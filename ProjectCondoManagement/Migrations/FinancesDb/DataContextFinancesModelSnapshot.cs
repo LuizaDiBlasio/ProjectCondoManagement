@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ProjectCondoManagement.Data.Entites.FinancesDb;
+using ProjectCondoManagementAPI.Data.Entites.FinancesDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.FinancesDb
+namespace ProjectCondoManagementAPI.Migrations.FinancesDb
 {
     [DbContext(typeof(DataContextFinances))]
     partial class DataContextFinancesModelSnapshot : ModelSnapshot

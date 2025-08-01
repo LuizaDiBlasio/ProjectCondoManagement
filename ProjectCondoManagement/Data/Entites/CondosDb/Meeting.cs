@@ -1,6 +1,6 @@
 ﻿using ClassLibrary;
 
-namespace ProjectCondoManagement.Data.Entites.CondosDb
+namespace ProjectCondoManagementAPI.Data.Entites.CondosDb
 {
     public class Meeting :IEntity
     {

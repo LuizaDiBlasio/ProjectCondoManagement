@@ -1,7 +1,7 @@
 ﻿using ClassLibrary;
-using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagementAPI.Data.Entites.CondosDb;
 
-namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
+namespace ProjectCondoManagementAPI.Data.Repositories.Condos.Interfaces
 {
     public interface IVoteRepository : IGenericRepository<Vote, DataContextCondos>
     {

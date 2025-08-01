@@ -1,7 +1,7 @@
 ﻿using ClassLibrary.DtoModels;
-using ProjectCondoManagement.Data.Entites.UsersDb;
+using ProjectCondoManagementAPI.Data.Entites.UsersDb;
 
-namespace ProjectCondoManagement.Helpers
+namespace ProjectCondoManagementAPI.Helpers
 {
     public interface IConverterHelper
     {

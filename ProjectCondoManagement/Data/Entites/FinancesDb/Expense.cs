@@ -1,5 +1,5 @@
 ﻿using ClassLibrary;
-using ProjectCondoManagement.Data.Entites.Enums;
+using ProjectCondoManagementAPI.Data.Entites.Enums;
 
 namespace ProjectCondoManagement.Data.Entites.FinancesDb
 {

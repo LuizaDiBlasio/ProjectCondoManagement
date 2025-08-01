@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagementAPI.Data.Entites.CondosDb;
 
 #nullable disable
 

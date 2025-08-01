@@ -1,7 +1,7 @@
 ﻿using ClassLibrary;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ProjectCondoManagement.Data.Entites.CondosDb
+namespace ProjectCondoManagementAPI.Data.Entites.CondosDb
 {
     public class Document : IEntity
     {

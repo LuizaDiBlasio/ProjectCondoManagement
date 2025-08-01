@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection.Emit;
 
-namespace ProjectCondoManagement.Data.Entites.CondosDb
+namespace ProjectCondoManagementAPI.Data.Entites.CondosDb
 {
     public class DataContextCondos : DbContext
     {

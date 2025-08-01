@@ -1,4 +1,4 @@
-﻿namespace ProjectCondoManagement.Data.Entites.UsersDb
+﻿namespace ProjectCondoManagementAPI.Data.Entites.UsersDb
 {
     public class CompanyCondominium
     {

@@ -1,6 +1,7 @@
 ﻿using ClassLibrary;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 
-namespace ProjectCondoManagement.Data.Entites.FinancesDb
+namespace ProjectCondoManagementAPI.Data.Entites.FinancesDb
 {
     public class Payment : IEntity
     {

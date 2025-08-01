@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text;
 using ClassLibrary;
 
-namespace ProjectCondoManagement.Controllers
+namespace ProjectCondoManagementAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

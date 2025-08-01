@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using ProjectCondoManagement.Data.Entites.CondosDb;
-using ProjectCondoManagement.Data.Entites.FinancesDb;
-using ProjectCondoManagement.Data.Entites.UsersDb;
+using ProjectCondoManagementAPI.Data.Entites.CondosDb;
+using ProjectCondoManagementAPI.Data.Entites.FinancesDb;
+using ProjectCondoManagementAPI.Data.Entites.UsersDb;
 
 var builder = WebApplication.CreateBuilder(args);
 

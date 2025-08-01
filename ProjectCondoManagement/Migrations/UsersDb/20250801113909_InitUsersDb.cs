@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.UsersDb
+namespace ProjectCondoManagementAPI.Migrations.UsersDb
 {
     /// <inheritdoc />
     public partial class InitUsersDb : Migration

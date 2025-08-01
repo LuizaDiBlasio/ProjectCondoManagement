@@ -1,7 +1,7 @@
 ﻿using ClassLibrary;
 using System.Security.Principal;
 
-namespace ProjectCondoManagement.Data.Entites.FinancesDb
+namespace ProjectCondoManagementAPI.Data.Entites.FinancesDb
 {
     public class Invoice: IEntity
     {

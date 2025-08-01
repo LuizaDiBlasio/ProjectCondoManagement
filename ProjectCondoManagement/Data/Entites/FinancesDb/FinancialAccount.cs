@@ -1,6 +1,6 @@
 ﻿using ClassLibrary;
 
-namespace ProjectCondoManagement.Data.Entites.FinancesDb
+namespace ProjectCondoManagementAPI.Data.Entites.FinancesDb
 {
     public class FinancialAccount :IEntity
     {

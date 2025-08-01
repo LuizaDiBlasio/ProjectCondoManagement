@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace ProjectCondoManagement.Data.Entites.UsersDb
+namespace ProjectCondoManagementAPI.Data.Entites.UsersDb
 {
     public class User : IdentityUser
     {

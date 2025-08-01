@@ -1,7 +1,7 @@
 ﻿using ClassLibrary;
 using MimeKit;
 
-namespace ProjectCondoManagement.Helpers
+namespace ProjectCondoManagementAPI.Helpers
 {
     public class MailHelper : IMailHelper
     {

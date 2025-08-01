@@ -1,4 +1,4 @@
-﻿namespace ProjectCondoManagement.Data.Entites.Enums
+﻿namespace ProjectCondoManagementAPI.Data.Entites.Enums
 {
     public enum ExpenseType
     {

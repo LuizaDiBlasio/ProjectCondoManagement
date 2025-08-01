@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using System.Security.Principal;
 
-namespace ProjectCondoManagement.Data.Entites.FinancesDb
+namespace ProjectCondoManagementAPI.Data.Entites.FinancesDb
 {
     public class DataContextFinances : DbContext
     {

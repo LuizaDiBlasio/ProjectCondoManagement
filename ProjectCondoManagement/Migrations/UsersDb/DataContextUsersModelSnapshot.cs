@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ProjectCondoManagement.Data.Entites.UsersDb;
+using ProjectCondoManagementAPI.Data.Entites.UsersDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.UsersDb
+namespace ProjectCondoManagementAPI.Migrations.UsersDb
 {
     [DbContext(typeof(DataContextUsers))]
     partial class DataContextUsersModelSnapshot : ModelSnapshot

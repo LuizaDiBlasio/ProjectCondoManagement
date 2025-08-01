@@ -1,7 +1,7 @@
 ﻿using ClassLibrary;
-using ProjectCondoManagement.Data.Entites.FinancesDb;
+using ProjectCondoManagementAPI.Data.Entites.FinancesDb;
 
-namespace ProjectCondoManagement.Data.Repositories.Finances.Interfaces
+namespace ProjectCondoManagementAPI.Data.Repositories.Finances.Interfaces
 {
     public interface ITransactionRepository : IGenericRepository<Transaction, DataContextFinances>
     {

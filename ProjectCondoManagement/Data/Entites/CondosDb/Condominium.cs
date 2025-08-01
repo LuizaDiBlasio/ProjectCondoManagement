@@ -1,7 +1,7 @@
 ﻿using ClassLibrary;
 using System.Reflection.Metadata;
 
-namespace ProjectCondoManagement.Data.Entites.CondosDb
+namespace ProjectCondoManagementAPI.Data.Entites.CondosDb
 {
     public class Condominium : IEntity
     {

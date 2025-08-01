@@ -1,8 +1,8 @@
 ﻿using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
-using ProjectCondoManagement.Data.Entites.UsersDb;
+using ProjectCondoManagementAPI.Data.Entites.UsersDb;
 
-namespace ProjectCondoManagement.Helpers
+namespace ProjectCondoManagementAPI.Helpers
 {
     public class UserHelper : IUserHelper
     {

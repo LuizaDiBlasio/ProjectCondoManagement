@@ -1,9 +1,8 @@
 ﻿using ClassLibrary;
-using ProjectCondoManagement.Data.Entites.FinancesDb;
-using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
-using System.Security.Principal;
+using ProjectCondoManagementAPI.Data.Entites.FinancesDb;
+using ProjectCondoManagementAPI.Data.Repositories.Finances.Interfaces;
 
-namespace ProjectCondoManagement.Data.Repositories.Finances
+namespace ProjectCondoManagementAPI.Data.Repositories.Finances
 {
     public class AccountReposirory : GenericRepository<FinancialAccount, DataContextFinances>, IAccountRepository
     {

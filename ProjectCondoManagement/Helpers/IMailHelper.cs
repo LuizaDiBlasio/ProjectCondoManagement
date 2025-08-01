@@ -1,6 +1,6 @@
 ﻿using ClassLibrary;
 
-namespace ProjectCondoManagement.Helpers
+namespace ProjectCondoManagementAPI.Helpers
 {
     public interface IMailHelper
     {

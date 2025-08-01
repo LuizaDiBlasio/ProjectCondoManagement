@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace ProjectCondoManagement.Data.Entites.UsersDb
+namespace ProjectCondoManagementAPI.Data.Entites.UsersDb
 {
     public class DataContextUsers : IdentityDbContext<User>
     {

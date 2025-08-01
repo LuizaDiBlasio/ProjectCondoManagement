@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35931.197 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectCondoManagement", "ProjectCondoManagement\ProjectCondoManagement.csproj", "{A7EB3EA6-231A-46AE-8015-138646424F5E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectCondoManagementAPI", "ProjectCondoManagement\ProjectCondoManagementAPI.csproj", "{A7EB3EA6-231A-46AE-8015-138646424F5E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary", "ClassLibrary\ClassLibrary.csproj", "{83F7CCCF-B1AD-46ED-A503-34EAC40D1EFA}"
 EndProject
