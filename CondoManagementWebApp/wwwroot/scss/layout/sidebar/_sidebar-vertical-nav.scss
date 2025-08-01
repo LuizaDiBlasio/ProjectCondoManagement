@@ -1,0 +1,28 @@
+[data-sidebar-position="fixed"][data-layout="vertical"] {
+    .nav-header {
+        position: fixed;
+        // left: auto;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+
+    .deznav {
+        // z-index: 0;
+        .deznav-scroll {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+    }
+
+    .menu-toggle {
+        .deznav {
+        }
+    }
+}
+[data-header-position="fixed"][data-sidebar-position="fixed"][data-sidebar-style="overlay"][data-layout="vertical"][data-container="boxed"] {
+    .deznav {
+        position: absolute;
+    }
+}
+
+

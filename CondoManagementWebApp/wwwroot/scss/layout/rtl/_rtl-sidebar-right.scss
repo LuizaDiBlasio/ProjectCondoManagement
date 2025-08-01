@@ -1,0 +1,26 @@
+
+
+//sidebar right
+[direction="rtl"] {
+    .sidebar-right {
+        left: -15.625rem;
+        right: auto;
+		box-shadow: 0.125rem 0.188rem 0.625rem 0rem rgba(119, 119, 119, 0.1);
+			
+        &.show {
+            left: 0;
+            right: auto;
+        }
+
+        .sidebar-right-trigger {
+            left: 100%;
+            right: auto;
+			border-radius: 0 0.313rem 0.313rem 0;
+			box-shadow: 0.313rem 0.188rem 0.313rem 0rem rgba(119, 119, 119, 0.15);
+        }
+    }
+	.bootstrap-select .dropdown-toggle .filter-option{
+		text-align:right;
+	}
+}
+

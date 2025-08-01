@@ -1,0 +1,12 @@
+// dropzone
+.dropzone{
+	background: rgba(149, 149, 149, 0.05) !important;
+	border: 0.063rem dashed #DDDFE1 !important;
+    min-height: 13.125rem;
+    position: relative;
+    border-radius: $radius;
+}
+.dropzone i {
+    font-size: 50px;
+    color: #eee;
+}

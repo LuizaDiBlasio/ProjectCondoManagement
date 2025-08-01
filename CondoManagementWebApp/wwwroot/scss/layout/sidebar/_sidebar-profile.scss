@@ -1,0 +1,71 @@
+///////////////////////////
+// Sidebar profile
+///////////////////////////
+.nav-user {
+    // text-align: center;
+    background: $primary;
+    margin-bottom: 0.625rem;
+    padding: 1.25rem 1.56rem 0.938rem;
+    @include custommq($min: 768px, $max: 1199px) {
+        padding: 1.25rem 0.938rem 0.938rem;
+    }
+    img {
+        width: 2.188rem;
+        height: 2.188rem; 
+        @include custommq($min: 768px, $max: 1199px) {
+            width: 2.188rem;
+            height:2.188rem;
+            margin-bottom: 0.625rem;
+        }
+    }
+    h5 {
+        margin-left: 0.625rem;
+        margin-bottom: 0.188rem;
+        color: $white;
+        @include custommq($min: 768px, $max: 1199px) {
+            display: none;
+        }
+        @at-root [data-sibebarbg="color_2"] & {
+            color: $white;
+        }
+    } 
+    p{
+        margin-left: 0.625rem;
+        margin-bottom: 0.5rem;
+        color: #afcff7;
+        @include custommq($min: 768px, $max: 1199px) {
+            display: none;
+        }
+    }
+
+    @include custommq($min: 768px, $max: 1199px) {
+        i{
+            margin-top: 0.938rem;
+            display: block
+        }
+    }    
+}
+
+.menu-toggle{
+    .nav-user {
+        padding: 1.25rem 0.938rem 0.938rem;
+        img {
+            width: 2.188rem;
+            height: 2.188rem;
+            margin-bottom: 0.625rem;
+        }
+        h5,
+        p {
+            display: none;
+        }
+        i {
+            margin-top: 0.938rem;
+            display: block
+        }
+        .dropdown-menu {
+            left: 2.81rem !important;
+            top: 1.37rem !important;
+        }
+    }
+}
+

@@ -1,0 +1,48 @@
+
+
+
+
+  //global styles
+  [direction="rtl"] {
+
+      &[data-theme-version="dark"] {
+          .border, .border-left, .border-right {
+              border-color: $d-border !important;
+          }
+      }
+
+      .text-right {
+          text-align: left !important;
+      }
+
+      .text-left {
+          text-align: right !important;
+      }
+
+      .border-right {
+          border-left: 0.063rem solid $border !important;
+          border-right: 0 !important;
+
+      }
+
+      .border-left {
+          border-right: 0.063rem solid $border !important; 
+          border-left: 0 !important;
+      }
+
+      .dropdown-menu {
+          left: auto;
+      }
+
+      .dropdown-menu-right {
+			left: 0;
+			right: auto;
+			@include respond('phone') {
+				left: 0.93rem;
+			}
+      }
+	  .notification_dropdown .dropdown-menu-right .media > span{
+	      margin-left: 0.625rem;
+	      margin-right: 0;
+	  }
+  }

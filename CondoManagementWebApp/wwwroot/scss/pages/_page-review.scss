@@ -1,0 +1,285 @@
+.newest-tag li a{
+    background: #26303c;
+    color: #798ea4;
+    font-size: 0.87rem;
+    font-weight: 500;
+}
+.testimonial-one{
+	.media img{
+		max-width:3.12rem;
+	}
+}
+.testimonial-one-navigation{
+	.prev,
+	.next{
+		font-size:0.87rem;
+		padding:0 0.25rem;
+		cursor:pointer;
+		color:#fff;
+		opacity:0.5;
+		&:hover{
+			opacity:1;
+		}
+	}
+}
+.widget-carousel{
+	position:relative;
+	.owl-item img{
+		max-width:5.31rem;
+	}
+	.owl-next,
+	.owl-prev{
+		position: absolute;
+		width: 3.75rem;
+		height: 3.75rem;
+		line-height: 3.75rem;
+		border-radius: 0.75rem;
+		top: 50%;
+		background: $white;
+		color: $primary;
+		font-size: 1.125rem;
+		margin-top: -1.87rem;
+		text-align: center;
+		@include transitionMedium;
+		cursor:pointer;
+		box-shadow:0 0.81rem 1.56rem 0 rgba(0,0,0,0.13);
+		@include respond('phone') {
+			width: 2.81rem;
+			height: 2.81rem;
+			line-height: 2.81rem;
+		}	
+		&:hover{
+			background: $primary;
+			color: #fff;
+		}
+	}
+	.owl-next{
+		right:-1.56rem;
+		@include respond('phone') {
+			right:-0.938rem;
+		}	
+	}
+	.owl-prev{
+		left:-1.56rem;
+		@include respond('phone') {
+			left:-0.938rem;
+		}	
+	}
+}
+.review-box{
+	padding: 1.87rem 1.87rem 0.625rem 1.87rem;
+    border-bottom: 0.063rem solid $border;
+	
+	@include respond('phone-land') {
+		display:block !important;
+	}
+	h4{
+		font-size:1.25rem;
+	}
+	p{
+		font-size:1rem;
+		line-height:1.5;
+	}
+	img{
+		@include respond('phone-land') {
+			width: 3.75rem;
+			float:left;
+		}
+	}
+	.media-footer{
+		min-width: 9.375rem;
+		@include respond('laptop') {
+			min-width: 6.87rem;
+		}
+	}
+	.star-review{
+		@include respond('phone-land') {
+			margin-top: 0.938rem;
+		}
+		span{
+			display: block;
+			font-size: 1.87rem;
+			font-weight: 600;
+			margin-bottom: 0.938rem;
+			line-height: 1.3;
+			@include respond('phone-land') {
+				font-size: 1rem;
+				display: inline-block;
+				margin-bottom: 0;
+			}
+		}
+		i{
+		    font-size: 1.125rem;
+			margin: 0 0.125rem;
+			@include respond('laptop') {
+				font-size: 1rem;
+				margin: 0 0.063rem;
+			}
+		}
+	}
+}
+.review-table{
+	padding: 1.56rem;
+    box-shadow: none;
+    border-radius: 0;
+    border-bottom: 0.063rem solid #eee;
+	height: auto;
+    margin-bottom: 0;
+	
+	.disease {
+		border-left: 0.063rem solid #eee;
+		padding-left: 1.25rem;
+		@include respond('tab-land') {
+			border-left: 0;
+			padding-left: 0;	
+			margin-right:0.625rem !important;
+			margin-left:0;
+		}
+	}
+	.star-review i{
+	
+		font-size:1.25rem;
+		@include respond('tab-land') {
+			font-size:216x;
+		}
+	}
+	.media-body{
+		p{
+			color:#3e4954;
+			line-height:1.5;
+		}
+	}
+	.media-footer{
+		min-width:31.25rem;
+		@include respond('laptop') {
+			min-width:18.75rem;
+			margin-left:0.625rem;
+		}
+		@include respond('tab-land') {
+			margin-left:0;
+			margin-top:1.56rem;
+		}
+	}
+	img{
+		@include respond('tab-land') {
+			float:left;
+			width: 5rem;
+		}
+	}
+	.media{
+		@include respond('tab-land') {
+			display:block !important;
+		}
+		
+	}
+	@include respond('tab-land') {
+		.custom-control{
+			float:right;
+		}
+			
+	}
+	@include respond('tab-port') {
+		padding: 0.938rem;
+	}
+}
+.review-tab.nav-pills{
+	margin-bottom:0;
+	background: $white;
+	padding: 0 1.87rem;
+	border-radius:$radius $radius 0 0;
+	box-shadow: 0rem 0.87rem 1.87rem -2.18rem;
+    position: relative;
+    z-index: 1;
+	border-bottom: 0.063rem solid $light;
+	@include respond('phone') {
+		padding: 0;
+	}
+	li{
+		display:inline-block;
+		
+		a.nav-link{
+			color: #B3B3B3;
+			background: $white;
+			box-shadow: none;
+			border-radius: 0;
+			position:relative;
+			font-weight: 600;
+			font-size: 1rem;
+			padding: 0.938rem 1.56rem;
+			margin-right: 0.063rem;
+			&.active{
+				color: $primary;
+			}
+			@include respond('tab-port') {
+				font-size: 0.87rem;
+				padding: 0.625rem 0.938rem;
+			}
+			
+			&:after{
+				height:0.37rem;
+				width:0rem;
+				background:$primary;
+				border-radius:0.625rem;
+				content:"";
+				position:absolute;
+				bottom:-0.37rem;
+				left:50%;
+				@include transitionMedium;
+				z-index:1;
+				transform:translatex(-50%);
+			}
+			&.active{
+				&:after{
+					width:100%;
+				}
+			}
+			
+		}
+		&:first-child a.nav-link{
+			border-radius:$radius 0 0 0;
+		}
+		&:last-child a.nav-link{
+			border-radius:0 $radius 0 0;
+		}
+		
+	}
+}
+.reviewer-box{
+	margin:0 -0.625rem -0.625rem -0.625rem;
+	background: #2c3b83;
+	background: -moz-linear-gradient(left, #2c3b83 0%, #3d018a 100%);
+	background: -webkit-linear-gradient(left, #2c3b83 0%,#3d018a 100%);
+	background: linear-gradient(to right, #2c3b83 0%,#3d018a 100%);
+	padding:1.25rem 1.56rem;
+	border-radius: 0.75rem;
+	
+	@include respond('laptop') {
+		padding:0.625rem 0.938rem;
+	}	
+	@include respond('phone-land') {
+		img{
+			width:2.5rem;
+		}
+	}	
+	.media img{
+		max-width:3.43rem !important;
+		width:3.43rem !important;
+		border-radius:3.12rem !important; 
+	}
+	.star-review{
+		i{
+			font-size:1.75rem;
+			@include respond('phone-land') {
+				font-size:1rem;
+			}	
+		}
+		span{
+			font-size: 1.37rem;
+			font-weight: 600;
+			color: #fff;
+			@include respond('phone-land') {
+				font-size:1rem;
+			}	
+		}
+	}
+}

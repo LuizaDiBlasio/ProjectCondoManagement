@@ -1,0 +1,204 @@
+// @import "../../abstracts/variable";
+
+.sidebar-right {
+    // display: none;
+    right: -15.625rem;
+    position: fixed;
+    top: 0;
+    width: 15.625rem;
+    background-color: $white;
+    height: calc(100% - 7.0625rem);
+    margin-top: 5rem;
+    transition: all .5s ease-in-out;
+    padding-bottom: 1.875rem;
+    box-shadow: -0.125rem 0.188rem 0.625rem 0 rgba(119, 119, 119, 0.1);
+
+    .slimScrollDiv {
+        @at-root [direction="rtl"] #{&} {
+            overflow: visible !important;
+        }
+    }
+    .sidebar-right-trigger {
+	
+        position: absolute;
+        z-index: 9;
+        top: 4.75rem;
+        right: 100%;
+        background-color: $white;
+        color: $primary;
+        display: inline-block;
+        height: 3rem;
+        width: 3rem;
+        text-align: center;
+        font-size: 1.75rem;
+        line-height: 3rem;
+		border-radius: 0.313rem 0 0 0.313rem;
+		box-shadow: -0.313rem 0.188rem 0.313rem 0 rgba(119, 119, 119, 0.15);
+		
+		@at-root [data-theme-version="dark"] #{&} {
+			background-color: #31343b;
+			color: $white;
+        }
+        &:hover {
+            color: $primary;
+        }
+    }
+
+    &.show {
+        right: 0;
+        z-index: 999;
+    }
+
+    .nav-tabs {
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        background-color: $white;
+        z-index: 2;
+                    
+        @at-root [data-theme-version="dark"] #{&} {
+            background-color: $d-bg;
+        }
+        
+
+        .nav-item {
+            margin-bottom: 0;
+            flex: 1;
+
+            .nav-link {
+                border: 0;
+                font-size: 1.125rem;
+                position: relative;
+                text-align: center;
+                background-color: $white;
+
+                &::after {
+                    position: absolute;
+                    left: 0;
+                    bottom: 0;
+                    width: 100%;
+                    height: 0.125rem;
+                    content: "";
+                    background: transparent;
+                }
+                    
+                @at-root [data-theme-version="dark"] #{&} {
+                    background-color: $d-bg;
+                }
+
+                &.active {
+                    
+                    @at-root [data-theme-version="dark"] #{&} {
+                        border-right: none;
+                        border-left: none;
+                        border-top: none;
+                    }
+                }
+            }
+        }
+    }
+
+    .tab-content {
+        padding: 1.25rem;
+
+        .tab-pane {
+
+            .admin-settings {
+				& > div {
+					margin-bottom: 0.625rem;
+				}
+                p {
+                    margin-bottom: 0.125rem;
+                }
+
+                //All color switcher scss goes here
+                input[type="radio"] {
+                    display: none;
+
+                    + label {
+                        display: inline-block;
+                        width: 1.56rem;    
+                        height: 1.56rem;
+                        cursor: pointer;
+                        transition: all .1s ease;
+						border-radius: 0.25rem;
+						margin-right: 0.313rem;
+						margin-bottom: 0.188rem;
+                    }
+
+                    &:checked {
+                        + label {
+                            position: relative;
+
+                            &::after {
+                                height: 2.06rem;
+                                width: 2.06rem;
+                                left: -0.25rem;
+                                top: -0.25rem;
+                                content: "";
+                                position: absolute;
+                                background-color: inherit;
+								border-radius: 0.37rem;
+								opacity: 0.4;
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+   
+    #nav_header, 
+    #header, 
+    #sidebar,
+	#primary{
+
+
+        @each $name, $color in $theme_backgrounds {
+            &_#{$name} {
+                + label {
+                    background-color: $color;            
+                }
+            }
+        }
+
+        &_color_1 {
+            + label {
+                border: 0.063rem solid $muted;
+            }
+        }
+    }
+
+}
+
+@keyframes bounce {
+	0% {
+        transform: translateX(-8%);;
+        -webkit-transform: translateX(-8%);; 
+        }
+	50% {
+        transform: translateX(8%);;
+        -webkit-transform: translateX(8%);; 
+        }
+	100% {
+        transform: translateX(-8%);; 
+        -webkit-transform: translateX(-8%);; 
+        }
+}
+
+@-webkit-keyframes bounce {
+	0% {
+        transform: translateX(-8%);;
+        -webkit-transform: translateX(-8%);; 
+        }
+	50% {
+        transform: translateX(8%);;
+        -webkit-transform: translateX(8%);; 
+        }
+	100% {
+        transform: translateY(-8%);; 
+        -webkit-transform: translateY(-8%);; 
+        }
+}

@@ -1,8 +1,69 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="form-head d-md-flex mb-sm-4 mb-3 align-items-start">
+    <div class="me-auto d-lg-block d-block">
+        <h2 class="text-black font-w600">Dashboard</h2>
+        <p class="mb-0">Welcome to CondoManagementWebApp</p>
+    </div>
+    <a href="@Url.Action("Index", "Home")" class="btn btn-primary rounded light">Refresh</a>
+</div>
+
+<div class="row">
+    <!-- Total Properties Card -->
+    <div class="col-xl-6 col-xxl-6">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card bg-danger property-bx text-white">
+                    <div class="card-body">
+                        <div class="media d-sm-flex d-block align-items-center">
+                            <span class="me-4 d-block mb-sm-0 mb-3">
+                                <!-- SVG from Omah -->
+                            </span>
+                            <div class="media-body mb-sm-0 mb-3 me-5">
+                                <h4 class="fs-22 text-white">Total Properties</h4>
+                                <div class="progress mt-3 mb-2" style="height:8px;">
+                                    <div class="progress-bar bg-white progress-animated" style="width: 86%; height:8px;" role="progressbar">
+                                        <span class="sr-only">86% Complete</span>
+                                    </div>
+                                </div>
+                                <span class="fs-14">431 more to break last month record</span>
+                            </div>
+                            <span class="fs-35 font-w500">4,562</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Add other cards (Properties for Sale, Rent, etc.) -->
+        </div>
+    </div>
+    <!-- Total Revenue Card -->
+    <div class="col-xl-6 col-xxl-6">
+        <div class="card">
+            <div class="card-header border-0 pb-0">
+                <h3 class="fs-18 text-black">Total Revenue</h3>
+                <div class="dropdown ms-auto">
+                    <div class="btn-link" data-bs-toggle="dropdown">
+                        <svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect x="0" y="0" width="24" height="24"></rect><circle fill="#000000" cx="5" cy="12" r="2"></circle><circle fill="#000000" cx="12" cy="12" r="2"></circle><circle fill="#000000" cx="19" cy="12" r="2"></circle></g></svg>
+                    </div>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href="javascript:void(0);">Edit</a>
+                        <a class="dropdown-item text-danger" href="javascript:void(0);">Delete</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-2 pb-0">
+                <div class="d-flex flex-wrap align-items-center">
+                    <span class="fs-28 text-black font-w600 me-3">$678,345</span>
+                    <p class="me-sm-auto me-3 mb-sm-0 mb-3">last month $563,443</p>
+                    <div class="d-flex align-items-center">
+                        <!-- SVG and percentage -->
+                    </div>
+                </div>
+                <div id="chartTimeline"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Add other dashboard sections (Overview, Properties Map, Customer Review, Recent Property) -->
 </div>

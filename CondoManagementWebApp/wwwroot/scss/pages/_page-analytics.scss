@@ -1,0 +1,36 @@
+.items-list-1{
+	padding: 1.25rem 1.87rem;
+	border-bottom: 0.063rem solid $border;
+	
+	.number{
+		font-size:1.37rem;
+		color:#969ba0;
+		font-weight:500;
+	}
+	@include respond('phone') {
+		//display: block;
+		padding: 0.625rem 0.938rem;
+		
+		.ml-auto{
+			margin-left:0 !important;
+		}
+		img{
+			float:left;
+			width: 2.5rem;
+		}
+		svg{
+			width:1.25rem;
+			height:0.81rem;
+		}
+		.number{
+			display:none;
+		}
+	}	
+}
+.items-list-2{
+	@include respond('phone') {
+		img{
+			width: 2.5rem;
+		}
+	}
+}

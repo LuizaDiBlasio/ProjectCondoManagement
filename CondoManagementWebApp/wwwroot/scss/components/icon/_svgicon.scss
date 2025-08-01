@@ -1,0 +1,114 @@
+.svg-icons-ov {
+    @include transitionMedium;
+	align-items: center;
+    padding: 0.938rem 0.938rem 4.688rem;
+    position: relative;
+    border: 0.063rem solid $border;
+	display: flex;
+	height:100%;
+	border-radius:$radius;
+	.svg-icons-prev{
+		margin-right:0.5rem;
+		svg{
+			width:1.875rem;
+			height:1.875rem;
+			path[fill] {
+				fill: $primary;
+			}
+		}
+		i{
+			font-size:1.375rem;
+			color:$primary;
+			line-height:1;
+		}
+	}
+	.svg-classname{
+		font-size:0.875rem;
+		text-align:center;
+		
+	}
+	.svg-icon-popup {
+		position: absolute;
+		bottom: 0.938rem;
+		width: 100%;
+		display: flex;
+		left: 0.625rem;
+		&.style-1{
+			left:0;
+			.btn{
+				width:100%;
+			}
+		}
+		
+		.btn{
+			padding: 0.5rem;
+			background: $primary-light;
+			margin: 0 0.313rem;
+			color: $primary;
+			font-size: 0.875rem !important;
+			display: inline-block;
+			width: 40%;
+			min-width: 40%;
+			height: 2.5rem;
+			&:hover{
+				background-color: $primary;
+				color: #fff;
+			}
+		}
+	}
+	&:hover{
+		border-color: $primary;
+	}
+	&.style-1{
+		padding:0.938rem;
+		flex-direction:column;
+		cursor:pointer;
+		border-radius:$radius;
+		.svg-icons-prev{
+			display: inline-block;
+			width: 3.125rem;
+			height: 3.125rem;
+			line-height: 3.563rem;
+			text-align: center;
+			background-color:  $primary-light;
+			margin-bottom:0.688rem;
+			margin-right:0;
+			border-radius:3.125rem;
+		}
+		.svg-classname{
+			font-size:0.713rem;
+			margin-top:auto;
+		}
+		
+	}
+}
+
+[data-theme-version="dark"] .svg-icons-ov{
+	border-color:#3E3E3E;
+}
+
+
+.svg-area{
+	.row{
+		margin:0;
+	}
+	.col-md-2{
+		padding:0;
+	}
+	
+	.card-header{
+		color: #000;
+		font-size: 1.125rem;
+		font-weight: 600;
+		padding: 0;
+		margin-top: 3.125rem;
+		margin-bottom: 1.25rem;
+		padding-bottom: 0.625rem;
+		&:first-child{
+			margin-top:0;
+		}
+	}
+}
+.m-b20{
+	margin-bottom:1.25rem;
+}
