@@ -3,7 +3,7 @@ using CondoManagementWebApp.Models;
 
 namespace CondoManagementWebApp.Helpers
 {
-    public class ConverterHelper
+    public class ConverterHelper : IConverterHelper
     {
         public LoginDto ToLoginDto(LoginViewModel model)
         {

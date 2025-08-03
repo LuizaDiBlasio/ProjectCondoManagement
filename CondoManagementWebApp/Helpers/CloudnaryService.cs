@@ -12,8 +12,6 @@
             _cloudinary = cloudinary;
         }
 
-
-
         public async Task<string> UploadImageAsync(IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -47,7 +45,6 @@
 
             return uploadResult.SecureUrl?.ToString() ?? throw new ApplicationException("Image upload failed: No URL returned.");
         }
-
 
     }
 }
