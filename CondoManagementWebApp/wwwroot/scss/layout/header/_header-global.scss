@@ -1,0 +1,138 @@
+/////////////////
+// Header
+/////////////////
+.header {
+    height: var(--dz-header-height);
+    z-index: 1;
+    position: var(--dz-header-pos);
+    padding: 0rem;
+    background:var(--headerbg);
+    z-index: 3;
+    top: 0;
+    width: 100%;
+    padding-#{$dz-pos-left}: var(--dz-sidebar-width);
+    transition: all .2s ease;
+	
+    .header-content {
+        position: relative;
+        height: 100%;
+        padding-#{$dz-pos-left}: 5rem;
+        padding-#{$dz-pos-right}: 1.875rem;
+        align-items: center;
+        display: flex;
+		
+		// @include respond ('tab-land') {
+		// 	padding-#{$dz-pos-left}: 4rem;
+		// }
+        @include custommq($max: 47.9375rem) {
+            padding-#{$dz-pos-left}: 3.75rem;
+			padding-#{$dz-pos-right}: 0.938rem;
+        }
+		@include respond ('phone'){
+			padding-#{$dz-pos-right}:0.538rem;
+		}
+        .nav-control{
+            #{$dz-pos-right}: auto;
+            #{$dz-pos-left}: 1rem;
+        }
+		
+    }
+    .navbar {
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        .navbar-collapse {
+            height: 100%;
+            width: 100%;
+        }
+    }
+    @include respond('phone-land'){
+        padding-#{$dz-pos-left}: 5rem;
+    }
+}
+
+[data-header-position="fixed"] {
+    --dz-header-pos : fixed;
+    .content-body {
+        padding-top: var(--dz-header-height);
+    }
+}
+
+/* pulse in CSS */
+
+.pulse-css {
+    border-radius: 0.5rem;
+    position: absolute;
+    background: #FF507A;
+    right: 0.13rem;
+    top: 0.13rem;
+    width: 0.8rem;
+    height:0.8rem;
+    &:after,
+    &:before {
+        content: '';
+        width: 0.8rem;
+		height: 0.8rem;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: -.2rem;
+		border-radius: 0.5rem;
+        background-color: #FF507A;
+        margin: auto;
+        -webkit-transform: scale(0.3);
+        transform: scale(0.3);
+        -webkit-transform-origin: center center;
+        transform-origin: center center;
+        -webkit-animation: pulse-me 3s linear infinite;
+        animation: pulse-me 3s linear infinite;
+        @at-root [direction="rtl"] & {
+            left: auto;
+            right: -.2rem;
+        }
+    }
+	@include respond ('laptop'){
+		height:0.5rem;
+		width:0.5rem;
+	}
+	
+}
+
+@-webkit-keyframes pulse-me {
+    0% {
+        -webkit-transform: scale(0.3);
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.1;
+    }
+    70% {
+        opacity: 0.09;
+    }
+    100% {
+        -webkit-transform: scale(3);
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+@keyframes pulse-me {
+    0% {
+        -webkit-transform: scale(0.3);
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.1;
+    }
+    70% {
+        opacity: 0.09;
+    }
+    100% {
+        -webkit-transform: scale(3);
+        transform: scale(3);
+        opacity: 0;
+    }
+}

@@ -10,16 +10,15 @@ namespace CondoManagementWebApp.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly IBlobHelper _blobHelper;
         private readonly IFlashMessage _flashMessage;
         private readonly IConfiguration _configuration;
         private readonly IConverterHelper _converterHelper;
         private readonly HttpClient _httpClient;
        
-        public AccountController(IBlobHelper blobHelper, IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient, 
+        public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient, 
             IConverterHelper converterHelper)
         {
-            _blobHelper = blobHelper;
+           
             _flashMessage = flashMessage;
             _configuration = configuration;
             _httpClient = httpClient;
@@ -179,10 +178,10 @@ namespace CondoManagementWebApp.Controllers
                 //Blobar imagem
                 Guid imageId = Guid.Empty; // identificador da imagem no blob (ainda não identificada)
 
-                if (model.ImageFile != null && model.ImageFile.Length > 0) //verificar se existe a imagem
-                {
-                    imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "imagens"); //manda gravar o ficheiros na pasta imagens 
-                }
+                //if (model.ImageFile != null && model.ImageFile.Length > 0) //verificar se existe a imagem
+                //{
+                //    imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "imagens"); //manda gravar o ficheiros na pasta imagens 
+                //}
 
                 //converter para dto
                 var registerDto = _converterHelper.ToRegisterDto(model, imageId);

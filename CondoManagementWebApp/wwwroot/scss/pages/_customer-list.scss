@@ -1,0 +1,25 @@
+.media-dropdown{
+	.dropdown-menu{
+		width:30rem;
+		padding:1.87rem;
+		@include respond('phone') {
+			width:20rem;
+			padding:1.25rem;
+		}
+	}
+	.btn{
+		&:focus{
+			svg{
+				transform: rotate(180deg);
+				@include transitionMedium;
+			}
+		}
+		&:hover{
+			svg{
+				path{
+					fill:$white;
+				}
+			}
+		}
+	}
+}

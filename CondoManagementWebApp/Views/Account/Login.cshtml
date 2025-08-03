@@ -1,0 +1,108 @@
+﻿@model CondoManagementWebApp.Models.LoginViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Omah - Real Estate Admin Dashboard Template</title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="author" content="DexignZone">
+    <meta name="robots" content="index, follow">
+
+    <meta name="keywords" content="admin, dashboard, admin dashboard, admin template, template, admin panel, administration, analytics, bootstrap, hospital admin, modern, property, real estate, responsive, creative, retina ready, modern Dashboard">
+    <meta name="description" content="Your Ultimate Real Estate Admin Dashboard Template. Streamline property management, analyze market trends, and boost productivity with our intuitive and feature-rich solution. Elevate your real estate business today!">
+
+    <meta property="og:title" content="Omah - Real Estate Admin Dashboard Template">
+    <meta property="og:description" content="Your Ultimate Real Estate Admin Dashboard Template. Streamline property management, analyze market trends, and boost productivity with our intuitive and feature-rich solution. Elevate your real estate business today!">
+    <meta property="og:image" content="https://omah.dexignzone.com/xhtml/social-image.png">
+    <meta name="format-detection" content="telephone=no">
+
+    <meta name="twitter:title" content="Omah - Real Estate Admin Dashboard Template">
+    <meta name="twitter:description" content="Your Ultimate Real Estate Admin Dashboard Template. Streamline property management, analyze market trends, and boost productivity with our intuitive and feature-rich solution. Elevate your real estate business today!">
+    <meta name="twitter:image" content="https://omah.dexignzone.com/xhtml/social-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon.png"> 
+    <link href="~/css/style.css" rel="stylesheet"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-***********" crossorigin="anonymous" referrerpolicy="no-referrer" /> @* Verifique o integrity e crossorigin *@
+
+</head>
+
+<body>
+    <div class="fix-wrapper">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-5 col-md-6">
+                    <div class="card mb-0 h-auto">
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <a asp-controller="Home" asp-action="Index"><img class="logo-auth" src="~/images/logo-full.png" alt="Logo"></a> 
+                            </div>
+                            <h4 class="text-center mb-4">Sign in your account</h4>
+
+                           
+                            <form asp-action="Login" asp-controller="Account" method="post" asp-route-returnUrl="@ViewData["ReturnUrl"]">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div> 
+
+                                <div class="form-group mb-4">
+                                    <label class="form-label" asp-for="Username">Username</label> 
+                                    <input type="email" asp-for="Username" class="form-control" placeholder="Enter username (Email)" id="username"> 
+                                    <span asp-validation-for="Username" class="text-danger"></span> 
+                                </div>
+
+                                <div class="form-group mb-3 mb-sm-4">
+                                    <label class="form-label" asp-for="Password">Password</label> 
+                                    <div class="position-relative">
+                                        <input type="password" asp-for="Password" class="form-control" placeholder="Enter password" id="dz-password"> 
+                                        <span class="show-pass eye">
+                                            <i class="fa fa-eye-slash"></i>
+                                            <i class="fa fa-eye"></i>
+                                        </span>
+                                    </div>
+                                    <span asp-validation-for="Password" class="text-danger"></span> 
+                                </div>
+
+                                <div class="form-row d-flex flex-wrap justify-content-between align-items-baseline mb-2">
+                                    <div class="form-group mb-sm-4 mb-1">
+                                        <div class="form-check custom-checkbox ms-1">
+                                            <input type="checkbox" asp-for="RememberMe" class="form-check-input" id="basic_checkbox_1"> 
+                                            <label class="form-check-label" for="basic_checkbox_1">Remember my preference</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group ms-2">
+                                        <a asp-controller="Account" asp-action="ForgotPassword">Forgot Password?</a> 
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                                </div>
+                            </form>
+                            <div class="new-account mt-3">
+                                <p>Don't have an account? <a class="text-primary" asp-controller="Account" asp-action="Register">Sign up</a></p> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/vendor/global/global.min.js"></script> 
+    <script src="~/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script> 
+    <script src="~/js/custom.min.js"></script> 
+    <script src="~/js/deznav-init.js"></script> 
+
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+</body>
+
+</html>

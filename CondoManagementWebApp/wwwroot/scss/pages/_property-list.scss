@@ -1,0 +1,287 @@
+.property-card{
+	&.style-1{
+		position: relative;
+		border-radius: $radius-sm;
+		box-shadow: 0px 15px 55px rgba(34, 34, 34, 0.15);
+		overflow: hidden;
+		background-color: #fff;
+		.dz-meta{
+			margin-bottom:10px;
+			ul{
+				li{
+					font-weight:500;
+					display: inline-block;
+					position: relative;
+					font-size: 14px;
+					margin-right: 14px;
+					i{
+						margin-right: 5px;
+						color: var(--primary);
+						font-size:16px;
+						position: relative;
+						top: 0px;
+					}
+					svg{
+						margin-right:5px;
+						path{
+							fill: var(--primary);
+						}
+					}
+				}
+				@include respond('laptop'){
+					li{
+						font-size:12px;
+						margin-right:5px;
+						svg{
+							width:20px;
+							height:20px;
+						}
+					}
+				}
+			}
+		}
+		.dz-media{
+			position:relative;
+			img{
+				height: 100%;
+				object-fit: cover;
+				width: 100%;
+			}
+			ul{
+				position:relative;
+				z-index:2;
+				li{
+					position:absolute;
+					top:10px;
+					left:10px;
+					right:auto;
+					svg{
+						font-size:0.6875rem;
+					}
+					&.rent{
+						right:10px;
+						left:auto;
+					}
+				}
+			}
+		}
+		.dz-content{
+			position:relative;
+			padding:30px;
+			.title{
+				line-height:1;
+			}
+			@include respond('laptop'){
+				padding:20px;
+			}
+		}
+		.dz-footer{
+			display:flex;
+			justify-content:space-between;
+			align-items:center;
+			.property-card{
+				display:flex;
+				align-items:center;
+				.property-media{
+					margin-right:10px;
+					width:30px;
+					height:30px;
+					img{
+						height: 100%;
+						object-fit: cover;
+						width: 100%;
+						border-radius:50px;
+					}
+				}
+			}
+			ul{
+				margin-right:-12px;
+				li{
+					display: inline-block;
+					margin-right: 12px;
+				}
+			}
+			@include respond('laptop'){
+				ul{
+					margin-right:-6px;
+					li{
+						margin-right:6px;
+						svg{
+							width:20px;
+							height:20px;
+						}
+					}
+				}
+			}
+		}
+		&.blog-half{
+			display:flex;
+			.dz-media{
+				img{
+					width:320px;
+				}
+			}
+			@include respond('laptop'){
+				.dz-media{
+					img{
+						width:250px;
+					}
+				}
+				.dz-meta{
+					ul{
+						li{
+							svg{
+								width:18px;
+								height:18px;
+							}
+						}
+					}
+				}
+			}
+			@include respond('phone'){
+				display:block;
+				.dz-media{
+					img{
+						height: 100%;
+						object-fit: cover;
+						width: 100%;
+					}
+				}
+				
+			}
+		}
+		
+	}
+}
+
+
+
+
+
+
+.post-swiper{
+	position:relative;
+	.btn-prev,
+	.btn-next{
+		position:absolute;
+		top:50%;
+		transform:translateY(-50%);
+		height:40px;
+		width:40px;
+		line-height:40px;
+		text-align:center;
+		font-size:16px;
+		background-color:#fff;
+		color:var(--primary);
+		z-index:1;
+		margin: 0 10px;
+		@include transitionMedium;
+		border-radius:50%;
+		&:hover{
+			background-color:var(--primary);
+			color:#fff;
+		}
+		i{
+			font-style:normal;
+		}
+		@include respond('phone-land'){
+			height:35px;
+			width:35px;
+			line-height:35px;
+		}
+	}
+	.btn-prev{
+		left:0;
+	}
+	.btn-next{
+		right:0;
+	}
+	.swiper-slide {
+		width:100% !important;
+		img{
+			width:100%;
+			height:100%;
+		}
+	}
+}
+
+
+.video{
+	z-index: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+	background-color:var(--primary);
+	color:#fff;
+	border-radius:50%;
+	text-align:center;
+	@include transitionMedium;
+	
+	&:hover{
+		transform: translate(-50%, -50%) scale(1.2);
+	}
+	i{
+		color:#fff;
+	}
+	
+	&.style-1{
+		width: 60px;
+		height: 60px;
+		line-height: 60px;
+		font-size: 18px;
+		
+	}
+}
+
+
+.check-tbl{
+	width:100%;
+	vertical-align:middle;
+	
+	tbody{
+		td{
+			padding: 8px;
+			font-weight: 500;
+			i{
+				color: var(--primary);
+				font-size: 1.62rem;
+				margin-right: 0.625rem;
+				vertical-align: middle;
+			}
+		}
+	}
+}
+
+
+.file-listing{
+	li{
+		float: left;
+		padding: 10px 10px 10px 40px;
+		width: 46%;
+		position: relative;
+		margin:5px 5px;
+		border-radius:$radius;
+		border:1px solid $border;
+		svg{
+			left: 0;
+			position: absolute;
+			margin-left: 10px;
+		}
+		span{
+			float:right;
+		}
+	}
+	@include respond('laptop') {
+		li{
+			padding: 10px 10px 10px 35px;
+			width: 31%;
+		}
+	}
+	@include respond('phone') {
+		li{
+			width: 46%;
+		}
+	}
+	
+}
