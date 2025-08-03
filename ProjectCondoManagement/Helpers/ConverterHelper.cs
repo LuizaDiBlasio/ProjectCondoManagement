@@ -14,7 +14,7 @@ namespace ProjectCondoManagement.Helpers
                 Address = user.Address,
                 BirthDate = user.BirthDate,
                 PhoneNumber = user.PhoneNumber,
-                ImageId = user.ImageId,
+                ImageUrl = user.ImageUrl,
                 UserId = user.Id
             };
             return condoMemberDto;

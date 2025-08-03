@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text;
 using Vereyon.Web;
 using CondoManagementWebApp.Models;
+using static System.Net.WebRequestMethods;
 
 namespace CondoManagementWebApp.Controllers
 {
@@ -13,15 +14,19 @@ namespace CondoManagementWebApp.Controllers
         private readonly IFlashMessage _flashMessage;
         private readonly IConfiguration _configuration;
         private readonly IConverterHelper _converterHelper;
+        private readonly CloudinaryService _cloudinaryService;  
         private readonly HttpClient _httpClient;
+
+        private readonly string baseUrl = "https://localhost:44390/"; //TODO : Mudar depois que publicar
        
         public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient, 
-            IConverterHelper converterHelper)
+            IConverterHelper converterHelper, CloudinaryService cloudinaryService)
         {
            
             _flashMessage = flashMessage;
             _configuration = configuration;
             _httpClient = httpClient;
+            _cloudinaryService = cloudinaryService;
         }
 
         /// <summary>
@@ -63,6 +68,7 @@ namespace CondoManagementWebApp.Controllers
 
             if (ModelState.IsValid) // se modelo enviado passar na validação
             {
+               
                 var loginDto = _converterHelper.ToLoginDto(model);
 
                 // Serializar model para JSON
@@ -74,7 +80,7 @@ namespace CondoManagementWebApp.Controllers
 
                 // Fazer a requisição HTTP POST para a UserAPI
 
-                var response = await _httpClient.PostAsync($"https://localhost:44390/api/AccountController/Login", jsonContent);
+                var response = await _httpClient.PostAsync($"{baseUrl}api/AccountController/Login", jsonContent);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -125,7 +131,7 @@ namespace CondoManagementWebApp.Controllers
         [Microsoft.AspNetCore.Authorization.Authorize] // todos os roles autenticados
         public async Task<IActionResult> Logout()
         {
-            var response = await _httpClient.GetAsync($"https://localhost:44390/api/UserApiAccountController/Logout");
+            var response = await _httpClient.GetAsync($"{baseUrl}api/UserApiAccountController/Logout");
 
             return RedirectToAction("Index", "Home");
 
@@ -178,13 +184,15 @@ namespace CondoManagementWebApp.Controllers
                 //Blobar imagem
                 Guid imageId = Guid.Empty; // identificador da imagem no blob (ainda não identificada)
 
-                //if (model.ImageFile != null && model.ImageFile.Length > 0) //verificar se existe a imagem
-                //{
-                //    imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "imagens"); //manda gravar o ficheiros na pasta imagens 
-                //}
+                if (model.ImageFile != null && model.ImageFile.Length > 0)
+                {
+                    var url = await _cloudinaryService.UploadImageAsync(model.ImageFile);
+                    model.ImageUrl = url;
+                }
+
 
                 //converter para dto
-                var registerDto = _converterHelper.ToRegisterDto(model, imageId);
+                var registerDto = _converterHelper.ToRegisterDto(model);
 
                 //Serializar
                 var jsonContent = new StringContent(
@@ -195,7 +203,7 @@ namespace CondoManagementWebApp.Controllers
 
                 // Fazer a requisição HTTP POST para a API
 
-                var response = await _httpClient.PostAsync($"https://localhost:44390/api/AccountController/Register", jsonContent);
+                var response = await _httpClient.PostAsync($"{baseUrl}api/AccountController/Register", jsonContent);
 
                 if (response.IsSuccessStatusCode)
                 {
