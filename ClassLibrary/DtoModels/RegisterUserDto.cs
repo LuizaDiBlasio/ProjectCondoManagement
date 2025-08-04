@@ -22,6 +22,6 @@ namespace ClassLibrary.DtoModels
 
         public int? CompanyId { get; set; }
 
-        public Guid? ImageId { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }

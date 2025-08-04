@@ -17,7 +17,7 @@ namespace CondoManagementWebApp.Helpers
             return loginDto;
         }
 
-        public RegisterUserDto ToRegisterDto(RegisterUserViewModel model, Guid imageId)
+        public RegisterUserDto ToRegisterDto(RegisterUserViewModel model, string imageUrl)
         {
             var registerDto = new RegisterUserDto
             {
@@ -28,7 +28,7 @@ namespace CondoManagementWebApp.Helpers
                 PhoneNumber = model.PhoneNumber,
                 SelectedRole = model.SelectedRole,
                 CompanyId = model.SelectedCompanyId,
-                ImageId = imageId
+                ImageUrl = imageUrl
             };
             return registerDto;
         }

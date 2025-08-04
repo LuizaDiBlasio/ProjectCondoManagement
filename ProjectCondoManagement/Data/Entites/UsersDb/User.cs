@@ -14,11 +14,11 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
 
         public Company? Company { get; set; }
 
-        public Guid? ImageId { get; set; }
+        public string? ImageUrl { get; set; }
 
         //TODO Tratar do blob (está com endereço blob antigo)
-        public string ImageFullPath => ImageId == null || ImageId == Guid.Empty
-     ? $"/imagens/noImage.jpg" // caminho relativo à raiz da aplicação!
-     : $"https://gestaoescolar.blob.core.windows.net/imagens/{ImageId}";
+     //   public string ImageFullPath => ImageId == null || ImageId == Guid.Empty
+     //? $"/imagens/noImage.jpg" // caminho relativo à raiz da aplicação!
+     //: $"https://gestaoescolar.blob.core.windows.net/imagens/{ImageId}";
     }
 }

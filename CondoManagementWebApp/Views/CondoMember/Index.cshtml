@@ -1,0 +1,43 @@
+﻿@model IEnumerable<ClassLibrary.DtoModels.CondoMemberDto>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Condo Members</h1>
+<br />
+
+<a class="btn btn-success" asp-action="Create" >Add Member</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Birth Date</th>
+            <th>Phone Number</th>
+            <th>Image</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.FullName</td>
+                <td>@item.Email</td>
+                <td>@item.Address</td>
+                <td>@item.BirthDate?.ToString("dd/MM/yyyy")</td>
+                <td>@item.PhoneNumber</td>
+                <td>        
+                    <span>No Image</span>
+                </td>
+                <td>
+                    <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                    <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </tr>
+        }
+    </tbody>
+</table>
+

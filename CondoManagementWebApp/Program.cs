@@ -1,7 +1,11 @@
+using CondoManagementWebApp.Helpers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<ICondoMemberHelper, CondoMemberHelper>();
 
 var app = builder.Build();
 

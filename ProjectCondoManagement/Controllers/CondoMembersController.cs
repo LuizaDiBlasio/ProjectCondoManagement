@@ -1,0 +1,135 @@
+﻿using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Core.Types;
+using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace ProjectCondoManagement.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class CondoMembersController : ControllerBase
+    {
+        private readonly DataContextCondos _context;
+        private readonly ICondoMemberRepository _condoMemberRepository;
+        private readonly IConverterHelper _converterHelper;
+
+        public CondoMembersController(DataContextCondos context, ICondoMemberRepository condoMemberRepository, IConverterHelper converterHelper)
+        {
+            _context = context;
+            _condoMemberRepository = condoMemberRepository;
+            _converterHelper = converterHelper;
+        }
+
+        // GET: api/CondoMembers
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<CondoMember>>> GetCondoMembers()
+        {
+            return await _condoMemberRepository.GetAll(_context).ToListAsync();
+        }
+
+        // GET: api/CondoMembers/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<CondoMember>> GetCondoMember(int id)
+        {
+            var condoMember = await _condoMemberRepository.GetByIdAsync(id, _context);
+
+            if (condoMember == null)
+            {
+                return NotFound();
+            }
+
+            return condoMember;
+        }
+
+        // PUT: api/CondoMembers/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> EditCondoMember(int id, CondoMember condoMember)
+        {
+            if (id != condoMember.Id)
+            {
+                return BadRequest();
+            }
+
+            // Check if it exists first
+            var exists = await _condoMemberRepository.ExistAsync(id, _context);
+            if (!exists)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                await _condoMemberRepository.UpdateAsync(condoMember, _context);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/CondoMembers
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<CondoMemberDto>> PostCondoMember(CondoMemberDto condoMemberDto)
+        {
+
+            if (condoMemberDto == null)
+            {
+                return BadRequest("Request body is null.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var condoMember = _converterHelper.ToCondoMember(condoMemberDto);
+
+                if (condoMember == null)
+                {
+                    return BadRequest("Conversion failed. Invalid data.");
+                }
+
+                await _condoMemberRepository.CreateAsync(condoMember, _context);
+
+                return Ok(); 
+            }
+            catch (Exception ex)
+            {              
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the condo member.");
+            }
+
+        }
+
+        // DELETE: api/CondoMembers/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCondoMember(int id)
+        {
+            var condoMember = await _condoMemberRepository.GetByIdAsync(id, _context);
+            if (condoMember == null)
+            {
+                return NotFound();
+            }
+
+            await _condoMemberRepository.DeleteAsync(condoMember, _context);
+
+            return NoContent();
+        }
+
+     
+    }
+}

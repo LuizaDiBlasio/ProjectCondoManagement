@@ -77,7 +77,7 @@ namespace ProjectCondoManagement.Controllers
                     UserName = registerDtoModel.Email,
                     Address = registerDtoModel.Address,
                     PhoneNumber = registerDtoModel.PhoneNumber,
-                    ImageId = registerDtoModel.ImageId,
+                    ImageUrl = registerDtoModel.ImageUrl,
                     BirthDate = registerDtoModel.BirthDate,
                     CompanyId = registerDtoModel.CompanyId,
                 };

@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using ProjectCondoManagement.Data.Repositories.Condos;
+using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,11 +23,17 @@ builder.Services.AddDbContext<DataContextUsers>(options =>
 
 builder.Services.AddControllers();
 
+builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
+
+builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
+
+app.UseRouting();
 
 app.UseAuthorization();
 
