@@ -6,6 +6,9 @@ using ProjectCondoManagement.Helpers;
 using System.Text.Json;
 using System.Text;
 using ClassLibrary;
+using System.ComponentModel.Design;
+using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -18,15 +21,19 @@ namespace ProjectCondoManagement.Controllers
         private readonly IConfiguration _configuration;
         private readonly IConverterHelper _converterHelper;
         private readonly IMailHelper _mailHelper;
+        private readonly ICondoMemberRepository _condoMemberRepository;
+        private readonly DataContextCondos _dataContextCondos;
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
-                                        IMailHelper mailHelper)
+                                        IMailHelper mailHelper, DataContextCondos dataContextCondos)
         {
             _userHelper = userHelper;
             _httpClient = httpClient;
             _configuration = configuration;
             _converterHelper = converterHelper;
             _mailHelper = mailHelper;
+            _dataContextCondos = dataContextCondos;
+
         }
 
         [Microsoft.AspNetCore.Mvc.HttpPost("Login")]
@@ -47,6 +54,11 @@ namespace ProjectCondoManagement.Controllers
                 if (user == null)
                 {
                     return StatusCode(500, new { Message = "Internal server error: User not found after successful authentication." });
+                }
+
+                if(user.IsActive == false)
+                {
+                    return StatusCode(500, new { Message = "User not active in the system" });
                 }
 
                 //TODO vamos usar Jwt token?
@@ -105,46 +117,20 @@ namespace ProjectCondoManagement.Controllers
 
                 var isCondoMember = await _userHelper.IsUserInRoleAsync(user, "CondoMember");
 
-                if (isCondoMember) // caso o user seja um condomember, criar condomember por requisição http
+                if (isCondoMember) // caso o user seja um condomember, criar condomember programaticamente
                 {
-                    //Converter
-                    var condoMemberDtoModel = _converterHelper.ToCondoMemberDto(user);
-
-                    //Serializar 
-
-                    var jsonContent = new StringContent(
-                   JsonSerializer.Serialize(condoMemberDtoModel, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }), //converte para camelCase em json
-                   Encoding.UTF8,
-                   "application/json" //diz que o body vai ter dados em json
-                    );
-
-                    // Fazer a requisição HTTP POST para a CondoAPI
-                    string userApiBaseUrl = _configuration["ApiUrls:CondoApi"];
-
-                    var responseCondo = await _httpClient.PostAsync($"{userApiBaseUrl}/api/UserApiCondoMemberController/Create", jsonContent);
-
-                    if (!responseCondo.IsSuccessStatusCode)
+                    var condoMember = new CondoMember()
                     {
-                        var errorResponseContent = await responseCondo.Content.ReadAsStringAsync();
-                        string errorMessage = "An unexpected error occurred, user cannot be registered";
+                        FullName = user.FullName,
+                        Email = user.Email,
+                        Address = user.Address,
+                        PhoneNumber = user.PhoneNumber,
+                        ImageUrl = user.ImageUrl,
+                        BirthDate = user.BirthDate,
+                        UserId = user.Id
+                    };
 
-                        try
-                        {
-                            // pegar mensagens de erro da api
-                            var apiError = JsonSerializer.Deserialize<Dictionary<string, string>>(errorResponseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-                            if (apiError != null && apiError.ContainsKey("message"))
-                            {
-                                errorMessage = apiError["message"];
-                            }
-                        }
-                        catch (JsonException)
-                        {
-
-                        }
-
-                        this.ModelState.AddModelError(string.Empty, errorMessage);
-
-                    }
+                    await _condoMemberRepository.CreateAsync(condoMember, _dataContextCondos);
                 }
 
                 string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
@@ -176,3 +162,5 @@ namespace ProjectCondoManagement.Controllers
         }
     }
 }
+
+

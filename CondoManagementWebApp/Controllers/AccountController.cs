@@ -1,11 +1,10 @@
 ﻿using CondoManagementWebApp.Helpers;
+using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
 using Vereyon.Web;
-using CondoManagementWebApp.Models;
-using static System.Net.WebRequestMethods;
 
 namespace CondoManagementWebApp.Controllers
 {
@@ -14,15 +13,15 @@ namespace CondoManagementWebApp.Controllers
         private readonly IFlashMessage _flashMessage;
         private readonly IConfiguration _configuration;
         private readonly IConverterHelper _converterHelper;
-        private readonly CloudinaryService _cloudinaryService;  
+        private readonly CloudinaryService _cloudinaryService;
         private readonly HttpClient _httpClient;
 
         private readonly string baseUrl = "https://localhost:44390/"; //TODO : Mudar depois que publicar
-       
-        public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient, 
+
+        public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient,
             IConverterHelper converterHelper, CloudinaryService cloudinaryService)
         {
-           
+
             _flashMessage = flashMessage;
             _configuration = configuration;
             _httpClient = httpClient;
@@ -68,7 +67,7 @@ namespace CondoManagementWebApp.Controllers
 
             if (ModelState.IsValid) // se modelo enviado passar na validação
             {
-               
+
                 var loginDto = _converterHelper.ToLoginDto(model);
 
                 // Serializar model para JSON
