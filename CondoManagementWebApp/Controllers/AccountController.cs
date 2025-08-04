@@ -119,7 +119,7 @@ namespace CondoManagementWebApp.Controllers
             this.ModelState.AddModelError(string.Empty, "Failed to login");
             _flashMessage.Danger("Login failed. Invalid credentials.");
 
-            return View(model);
+            return View("Login", model);
         }
 
 

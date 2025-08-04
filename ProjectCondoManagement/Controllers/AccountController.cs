@@ -1,14 +1,11 @@
+using ClassLibrary;
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using ProjectCondoManagement.Data.Entites.UsersDb;
-using ProjectCondoManagement.Helpers;
-using System.Text.Json;
-using System.Text;
-using ClassLibrary;
-using System.ComponentModel.Design;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Helpers;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -56,7 +53,7 @@ namespace ProjectCondoManagement.Controllers
                     return StatusCode(500, new { Message = "Internal server error: User not found after successful authentication." });
                 }
 
-                if(user.IsActive == false)
+                if (user.IsActive == false)
                 {
                     return StatusCode(500, new { Message = "User not active in the system" });
                 }
