@@ -16,7 +16,7 @@ namespace CondoManagementWebApp.Controllers
         private readonly CloudinaryService _cloudinaryService;
         private readonly HttpClient _httpClient;
 
-        private readonly string baseUrl = "https://localhost:44390/"; //TODO : Mudar depois que publicar
+        private readonly string baseUrl = "https://localhost:7001/"; //TODO : Mudar depois que publicar
 
         public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient,
             IConverterHelper converterHelper, CloudinaryService cloudinaryService)
@@ -26,6 +26,7 @@ namespace CondoManagementWebApp.Controllers
             _configuration = configuration;
             _httpClient = httpClient;
             _cloudinaryService = cloudinaryService;
+            _converterHelper = converterHelper; 
         }
 
         /// <summary>
@@ -47,7 +48,7 @@ namespace CondoManagementWebApp.Controllers
         /// Displays the login view. If the user is already authenticated, redirects to the Home page.
         /// </summary>
         /// <returns>The login view or a redirection to the Home page.</returns>
-        //Get do login 
+        //Get do Change login 
         public IActionResult ChangeLogin()
         {
 
@@ -79,7 +80,7 @@ namespace CondoManagementWebApp.Controllers
 
                 // Fazer a requisição HTTP POST para a UserAPI
 
-                var response = await _httpClient.PostAsync($"{baseUrl}api/AccountController/Login", jsonContent);
+                var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Login", jsonContent);
 
                 if (response.IsSuccessStatusCode)
                 {
