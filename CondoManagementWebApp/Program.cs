@@ -1,6 +1,7 @@
 using CondoManagementWebApp.Helpers;
 using Vereyon.Web;
 using CloudinaryDotNet;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,14 @@ builder.Services.AddSingleton(x => {
     return new Cloudinary(account);
 });
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+    });
+
+
 builder.Services.AddScoped<CloudinaryService>();
 
 builder.Services.AddControllersWithViews();
@@ -41,6 +50,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

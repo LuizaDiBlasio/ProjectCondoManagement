@@ -37,5 +37,7 @@ namespace ProjectCondoManagement.Helpers
         Task<User> GetUserByIdAsync(string id); //recebe um id e devolve o user correspondente
 
         Task<IdentityResult> ResetPasswordAsync(User user, string token, string password); //Faz o reset da password
+
+        Task<IList<string>> GetRolesAsync(User user); //busca o role do user
     }
 }

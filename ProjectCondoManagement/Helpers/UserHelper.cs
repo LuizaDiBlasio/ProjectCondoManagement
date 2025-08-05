@@ -77,6 +77,7 @@ namespace ProjectCondoManagement.Helpers
                 {
                     Name = roleName
                 });
+
             }
 
         }
@@ -255,6 +256,12 @@ namespace ProjectCondoManagement.Helpers
         public async Task<SignInResult> ValidatePasswordAsync(User user, string password)
         {
             return await _signInManager.CheckPasswordSignInAsync(user, password, false);
+        }
+
+
+        public async Task<IList<string>> GetRolesAsync(User user)
+        {
+            return await _userManager.GetRolesAsync(user);  
         }
     }
 }

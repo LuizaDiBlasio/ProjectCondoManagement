@@ -2,10 +2,15 @@ using ClassLibrary;
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
+using System.Data;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -20,9 +25,10 @@ namespace ProjectCondoManagement.Controllers
         private readonly IMailHelper _mailHelper;
         private readonly ICondoMemberRepository _condoMemberRepository;
         private readonly DataContextCondos _dataContextCondos;
+        private readonly IJwtTokenService _jwtTokenService;
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
-                                        IMailHelper mailHelper, DataContextCondos dataContextCondos)
+                                        IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService)
         {
             _userHelper = userHelper;
             _httpClient = httpClient;
@@ -30,6 +36,7 @@ namespace ProjectCondoManagement.Controllers
             _converterHelper = converterHelper;
             _mailHelper = mailHelper;
             _dataContextCondos = dataContextCondos;
+            _jwtTokenService = jwtTokenService; 
 
         }
 
@@ -47,23 +54,36 @@ namespace ProjectCondoManagement.Controllers
             {
                 var user = await _userHelper.GetUserByEmailAsync(loginDtoModel.Username);
 
-                // Verificação de usuário e roles para a API e redirecionamento (existente) 
-                if (user == null)
+                if (user != null)
                 {
-                    return StatusCode(500, new { Message = "Internal server error: User not found after successful authentication." });
+                    // pede lista de roles do usuário (somente 1 item na lista)
+                    var roles = await _userHelper.GetRolesAsync(user);
+
+                    // verifica se a lista não está vazia e pega a primeira role.
+                    if (roles != null && roles.Any())
+                    {
+                        var userRole = roles.First(); 
+
+                        // string da role para gerar o token
+                        var tokenString = _jwtTokenService.GenerateToken(user, userRole);
+
+                        var results = new
+                        {
+                            token = tokenString,
+                            expiration = DateTime.UtcNow.AddDays(15)
+                        };
+
+                        return Ok(results);
+
+                    }
+                    return Unauthorized(new { Message = "Login failed, credentials are not valid." });
+
                 }
-
-                if (user.IsActive == false)
-                {
-                    return StatusCode(500, new { Message = "User not active in the system" });
-                }
-
-                //TODO vamos usar Jwt token?
-                return Ok(new { Message = "Login successful", /* , Token = "jwt_aqui" */ });
-
+                return NotFound(new { Message = "Login failed, user not found." });
             }
-            return Unauthorized(new { Message = "Login failed, credentials are not valid." });
+            return Unauthorized(new { Message = "Login failed." });
         }
+
 
         [Microsoft.AspNetCore.Mvc.HttpGet("Logout")]
         public async Task<IActionResult> Logout()

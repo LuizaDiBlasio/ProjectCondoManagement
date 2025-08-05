@@ -1,10 +1,16 @@
 ﻿using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Vereyon.Web;
+using ClassLibrary.DtoModels;
+using System.IdentityModel.Tokens.Jwt;
+using ClassLibrary;
 
 namespace CondoManagementWebApp.Controllers
 {
@@ -84,41 +90,34 @@ namespace CondoManagementWebApp.Controllers
 
                 if (response.IsSuccessStatusCode)
                 {
-                    //TODO se usarmos Jwt
-                    // Ler o corpo da resposta se a API retornar um JWT ou dados do usuário
-                    // var apiResponse = await response.Content.ReadFromJsonAsync<LoginApiResponseDto>();
-                    // processar o token
 
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    //sessão com token
+                    var handler = new JwtSecurityTokenHandler();
+                    var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
+
+                    // ClaimsPrincipal com base nas claims do token JWT
+                    var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                    // login no  WebApp, criando um cookie de autenticação
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
+                    _flashMessage.Confirmation("Login successful!");
                     return RedirectToAction("Index", "Home");
+
+
                 }
                 else // Login falhou na API
                 {
-                    var errorResponseContent = await response.Content.ReadAsStringAsync();
-                    string errorMessage = "Login Failed. Check your credentials";
-
-                    try
-                    {
-                        // pegar mensagens de erro da api
-                        var apiError = JsonSerializer.Deserialize<Dictionary<string, string>>(errorResponseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-                        if (apiError != null && apiError.ContainsKey("message"))
-                        {
-                            errorMessage = apiError["message"];
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        _flashMessage.Danger("Login failed.");
-                    }
-
-                    this.ModelState.AddModelError(string.Empty, errorMessage);
-                    _flashMessage.Danger(errorMessage); // Exibe a mensagem de erro vinda da API ou a padrão
-                    return View(model); // Retorna a View de login com o modelo e a mensagem de erro
+                    this.ModelState.AddModelError(string.Empty, "Invalid login credentials.");
+                    return View("Login", model);
                 }
             }
             // Se o result.Succeeded for false (login falhou )
             this.ModelState.AddModelError(string.Empty, "Failed to login");
-            _flashMessage.Danger("Login failed. Invalid credentials.");
-
             return View("Login", model);
         }
 
