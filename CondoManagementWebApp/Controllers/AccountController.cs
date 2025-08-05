@@ -1,7 +1,12 @@
-﻿using CondoManagementWebApp.Helpers;
+﻿using ClassLibrary;
+using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Vereyon.Web;
@@ -15,17 +20,20 @@ namespace CondoManagementWebApp.Controllers
         private readonly IConverterHelper _converterHelper;
         private readonly CloudinaryService _cloudinaryService;
         private readonly HttpClient _httpClient;
+        private readonly IApiCallService _apiCallService;
 
-        private readonly string baseUrl = "https://localhost:44390/"; //TODO : Mudar depois que publicar
+        private readonly string baseUrl = "https://localhost:7001/"; //TODO : Mudar depois que publicar
 
         public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient,
-            IConverterHelper converterHelper, CloudinaryService cloudinaryService)
+            IConverterHelper converterHelper, CloudinaryService cloudinaryService, IApiCallService apiCallService)
         {
 
             _flashMessage = flashMessage;
             _configuration = configuration;
             _httpClient = httpClient;
             _cloudinaryService = cloudinaryService;
+            _converterHelper = converterHelper;
+            _apiCallService = apiCallService;
         }
 
         /// <summary>
@@ -47,7 +55,7 @@ namespace CondoManagementWebApp.Controllers
         /// Displays the login view. If the user is already authenticated, redirects to the Home page.
         /// </summary>
         /// <returns>The login view or a redirection to the Home page.</returns>
-        //Get do login 
+        //Get do Change login 
         public IActionResult ChangeLogin()
         {
 
@@ -57,7 +65,7 @@ namespace CondoManagementWebApp.Controllers
 
         /// <summary>
         /// Handles the login POST request, authenticates the user, and redirects based on role.
-        /// Attempts to get a JWT token for 'Employee' roles from an external API.
+        /// In case of success, Api returns a JWT wich will be stored as a cookie in the user session  
         /// </summary>
         /// <param name="model">The LoginViewModel containing user credentials.</param>
         /// <returns>A redirection to the appropriate page or the login view with error messages.</returns>
@@ -79,59 +87,60 @@ namespace CondoManagementWebApp.Controllers
 
                 // Fazer a requisição HTTP POST para a UserAPI
 
-                var response = await _httpClient.PostAsync($"{baseUrl}api/AccountController/Login", jsonContent);
+                var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Login", jsonContent);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    //TODO se usarmos Jwt
-                    // Ler o corpo da resposta se a API retornar um JWT ou dados do usuário
-                    // var apiResponse = await response.Content.ReadFromJsonAsync<LoginApiResponseDto>();
-                    // processar o token
 
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    //sessão com token
+                    var handler = new JwtSecurityTokenHandler();
+                    var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
+
+                    //armazenar token na sessão para futuras requisições da api
+                    HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
+
+                    // ClaimsPrincipal com base nas claims do token JWT
+                    var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                    // login no  WebApp, criando um cookie de autenticação
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
+                    _flashMessage.Confirmation("Login successful!");
                     return RedirectToAction("Index", "Home");
+
+
                 }
                 else // Login falhou na API
                 {
-                    var errorResponseContent = await response.Content.ReadAsStringAsync();
-                    string errorMessage = "Login Failed. Check your credentials";
-
-                    try
-                    {
-                        // pegar mensagens de erro da api
-                        var apiError = JsonSerializer.Deserialize<Dictionary<string, string>>(errorResponseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-                        if (apiError != null && apiError.ContainsKey("message"))
-                        {
-                            errorMessage = apiError["message"];
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        _flashMessage.Danger("Login failed.");
-                    }
-
-                    this.ModelState.AddModelError(string.Empty, errorMessage);
-                    _flashMessage.Danger(errorMessage); // Exibe a mensagem de erro vinda da API ou a padrão
-                    return View(model); // Retorna a View de login com o modelo e a mensagem de erro
+                    this.ModelState.AddModelError(string.Empty, "Invalid login credentials.");
+                    return View("Login", model);
                 }
             }
             // Se o result.Succeeded for false (login falhou )
             this.ModelState.AddModelError(string.Empty, "Failed to login");
-            _flashMessage.Danger("Login failed. Invalid credentials.");
-
-            return View(model);
+            return View("Login", model);
         }
 
 
 
         /// <summary>
-        /// Logs out the current user and redirects to the Home page.
+        /// Cleans Session, remove cookies and redirects to the Home page. 
         /// </summary>
         /// <returns>A redirection to the Home page.</returns>
-        [Microsoft.AspNetCore.Authorization.Authorize] // todos os roles autenticados
+        [Microsoft.AspNetCore.Authorization.Authorize]
         public async Task<IActionResult> Logout()
         {
-            var response = await _httpClient.GetAsync($"{baseUrl}api/UserApiAccountController/Logout");
+            // Limpa o token JWT da sessão do Web App.
+            HttpContext.Session.Clear();
 
+            // Remove o cookie de autenticação do browser
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Volta para página inicial
             return RedirectToAction("Index", "Home");
 
         }
@@ -168,7 +177,7 @@ namespace CondoManagementWebApp.Controllers
         /// <returns>An action result indicating success or failure of the registration.</returns>
 
         [Microsoft.AspNetCore.Mvc.HttpPost]
-        public async Task<IActionResult> Register(RegisterUserViewModel model) // registra o user
+        public async Task<IActionResult> RequestRegister(RegisterUserViewModel model) // registra o user
         {
             if (ModelState.IsValid) //ver se modelo é válido
             {
@@ -241,5 +250,22 @@ namespace CondoManagementWebApp.Controllers
             return View(model);
 
         }
+
+
     }
 }
+
+//Explicação do fluxo do Login com jwt (apagar depois):
+
+//O login request do frontend faz uma requisição HTTP com as informações de login para a API. A API checa essas informações,
+//caso elas sejam válidas, gera um token JWT Bearer e devolve isso para o frontend na sua resposta. O frontend, que é uma aplicação ASP.NET Core Web,
+//recebe o token, desserializa-o para extrair as claims (informações do usuário) e usa essas claims para criar um cookie de autenticação. Este cookie
+//será usado para manter o usuário autenticado na sessão do browser, permitindo o acesso às páginas protegidas do Web App. O Controller Account do cliente
+//também se encarrega de armazenar o token Jwt dentro de novos para que seja possível acessar aos dados via api. O Program.cs do frontend configura
+//a autenticação por cookies, enquanto o Program.cs do backend (API) configura o esquema de autenticação para validar os tokens JWT que são enviados em cada
+//requisição feita pelo  Web App (ou por qualquer outro cliente da API) para ele. O User Identity é usado na validação de informações do user na API,
+//mas deixa de ser utilizado para criação de token e armazenamento de cookie como no projeto passado
+
+//A cada requisição:
+//para cada requisição é necessário adicionar o token ao cabeçalho do jsno que será enviado na requisição http
+

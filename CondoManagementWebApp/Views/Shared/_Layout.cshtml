@@ -103,10 +103,9 @@
                                 <li class="nav-item dropdown header-profile">
                                     <a class="nav-link" href="javascript:void(0);" role="button" data-bs-toggle="dropdown">
                                         <div class="header-info">
-                                            <span class="text-black">@User.Identity.Name</span> @* Exibe o nome do usuário logado dinamicamente *@
-                                            <p class="fs-12 mb-0">Admin</p>
+                                            <span class="text-black">@User.Identity.Name</span>
                                         </div>
-                                        <img src="~/images/profile/17.jpg" width="20" alt="Profile" /> @* Certifique-se de que a imagem de perfil existe *@
+                                        <img src="~/images/profile/17.jpg" width="20" alt="Profile" />
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-end">
                                         <a asp-controller="Account" asp-action="Profile" class="dropdown-item ai-icon">
@@ -124,28 +123,28 @@
                                     </div>
                                 </li>
                                 <li class="nav-item ms-3">
-                                    @* ms-3 para adicionar margem à esquerda *@
                                     <a class="nav-link btn btn-primary light" asp-controller="Account" asp-action="Logout" title="Logout">
-                                        @* Adicionado classes de botão para estilo *@
                                         <i class="fas fa-sign-out-alt"></i>
                                         <span class="d-none d-sm-inline ms-1">Logout</span>
                                     </a>
                                 </li>
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li class="nav-item ms-3">
+                                        <a class="nav-link btn btn-info light" asp-controller="Account" asp-action="Register" title="Register New User">
+                                            <i class="fas fa-user-plus"></i>
+                                            <span class="d-none d-sm-inline ms-1">Register new user</span>
+                                        </a>
+                                    </li>
+                                }
                             }
                             else
                             {
                                 <li class="nav-item">
                                     <a class="nav-link btn btn-primary light me-2" asp-controller="Account" asp-action="Login">
-                                        @* Adicionado classes de botão e margem à direita *@
                                         <i class="fas fa-sign-in-alt"></i>
                                         <span class="ms-1">Login</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link btn btn-secondary light" asp-controller="Account" asp-action="Register">
-                                        @* Adicionado classes de botão *@
-                                        <i class="fas fa-user-plus"></i>
-                                        <span class="ms-1">Register</span>
                                     </a>
                                 </li>
                             }

@@ -1,0 +1,120 @@
+﻿@model CondoManagementWebApp.Models.RegisterUserViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Define o layout a ser usado
+}
+
+<div class="fix-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-6">
+                <div class="card mb-0 h-auto">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <a href="@Url.Action("Index", "Home")"><img class="logo-auth" src="~/images/logo-full.png" alt="Logo"></a>
+                        </div>
+                        <h4 class="text-center mb-4">Register your account</h4>
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
+
+                        <form asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data">
+
+                            <div class="form-group mb-4">
+                                <label class="form-label" asp-for="FullName">Full Name</label>
+                                <input asp-for="FullName" class="form-control" placeholder="Enter full name">
+                                <span asp-validation-for="FullName" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label class="form-label" asp-for="Email">Email</label>
+                                <input asp-for="Email" class="form-control" placeholder="hello@example.com">
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label class="form-label" asp-for="Address">Address</label>
+                                <input asp-for="Address" class="form-control" placeholder="Enter address">
+                                <span asp-validation-for="Address" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label class="form-label" asp-for="PhoneNumber">Phone Number</label>
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number">
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label asp-for="BirthDate" class="control-label">Date of Birth</label>
+                                <input type="text" id="birthDateInput" asp-for="BirthDate" class="form-control" placeholder="Select a date" />
+                                <span asp-validation-for="BirthDate" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label class="form-label">Password</label>
+                                <div class="position-relative">
+                                    <input type="password" id="dz-password" name="Password" class="form-control">
+                                    <span class="show-pass eye">
+                                        <i class="fa fa-eye-slash"></i>
+                                        <i class="fa fa-eye"></i>
+                                    </span>
+                                </div>
+                                <span class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label class="form-label">Confirm Password</label>
+                                <div class="position-relative">
+                                    <input type="password" name="ConfirmPassword" class="form-control">
+                                </div>
+                                <span class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label asp-for="SelectedRole" class="form-label">User role</label>
+                                <select asp-for="SelectedRole" asp-items="Model.AvailableRoles" class="form-control"></select>
+                                <span asp-validation-for="SelectedRole" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label asp-for="SelectedCompanyId" class="form-label">Company</label>
+                                <select asp-for="SelectedCompanyId" asp-items="Model.Companies" class="form-control"></select>
+                                <span asp-validation-for="SelectedCompanyId" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label asp-for="ImageFile" class="form-label">Profile picture</label>
+                                <input asp-for="ImageFile" class="form-control" type="file" />
+                                <span asp-validation-for="ImageFile" class="text-danger"></span>
+                            </div>
+
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-block">Register User</button>
+                            </div>
+                        </form>
+
+                        <div class="new-account mt-3">
+                            <p>Already have an account? <a class="text-primary" asp-controller="Account" asp-action="Login">Sign in</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            var birthDatePicker = new ej.calendars.DatePicker({
+                format: 'MM/dd/yyyy',
+                placeholder: 'Select a date',
+                max: new Date()
+            });
+            birthDatePicker.appendTo('#birthDateInput');
+        });
+    </script>
+    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
+}
