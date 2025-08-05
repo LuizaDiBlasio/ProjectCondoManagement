@@ -51,6 +51,8 @@ namespace CondoManagementWebApp.Models
 
         [Display(Name = "Profile picture")]
         [MaxFileSize(5 * 1024 * 1024)]
-        public IFormFile ImageFile { get; set; }
+        public IFormFile? ImageFile { get; set; }
+
+        public string? ImageUrl { get; set; }
     }
 }

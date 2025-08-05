@@ -23,6 +23,7 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
         public DbSet<Vote> Votes { get; set; }
 
         public DbSet<Voting> Voting { get; set; }
+
         public DbSet<Document> Documents { get; set; }
 
 

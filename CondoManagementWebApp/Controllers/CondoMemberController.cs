@@ -25,9 +25,15 @@ namespace CondoManagementWebApp.Controllers
         } 
 
         // GET: CondoMemberController/Details/5
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int? id)
         {
-            var condoMember = await _condoMemberHelper.GetCondoMemberAsync(id);
+
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var condoMember = await _condoMemberHelper.GetCondoMemberAsync(id.Value);
 
             return View(condoMember);
         }
@@ -60,7 +66,7 @@ namespace CondoManagementWebApp.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch
             {
                 ModelState.AddModelError("", "An unexpected error occurred. Please try again.");
                 return View(condoMemberDto);
@@ -69,44 +75,109 @@ namespace CondoManagementWebApp.Controllers
         }
 
         // GET: CondoMemberController/Edit/5
-        public ActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int? id)
         {
-            return View();
+
+            if (id == null)
+            {
+                return  NotFound();
+            }
+
+            var condoMember = await _condoMemberHelper.GetCondoMemberAsync(id.Value);
+            if (condoMember == null)
+            {
+                return NotFound();
+            }
+
+
+            return View(condoMember);
         }
 
         // POST: CondoMemberController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<IActionResult> Edit(int id, CondoMemberDto condoMemberDto)
         {
+
+            if (id != condoMemberDto.Id)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(condoMemberDto);
+            }
+
             try
             {
+
+               var success = await _condoMemberHelper.EditCondoMemberAsync(condoMemberDto);
+               if (!success)
+               {
+                   ModelState.AddModelError("", "Failed to edit condo member. Please try again.");
+                   return View(condoMemberDto);
+               }
+
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
-                return View();
+                ModelState.AddModelError("", "An unexpected error occurred. Please try again.");
+                return View(condoMemberDto);
             }
         }
 
         // GET: CondoMemberController/Delete/5
-        public ActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            return View();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var condoMember = await _condoMemberHelper.GetCondoMemberAsync(id.Value);
+            if (condoMember == null)
+            {
+                return NotFound();
+            }
+
+
+            return View(condoMember);
         }
 
         // POST: CondoMemberController/Delete/5
-        [HttpPost]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<IActionResult> DeleteConfirmed(int? id)
         {
-            try
+            if (id == null)
             {
+                return NotFound();
+            }
+
+            try
+            {                            
+
+                var condoMember = await _condoMemberHelper.GetCondoMemberAsync(id.Value);
+                if (condoMember == null)
+                {
+                    return NotFound();
+                }
+
+                var success = await _condoMemberHelper.DeleteCondoMemberAsync(id.Value);
+                if (!success)
+                {
+                    ModelState.AddModelError("", "Failed to delete condo member. Please try again.");
+                    return View(condoMember);
+                }
+
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
-                return View();
+                ModelState.AddModelError("", "An unexpected error occurred. Please try again.");
+                return View(id);
             }
         }
     }

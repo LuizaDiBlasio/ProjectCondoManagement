@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ProjectCondoManagement.Data;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
@@ -23,11 +25,47 @@ builder.Services.AddDbContext<DataContextUsers>(options =>
 
 builder.Services.AddControllers();
 
+//builder.Services.AddIdentity<User, IdentityRole>()
+//    .AddEntityFrameworkStores<DataContextUsers>()
+//    .AddDefaultTokenProviders();
+
+builder.Services.AddIdentity<User, IdentityRole>(cfg =>
+{
+    // Configurações de senha e usuário do seu projeto antigo
+    cfg.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
+    cfg.SignIn.RequireConfirmedEmail = true;
+    cfg.User.RequireUniqueEmail = true;
+    cfg.Password.RequireDigit = false;
+    cfg.Password.RequiredUniqueChars = 0;
+    cfg.Password.RequireLowercase = false;
+    cfg.Password.RequireUppercase = false;
+    cfg.Password.RequireNonAlphanumeric = false;
+    cfg.Password.RequiredLength = 6;
+}).AddEntityFrameworkStores<DataContextUsers>() // Usar o DataContextUsers para o Identity
+  .AddDefaultTokenProviders();
+
+
+builder.Services.AddScoped<IUserHelper, UserHelper>();
+
+builder.Services.AddTransient<SeedDb>();
+
+builder.Services.AddScoped<IMailHelper, MailHelper>();
+
 builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
 
 builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
 
+builder.Services.AddScoped<IMailHelper, MailHelper>();
+
 var app = builder.Build();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var seeder = services.GetRequiredService<SeedDb>();
+    await seeder.SeedAsync(); 
+}
 
 // Configure the HTTP request pipeline.
 

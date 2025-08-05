@@ -11,5 +11,9 @@ namespace CondoManagementWebApp.Helpers
 
         public Task<bool> CreateCondoMemberAsync(CondoMemberDto condoMemberDto);
 
+        public Task<bool> EditCondoMemberAsync(CondoMemberDto condoMemberDto);
+
+        public Task<bool> DeleteCondoMemberAsync(int id);
+
     }
 }

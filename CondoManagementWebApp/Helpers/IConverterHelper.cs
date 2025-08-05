@@ -7,6 +7,6 @@ namespace CondoManagementWebApp.Helpers
     {
         public LoginDto ToLoginDto(LoginViewModel model);
 
-        public RegisterDto ToRegisterDto(RegisterUserViewModel model, Guid imageId);
+        public RegisterUserDto ToRegisterDto(RegisterUserViewModel model);
     }
 }

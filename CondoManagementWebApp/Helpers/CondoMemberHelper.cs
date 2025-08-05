@@ -5,7 +5,7 @@ using System.Net.Http;
 
 namespace CondoManagementWebApp.Helpers
 {
-    public class CondoMemberHelper : ICondoMemberHelper
+    public class CondoMemberHelper : ICondoMemberHelper 
     {
     
 
@@ -72,5 +72,38 @@ namespace CondoManagementWebApp.Helpers
                 return response.IsSuccessStatusCode;
             }
         }
+
+
+        public async Task<bool> EditCondoMemberAsync(CondoMemberDto condoMemberDto)
+        {
+            using (var client = new HttpClient())
+            {
+                var apiUrl = $"https://localhost:7001/api/CondoMembers/Edit/{condoMemberDto.Id}";
+
+
+                var jsonContent = JsonConvert.SerializeObject(condoMemberDto);
+                var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(apiUrl, httpContent);
+
+
+                return response.IsSuccessStatusCode;
+            }
+        }
+
+
+        public async Task<bool> DeleteCondoMemberAsync(int id)
+        {
+            using (var client = new HttpClient())
+            {
+                var apiUrl = $"https://localhost:7001/api/CondoMembers/{id}";
+
+                var response = await client.DeleteAsync(apiUrl);
+
+                return response.IsSuccessStatusCode;
+            }
+        }
+
+
     }
 }

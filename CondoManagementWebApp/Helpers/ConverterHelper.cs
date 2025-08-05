@@ -3,7 +3,7 @@ using CondoManagementWebApp.Models;
 
 namespace CondoManagementWebApp.Helpers
 {
-    public class ConverterHelper
+    public class ConverterHelper : IConverterHelper
     {
         public LoginDto ToLoginDto(LoginViewModel model)
         {
@@ -17,7 +17,7 @@ namespace CondoManagementWebApp.Helpers
             return loginDto;
         }
 
-        public RegisterUserDto ToRegisterDto(RegisterUserViewModel model, string imageUrl)
+        public RegisterUserDto ToRegisterDto(RegisterUserViewModel model)
         {
             var registerDto = new RegisterUserDto
             {
@@ -28,7 +28,7 @@ namespace CondoManagementWebApp.Helpers
                 PhoneNumber = model.PhoneNumber,
                 SelectedRole = model.SelectedRole,
                 CompanyId = model.SelectedCompanyId,
-                ImageUrl = imageUrl
+                ImageUrl = model.ImageUrl
             };
             return registerDto;
         }

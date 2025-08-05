@@ -50,50 +50,51 @@ namespace ProjectCondoManagement.Controllers
             return condoMember;
         }
 
-        // PUT: api/CondoMembers/5
+        // POST: api/CondoMembers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> EditCondoMember(int id, CondoMember condoMember)
+        [HttpPost("Edit/{id}")]
+        public async Task<IActionResult> EditCondoMember(int id, CondoMemberDto condoMemberDto)
         {
-            if (id != condoMember.Id)
+            if (id != condoMemberDto.Id)
             {
                 return BadRequest();
             }
 
-            // Check if it exists first
             var exists = await _condoMemberRepository.ExistAsync(id, _context);
+
             if (!exists)
             {
                 return NotFound();
             }
 
+
+            var condoMember = _converterHelper.ToCondoMember(condoMemberDto);
+
+
             try
             {
                 await _condoMemberRepository.UpdateAsync(condoMember, _context);
+
+                return Ok();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the condo member.");
             }
 
-            return NoContent();
         }
 
         // POST: api/CondoMembers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<CondoMemberDto>> PostCondoMember(CondoMemberDto condoMemberDto)
+        public async Task<IActionResult> PostCondoMember(CondoMemberDto condoMemberDto)
         {
 
             if (condoMemberDto == null)
             {
                 return BadRequest("Request body is null.");
             }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        
 
             try
             {

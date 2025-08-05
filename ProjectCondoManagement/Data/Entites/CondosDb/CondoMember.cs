@@ -27,12 +27,9 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
         public string? ImageUrl { get; set; }
 
 
-
-
-        //TODO Tratar do blob (está com endereço bloc antigo)
-     //   public string ImageFullPath => ImageUrl == null || ImageUrl == string.Empty
-     //? $"/imagens/noImage.jpg" // caminho relativo à raiz da aplicação!
-     //: $"https://gestaoescolar.blob.core.windows.net/imagens/{ImageUrl}";
+        public string ImageFullPath => ImageUrl == string.Empty ?
+                     $"https://res.cloudinary.com/ddnkq9dyb/image/upload/v1754230681/noimage_q8mayx.jpg" // caminho relativo ao Url no image
+                     : ImageUrl;
     }
 }
 

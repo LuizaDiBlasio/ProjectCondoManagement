@@ -14,11 +14,12 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
 
         public Company? Company { get; set; }
 
-        public string? ImageUrl { get; set; }
+        public bool IsActive { get; set; }  = true; 
 
-        //TODO Tratar do blob (está com endereço blob antigo)
-     //   public string ImageFullPath => ImageId == null || ImageId == Guid.Empty
-     //? $"/imagens/noImage.jpg" // caminho relativo à raiz da aplicação!
-     //: $"https://gestaoescolar.blob.core.windows.net/imagens/{ImageId}";
+        public string? ImageUrl { get; set; }
+    
+        public string ImageFullPath => ImageUrl == string.Empty? 
+                     $"https://res.cloudinary.com/ddnkq9dyb/image/upload/v1754230681/noimage_q8mayx.jpg" // caminho relativo ao Url no image
+                     : ImageUrl;
     }
 }
