@@ -129,11 +129,9 @@
                                     </a>
                                 </li>
 
-                                @* LÓGICA CORRETA PARA O BOTÃO REGISTER: APENAS PARA ADMIN AUTENTICADO *@
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <li class="nav-item ms-3">
-                                        @* Você pode ajustar a margem conforme a necessidade *@
                                         <a class="nav-link btn btn-info light" asp-controller="Account" asp-action="Register" title="Register New User">
                                             <i class="fas fa-user-plus"></i>
                                             <span class="d-none d-sm-inline ms-1">Register new user</span>
@@ -149,14 +147,6 @@
                                         <span class="ms-1">Login</span>
                                     </a>
                                 </li>
-                                @* O botão Register não aparece aqui para usuários não autenticados *
-                                        <li class="nav-item">
-                                             <a class="nav-link btn btn-secondary light" asp-controller="Account" asp-action="Register">
-                                                 <i class="fas fa-user-plus"></i>
-                                                 <span class="ms-1">Register</span>
-                                             </a>
-                                         </li>
-                                        * Remova ou comente o bloco acima se o Register nunca deve ser visível para não logados *@
                             }
                         </ul>
                     </div>

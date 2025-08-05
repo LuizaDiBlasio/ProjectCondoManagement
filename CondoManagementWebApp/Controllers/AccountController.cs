@@ -177,7 +177,7 @@ namespace CondoManagementWebApp.Controllers
         /// <returns>An action result indicating success or failure of the registration.</returns>
 
         [Microsoft.AspNetCore.Mvc.HttpPost]
-        public async Task<IActionResult> Register(RegisterUserViewModel model) // registra o user
+        public async Task<IActionResult> RequestRegister(RegisterUserViewModel model) // registra o user
         {
             if (ModelState.IsValid) //ver se modelo é válido
             {
