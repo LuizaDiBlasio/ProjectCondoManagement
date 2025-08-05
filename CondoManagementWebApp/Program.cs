@@ -15,7 +15,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
 
-builder.Services.AddScoped<IApiCallService, ApiCallService>();
+builder.Services.AddScoped<IUserApiCallService, UserApiCallService>();
 
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinarySettings"));
@@ -30,7 +30,7 @@ builder.Services.AddSingleton(x => {
 //configurar sessão 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.IdleTimeout = TimeSpan.FromMinutes(120);
     options.Cookie.HttpOnly = true; 
     options.Cookie.IsEssential = true; // Indica que o cookie de sessão é essencial para o funcionamento do site
 });

@@ -3,12 +3,12 @@ using System.Text.Json;
 
 namespace CondoManagementWebApp.Helpers
 {
-    public class ApiCallService : IApiCallService
+    public class UserApiCallService : IUserApiCallService
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ApiCallService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public UserApiCallService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
         {
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor; //possibilita aceder ao httpContext fora do controller 

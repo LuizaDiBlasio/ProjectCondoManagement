@@ -1,4 +1,5 @@
 ﻿using CondoManagementWebApp.ValidationAttributes;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
@@ -40,14 +41,15 @@ namespace CondoManagementWebApp.Models
         [Display(Name = "User role")]
         public string SelectedRole { get; set; }
 
-
-        public IEnumerable<SelectListItem> AvailableRoles { get; set; }
+        [BindNever]
+        public IEnumerable<SelectListItem> AvailableRoles { get; set; } = new List<SelectListItem>();   
 
 
         [Display(Name = "Company")]
-        public int SelectedCompanyId { get; set; }
+        public int? SelectedCompanyId { get; set; } //mudar depois
 
-        public IEnumerable<SelectListItem> Companies { get; set; }
+        [BindNever]
+        public IEnumerable<SelectListItem> Companies { get; set; } = new List<SelectListItem>();    
 
         [Display(Name = "Profile picture")]
         [MaxFileSize(5 * 1024 * 1024)]

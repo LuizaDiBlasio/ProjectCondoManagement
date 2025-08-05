@@ -1,5 +1,7 @@
 using ClassLibrary;
 using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProjectCondoManagement.Data.Entites.CondosDb;
@@ -11,6 +13,7 @@ namespace ProjectCondoManagement.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    
     public class AccountController : ControllerBase
     {
         private readonly IUserHelper _userHelper;
@@ -23,7 +26,7 @@ namespace ProjectCondoManagement.Controllers
         private readonly IJwtTokenService _jwtTokenService;
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
-                                        IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService)
+                               IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService, ICondoMemberRepository condoMemberRepository)
         {
             _userHelper = userHelper;
             _httpClient = httpClient;
@@ -32,6 +35,7 @@ namespace ProjectCondoManagement.Controllers
             _mailHelper = mailHelper;
             _dataContextCondos = dataContextCondos;
             _jwtTokenService = jwtTokenService;
+            _condoMemberRepository = condoMemberRepository;
 
         }
 
@@ -79,7 +83,7 @@ namespace ProjectCondoManagement.Controllers
             return Unauthorized(new { Message = "Login failed." });
         }
 
-
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [Microsoft.AspNetCore.Mvc.HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDto registerDtoModel)
         {
@@ -109,10 +113,10 @@ namespace ProjectCondoManagement.Controllers
                 //Adicionar roles ao user
                 switch (registerDtoModel.SelectedRole)
                 {
-                    case "Student":
-                        await _userHelper.AddUserToRoleAsync(user, "CondoMemeber");
+                    case "CondoMember":
+                        await _userHelper.AddUserToRoleAsync(user, "CondoMember");
                         break;
-                    case "Employee":
+                    case "CondoManager":
                         await _userHelper.AddUserToRoleAsync(user, "CondoManager");
                         break;
                     case "Admin":
@@ -152,17 +156,15 @@ namespace ProjectCondoManagement.Controllers
 
                 if (response.IsSuccess) //se conseguiu enviar o email
                 {
-                    return StatusCode(200, new { Message = "User registered, a confirmation email has been sent" });
+                    return StatusCode(200, new Response { Message = "User registered, a confirmation email has been sent", IsSuccess = true });
                 }
 
                 //se não conseguiu enviar email:
-                return StatusCode(500, new { Message = "User couldn't be logged" });
-
-
+                return StatusCode(500, new Response { Message = "User couldn't be logged", IsSuccess = false });
             }
             else
             {
-                return StatusCode(500, new { Message = "User already exists, try registering wih new credentials" });
+                return StatusCode(409, new Response { Message = "User already exists, try registering wih new credentials", IsSuccess = false });
             }
         }
     }

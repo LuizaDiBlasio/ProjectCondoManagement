@@ -1,6 +1,6 @@
 ﻿namespace CondoManagementWebApp.Helpers
 {
-    public interface IApiCallService
+    public interface IUserApiCallService
     {
         Task<T> GetAsync<T>(string requestUri);
 

@@ -102,10 +102,7 @@
                             {
                                 <li class="nav-item dropdown header-profile">
                                     <a class="nav-link" href="javascript:void(0);" role="button" data-bs-toggle="dropdown">
-                                        <div class="header-info">
-                                            <span class="text-black">@User.Identity.Name</span>
-                                        </div>
-                                        <img src="~/images/profile/17.jpg" width="20" alt="Profile" />
+                                        <img src="~/images/admin.jpg" width="20" alt="Profile" /> 
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-end">
                                         <a asp-controller="Account" asp-action="Profile" class="dropdown-item ai-icon">
@@ -122,12 +119,7 @@
                                         </a>
                                     </div>
                                 </li>
-                                <li class="nav-item ms-3">
-                                    <a class="nav-link btn btn-primary light" asp-controller="Account" asp-action="Logout" title="Logout">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                        <span class="d-none d-sm-inline ms-1">Logout</span>
-                                    </a>
-                                </li>
+                                
 
                                 @if (User.IsInRole("Admin"))
                                 {

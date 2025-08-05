@@ -1,9 +1,12 @@
 ﻿using ClassLibrary;
+using ClassLibrary.DtoModels;
 using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -20,12 +23,12 @@ namespace CondoManagementWebApp.Controllers
         private readonly IConverterHelper _converterHelper;
         private readonly CloudinaryService _cloudinaryService;
         private readonly HttpClient _httpClient;
-        private readonly IApiCallService _apiCallService;
+        private readonly IUserApiCallService _userApiCallService;
 
         private readonly string baseUrl = "https://localhost:7001/"; //TODO : Mudar depois que publicar
 
         public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient,
-            IConverterHelper converterHelper, CloudinaryService cloudinaryService, IApiCallService apiCallService)
+            IConverterHelper converterHelper, CloudinaryService cloudinaryService, IUserApiCallService userApiCallService)
         {
 
             _flashMessage = flashMessage;
@@ -33,7 +36,7 @@ namespace CondoManagementWebApp.Controllers
             _httpClient = httpClient;
             _cloudinaryService = cloudinaryService;
             _converterHelper = converterHelper;
-            _apiCallService = apiCallService;
+            _userApiCallService = userApiCallService;
         }
 
         /// <summary>
@@ -131,7 +134,7 @@ namespace CondoManagementWebApp.Controllers
         /// Cleans Session, remove cookies and redirects to the Home page. 
         /// </summary>
         /// <returns>A redirection to the Home page.</returns>
-        [Microsoft.AspNetCore.Authorization.Authorize]
+        [Authorize(Roles = "Admin, CondoManager, CondoMember")]
         public async Task<IActionResult> Logout()
         {
             // Limpa o token JWT da sessão do Web App.
@@ -150,15 +153,15 @@ namespace CondoManagementWebApp.Controllers
         /// Populates available roles for selection.
         /// </summary>
         /// <returns>The registration view with available roles.</returns>
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Register() //só mostra a view do Register
         {
             //criar modelo com as opções da combobox
             var selectList = new List<SelectListItem>
             {
                 new SelectListItem{Value = "0", Text = "Select a role..."},
-                new SelectListItem{Value = "CondoManager", Text = "CondoManager"},
-                new SelectListItem{Value = "CondoMember", Text = "CondoMember"},
+                new SelectListItem{Value = "CondoManager", Text = "Condo manager"},
+                new SelectListItem{Value = "CondoMember", Text = "Condo member"},
                 new SelectListItem{Value = "Admin", Text = "Admin"},
             };
 
@@ -166,16 +169,18 @@ namespace CondoManagementWebApp.Controllers
 
             model.AvailableRoles = selectList;
 
+            model.Companies = new List<SelectListItem>();
+
             return View(model);
         }
 
         /// <summary>
-        /// Processes the registration of a new user.
+        /// Makes an API Request to processe user registration
         /// Only users with the 'Admin' role can access this functionality.
         /// </summary>
         /// <param name="model">The model containing the data of the new user to be registered.</param>
         /// <returns>An action result indicating success or failure of the registration.</returns>
-
+        [Authorize(Roles = "Admin")]
         [Microsoft.AspNetCore.Mvc.HttpPost]
         public async Task<IActionResult> RequestRegister(RegisterUserViewModel model) // registra o user
         {
@@ -186,11 +191,11 @@ namespace CondoManagementWebApp.Controllers
                 {
                     ModelState.AddModelError("SelectedRole", "You must select a valid role."); // Adiciona um erro específico para o campo SelectedRole
 
-                    return View(model); // Retorna a View com o erro
-                }
+                   
+                    return View("Register", model); // Retorna a View com o erro
+                }               
 
-                //Blobar imagem
-                Guid imageId = Guid.Empty; // identificador da imagem no blob (ainda não identificada)
+                //Cloudnary da imagem
 
                 if (model.ImageFile != null && model.ImageFile.Length > 0)
                 {
@@ -198,60 +203,40 @@ namespace CondoManagementWebApp.Controllers
                     model.ImageUrl = url;
                 }
 
-
                 //converter para dto
                 var registerDto = _converterHelper.ToRegisterDto(model);
 
-                //Serializar
-                var jsonContent = new StringContent(
-                JsonSerializer.Serialize(registerDto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }), //converte para camelCase em json
-                   Encoding.UTF8,
-                   "application/json" //diz que o body vai ter dados em json
-               );
-
-                // Fazer a requisição HTTP POST para a API
-
-                var response = await _httpClient.PostAsync($"{baseUrl}api/AccountController/Register", jsonContent);
-
-                if (response.IsSuccessStatusCode)
+                //fazer chamada na api
+                try
                 {
-                    _flashMessage.Confirmation("Confirmation instructions have been sent to user's email");
+                    var apiCall = await _userApiCallService.PostAsync<RegisterUserDto, Response>("api/Account/Register", registerDto);
 
-                    return View(model);
+                    if (apiCall.IsSuccess)
+                    {
+                        _flashMessage.Confirmation("Confirmation instructions have been sent to user's email");
+
+                        return View("Register", new RegisterUserViewModel());
+                    }
+                    else // Login falhou na API
+                    {
+                        _flashMessage.Danger(apiCall.Message);
+
+                        return View("Register", model);
+                    }
                 }
-                else // Login falhou na API
+                catch(Exception e)
                 {
-                    var errorResponseContent = await response.Content.ReadAsStringAsync();
-                    string errorMessage = "An unexpected error occurred, user cannot be registered";
+                    _flashMessage.Danger($"An unexpected error occurred: {e.Message}");
 
-                    try
-                    {
-                        // pegar mensagens de erro da api
-                        var apiError = JsonSerializer.Deserialize<Dictionary<string, string>>(errorResponseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-                        if (apiError != null && apiError.ContainsKey("message"))
-                        {
-                            errorMessage = apiError["message"];
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        _flashMessage.Danger("An unexpected error occurred, user cannot be registered");
-                    }
-
-                    this.ModelState.AddModelError(string.Empty, errorMessage);
-                    _flashMessage.Danger(errorMessage); // Exibe a mensagem de erro vinda da API ou a padrão
-                    return View(model); // Retorna a View de login com o modelo e a mensagem de erro
+                    return View("Register", model);
                 }
+               
             }
             // Se o result.Succeeded for false (login falhou )
-            this.ModelState.AddModelError(string.Empty, "An unexpected error occurred, user cannot be registered");
             _flashMessage.Danger("An unexpected error occurred, user cannot be registered");
 
-            return View(model);
-
+            return View("Register",model);
         }
-
-
     }
 }
 
@@ -267,5 +252,5 @@ namespace CondoManagementWebApp.Controllers
 //mas deixa de ser utilizado para criação de token e armazenamento de cookie como no projeto passado
 
 //A cada requisição:
-//para cada requisição é necessário adicionar o token ao cabeçalho do jsno que será enviado na requisição http
+//para cada requisição é necessário adicionar o token ao cabeçalho do json que será enviado na requisição http
 
