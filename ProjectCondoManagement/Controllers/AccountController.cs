@@ -2,15 +2,10 @@ using ClassLibrary;
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
-using System.Data;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -36,7 +31,7 @@ namespace ProjectCondoManagement.Controllers
             _converterHelper = converterHelper;
             _mailHelper = mailHelper;
             _dataContextCondos = dataContextCondos;
-            _jwtTokenService = jwtTokenService; 
+            _jwtTokenService = jwtTokenService;
 
         }
 
@@ -62,7 +57,7 @@ namespace ProjectCondoManagement.Controllers
                     // verifica se a lista não está vazia e pega a primeira role.
                     if (roles != null && roles.Any())
                     {
-                        var userRole = roles.First(); 
+                        var userRole = roles.First();
 
                         // string da role para gerar o token
                         var tokenString = _jwtTokenService.GenerateToken(user, userRole);
@@ -84,13 +79,6 @@ namespace ProjectCondoManagement.Controllers
             return Unauthorized(new { Message = "Login failed." });
         }
 
-
-        [Microsoft.AspNetCore.Mvc.HttpGet("Logout")]
-        public async Task<IActionResult> Logout()
-        {
-            await _userHelper.LogoutAsync();
-            return Ok();
-        }
 
         [Microsoft.AspNetCore.Mvc.HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDto registerDtoModel)

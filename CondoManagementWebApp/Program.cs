@@ -11,8 +11,11 @@ builder.Services.AddFlashMessage();
 
 builder.Services.AddHttpClient();
 
-builder.Services.AddScoped<IConverterHelper, ConverterHelper>(); 
+builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
+
+builder.Services.AddScoped<IApiCallService, ApiCallService>();
 
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinarySettings"));
@@ -22,6 +25,14 @@ builder.Services.AddSingleton(x => {
     var config = builder.Configuration.GetSection("CloudinarySettings").Get<CloudinarySettings>();
     var account = new Account(config.CloudName, config.ApiKey, config.ApiSecret);
     return new Cloudinary(account);
+});
+
+//configurar sessão 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.Cookie.HttpOnly = true; 
+    options.Cookie.IsEssential = true; // Indica que o cookie de sessão é essencial para o funcionamento do site
 });
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -47,6 +58,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -54,6 +66,8 @@ app.UseRouting();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
