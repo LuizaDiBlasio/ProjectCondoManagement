@@ -32,5 +32,16 @@ namespace CondoManagementWebApp.Helpers
             };
             return registerDto;
         }
+
+        public ResetPasswordDto ToResetPasswordDto(string userId, string token)
+        {
+            var resetPasswordDto = new ResetPasswordDto()
+            {
+                Token = token,
+                UserId = userId,
+            };
+
+            return resetPasswordDto;
+        }
     }
 }

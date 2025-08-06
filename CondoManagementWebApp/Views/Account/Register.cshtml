@@ -43,21 +43,11 @@
                                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                             </div>
 
-
-                            @* <div class="form-group">
+                            <div class="form-group">
                                 <label asp-for="BirthDate" class="control-label"></label>
                                 <input asp-for="BirthDate" class="form-control" type="date" />
                                 <span asp-validation-for="BirthDate" class="text-danger"></span>
-                            </div> *@
-
-                            <div class="form-group mb-4">
-                                <label asp-for="BirthDate" class="form-label">Date of Birth</label>
-                                <div class="input-group">
-                                    <input asp-for="BirthDate" class="form-control datepicker-default" id="datepicker" type="text" placeholder="Select a date" />
-                                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                                </div>
-                                <span asp-validation-for="BirthDate" class="text-danger"></span>
-                            </div>
+                            </div>     
 
                             <div class="form-group mb-4">
                                 <label asp-for="SelectedRole" class="form-label">User role</label>
@@ -96,15 +86,6 @@
     }
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
-            // Se você não está usando o DatePicker da Syncfusion, remova o bloco abaixo
-            var birthDatePicker = new ej.calendars.DatePicker({
-                format: 'MM/dd/yyyy',
-                placeholder: 'Select a date',
-                max: new Date()
-            });
-            birthDatePicker.appendTo('#birthDateInput');
-            // Fim do bloco opcional
-
             // Lógica para mostrar/ocultar o campo da empresa
             var roleDropdown = document.getElementById('SelectedRole');
             var companyGroup = document.getElementById('company-selection-group');
@@ -125,5 +106,4 @@
             toggleCompanyField();
         });
     </script>
-    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
 }

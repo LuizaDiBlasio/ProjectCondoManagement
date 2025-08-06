@@ -70,30 +70,5 @@ namespace CondoManagementWebApp.Helpers
     }
 }
 
-//exemplo de uso para colegas:
-//public class CondosController : Controller
 
-//private readonly IApiService _apiService;
-
-//public CondosController(IApiService apiService)
-//{
-//    _apiService = apiService;
-//}
-
-//[Authorize]
-//public async Task<IActionResult> Index()
-//{
-//    try
-//    {
-//        // Usando o método genérico para buscar uma lista de condomínios
-//        var condos = await _apiService.GetAsync<List<CondoModel>>("api/condos");
-//        return View(condos);
-//    }
-//    catch (HttpRequestException ex)
-//    {
-//        // Lógica para lidar com erros da API, como 401 Unauthorized
-//        // Redirecionar para o login pode ser uma boa ideia
-//        return RedirectToAction("Login", "Account");
-//    }
-//}
 

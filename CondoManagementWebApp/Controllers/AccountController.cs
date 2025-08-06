@@ -54,17 +54,6 @@ namespace CondoManagementWebApp.Controllers
             return View(); //se login não funcionar, permanece na View 
         }
 
-        /// <summary>
-        /// Displays the login view. If the user is already authenticated, redirects to the Home page.
-        /// </summary>
-        /// <returns>The login view or a redirection to the Home page.</returns>
-        //Get do Change login 
-        public IActionResult ChangeLogin()
-        {
-
-            return View();
-        }
-
 
         /// <summary>
         /// Handles the login POST request, authenticates the user, and redirects based on role.
@@ -224,18 +213,88 @@ namespace CondoManagementWebApp.Controllers
                         return View("Register", model);
                     }
                 }
-                catch(Exception e)
+                catch (HttpRequestException e)
                 {
-                    _flashMessage.Danger($"An unexpected error occurred: {e.Message}");
-
+                    if (e.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        _flashMessage.Danger("Access Unauthorized or session expired, please login again.");
+                        return View("Register", model);
+                    }
+                    // outros erros HTTP de forma diferente
+                    _flashMessage.Danger($"An HTTP error occurred: {e.Message}");
                     return View("Register", model);
                 }
-               
+                catch (Exception e)
+                {
+                    // qualquer outro erro inesperado
+                    _flashMessage.Danger($"An unexpected error occurred: {e.Message}");
+                    return View("Register", model);
+                }
+
             }
             // Se o result.Succeeded for false (login falhou )
             _flashMessage.Danger("An unexpected error occurred, user cannot be registered");
 
             return View("Register",model);
+        }
+
+        /// <summary>
+        /// Displays the view for resetting the user's password after email confirmation.
+        /// </summary>
+        /// <param name="userId">The ID of the user.</param>
+        /// <param name="token">The email confirmation token.</param>
+        /// <returns>The password reset view or a "User Not Found" view if parameters are invalid.</returns>
+        //Get do ResetPassword
+        public async Task<IActionResult> ResetPassword(string userId, string token)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token)) //verificar parâmetros
+            {
+                return new NotFoundViewResult("UserNotFound");
+            }
+
+            var resetPasswordDto = _converterHelper.ToResetPasswordDto(userId, token);
+
+            var apiCall = await _userApiCallService.PostAsync<ResetPasswordDto, Response>("api/Account/ResetPassword", resetPasswordDto);
+            
+
+            if (!apiCall.IsSuccess)
+            {
+                return new NotFoundViewResult("UserNotFound");
+            }
+            else
+            {
+
+                //var model = new ResetPasswordViewModel
+                //{
+                //    Username = apiCall.Results.Username,
+                //    Token = apiCall.Results.Token
+                //};
+
+                ModelState.Remove("Token"); //limpa o ModelState para evitar o uso do token antigo de confirmação de email
+
+                //return View(model);
+                return new NotFoundViewResult("UserNotFound");//tirar isso
+            }
+                
+        }
+
+        // <summary>
+        /// Displays the "Not Authorized" view when a user tries to access a restricted area.
+        /// </summary>
+        /// <returns>The "Not Authorized" view.</returns>
+        public IActionResult NotAuthorized()
+        {
+            return View();
+        }
+
+
+        /// <summary>
+        /// Displays the "User Not Found" view when a user cannot be located.
+        /// </summary>
+        /// <returns>The "User Not Found" view.</returns>
+        public IActionResult UserNotFound()
+        {
+            return View();
         }
     }
 }
@@ -252,5 +311,7 @@ namespace CondoManagementWebApp.Controllers
 //mas deixa de ser utilizado para criação de token e armazenamento de cookie como no projeto passado
 
 //A cada requisição:
-//para cada requisição é necessário adicionar o token ao cabeçalho do json que será enviado na requisição http
+//para cada requisição é necessário adicionar o token ao cabeçalho do json que será enviado na requisição http fazemos isso por meio do serviços de userApiCall
+//e da interface apiCall para as demais entidades
+
 

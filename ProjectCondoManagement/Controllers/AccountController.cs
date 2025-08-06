@@ -167,6 +167,43 @@ namespace ProjectCondoManagement.Controllers
                 return StatusCode(409, new Response { Message = "User already exists, try registering wih new credentials", IsSuccess = false });
             }
         }
+
+        [Microsoft.AspNetCore.Mvc.HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            var user = await _userHelper.GetUserByIdAsync(resetPasswordDto.UserId); //verificar user
+
+            if (user == null)
+            {
+                return StatusCode(404, new Response { Message = "User not found", IsSuccess = false });
+            }
+
+            var result = await _userHelper.ConfirmEmailAsync(user, resetPasswordDto.Token); //resposta do email, ver se user e token dão match
+
+            if (!result.Succeeded)
+            {
+                return StatusCode(404, new Response { Message = "User not found", IsSuccess = false });
+            }
+
+            //gerar token
+
+            var passwordToken = await _userHelper.GeneratePasswordResetTokenAsync(user);
+
+            var responseResult = new
+            {
+                Username = user.UserName,
+                Token = passwordToken,
+            };
+
+            var response = new Response
+            {
+                IsSuccess = true,
+                Message = "Access permission granted",
+                Results = responseResult
+            };
+
+            return Ok(response);
+        }
     }
 }
 
