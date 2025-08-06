@@ -6,6 +6,8 @@ namespace ProjectCondoManagement.Helpers
 {
     public interface IUserHelper
     {
+
+        Task<User> CreateUser(RegisterUserDto registerDtoModel); //cria user com base no RegisterUserDto
         Task<User> GetUserByEmailAsync(string email); //passa o email para buscar user
 
         Task<IdentityResult> AddUserAsync(User user, string password); //adiciona user na BD

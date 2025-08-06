@@ -5,9 +5,18 @@ using System.Net.Http;
 
 namespace CondoManagementWebApp.Helpers
 {
-    public class CondoMemberHelper : ICondoMemberHelper 
+    public class CondoMemberHelper : ApiCallService<CondoMemberDto>, ICondoMemberHelper 
     {
-    
+        private readonly HttpClient _httpClient;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public CondoMemberHelper(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+             : base(httpClient, httpContextAccessor)
+        {
+            _httpClient = httpClient;
+            _httpContextAccessor = httpContextAccessor;
+             _httpClient.BaseAddress = new Uri("https://localhost:7001/");
+        }
 
         public async Task<IEnumerable<CondoMemberDto>> GetCondoMembersAsync()
         {

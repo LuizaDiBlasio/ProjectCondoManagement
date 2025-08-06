@@ -11,6 +11,7 @@ namespace ProjectCondoManagement.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+
     public class AccountController : ControllerBase
     {
         private readonly IUserHelper _userHelper;
@@ -80,47 +81,51 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
+        [Microsoft.AspNetCore.Mvc.HttpPost("AssociateUser")]
+        public async Task<IActionResult> AssociateUser([FromBody] RegisterUserDto registerDtoModel)
+        {
+            var user = await _userHelper.CreateUser(registerDtoModel);
+            if (user == null)
+            {
+                return StatusCode(500, new { Message = "Internal server error: User not registered" });
+            }
+
+            string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
+
+            // gera um link de confirmção para o email
+            string tokenLink = Url.Action("ResetPassword", "Account", new  //Link gerado na Action ConfirmEmail dentro do AccountController, ela recebe 2 parametros (userId e token)
+            {
+                userId = user.Id,
+                token = myToken
+            }, protocol: HttpContext.Request.Scheme); //utiliza o protocolo Http para passar dados de uma action para a outra
+
+            Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
+           $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link 
+
+            if (response.IsSuccess) //se conseguiu enviar o email
+            {
+                return StatusCode(200, new { Message = "User registered, a confirmation email has been sent" });
+            }
+
+            //se não conseguiu enviar email:
+            return StatusCode(500, new { Message = "User couldn't be logged" });
+        }
+
+
+
+
         [Microsoft.AspNetCore.Mvc.HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDto registerDtoModel)
         {
-            var user = await _userHelper.GetUserByEmailAsync(registerDtoModel.Email); //buscar user  
-
-            if (user == null) // caso user não exista, registrá-lo
+      
+            var user = await _userHelper.CreateUser(registerDtoModel);
+            if (user == null) 
             {
-                user = new User
-                {
-                    FullName = registerDtoModel.FullName,
-                    Email = registerDtoModel.Email,
-                    UserName = registerDtoModel.Email,
-                    Address = registerDtoModel.Address,
-                    PhoneNumber = registerDtoModel.PhoneNumber,
-                    ImageUrl = registerDtoModel.ImageUrl,
-                    BirthDate = registerDtoModel.BirthDate,
-                    CompanyId = registerDtoModel.CompanyId,
-                };
+               return StatusCode(500, new { Message = "Internal server error: User not registered" });
+            }
 
-                var result = await _userHelper.AddUserAsync(user, "123456"); //add user depois de criado
+            var isCondoMember = await _userHelper.IsUserInRoleAsync(user, "CondoMember");
 
-                if (result != IdentityResult.Success) // caso não consiga criar user
-                {
-                    return StatusCode(500, new { Message = "Internal server error: User not registered" });
-                }
-
-                //Adicionar roles ao user
-                switch (registerDtoModel.SelectedRole)
-                {
-                    case "Student":
-                        await _userHelper.AddUserToRoleAsync(user, "CondoMemeber");
-                        break;
-                    case "Employee":
-                        await _userHelper.AddUserToRoleAsync(user, "CondoManager");
-                        break;
-                    case "Admin":
-                        await _userHelper.AddUserToRoleAsync(user, "Admin");
-                        break;
-                }
-
-                var isCondoMember = await _userHelper.IsUserInRoleAsync(user, "CondoMember");
 
                 if (isCondoMember) // caso o user seja um condomember, criar condomember programaticamente
                 {
@@ -132,38 +137,32 @@ namespace ProjectCondoManagement.Controllers
                         PhoneNumber = user.PhoneNumber,
                         ImageUrl = user.ImageUrl,
                         BirthDate = user.BirthDate,
-                        UserId = user.Id
                     };
 
                     await _condoMemberRepository.CreateAsync(condoMember, _dataContextCondos);
                 }
 
-                string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
+            string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
 
-                // gera um link de confirmção para o email
-                string tokenLink = Url.Action("ResetPassword", "Account", new  //Link gerado na Action ConfirmEmail dentro do AccountController, ela recebe 2 parametros (userId e token)
-                {
-                    userId = user.Id,
-                    token = myToken
-                }, protocol: HttpContext.Request.Scheme); //utiliza o protocolo Http para passar dados de uma action para a outra
-
-                Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
-               $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link 
-
-                if (response.IsSuccess) //se conseguiu enviar o email
-                {
-                    return StatusCode(200, new { Message = "User registered, a confirmation email has been sent" });
-                }
-
-                //se não conseguiu enviar email:
-                return StatusCode(500, new { Message = "User couldn't be logged" });
-
-
-            }
-            else
+            // gera um link de confirmção para o email
+            string tokenLink = Url.Action("ResetPassword", "Account", new  //Link gerado na Action ConfirmEmail dentro do AccountController, ela recebe 2 parametros (userId e token)
             {
-                return StatusCode(500, new { Message = "User already exists, try registering wih new credentials" });
+                userId = user.Id,
+                token = myToken
+            }, protocol: HttpContext.Request.Scheme); //utiliza o protocolo Http para passar dados de uma action para a outra
+
+            Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
+           $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link 
+
+            if (response.IsSuccess) //se conseguiu enviar o email
+            {
+                return StatusCode(200, new { Message = "User registered, a confirmation email has been sent" });
             }
+
+            //se não conseguiu enviar email:
+            return StatusCode(500, new { Message = "User couldn't be logged" });
+
+
         }
     }
 }

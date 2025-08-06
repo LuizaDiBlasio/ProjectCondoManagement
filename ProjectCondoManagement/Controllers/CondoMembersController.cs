@@ -1,4 +1,6 @@
 ﻿using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +18,8 @@ namespace ProjectCondoManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Roles = "Admin")]
     public class CondoMembersController : ControllerBase
     {
         private readonly DataContextCondos _context;
@@ -53,7 +57,7 @@ namespace ProjectCondoManagement.Controllers
         // POST: api/CondoMembers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("Edit/{id}")]
-        public async Task<IActionResult> EditCondoMember(int id, CondoMemberDto condoMemberDto)
+        public async Task<IActionResult> EditCondoMember(int id, [FromBody]CondoMemberDto condoMemberDto)
         {
             if (id != condoMemberDto.Id)
             {
@@ -87,7 +91,7 @@ namespace ProjectCondoManagement.Controllers
         // POST: api/CondoMembers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<IActionResult> PostCondoMember(CondoMemberDto condoMemberDto)
+        public async Task<IActionResult> PostCondoMember([FromBody]CondoMemberDto condoMemberDto)
         {
 
             if (condoMemberDto == null)
@@ -109,9 +113,17 @@ namespace ProjectCondoManagement.Controllers
 
                 return Ok(); 
             }
+            //catch (Exception ex)
+            //{
+            //    //return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the condo member.");
+            //    return StatusCode(StatusCodes.Status500InternalServerError,
+            //        $"An error occurred: {ex.Message}");
+            //}
             catch (Exception ex)
-            {              
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the condo member.");
+            {
+                var errorMessage = ex.InnerException?.Message ?? ex.Message;
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"An error occurred: {errorMessage}");
             }
 
         }

@@ -14,8 +14,9 @@ builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
+builder.Services.AddScoped<IUserHelper, UserHelper>();
 
-builder.Services.AddScoped<IApiCallService, ApiCallService>();
+
 
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinarySettings"));

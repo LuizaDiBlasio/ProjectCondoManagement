@@ -20,12 +20,11 @@ namespace CondoManagementWebApp.Controllers
         private readonly IConverterHelper _converterHelper;
         private readonly CloudinaryService _cloudinaryService;
         private readonly HttpClient _httpClient;
-        private readonly IApiCallService _apiCallService;
 
         private readonly string baseUrl = "https://localhost:7001/"; //TODO : Mudar depois que publicar
 
         public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient,
-            IConverterHelper converterHelper, CloudinaryService cloudinaryService, IApiCallService apiCallService)
+            IConverterHelper converterHelper, CloudinaryService cloudinaryService)
         {
 
             _flashMessage = flashMessage;
@@ -33,7 +32,6 @@ namespace CondoManagementWebApp.Controllers
             _httpClient = httpClient;
             _cloudinaryService = cloudinaryService;
             _converterHelper = converterHelper;
-            _apiCallService = apiCallService;
         }
 
         /// <summary>

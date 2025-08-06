@@ -77,7 +77,18 @@ builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
 
+builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
+
 builder.Services.AddHttpClient();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("JwtApiAthentication", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+    });
+});
 
 // Configurações do Swagger/OpenAPI para testar a API (opcional, mas útil)
 builder.Services.AddEndpointsApiExplorer();

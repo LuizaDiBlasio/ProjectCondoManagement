@@ -2,7 +2,7 @@
 
 namespace CondoManagementWebApp.Helpers
 {
-    public interface ICondoMemberHelper
+    public interface ICondoMemberHelper : IApiCallService<CondoMemberDto>
     {
 
         public Task<IEnumerable<CondoMemberDto>> GetCondoMembersAsync();

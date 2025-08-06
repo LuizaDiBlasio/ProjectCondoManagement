@@ -1,11 +1,17 @@
-﻿using System.Text;
+﻿
+using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Newtonsoft.Json;
+using System.Text;
 using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace CondoManagementWebApp.Helpers
 {
-    public class ApiCallService : IApiCallService
+    public class ApiCallService<T> : IApiCallService<T> where T : class, new()
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient _httpClient;    
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ApiCallService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
@@ -24,48 +30,79 @@ namespace CondoManagementWebApp.Helpers
             }
         }
 
-        public async Task<T> GetAsync<T>(string requestUri)
+        public async Task<IEnumerable<T>> GetAllAsync(string requestUri)
         {
             AddAuthorizationHeader();
             var response = await _httpClient.GetAsync(requestUri);
-            response.EnsureSuccessStatusCode(); // Lança exceção se o status não for 2xx
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonString = await response.Content.ReadAsStringAsync();
+                var tList = JsonConvert.DeserializeObject<IEnumerable<T>>(jsonString);
 
-            return await response.Content.ReadFromJsonAsync<T>();
+                return tList ?? Enumerable.Empty<T>() ;
+            }
+
+            return Enumerable.Empty<T>();
         }
 
-        public async Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest data)
+
+        public async Task<T> GetByIdAsync(string requestUri)
         {
             AddAuthorizationHeader();
+            var response = await _httpClient.GetAsync(requestUri);
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonString = await response.Content.ReadAsStringAsync();
+
+                var obj = JsonConvert.DeserializeObject<T>(jsonString);
+
+                return obj ?? new T();
+            }
+
+            return new T();
+        }
+
+
+
+
+        public async Task<bool> CreateAsync(string requestUri, T obj)
+        {
+            AddAuthorizationHeader();
+
             var jsonContent = new StringContent(
-                JsonSerializer.Serialize(data),
-                Encoding.UTF8,
-                "application/json"
-            );
+               System.Text.Json.JsonSerializer.Serialize(obj),
+               Encoding.UTF8,
+               "application/json"
+           );
+
             var response = await _httpClient.PostAsync(requestUri, jsonContent);
-            response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<TResponse>();
+
+            return response.IsSuccessStatusCode;
         }
 
-        public async Task<TResponse> PutAsync<TRequest, TResponse>(string requestUri, TRequest data)
+
+
+        public async Task<bool> EditAsync(string requestUri, T obj)
         {
             AddAuthorizationHeader();
             var jsonContent = new StringContent(
-                JsonSerializer.Serialize(data),
+                System.Text.Json.JsonSerializer.Serialize(obj),
                 Encoding.UTF8,
                 "application/json"
             );
-            var response = await _httpClient.PutAsync(requestUri, jsonContent);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<TResponse>();
+            
+
+            var response = await _httpClient.PostAsync(requestUri, jsonContent);
+
+            return response.IsSuccessStatusCode;
         }
 
-        public async Task<HttpResponseMessage> DeleteAsync(string requestUri)
+        public async Task<bool> DeleteAsync(string requestUri)
         {
             AddAuthorizationHeader();
             var response = await _httpClient.DeleteAsync(requestUri);
-            response.EnsureSuccessStatusCode(); // Lança exceção para status codes de erro
-            return response;
+            return response.IsSuccessStatusCode;
         }
     }
 }

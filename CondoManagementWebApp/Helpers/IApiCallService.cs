@@ -1,14 +1,16 @@
 ﻿namespace CondoManagementWebApp.Helpers
 {
-    public interface IApiCallService
+    public interface IApiCallService<T> where T : class, new()
     {
-        Task<T> GetAsync<T>(string requestUri);
+        Task<IEnumerable<T>> GetAllAsync(string requestUri);
 
-        Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest data);
+        Task<T> GetByIdAsync(string requestUri);
 
-        //Não sei se vamos usar
-        Task<TResponse> PutAsync<TRequest, TResponse>(string requestUri, TRequest data);
 
-        Task<HttpResponseMessage> DeleteAsync(string requestUri);
+        Task<bool> CreateAsync(string requestUri, T obj);
+
+        Task<bool> EditAsync(string requestUri,T obj);
+
+        Task<bool> DeleteAsync(string requestUri);
     }
 }

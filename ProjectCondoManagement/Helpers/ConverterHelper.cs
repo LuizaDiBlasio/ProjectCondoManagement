@@ -17,7 +17,6 @@ namespace ProjectCondoManagement.Helpers
                 BirthDate = condoMemberDto.BirthDate,
                 PhoneNumber = condoMemberDto.PhoneNumber,
                 ImageUrl = condoMemberDto.ImageUrl,
-                UserId = condoMemberDto.UserId
             };
 
             return condoMember;
@@ -33,7 +32,6 @@ namespace ProjectCondoManagement.Helpers
                 BirthDate = user.BirthDate,
                 PhoneNumber = user.PhoneNumber,
                 ImageUrl = user.ImageUrl,
-                UserId = user.Id
             };
             return condoMemberDto;
         }
