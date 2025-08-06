@@ -103,7 +103,6 @@ namespace ProjectCondoManagement.Controllers
                     CompanyId = registerDtoModel.CompanyId,
                 };
 
-                var result = await _userHelper.AddUserAsync(user, "123456"); //add user depois de criado
 
                 if (result != IdentityResult.Success) // caso não consiga criar user
                 {
@@ -136,7 +135,6 @@ namespace ProjectCondoManagement.Controllers
                         PhoneNumber = user.PhoneNumber,
                         ImageUrl = user.ImageUrl,
                         BirthDate = user.BirthDate,
-                        UserId = user.Id
                     };
 
                     await _condoMemberRepository.CreateAsync(condoMember, _dataContextCondos);

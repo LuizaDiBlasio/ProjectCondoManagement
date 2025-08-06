@@ -1,6 +1,8 @@
-﻿using ClassLibrary.DtoModels;
+﻿using ClassLibrary;
+using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using System.Security.Policy;
 
 namespace ProjectCondoManagement.Helpers
 {
@@ -21,6 +23,55 @@ namespace ProjectCondoManagement.Helpers
         }
 
 
+        public async Task<User> CreateUser(RegisterUserDto registerDtoModel)
+        {
+            if (registerDtoModel == null) // se o modelo for nulo, retorna nulo
+            {
+                return null;
+            }
+
+            var user = await GetUserByEmailAsync(registerDtoModel.Email); //buscar user  
+            if(user != null)
+            {
+                return null;
+            }
+
+                user = new User
+                {
+                    FullName = registerDtoModel.FullName,
+                    Email = registerDtoModel.Email,
+                    UserName = registerDtoModel.Email,
+                    Address = registerDtoModel.Address,
+                    PhoneNumber = registerDtoModel.PhoneNumber,
+                    ImageUrl = registerDtoModel.ImageUrl,
+                    BirthDate = registerDtoModel.BirthDate,
+                    CompanyId = registerDtoModel.CompanyId,
+                };
+
+                var result = await AddUserAsync(user, "123456"); //add user depois de criado
+
+                if (result != IdentityResult.Success) // caso não consiga criar user
+                {
+                    return null;
+                }
+
+                //Adicionar roles ao user
+                switch (registerDtoModel.SelectedRole)
+                {
+                    case "CondoMember":
+                        await AddUserToRoleAsync(user, "CondoMember");
+                        break;
+                    case "CondoManager":
+                        await AddUserToRoleAsync(user, "CondoManager");
+                        break;
+                    case "Admin":
+                        await AddUserToRoleAsync(user, "Admin");
+                        break;
+                }
+
+
+                return user;
+        }
 
         /// <summary>
         /// Creates a new user with the specified password.

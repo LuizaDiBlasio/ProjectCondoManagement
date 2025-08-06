@@ -10,5 +10,7 @@ namespace CondoManagementWebApp.Helpers
         public RegisterUserDto ToRegisterDto(RegisterUserViewModel model);
 
         public ResetPasswordDto ToResetPasswordDto(string userId, string token);
+
+        public RegisterUserDto ToRegisterDto(CondoMemberDto condoMember);
     }
 }

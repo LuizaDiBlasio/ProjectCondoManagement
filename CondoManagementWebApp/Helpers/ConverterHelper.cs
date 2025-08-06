@@ -43,5 +43,20 @@ namespace CondoManagementWebApp.Helpers
 
             return resetPasswordDto;
         }
+
+        public RegisterUserDto ToRegisterDto(CondoMemberDto condoMember)
+        {
+            var registerDto = new RegisterUserDto
+            {
+                FullName = condoMember.FullName,
+                Email = condoMember.Email,
+                Address = condoMember.Address,
+                BirthDate = condoMember.BirthDate,
+                PhoneNumber = condoMember.PhoneNumber,
+                ImageUrl = condoMember.ImageUrl
+            };
+            return registerDto;
+        }
+
     }
 }
