@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.IdentityModel.Tokens.Jwt;
@@ -23,12 +24,12 @@ namespace CondoManagementWebApp.Controllers
         private readonly IConverterHelper _converterHelper;
         private readonly CloudinaryService _cloudinaryService;
         private readonly HttpClient _httpClient;
-        private readonly IUserApiCallService _userApiCallService;
+        private readonly IApiCallService _apiCallService;
 
         private readonly string baseUrl = "https://localhost:7001/"; //TODO : Mudar depois que publicar
 
         public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient,
-            IConverterHelper converterHelper, CloudinaryService cloudinaryService, IUserApiCallService userApiCallService)
+            IConverterHelper converterHelper, CloudinaryService cloudinaryService, IApiCallService apiCallService)
         {
 
             _flashMessage = flashMessage;
@@ -36,7 +37,7 @@ namespace CondoManagementWebApp.Controllers
             _httpClient = httpClient;
             _cloudinaryService = cloudinaryService;
             _converterHelper = converterHelper;
-            _userApiCallService = userApiCallService;
+            _apiCallService = apiCallService;
         }
 
         /// <summary>
@@ -56,7 +57,7 @@ namespace CondoManagementWebApp.Controllers
 
 
         /// <summary>
-        /// Handles the login POST request, authenticates the user, and redirects based on role.
+        /// Handles the login POST apiCall, authenticates the user, and redirects based on role.
         /// In case of success, Api returns a JWT wich will be stored as a cookie in the user session  
         /// </summary>
         /// <param name="model">The LoginViewModel containing user credentials.</param>
@@ -89,10 +90,10 @@ namespace CondoManagementWebApp.Controllers
 
                     //sessão com token
                     var handler = new JwtSecurityTokenHandler();
-                    var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
+                    var jwtToken = handler.ReadJwtToken(tokenResponse.JwtToken);
 
                     //armazenar token na sessão para futuras requisições da api
-                    HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
+                    HttpContext.Session.SetString("JwtToken", tokenResponse.JwtToken);
 
                     // ClaimsPrincipal com base nas claims do token JWT
                     var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -101,7 +102,6 @@ namespace CondoManagementWebApp.Controllers
                     // login no  WebApp, criando um cookie de autenticação
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
-                    _flashMessage.Confirmation("Login successful!");
                     return RedirectToAction("Index", "Home");
 
 
@@ -198,11 +198,11 @@ namespace CondoManagementWebApp.Controllers
                 //fazer chamada na api
                 try
                 {
-                    var apiCall = await _userApiCallService.PostAsync<RegisterUserDto, Response>("api/Account/Register", registerDto);
+                    var apiCall = await _apiCallService.PostAsync<RegisterUserDto, Response>("api/Account/Register", registerDto);
 
                     if (apiCall.IsSuccess)
                     {
-                        _flashMessage.Confirmation("Confirmation instructions have been sent to user's email");
+                        _flashMessage.Confirmation(apiCall.Message);
 
                         return View("Register", new RegisterUserViewModel());
                     }
@@ -238,6 +238,7 @@ namespace CondoManagementWebApp.Controllers
             return View("Register",model);
         }
 
+
         /// <summary>
         /// Displays the view for resetting the user's password after email confirmation.
         /// </summary>
@@ -245,37 +246,85 @@ namespace CondoManagementWebApp.Controllers
         /// <param name="token">The email confirmation token.</param>
         /// <returns>The password reset view or a "User Not Found" view if parameters are invalid.</returns>
         //Get do ResetPassword
-        public async Task<IActionResult> ResetPassword(string userId, string token)
+        public async Task<IActionResult> ResetPassword(string userId, string tokenEmail)
         {
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token)) //verificar parâmetros
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(tokenEmail)) //verificar parâmetros
             {
-                return new NotFoundViewResult("UserNotFound");
+                return new NotFoundViewResult("NotAuthorized");
             }
 
-            var resetPasswordDto = _converterHelper.ToResetPasswordDto(userId, token);
-
-            var apiCall = await _userApiCallService.PostAsync<ResetPasswordDto, Response>("api/Account/ResetPassword", resetPasswordDto);
-            
-
-            if (!apiCall.IsSuccess)
+            var model = new ResetPasswordViewModel()
             {
-                return new NotFoundViewResult("UserNotFound");
+                UserId = userId,
+                Token = tokenEmail,
+                Password =String.Empty  //ainda não foi colocada a senha
+            };
+            var resetPasswordDto = _converterHelper.ToResetPasswordDto(model);
+
+            try
+            {
+                var apiCall = await _apiCallService.PostAsync<ResetPasswordDto, Response>("api/Account/GenerateResetPasswordToken", resetPasswordDto);
+
+                if (apiCall.IsSuccess)
+                { 
+                    var model2 = new ResetPasswordViewModel
+                    {
+                        Token = apiCall.Token,
+                        UserId = userId,
+                        Password = String.Empty //ainda não foi colocada a senha
+                    };
+
+
+                    ModelState.Remove("Token"); //limpa o ModelState para evitar o uso do token antigo de confirmação de email
+
+                    return View( model2);
+                }
+
+                return View("Error");
             }
-            else
+            catch
             {
-
-                //var model = new ResetPasswordViewModel
-                //{
-                //    Username = apiCall.Results.Username,
-                //    Token = apiCall.Results.Token
-                //};
-
-                ModelState.Remove("Token"); //limpa o ModelState para evitar o uso do token antigo de confirmação de email
-
-                //return View(model);
-                return new NotFoundViewResult("UserNotFound");//tirar isso
+                return View("Error");
             }
                 
+        }
+
+        /// <summary>
+        /// Processes the user's password reset request and requests for SMS confirmation token.
+        /// </summary>
+        /// <param name="model">The model containing the username, reset token, and new password.</param>
+        /// <returns>The password reset view with a success or error message.</returns>
+        [HttpPost]
+        public async Task<IActionResult> SendResetPassword(ResetPasswordViewModel model) //recebo modelo preechido com dados para reset da password
+        {
+            if (string.IsNullOrEmpty(model.UserId) || string.IsNullOrEmpty(model.Token)) //verificar parâmetros (se o token for null, quer dizer que processo falhou e não autoriza)
+            {
+                return new NotFoundViewResult("NotAuthorized");
+            }
+
+            var resetPasswordDto = _converterHelper.ToResetPasswordDto(model); //esse já contém password
+
+            try
+            {
+                var apiCall = await _apiCallService.PostAsync<ResetPasswordDto, Response>("api/Account/ResetPassword", resetPasswordDto);
+
+                if (apiCall.IsSuccess)
+                {
+                    _flashMessage.Confirmation(apiCall.Message);
+
+                    return View("ResetPassword", new ResetPasswordViewModel());
+                }
+
+                _flashMessage.Danger($"{apiCall.Message}");
+
+                return View("ResetPassword", new ResetPasswordViewModel());
+            }
+            catch (Exception e)
+            {
+                _flashMessage.Danger($"{e.Message}");
+
+                return View("ResetPassword", new ResetPasswordViewModel());
+            }
         }
 
         // <summary>
@@ -301,7 +350,7 @@ namespace CondoManagementWebApp.Controllers
 
 //Explicação do fluxo do Login com jwt (apagar depois):
 
-//O login request do frontend faz uma requisição HTTP com as informações de login para a API. A API checa essas informações,
+//O login apiCall do frontend faz uma requisição HTTP com as informações de login para a API. A API checa essas informações,
 //caso elas sejam válidas, gera um token JWT Bearer e devolve isso para o frontend na sua resposta. O frontend, que é uma aplicação ASP.NET Core Web,
 //recebe o token, desserializa-o para extrair as claims (informações do usuário) e usa essas claims para criar um cookie de autenticação. Este cookie
 //será usado para manter o usuário autenticado na sessão do browser, permitindo o acesso às páginas protegidas do Web App. O Controller Account do cliente

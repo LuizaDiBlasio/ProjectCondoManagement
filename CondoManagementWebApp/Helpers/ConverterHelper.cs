@@ -33,12 +33,13 @@ namespace CondoManagementWebApp.Helpers
             return registerDto;
         }
 
-        public ResetPasswordDto ToResetPasswordDto(string userId, string token)
+        public ResetPasswordDto ToResetPasswordDto(ResetPasswordViewModel model)
         {
             var resetPasswordDto = new ResetPasswordDto()
             {
-                Token = token,
-                UserId = userId,
+                Token = model.Token,
+                UserId = model.UserId,
+                Password = model.Password
             };
 
             return resetPasswordDto;

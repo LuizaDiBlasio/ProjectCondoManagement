@@ -9,6 +9,9 @@ namespace ClassLibrary
     public class TokenResponseModel
     {
         public string Token { get; set; }
-        public DateTime Expiration { get; set; }
+
+        public string JwtToken { get; set; }
+
+        public DateTime? JwtExpiration { get; set; } 
     }
 }

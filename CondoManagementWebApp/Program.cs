@@ -14,8 +14,6 @@ builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
-builder.Services.AddScoped<IUserHelper, UserHelper>();
-
 
 
 builder.Services.Configure<CloudinarySettings>(
@@ -46,9 +44,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddScoped<CloudinaryService>();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IApiCallService, ApiCallService>();
 
-builder.Services.AddScoped<ICondoMemberHelper, CondoMemberHelper>();
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 

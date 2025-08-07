@@ -262,6 +262,7 @@ namespace ProjectCondoManagement.Helpers
         public async Task<IdentityResult> ConfirmEmailAsync(User user, string token)
         {
             return await _userManager.ConfirmEmailAsync(user, token);
+
         }
 
 
@@ -313,6 +314,11 @@ namespace ProjectCondoManagement.Helpers
         public async Task<IList<string>> GetRolesAsync(User user)
         {
             return await _userManager.GetRolesAsync(user);  
+        }
+
+        public async Task<string> GenerateTwoFactorTokenAsync(User user, string token)
+        {
+           return await _userManager.GenerateTwoFactorTokenAsync()
         }
     }
 }

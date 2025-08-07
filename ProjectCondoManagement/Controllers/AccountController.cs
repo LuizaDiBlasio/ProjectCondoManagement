@@ -8,6 +8,7 @@ using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
+using static System.Net.WebRequestMethods;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -24,6 +25,8 @@ namespace ProjectCondoManagement.Controllers
         private readonly ICondoMemberRepository _condoMemberRepository;
         private readonly DataContextCondos _dataContextCondos;
         private readonly IJwtTokenService _jwtTokenService;
+
+        string webBaseAdress = "https://localhost:7081"; //TODO mudar quando publicar
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
                                IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService, ICondoMemberRepository condoMemberRepository)
@@ -63,14 +66,17 @@ namespace ProjectCondoManagement.Controllers
                     {
                         var userRole = roles.First();
 
-                        // string da role para gerar o token
-                        var tokenString = _jwtTokenService.GenerateToken(user, userRole);
+                        // gerar o token jwt
+                        var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
 
                         var results = new
                         {
-                            token = tokenString,
-                            expiration = DateTime.UtcNow.AddDays(15)
+                            JwtToken = tokenJwt,
+                            JwtExpiration = DateTime.UtcNow.AddDays(15)
                         };
+
+                        // gerar o token 2FA
+                        var token2FA = _userHelper.GenerateTwoFactorTokenAsync(user, token) //Estrnho
 
                         return Ok(results);
 
@@ -84,27 +90,48 @@ namespace ProjectCondoManagement.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [Microsoft.AspNetCore.Mvc.HttpPost("AssociateUser")]
+        public async Task<IActionResult> AssociateUser([FromBody] RegisterUserDto registerDtoModel)
+        {
+            var user = await _userHelper.CreateUser(registerDtoModel);
+
+            if (user == null)
+            {
+                return StatusCode(500, new { Message = "Internal server error: User not registered" });
+            }
+
+            string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
+
+            // gera um link de confirmção para o email
+            string tokenLink = $"{webBaseAdress}/Account/ResetPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
+
+            Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
+           $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link
+
+            if (response.IsSuccess) //se conseguiu enviar o email
+            {
+                return StatusCode(200, new { Message = "User registered, a confirmation email has been sent" });
+            }
+
+            //se não conseguiu enviar email:
+            return StatusCode(500, new { Message = "User couldn't be logged" });
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [Microsoft.AspNetCore.Mvc.HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDto registerDtoModel)
         {
             var user = await _userHelper.GetUserByEmailAsync(registerDtoModel.Email); //buscar user  
 
-            if (user == null) // caso user não exista, registrá-lo
+            if (user != null) 
             {
-                user = new User
-                {
-                    FullName = registerDtoModel.FullName,
-                    Email = registerDtoModel.Email,
-                    UserName = registerDtoModel.Email,
-                    Address = registerDtoModel.Address,
-                    PhoneNumber = registerDtoModel.PhoneNumber,
-                    ImageUrl = registerDtoModel.ImageUrl,
-                    BirthDate = registerDtoModel.BirthDate,
-                    CompanyId = registerDtoModel.CompanyId,
-                };
+                return StatusCode(409, new Response { Message = "User already exists, try registering wih new credentials", IsSuccess = false });
+            }
+            else //criar user caso não exista
+            {
+                var newUser = await _userHelper.CreateUser(registerDtoModel);
 
-
-                if (result != IdentityResult.Success) // caso não consiga criar user
+                if (newUser == null)//se retorna null, CreateUser foi mal sucedido 
                 {
                     return StatusCode(500, new { Message = "Internal server error: User not registered" });
                 }
@@ -113,44 +140,40 @@ namespace ProjectCondoManagement.Controllers
                 switch (registerDtoModel.SelectedRole)
                 {
                     case "CondoMember":
-                        await _userHelper.AddUserToRoleAsync(user, "CondoMember");
+                        await _userHelper.AddUserToRoleAsync(newUser, "CondoMember");
                         break;
                     case "CondoManager":
-                        await _userHelper.AddUserToRoleAsync(user, "CondoManager");
+                        await _userHelper.AddUserToRoleAsync(newUser, "CondoManager");
                         break;
                     case "Admin":
-                        await _userHelper.AddUserToRoleAsync(user, "Admin");
+                        await _userHelper.AddUserToRoleAsync(newUser, "Admin");
                         break;
                 }
 
-                var isCondoMember = await _userHelper.IsUserInRoleAsync(user, "CondoMember");
+                var isCondoMember = await _userHelper.IsUserInRoleAsync(newUser, "CondoMember");
 
                 if (isCondoMember) // caso o user seja um condomember, criar condomember programaticamente
                 {
                     var condoMember = new CondoMember()
                     {
-                        FullName = user.FullName,
-                        Email = user.Email,
-                        Address = user.Address,
-                        PhoneNumber = user.PhoneNumber,
-                        ImageUrl = user.ImageUrl,
-                        BirthDate = user.BirthDate,
+                        FullName = newUser.FullName,
+                        Email = newUser.Email,
+                        Address = newUser.Address,
+                        PhoneNumber = newUser.PhoneNumber,
+                        ImageUrl = newUser.ImageUrl,
+                        BirthDate = newUser.BirthDate
                     };
 
                     await _condoMemberRepository.CreateAsync(condoMember, _dataContextCondos);
                 }
 
-                string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
+                string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(newUser); //gerar o token
 
                 // gera um link de confirmção para o email
-                string tokenLink = Url.Action("ResetPassword", "Account", new  //Link gerado na Action ConfirmEmail dentro do AccountController, ela recebe 2 parametros (userId e token)
-                {
-                    userId = user.Id,
-                    token = myToken
-                }, protocol: HttpContext.Request.Scheme); //utiliza o protocolo Http para passar dados de uma action para a outra
+                string tokenLink = $"{webBaseAdress}/Account/ResetPassword?userId={newUser.Id}&tokenEmail={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
                 Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
-               $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link 
+               $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password. </a>"); //Contruir email e enviá-lo com o link 
 
                 if (response.IsSuccess) //se conseguiu enviar o email
                 {
@@ -159,11 +182,30 @@ namespace ProjectCondoManagement.Controllers
 
                 //se não conseguiu enviar email:
                 return StatusCode(500, new Response { Message = "User couldn't be logged", IsSuccess = false });
-            }
-            else
+            }   
+        }
+
+        [Microsoft.AspNetCore.Mvc.HttpPost("GenerateResetPasswordToken")]
+        public async Task<IActionResult> GenerateResetPasswordToken([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            var user = await _userHelper.GetUserByIdAsync(resetPasswordDto.UserId); //verificar user
+
+            if (user == null)
             {
-                return StatusCode(409, new Response { Message = "User already exists, try registering wih new credentials", IsSuccess = false });
+                return StatusCode(404, new Response { Message = "User not found", IsSuccess = false });
             }
+
+            var response = await _userHelper.ConfirmEmailAsync(user, resetPasswordDto.Token); //resposta do email, ver se user e token dão match
+
+            if (!response.Succeeded)
+            {
+                return StatusCode(404, new Response { Message = "User not found", IsSuccess = false });
+            }
+
+            //gerar token
+            var passwordToken = await _userHelper.GeneratePasswordResetTokenAsync(user);
+
+            return StatusCode(200, new Response { Token = passwordToken, IsSuccess = true });
         }
 
         [Microsoft.AspNetCore.Mvc.HttpPost("ResetPassword")]
@@ -176,31 +218,16 @@ namespace ProjectCondoManagement.Controllers
                 return StatusCode(404, new Response { Message = "User not found", IsSuccess = false });
             }
 
-            var result = await _userHelper.ConfirmEmailAsync(user, resetPasswordDto.Token); //resposta do email, ver se user e token dão match
+            var resetPassword = await _userHelper.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.Password);
 
-            if (!result.Succeeded)
+            if (resetPassword.Succeeded)
             {
-                return StatusCode(404, new Response { Message = "User not found", IsSuccess = false });
+                return StatusCode(200, new Response { Message = "Password reset successfully, you can login now", IsSuccess = true });
             }
-
-            //gerar token
-
-            var passwordToken = await _userHelper.GeneratePasswordResetTokenAsync(user);
-
-            var responseResult = new
+            else
             {
-                Username = user.UserName,
-                Token = passwordToken,
-            };
-
-            var response = new Response
-            {
-                IsSuccess = true,
-                Message = "Access permission granted",
-                Results = responseResult
-            };
-
-            return Ok(response);
+                return StatusCode(400, new Response { Message = "An unexpected error occurred while resetting password, please try again", IsSuccess = false });
+            }   
         }
     }
 }
