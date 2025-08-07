@@ -90,10 +90,10 @@ namespace CondoManagementWebApp.Controllers
 
                     //sessão com token
                     var handler = new JwtSecurityTokenHandler();
-                    var jwtToken = handler.ReadJwtToken(tokenResponse.JwtToken);
+                    var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
 
                     //armazenar token na sessão para futuras requisições da api
-                    HttpContext.Session.SetString("JwtToken", tokenResponse.JwtToken);
+                    HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
 
                     // ClaimsPrincipal com base nas claims do token JWT
                     var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);

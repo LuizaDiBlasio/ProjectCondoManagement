@@ -69,14 +69,12 @@ namespace ProjectCondoManagement.Controllers
                         // gerar o token jwt
                         var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
 
-                        var results = new
+                        var results = new TokenResponseModel()
                         {
-                            JwtToken = tokenJwt,
-                            JwtExpiration = DateTime.UtcNow.AddDays(15)
+                            Token = tokenJwt,
+                            Expiration = DateTime.UtcNow.AddDays(15)
                         };
 
-                        // gerar o token 2FA
-                        var token2FA = _userHelper.GenerateTwoFactorTokenAsync(user, token) //Estrnho
 
                         return Ok(results);
 
