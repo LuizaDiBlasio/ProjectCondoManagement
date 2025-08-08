@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="CloudinaryDotNet" Version="1.27.6" />
+    <PackageReference Include="Syncfusion.EJ2.AspNet.Core" Version="30.2.4" />
+    <PackageReference Include="Syncfusion.Licensing" Version="30.2.4" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
     <PackageReference Include="Vereyon.Web.FlashMessage" Version="3.0.0" />

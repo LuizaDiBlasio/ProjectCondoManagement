@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="~/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" />
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/CondoManagementWebApp.styles.css" asp-append-version="true" />
+    <link href="https://cdn.syncfusion.com/ej2/30.2.4/bootstrap5.css" rel="stylesheet" />
     <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon.png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-***********" crossorigin="anonymous" referrerpolicy="no-referrer" /> @* Certifique-se de que o integrity e crossorigin estejam corretos *@
 </head>
@@ -163,8 +164,14 @@
      
     </div>
 
+    <!--Core dependencies -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Syncfusion -->
+    <script src="https://cdn.syncfusion.com/ej2/30.2.4/dist/ej2.min.js"></script>
+
+    <!--App + vendor plugins -->
     <script src="~/vendor/global/global.min.js"></script>
     <script src="~/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
     <script src="~/vendor/chartjs/chart.bundle.min.js"></script>
@@ -174,6 +181,8 @@
     <script src="~/vendor/jqvmap/js/jquery.vmap.world.js"></script>
     <script src="~/vendor/jqvmap/js/jquery.vmap.usa.js"></script>
     <script src="~/vendor/peity/jquery.peity.min.js"></script>
+
+    <!--Custom dashboard and app scripts -->
     <script src="~/js/dashboard/dashboard-1.js"></script>
     <script src="~/js/custom.min.js"></script>
     <script src="~/js/deznav-init.js"></script>
@@ -210,5 +219,6 @@
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+    <ejs-scripts></ejs-scripts>
 </body>
 </html>

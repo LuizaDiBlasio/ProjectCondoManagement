@@ -2,6 +2,7 @@ using ClassLibrary;
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
@@ -22,9 +23,12 @@ namespace ProjectCondoManagement.Controllers
         private readonly ICondoMemberRepository _condoMemberRepository;
         private readonly DataContextCondos _dataContextCondos;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly DataContextUsers _dataContextUsers;
+        string webBaseAdress = "https://localhost:7081"; //TODO mudar quando publicar
+
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
-                                        IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService)
+                                        IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService, DataContextUsers dataContextUsers)
         {
             _userHelper = userHelper;
             _httpClient = httpClient;
@@ -33,7 +37,7 @@ namespace ProjectCondoManagement.Controllers
             _mailHelper = mailHelper;
             _dataContextCondos = dataContextCondos;
             _jwtTokenService = jwtTokenService;
-
+            _dataContextUsers = dataContextUsers;
         }
 
         [Microsoft.AspNetCore.Mvc.HttpPost("Login")]
@@ -85,30 +89,27 @@ namespace ProjectCondoManagement.Controllers
         public async Task<IActionResult> AssociateUser([FromBody] RegisterUserDto registerDtoModel)
         {
             var user = await _userHelper.CreateUser(registerDtoModel);
+
             if (user == null)
             {
-                return StatusCode(500, new { Message = "Internal server error: User not registered" });
+                return Ok(new Response { IsSuccess = true, Message = "User registered, a confirmation email has been sent" });
             }
 
             string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
 
             // gera um link de confirmção para o email
-            string tokenLink = Url.Action("ResetPassword", "Account", new  //Link gerado na Action ConfirmEmail dentro do AccountController, ela recebe 2 parametros (userId e token)
-            {
-                userId = user.Id,
-                token = myToken
-            }, protocol: HttpContext.Request.Scheme); //utiliza o protocolo Http para passar dados de uma action para a outra
+            string tokenLink = $"{webBaseAdress}/Account/ResetPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
             Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
-           $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link 
+           $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link
 
             if (response.IsSuccess) //se conseguiu enviar o email
             {
-                return StatusCode(200, new { Message = "User registered, a confirmation email has been sent" });
+                return Ok(new Response { IsSuccess = true, Message = "User registered, a confirmation email has been sent" });
             }
 
             //se não conseguiu enviar email:
-            return StatusCode(500, new { Message = "User couldn't be logged" });
+            return StatusCode(500, new Response { IsSuccess = false, Message = "Internal server error: User not registered" });
         }
 
 
@@ -144,15 +145,10 @@ namespace ProjectCondoManagement.Controllers
 
             string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
 
-            // gera um link de confirmção para o email
-            string tokenLink = Url.Action("ResetPassword", "Account", new  //Link gerado na Action ConfirmEmail dentro do AccountController, ela recebe 2 parametros (userId e token)
-            {
-                userId = user.Id,
-                token = myToken
-            }, protocol: HttpContext.Request.Scheme); //utiliza o protocolo Http para passar dados de uma action para a outra
+            string tokenLink = $"{webBaseAdress}/Account/ResetPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
             Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
-           $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link 
+           $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link
 
             if (response.IsSuccess) //se conseguiu enviar o email
             {

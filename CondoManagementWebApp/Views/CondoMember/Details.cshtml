@@ -6,48 +6,38 @@
 
 <h1>Details</h1>
 
-<div>
-    <h4>CondoMemberDto</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FullName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FullName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Address)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Address)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BirthDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BirthDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PhoneNumber)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PhoneNumber)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageUrl)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="container mt-4">
+    <div class="row">
+
+
+        <!-- Table Section -->
+        <div class="col-md-8">
+            <h4>CondoMember Details</h4>
+            <hr />
+            <dl class="row">
+                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.FullName)</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.FullName)</dd>
+
+                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Email)</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Email)</dd>
+
+                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Address)</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Address)</dd>
+
+                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.BirthDate)</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.BirthDate)</dd>
+
+                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.PhoneNumber)</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.PhoneNumber)</dd>
+            </dl>
+            <a asp-action="Index" class="btn btn-outline-secondary mt-3">Back to List</a>
+        </div>
+
+
+
+        <!-- Image Section -->
+        <div class="col-md-4 d-flex align-items-start justify-content-center">
+            <img src="@Model.ImageFullPath" alt="Member Image" class="img-fluid rounded border shadow" style="max-height: 300px;" />
+        </div>
+    </div>
 </div>

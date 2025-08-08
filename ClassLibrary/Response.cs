@@ -14,6 +14,8 @@ namespace ClassLibrary
 
 
         public object Results;
+
+        public string Token { get; set; }
     }
 }
 

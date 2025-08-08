@@ -1,6 +1,7 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using System.Security.Policy;
 
@@ -14,12 +15,14 @@ namespace ProjectCondoManagement.Helpers
 
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager)
+        private readonly DataContextUsers _dataContextUsers;
+
+        public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, DataContextUsers dataContextUsers)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
-
+            _dataContextUsers = dataContextUsers;
         }
 
 
@@ -31,46 +34,46 @@ namespace ProjectCondoManagement.Helpers
             }
 
             var user = await GetUserByEmailAsync(registerDtoModel.Email); //buscar user  
-            if(user != null)
+            if (user != null)
             {
                 return null;
             }
 
-                user = new User
-                {
-                    FullName = registerDtoModel.FullName,
-                    Email = registerDtoModel.Email,
-                    UserName = registerDtoModel.Email,
-                    Address = registerDtoModel.Address,
-                    PhoneNumber = registerDtoModel.PhoneNumber,
-                    ImageUrl = registerDtoModel.ImageUrl,
-                    BirthDate = registerDtoModel.BirthDate,
-                    CompanyId = registerDtoModel.CompanyId,
-                };
+            user = new User
+            {
+                FullName = registerDtoModel.FullName,
+                Email = registerDtoModel.Email,
+                UserName = registerDtoModel.Email,
+                Address = registerDtoModel.Address,
+                PhoneNumber = registerDtoModel.PhoneNumber,
+                ImageUrl = registerDtoModel.ImageUrl,
+                BirthDate = registerDtoModel.BirthDate,
+                CompanyId = registerDtoModel.CompanyId,
+            };
 
-                var result = await AddUserAsync(user, "123456"); //add user depois de criado
+            var result = await AddUserAsync(user, "123456"); //add user depois de criado
 
-                if (result != IdentityResult.Success) // caso não consiga criar user
-                {
-                    return null;
-                }
+            if (result != IdentityResult.Success) // caso não consiga criar user
+            {
+                return null;
+            }
 
-                //Adicionar roles ao user
-                switch (registerDtoModel.SelectedRole)
-                {
-                    case "CondoMember":
-                        await AddUserToRoleAsync(user, "CondoMember");
-                        break;
-                    case "CondoManager":
-                        await AddUserToRoleAsync(user, "CondoManager");
-                        break;
-                    case "Admin":
-                        await AddUserToRoleAsync(user, "Admin");
-                        break;
-                }
+            //Adicionar roles ao user
+            switch (registerDtoModel.SelectedRole)
+            {
+                case "CondoMember":
+                    await AddUserToRoleAsync(user, "CondoMember");
+                    break;
+                case "CondoManager":
+                    await AddUserToRoleAsync(user, "CondoManager");
+                    break;
+                case "Admin":
+                    await AddUserToRoleAsync(user, "Admin");
+                    break;
+            }
 
 
-                return user;
+            return user;
         }
 
         /// <summary>
@@ -168,6 +171,13 @@ namespace ProjectCondoManagement.Helpers
             return await _userManager.FindByEmailAsync(email);
         }
 
+
+        public async Task<List<User>> GetUsersByEmailsAsync(IEnumerable<string> emails)
+        {
+            return await _dataContextUsers.Users
+                .Where(u => emails.Contains(u.Email))
+                .ToListAsync();
+        }
 
         /// <summary>
         /// Asynchronously checks if a user is a member of a specified role.
@@ -312,7 +322,43 @@ namespace ProjectCondoManagement.Helpers
 
         public async Task<IList<string>> GetRolesAsync(User user)
         {
-            return await _userManager.GetRolesAsync(user);  
+            return await _userManager.GetRolesAsync(user);
         }
+
+        public async Task<Response> DeactivateUserAsync(User user)
+        {
+            user.IsActive = false;
+
+            try
+            {
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    return new Response
+                    {
+                        IsSuccess = true,
+                    };
+                }
+
+                return new Response
+                {
+                    IsSuccess = false,
+                    Message = "User deactivation failed.",
+                };
+            }          
+            catch (Exception ex)
+            {
+                return new Response
+                {
+                    IsSuccess = false,
+                    Message = $"Error deactivating User.({ex.Message})"
+                };
+            }                 
+
+        }
+
+
+
+
     }
 }

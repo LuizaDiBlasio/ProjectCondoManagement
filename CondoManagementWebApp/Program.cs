@@ -2,6 +2,7 @@ using CondoManagementWebApp.Helpers;
 using Vereyon.Web;
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Syncfusion.Licensing;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,9 +15,12 @@ builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
-builder.Services.AddScoped<IUserHelper, UserHelper>();
 
+builder.Services.AddScoped<IApiCallService, ApiCallService>();
 
+builder.Services.AddScoped<CloudinaryService>();
+
+SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JEaF5cXmRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXded3VWR2VcVEZxWUZWYEk=");
 
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinarySettings"));
@@ -44,11 +48,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 
-builder.Services.AddScoped<CloudinaryService>();
+
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddScoped<ICondoMemberHelper, CondoMemberHelper>();
+
 
 var app = builder.Build();
 

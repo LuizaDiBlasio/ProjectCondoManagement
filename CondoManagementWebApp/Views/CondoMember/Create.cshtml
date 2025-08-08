@@ -34,7 +34,12 @@
 
             <div class="form-group">
                 <label asp-for="BirthDate" class="control-label"></label>
-                <input asp-for="BirthDate" class="form-control" type="date" />
+                <ejs-datepicker id="BirthDate"
+                                name="BirthDate"
+                                format="dd/MM/yyyy"
+                                placeholder="Select birth date"
+                                value="@DateTime.Now">
+                </ejs-datepicker>
                 <span asp-validation-for="BirthDate" class="text-danger"></span>
             </div>
 
@@ -43,18 +48,6 @@
                 <input asp-for="PhoneNumber" class="form-control" />
                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
             </div>
-
-        @*     <div class="form-group">
-                <label asp-for="ImageUrl" class="control-label"></label>
-                <input asp-for="ImageUrl" class="form-control" />
-                <span asp-validation-for="ImageUrl" class="text-danger"></span>
-            </div> *@
-
-         @*    <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <input asp-for="UserId" class="form-control" />
-                <span asp-validation-for="UserId" class="text-danger"></span>
-            </div> *@
 
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
@@ -66,6 +59,8 @@
 <div>
     <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
 </div>
+
+
 
 @section Scripts {
     @{

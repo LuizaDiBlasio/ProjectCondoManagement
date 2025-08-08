@@ -4,7 +4,7 @@ using System.Security.Principal;
 
 namespace ProjectCondoManagement.Data.Repositories.Finances.Interfaces
 {
-    public interface IAccountRepository : IGenericRepository<FinancialAccount, DataContextFinances>
+    public interface IFinancialAccountRepository : IGenericRepository<FinancialAccount, DataContextFinances>
     {
     }
 }
