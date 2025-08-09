@@ -13,7 +13,8 @@ namespace ClassLibrary
         public string Message { get; set; }
 
 
-        public object Results;
+        public object Results { get; set; }
+
 
         public string Token { get; set; }  
     }

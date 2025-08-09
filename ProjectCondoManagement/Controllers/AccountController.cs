@@ -25,11 +25,13 @@ namespace ProjectCondoManagement.Controllers
         private readonly ICondoMemberRepository _condoMemberRepository;
         private readonly DataContextCondos _dataContextCondos;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly ISmsHelper _smsHelper;
 
         string webBaseAdress = "https://localhost:7081"; //TODO mudar quando publicar
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
-                               IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService, ICondoMemberRepository condoMemberRepository)
+                               IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService, ICondoMemberRepository condoMemberRepository
+                             , ISmsHelper smsHelper)
         {
             _userHelper = userHelper;
             _httpClient = httpClient;
@@ -39,53 +41,119 @@ namespace ProjectCondoManagement.Controllers
             _dataContextCondos = dataContextCondos;
             _jwtTokenService = jwtTokenService;
             _condoMemberRepository = condoMemberRepository;
-
+            _smsHelper = smsHelper;
+       
         }
 
         [Microsoft.AspNetCore.Mvc.HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDtoModel)
+        {
+            //ver se user está ativo
+            var user = await _userHelper.GetUserByEmailAsync(loginDtoModel.Username);
+
+            if(user == null)
+            {
+                return NotFound(new { Message = "Login failed, user not found." });
+            }
+
+            if (user.IsActive == false)
+            {
+                return Unauthorized(new Response { Message = "User is not active in the system, please contact admin" });
+            }
+
+            var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login (Este é o seu método que usa PasswordSignInAsync internamente)
+
+            if (result.RequiresTwoFactor) //se login for bem sucedido
+            {
+                var token = await _userHelper.GenerateTwoFactorTokenAsync(user, "Phone");
+
+                var response = await _smsHelper.SendSmsAsync(user.PhoneNumber, $"Your authentication code is: {token}");
+
+                if (response.IsSuccess)
+                {
+                    return Ok(new TokenResponseModel
+                    {
+                        Token = null,
+                        Expiration = null,
+                        Requires2FA = true,
+                    });
+                }
+                else
+                {
+                    return StatusCode(500, new { Message = "It was not possible to send SMS verification code" });
+                }
+            }
+            else //seguir normalmente para ambiente de desenvolvimento
+            {
+                // pede lista de roles do usuário (somente 1 item na lista)
+                var roles = await _userHelper.GetRolesAsync(user);
+
+                // verifica se a lista não está vazia e pega a primeira role.
+                if (roles != null && roles.Any())
+                {
+                    var userRole = roles.First();
+
+                    // gerar o token jwt
+                    var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
+
+                    var results = new TokenResponseModel()
+                    {
+                        Token = tokenJwt,
+                        Expiration = DateTime.UtcNow.AddDays(15),
+                        Requires2FA = false
+                    };
+
+                    return Ok(results);
+                }
+
+            }
+            return Unauthorized(new { Message = "Login failed, credentials are not valid." });
+        }
+
+
+        [HttpPost("Verify2FA")]
+        public async Task<IActionResult> Verify2FA([FromBody] Verify2FADto verify2FADto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login (Este é o seu método que usa PasswordSignInAsync internamente)
+            var user = await _userHelper.GetUserByEmailAsync(verify2FADto.Username);
 
-            if (result.Succeeded) //se login for bem sucedido
+            if (user == null)
             {
-                var user = await _userHelper.GetUserByEmailAsync(loginDtoModel.Username);
-
-                if (user != null)
-                {
-                    // pede lista de roles do usuário (somente 1 item na lista)
-                    var roles = await _userHelper.GetRolesAsync(user);
-
-                    // verifica se a lista não está vazia e pega a primeira role.
-                    if (roles != null && roles.Any())
-                    {
-                        var userRole = roles.First();
-
-                        // gerar o token jwt
-                        var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
-
-                        var results = new TokenResponseModel()
-                        {
-                            Token = tokenJwt,
-                            Expiration = DateTime.UtcNow.AddDays(15)
-                        };
-
-
-                        return Ok(results);
-
-                    }
-                    return Unauthorized(new { Message = "Login failed, credentials are not valid." });
-
-                }
-                return NotFound(new { Message = "Login failed, user not found." });
+                return NotFound(new { Message = "User not found" });
             }
-            return Unauthorized(new { Message = "Login failed." });
+
+            // Verifica o token 2FA
+            var isValidToken = await _userHelper.VerifyTwoFactorTokenAsync(user, "Phone", verify2FADto.Token);
+
+            if (isValidToken)
+            {
+                // Token válido - gera JWT
+                var roles = await _userHelper.GetRolesAsync(user);
+
+                if (roles != null && roles.Any())
+                {
+                    var userRole = roles.First();
+                    var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
+
+                    var results = new TokenResponseModel()
+                    {
+                        Token = tokenJwt,
+                        Expiration = DateTime.UtcNow.AddDays(15),
+                        Requires2FA = false
+                    };
+
+                    return Ok(results);
+                }
+            }
+
+            return BadRequest(new { Message = "Invalid verification code" });
         }
+
+
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [Microsoft.AspNetCore.Mvc.HttpPost("AssociateUser")]

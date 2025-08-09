@@ -2,6 +2,7 @@ using CondoManagementWebApp.Helpers;
 using Vereyon.Web;
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Syncfusion.Licensing;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,17 +35,37 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true; // Indica que o cookie de sessão é essencial para o funcionamento do site
 });
 
+//nomear a sessão para que ela seja unica
+var cookieName = $"CondoAuth_Session_{Guid.NewGuid().ToString("N")}";
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/AccessDenied";
+
+        //atribuir o nome, assim a cada sessão o nome terá que ser unico e os cookies nunca serão guardados
+        options.Cookie.Name = cookieName;
+
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnSigningIn = context =>
+            {
+                context.Properties.IsPersistent = false;
+                return Task.CompletedTask;
+            }
+        };
     });
 
 
 builder.Services.AddScoped<CloudinaryService>();
 
+
 builder.Services.AddScoped<IApiCallService, ApiCallService>();
+
+
+SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JEaF5cXmRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXded3VWR2VcVEZxWUZWYEk=");
+
 
 builder.Services.AddControllersWithViews();
 

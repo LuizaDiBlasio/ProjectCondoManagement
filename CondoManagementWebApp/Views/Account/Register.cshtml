@@ -43,11 +43,18 @@
                                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                             </div>
 
-                            <div class="form-group">
+                            <div class="form-group mb-4">
                                 <label asp-for="BirthDate" class="control-label"></label>
-                                <input asp-for="BirthDate" class="form-control" type="date" />
+                                <ejs-datepicker id="BirthDate"
+                                                name="BirthDate"
+                                                format="dd/MM/yyyy"
+                                                placeholder="Select birth date"
+                                                cssClass="e-input e-control"
+                                                floatLabelType="Never"
+                                                value="@DateTime.Now">
+                                </ejs-datepicker>
                                 <span asp-validation-for="BirthDate" class="text-danger"></span>
-                            </div>     
+                            </div>
 
                             <div class="form-group mb-4">
                                 <label asp-for="SelectedRole" class="form-label">User role</label>

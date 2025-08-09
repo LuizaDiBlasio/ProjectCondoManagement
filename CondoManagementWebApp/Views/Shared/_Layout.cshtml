@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="~/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" />
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/CondoManagementWebApp.styles.css" asp-append-version="true" />
+    <link href="https://cdn.syncfusion.com/ej2/30.2.4/bootstrap5.css" rel="stylesheet"   />
     <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon.png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-***********" crossorigin="anonymous" referrerpolicy="no-referrer" /> 
 
@@ -68,7 +69,7 @@
                     </li>
                 </ul>
                 <div class="copyright">
-                    <p><strong>CondoManagementWebApp</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
+                    <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
                     <p>by YourTeam</p>
                 </div>
             </div>
@@ -103,7 +104,7 @@
                             {
                                 <li class="nav-item dropdown header-profile">
                                     <a class="nav-link" href="javascript:void(0);" role="button" data-bs-toggle="dropdown">
-                                        <img src="~/images/admin.jpg" width="20" alt="Profile" /> 
+                                        <i class="fa-solid fa-user"></i>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-end">
                                         <a asp-controller="Account" asp-action="Profile" class="dropdown-item ai-icon">
@@ -126,7 +127,6 @@
                                 {
                                     <li class="nav-item ms-3">
                                         <a class="nav-link btn btn-info light" asp-controller="Account" asp-action="Register" title="Register New User">
-                                            <i class="fas fa-user-plus"></i>
                                             <span class="d-none d-sm-inline ms-1">Register new user</span>
                                         </a>
                                     </li>
@@ -156,8 +156,14 @@
      
     </div>
 
+    <!--Core dependencies -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Syncfusion -->
+    <script src="https://cdn.syncfusion.com/ej2/30.2.4/dist/ej2.min.js"></script>
+
+    <!--App + vendor plugins -->
     <script src="~/vendor/global/global.min.js"></script>
     <script src="~/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
     <script src="~/vendor/chartjs/chart.bundle.min.js"></script>
@@ -167,12 +173,14 @@
     <script src="~/vendor/jqvmap/js/jquery.vmap.world.js"></script>
     <script src="~/vendor/jqvmap/js/jquery.vmap.usa.js"></script>
     <script src="~/vendor/peity/jquery.peity.min.js"></script>
+    <script src="~/vendor/jquery/jquery.min.js"></script>
+
+    <!--Custom dashboard and app scripts -->
     <script src="~/js/dashboard/dashboard-1.js"></script>
     <script src="~/js/custom.min.js"></script>
     <script src="~/js/deznav-init.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/vendor/jquery/jquery.min.js"></script>
-  
+
 
     <script>
         function carouselReview() {
@@ -205,5 +213,8 @@
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <ejs-scripts></ejs-scripts>
+
 </body>
 </html>

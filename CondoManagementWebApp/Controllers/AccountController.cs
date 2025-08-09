@@ -65,29 +65,52 @@ namespace CondoManagementWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> RequestLogin(LoginViewModel model)
         {
-
-            if (ModelState.IsValid) // se modelo enviado passar na validação
+            // Adicione esta verificação para saber se a requisição é um AJAX POST
+            // Use Request.IsAjaxRequest() se estiver usando uma versão mais antiga do ASP.NET Core MVC
+            // ou se o seu JavaScript estiver a definir o header X-Requested-With
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-
-                var loginDto = _converterHelper.ToLoginDto(model);
-
-                // Serializar model para JSON
-                var jsonContent = new StringContent(
-                    JsonSerializer.Serialize(loginDto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }), //converte para camelCase em json
-                    Encoding.UTF8,
-                    "application/json" //diz que o body vai ter dados em json
-                );
-
-                // Fazer a requisição HTTP POST para a UserAPI
-
-                var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Login", jsonContent);
-
-                if (response.IsSuccessStatusCode)
+                if (!ModelState.IsValid)
                 {
+                    // Retorne um JSON para requisições AJAX que falham a validação
+                    return BadRequest(new { isSuccess = false, message = "Invalid input, please correct the form." });
+                }
+            }
+            else // Requesição não AJAX (se você quiser manter o comportamento de form tradicional)
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View("Login", model);
+                }
+            }
 
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var loginDto = _converterHelper.ToLoginDto(model);
+            var jsonContent = new StringContent(
+                JsonSerializer.Serialize(loginDto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                Encoding.UTF8,
+                "application/json"
+            );
 
+            var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Login", jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (tokenResponse.Requires2FA)
+                {
+                    // Para requisições AJAX, retorne um JSON que o JavaScript possa entender
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Ok(new { isSuccess = true, requires2FA = true, username = model.Username });
+                    }
+                    // Para requisições não AJAX, volte a view
+                    var responseModel = new LoginViewModel() { Username = model.Username, Requires2FA = true };
+                    return View("Login", responseModel);
+                }
+                else // Login bem-sucedido (sem 2FA)
+                {
                     //sessão com token
                     var handler = new JwtSecurityTokenHandler();
                     var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
@@ -102,21 +125,75 @@ namespace CondoManagementWebApp.Controllers
                     // login no  WebApp, criando um cookie de autenticação
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Ok(new { isSuccess = true, requires2FA = false });
+                    }
                     return RedirectToAction("Index", "Home");
-
-
-                }
-                else // Login falhou na API
-                {
-                    this.ModelState.AddModelError(string.Empty, "Invalid login credentials.");
-                    return View("Login", model);
                 }
             }
-            // Se o result.Succeeded for false (login falhou )
-            this.ModelState.AddModelError(string.Empty, "Failed to login");
-            return View("Login", model);
+            else // Login falhou na API
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var error = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return BadRequest(new { isSuccess = false, message = error.Message });
+                }
+
+                this.ModelState.AddModelError(string.Empty, error.Message);
+                return View("Login", model);
+            }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Verify2FA([FromBody] Verify2FADto model)
+        {
+            // Apenas para garantir que a validação do modelo funciona
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { isSuccess = false, message = "Invalid input for 2FA." });
+            }
+
+            // Serializar o modelo para JSON para enviar para a API
+            var jsonContent = new StringContent(
+                JsonSerializer.Serialize(model, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            // Chamar o endpoint da sua API para verificar o código 2FA
+            var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Verify2FA", jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                // Se o token for válido, o login é completado
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
+
+                HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
+
+                var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
+                // Retorna sucesso para o AJAX no front-end
+                return Ok(new { isSuccess = true });
+            }
+            else
+            {
+                // Se a API retornar um erro (ex: código inválido)
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var error = JsonSerializer.Deserialize<Response>(errorContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                // Retorna o erro para o AJAX
+                return BadRequest(new { isSuccess = false, message = error?.Message ?? "Invalid verification code" });
+            }
+        }
 
 
         /// <summary>

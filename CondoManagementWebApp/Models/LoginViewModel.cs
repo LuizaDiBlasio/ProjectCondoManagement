@@ -12,6 +12,6 @@ namespace CondoManagementWebApp.Models
         [MinLength(6)] //minimo de caracteres na validação
         public string Password { get; set; }
 
-        public bool RememberMe { get; set; } //para a pessoa não ter que sempre fazer o login
+        public bool Requires2FA { get; set; }
     }
 }

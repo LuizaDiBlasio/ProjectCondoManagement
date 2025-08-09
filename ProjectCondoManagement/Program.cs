@@ -1,17 +1,13 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ProjectCondoManagement.Data;
 using Microsoft.IdentityModel.Tokens;
 using ProjectCondoManagement.Data;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
-using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Condos;
-using ProjectCondoManagement.Helpers;
+using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
 using System.Text;
 
@@ -67,6 +63,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 
+
 builder.Services.AddTransient<SeedDb>();
 
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -74,6 +71,8 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IUserHelper, UserHelper>();
 
 builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
+
+builder.Services.AddScoped<ISmsHelper, SmsHelper>();
 
 builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
 

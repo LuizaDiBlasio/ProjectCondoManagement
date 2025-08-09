@@ -11,7 +11,7 @@ namespace CondoManagementWebApp.Helpers
             {
                 Username = model.Username,
                 Password = model.Password,
-                RememberMe = model.RememberMe
+                Requires2FA = model.Requires2FA,    
             };
 
             return loginDto;
