@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
@@ -334,6 +335,35 @@ namespace ProjectCondoManagement.Controllers
                 return StatusCode(400, new Response { Message = "An unexpected error occurred while resetting password, please try again", IsSuccess = false });
             }   
         }
+
+
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Microsoft.AspNetCore.Mvc.HttpPost("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+
+            var user = await _userHelper.GetUserByEmailAsync(changePasswordDto.Email); //verificar user
+
+            if (user != null)
+            {
+                var result = await _userHelper.ChangePasswordAsync(user, changePasswordDto.OldPassword, changePasswordDto.NewPassword); //muda password
+
+                if (result.Succeeded)
+                {
+                    return StatusCode(200, new Response() { IsSuccess = true, Message = "Your password has been changed."});
+                }
+                else
+                {
+                    return StatusCode(400, new Response() { IsSuccess = false, Message = "Unable to change password" });
+                }
+            }
+            else //se for nulo
+            {
+                return StatusCode(404, new Response() { IsSuccess = false, Message = "Unable to change password" });
+            }
+        }
+
 
     }
 }

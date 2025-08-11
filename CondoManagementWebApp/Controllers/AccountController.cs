@@ -1,5 +1,6 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
+using CloudinaryDotNet.Actions;
 using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
 using Humanizer;
@@ -16,6 +17,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Vereyon.Web;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CondoManagementWebApp.Controllers
 {
@@ -67,15 +69,13 @@ namespace CondoManagementWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> RequestLogin(LoginViewModel model)
         {
-            // Adicione esta verificação para saber se a requisição é um AJAX POST
-            // Use Request.IsAjaxRequest() se estiver usando uma versão mais antiga do ASP.NET Core MVC
-            // ou se o seu JavaScript estiver a definir o header X-Requested-With
+            //verificação para saber se a requisição é um AJAX POST
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
                 if (!ModelState.IsValid)
                 {
                     // Retorne um JSON para requisições AJAX que falham a validação
-                    return BadRequest(new { isSuccess = false, message = "Invalid input, please correct the form." });
+                    return BadRequest(new { isSuccess = false, message = "Invalid input, please fill in the form correctly." });
                 }
             }
             else // Requesição não AJAX (se você quiser manter o comportamento de form tradicional)
@@ -93,60 +93,72 @@ namespace CondoManagementWebApp.Controllers
                 "application/json"
             );
 
-            var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Login", jsonContent);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var content = await response.Content.ReadAsStringAsync();
-                var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Login", jsonContent);
 
-                if (tokenResponse.Requires2FA)
+                if (response.IsSuccessStatusCode)
                 {
-                   // Para requisições AJAX, retorne um JSON que o JavaScript possa entender
-                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    var content = await response.Content.ReadAsStringAsync();
+                    var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    if (tokenResponse.Requires2FA)
                     {
-                        return Ok(new { isSuccess = true, requires2FA = true, username = model.Username });
+                        // Para requisições AJAX, retorne um JSON que o JavaScript possa entender
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        {
+                            return Ok(new { isSuccess = true, requires2FA = true, username = model.Username });
+                        }
+                        // Para requisições não AJAX, volte a view
+                        var responseModel = new LoginViewModel() { Username = model.Username, Requires2FA = true };
+                        return View("Login", responseModel);
                     }
-                    // Para requisições não AJAX, volte a view
-                    var responseModel = new LoginViewModel() { Username = model.Username, Requires2FA = true };
-                    return View("Login", responseModel);
+                    else // Login bem-sucedido (sem 2FA)
+                    {
+                        //sessão com token
+                        var handler = new JwtSecurityTokenHandler();
+                        var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
+
+                        //armazenar token na sessão para futuras requisições da api
+                        HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
+
+                        // ClaimsPrincipal com base nas claims do token JWT
+                        var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                        // login no  WebApp, criando um cookie de autenticação
+                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        {
+                            return Ok(new { isSuccess = true, requires2FA = false });
+                        }
+                        return RedirectToAction("Index", "Home");
+                    }
                 }
-                else // Login bem-sucedido (sem 2FA)
+                else // Login falhou na API
                 {
-                    //sessão com token
-                    var handler = new JwtSecurityTokenHandler();
-                    var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
-
-                    //armazenar token na sessão para futuras requisições da api
-                    HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
-
-                    // ClaimsPrincipal com base nas claims do token JWT
-                    var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
-                    // login no  WebApp, criando um cookie de autenticação
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+                    var content = await response.Content.ReadAsStringAsync();
+                    var error = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
-                        return Ok(new { isSuccess = true, requires2FA = false });
+                        return BadRequest(new { isSuccess = false, message = error.Message });
                     }
-                    return RedirectToAction("Index", "Home");
+
+                    this.ModelState.AddModelError(string.Empty, error.Message);
+                    return View("Login", model);
                 }
             }
-            else // Login falhou na API
+            catch (Exception ex)
             {
-                var content = await response.Content.ReadAsStringAsync();
-                var error = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
-                    return BadRequest(new { isSuccess = false, message = error.Message });
+                    return BadRequest(new { message = ex.Message });
                 }
-
-                this.ModelState.AddModelError(string.Empty, error.Message);
                 return View("Login", model);
             }
+            
         }
 
         [HttpPost]
@@ -165,36 +177,44 @@ namespace CondoManagementWebApp.Controllers
                 "application/json"
             );
 
-            // Chamar o endpoint da sua API para verificar o código 2FA
-            var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Verify2FA", jsonContent);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var content = await response.Content.ReadAsStringAsync();
-                var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                // Chamar o endpoint da sua API para verificar o código 2FA
+                var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Verify2FA", jsonContent);
 
-                // Se o token for válido, o login é completado
-                var handler = new JwtSecurityTokenHandler();
-                var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
+                    // Se o token for válido, o login é completado
+                    var handler = new JwtSecurityTokenHandler();
+                    var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
 
-                var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+                    HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
 
-                // Retorna sucesso para o AJAX no front-end
-                return Ok(new { isSuccess = true });
+                    var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
+                    // Retorna sucesso para o AJAX no front-end
+                    return Ok(new { isSuccess = true });
+                }
+                else
+                {
+                    // Se a API retornar um erro (ex: código inválido)
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var error = JsonSerializer.Deserialize<Response>(errorContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    // Retorna o erro para o AJAX
+                    return BadRequest(new { isSuccess = false, message = error?.Message ?? "Invalid verification code" });
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Se a API retornar um erro (ex: código inválido)
-                var errorContent = await response.Content.ReadAsStringAsync();
-                var error = JsonSerializer.Deserialize<Response>(errorContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                // Retorna o erro para o AJAX
-                return BadRequest(new { isSuccess = false, message = error?.Message ?? "Invalid verification code" });
+                return BadRequest(ex.Message);
             }
+           
         }
 
         /// <summary>
@@ -219,15 +239,22 @@ namespace CondoManagementWebApp.Controllers
                 Encoding.UTF8,
                 "application/json");
 
-            var apiCall = await _httpClient.PostAsync($"{baseUrl}api/Account/GenerateForgotPasswordTokenAndEmail", jsonContent);
-
-            if (apiCall.IsSuccessStatusCode)
+            try
             {
-                return Json(new { Message = "A retrieve password link has been sent to your email" });
+                var apiCall = await _httpClient.PostAsync($"{baseUrl}api/Account/GenerateForgotPasswordTokenAndEmail", jsonContent);
+
+                if (apiCall.IsSuccessStatusCode)
+                {
+                    return Json(new { Message = "A retrieve password link has been sent to your email" });
+                }
+
+                return Json(new { Message = "Unable to send link, please contact admin." });
             }
-
-
-            return Json(new { Message = "Unable to send link, please contact admin." });
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+           
         }
 
         /// <summary>
@@ -368,7 +395,7 @@ namespace CondoManagementWebApp.Controllers
             {
                 UserId = userId,
                 Token = tokenEmail,
-                Password =String.Empty  //ainda não foi colocada a senha
+                Password = " "  //ainda não foi colocada a senha
             };
             var resetPasswordDto = _converterHelper.ToResetPasswordDto(model);
 
@@ -382,7 +409,7 @@ namespace CondoManagementWebApp.Controllers
                     {
                         Token = apiCall.Token,
                         UserId = userId,
-                        Password = String.Empty //ainda não foi colocada a senha
+                        Password = " " //ainda não foi colocada a senha
                     };
 
 
@@ -457,7 +484,7 @@ namespace CondoManagementWebApp.Controllers
             {
                 UserId = userId,
                 Token = token,
-                Password = String.Empty  //ainda não foi colocada a senha
+                Password = string.Empty  //ainda não foi colocada a senha
             };
             
             return View(model);
@@ -507,6 +534,52 @@ namespace CondoManagementWebApp.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Displays Change Password View
+        /// </summary>
+        /// <returns>IActionResult containing view ChangePassword</returns>
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+
+        /// <summary>
+        /// Requests API to change Password
+        /// </summary>
+        /// <returns>View model containing outcome message</returns>
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> RequestChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var changePasswordDto = _converterHelper.ToChangePasswordDto(model);
+
+
+            try
+            {
+                var apiCall = await _apiCallService.PostAsync<ChangePasswordDto, Response>("api/Account/ChangePassword", changePasswordDto);
+
+                if (apiCall.IsSuccess)
+                {
+                    _flashMessage.Confirmation($"{apiCall.Message}");
+                    return View("ChangePassword", model);
+                }
+
+                _flashMessage.Danger($"{apiCall.Message}");
+                return View("ChangePassword", model);
+            }
+            catch(Exception e) 
+            {
+                _flashMessage.Danger($"{e.Message}");
+                return View("ChangePassword", model);
+            }
+        } 
 
 
         // <summary>

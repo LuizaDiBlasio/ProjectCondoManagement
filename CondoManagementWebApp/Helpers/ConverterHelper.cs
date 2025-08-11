@@ -58,5 +58,16 @@ namespace CondoManagementWebApp.Helpers
             };
             return registerDto;
         }
+
+        public ChangePasswordDto ToChangePasswordDto(ChangePasswordViewModel model)
+        {
+            var changePasswordDto = new ChangePasswordDto()
+            {
+                OldPassword = model.OldPassword,
+                NewPassword = model.NewPassword,
+                Email = model.Email,    
+            };
+            return changePasswordDto;
+        }
     }
 }
