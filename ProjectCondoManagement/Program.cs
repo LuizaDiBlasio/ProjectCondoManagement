@@ -8,6 +8,8 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Finances;
 using ProjectCondoManagement.Helpers;
 using System.Text;
 
@@ -75,6 +77,8 @@ builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
 builder.Services.AddScoped<ISmsHelper, SmsHelper>();
 
 builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
+
+builder.Services.AddScoped<IFinancialAccountRepository, FinancialAccountReposirory>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
 

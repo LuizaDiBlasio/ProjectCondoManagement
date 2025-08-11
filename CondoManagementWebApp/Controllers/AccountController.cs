@@ -234,7 +234,7 @@ namespace CondoManagementWebApp.Controllers
         /// Cleans Session, remove cookies and redirects to the Home page. 
         /// </summary>
         /// <returns>A redirection to the Home page.</returns>
-        [Authorize(Roles = "Admin, CondoManager, CondoMember")]
+        [Authorize(Roles = "CompanyAdmin, CondoManager, CondoMember")]
         public async Task<IActionResult> Logout()
         {
             // Limpa o token JWT da sessão do Web App.
@@ -262,7 +262,7 @@ namespace CondoManagementWebApp.Controllers
                 new SelectListItem{Value = "0", Text = "Select a role..."},
                 new SelectListItem{Value = "CondoManager", Text = "Condo manager"},
                 new SelectListItem{Value = "CondoMember", Text = "Condo member"},
-                new SelectListItem{Value = "Admin", Text = "Admin"},
+                new SelectListItem{Value = "CompanyAdmin", Text = "Company admin"},
             };
 
             var model = new RegisterUserViewModel();

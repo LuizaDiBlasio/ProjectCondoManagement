@@ -19,6 +19,5 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public Payment Payment { get; set; }
 
-        public decimal TotalAmount => Payment != null ? Payment.Expenses.Sum(e => e.Amount) : 0;
     }
 }

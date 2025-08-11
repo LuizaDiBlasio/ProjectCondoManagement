@@ -20,6 +20,8 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public IEnumerable<Expense> Expenses { get; set; }
 
+        public decimal TotalAmount => Expenses.Sum(e => e.Amount);
+
         public Transaction? Transaction { get; set; }
 
     }

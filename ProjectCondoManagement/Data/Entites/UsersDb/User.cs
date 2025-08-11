@@ -16,7 +16,7 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
 
         public Company? Company { get; set; }
 
-        //public int? FinancialAccount {  get; set; }  
+        public int? FinancialAccountId { get; set; }
 
         public bool IsActive { get; set; }  = true; 
 

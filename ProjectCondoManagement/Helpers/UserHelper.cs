@@ -1,8 +1,8 @@
-﻿using ClassLibrary;
-using ClassLibrary.DtoModels;
+﻿using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
-using System.Security.Policy;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 
 namespace ProjectCondoManagement.Helpers
 {
@@ -14,12 +14,18 @@ namespace ProjectCondoManagement.Helpers
 
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager)
+        private readonly IFinancialAccountRepository _financialAccountRepository;
+
+        private readonly DataContextFinances _dataContextFinances;
+
+        public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager,
+            IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
-
+            _financialAccountRepository = financialAccountRepository;
+            _dataContextFinances = dataContextFinances;
         }
 
 
@@ -31,10 +37,17 @@ namespace ProjectCondoManagement.Helpers
             }
 
             var user = await GetUserByEmailAsync(registerDtoModel.Email); //buscar user  
-            if(user != null)
+            if (user != null)
             {
-                return null;
+                return null; //já existe o user --> resposta negativa (null)
             }
+
+            var financialAccount = new FinancialAccount()
+            {
+                InitialDeposit = 0 // depósito inicial vai ser sempre 0
+            }; 
+
+            await _financialAccountRepository.CreateAsync(financialAccount, _dataContextFinances); //add FinAcc na Bd
 
                 user = new User
                 {
@@ -46,28 +59,29 @@ namespace ProjectCondoManagement.Helpers
                     ImageUrl = registerDtoModel.ImageUrl,
                     BirthDate = registerDtoModel.BirthDate,
                     CompanyId = registerDtoModel.CompanyId,
+                    FinancialAccountId = financialAccount.Id
                 };
 
-                var result = await AddUserAsync(user, "123456"); //add user depois de criado
+            var result = await AddUserAsync(user, "123456"); //add user depois de criado
 
-                if (result != IdentityResult.Success) // caso não consiga criar user
-                {
-                    return null;
-                }
+            if (result != IdentityResult.Success) // caso não consiga criar user
+            {
+                return null;
+            }
 
-                //Adicionar roles ao user
-                switch (registerDtoModel.SelectedRole)
-                {
-                    case "CondoMember":
-                        await AddUserToRoleAsync(user, "CondoMember");
-                        break;
-                    case "CondoManager":
-                        await AddUserToRoleAsync(user, "CondoManager");
-                        break;
-                    case "Admin":
-                        await AddUserToRoleAsync(user, "Admin");
-                        break;
-                }
+            //Adicionar roles ao user
+            switch (registerDtoModel.SelectedRole)
+            {
+                case "CondoMember":
+                    await AddUserToRoleAsync(user, "CondoMember");
+                    break;
+                case "CondoManager":
+                    await AddUserToRoleAsync(user, "CondoManager");
+                    break;
+                case "Admin":
+                    await AddUserToRoleAsync(user, "CompanyAdmin");
+                    break;
+            }
 
             //TODO Tirar o if e essa atribuição de bool quando publicar, manter só o método de ativação
             user.Uses2FA = true;
@@ -148,7 +162,7 @@ namespace ProjectCondoManagement.Helpers
         /// <returns>A "Task" that represents the asynchronous operation.</returns>
         public async Task CreateRolesAsync()
         {
-            string[] roleNames = { "CondoManager", "CondoMember", "Admin" };
+            string[] roleNames = { "CondoManager", "CondoMember", "CompanyAdmin", "SysAdmin" };
 
             foreach (var roleName in roleNames)
             {
@@ -321,7 +335,7 @@ namespace ProjectCondoManagement.Helpers
 
         public async Task<IList<string>> GetRolesAsync(User user)
         {
-            return await _userManager.GetRolesAsync(user);  
+            return await _userManager.GetRolesAsync(user);
         }
 
         public async Task<string> GenerateTwoFactorTokenAsync(User user, string tokenProvider)
