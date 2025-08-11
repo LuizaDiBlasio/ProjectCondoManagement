@@ -58,6 +58,5 @@ namespace CondoManagementWebApp.Helpers
             };
             return registerDto;
         }
-
     }
 }

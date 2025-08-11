@@ -13,7 +13,5 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
         public IEnumerable<Transaction> TransactionsAsBeneficiary { get; set; }
 
         public decimal Balance { get; set; }
-
-        public string UserId { get; set; }
     }
 }

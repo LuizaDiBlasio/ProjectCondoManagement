@@ -51,13 +51,11 @@
                                 </div>
 
                                 <div class="form-row d-flex flex-wrap justify-content-between align-items-baseline mb-2">
-                                    <div class="form-group mb-sm-4 mb-1">
-                                        
-                                    </div>
                                     <div class="form-group ms-2">
-                                        <a asp-controller="Account" asp-action="ForgotPassword">Forgot Password?</a>
+                                        <a href="#" id="forgotPasswordLink">Forgot Password?</a>
                                     </div>
                                 </div>
+
                                 <div class="text-center">
                                     <button type="submit" class="btn btn-primary btn-block" id="loginButton">Sign In</button>
                                 </div>
@@ -69,7 +67,6 @@
         </div>
     </div>
 
-    <!-- Modal 2FA -->
     <div class="modal fade" id="twoFAModal" tabindex="-1" aria-labelledby="twoFAModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -96,6 +93,14 @@
         </div>
     </div>
 
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div id="forgotPasswordModalContent"></div>
+            </div>
+        </div>
+    </div>
+
     @section Scripts {
         @{
             await Html.RenderPartialAsync("_ValidationScriptsPartial");
@@ -105,25 +110,21 @@
             $(document).ready(function() {
                 var currentUsername = '';
 
-                // Intercepta o submit do formulário de login
+                // --- Lógica do Login e 2FA ---
                 $('#loginForm').on('submit', function(event) {
                     event.preventDefault();
 
                     var username = $('#username').val();
                     var password = $('#dz-password').val();
 
-                    // Armazena o username para uso posterior (na verificação 2FA)
                     currentUsername = username;
 
-                    // Desabilita o botão de login e mostra um feedback visual
                     $('#loginButton').prop('disabled', true).text('Logging in...');
 
-                    // Limpa mensagens de erro de tentativas anteriores
-                    $('#loginErrorSummary').text('').hide(); // Limpa o container de erro genérico
+                    $('#loginErrorSummary').text('').hide();
                     $('#username').removeClass('is-invalid');
                     $('#dz-password').removeClass('is-invalid');
 
-                    // Faz a requisição AJAX para o endpoint de login
                     $.ajax({
                         url: '@Url.Action("RequestLogin", "Account")',
                         type: 'POST',
@@ -132,9 +133,7 @@
                             Password: password
                         },
                         success: function(data) {
-                            // Reabilita o botão de login
                             $('#loginButton').prop('disabled', false).text('Sign In');
-
                             if (data.isSuccess) {
                                 if (data.requires2FA === true) {
                                     $('#twoFAModal').modal('show');
@@ -143,13 +142,11 @@
                                 }
                             } else {
                                 var errorMsg = data.message || 'Login failed, please check your credentials.';
-                                $('#loginErrorSummary').text(errorMsg).show(); // Exibe o erro no local correto
+                                $('#loginErrorSummary').text(errorMsg).show();
                             }
                         },
                         error: function(xhr) {
-                            // Reabilita o botão de login
                             $('#loginButton').prop('disabled', false).text('Sign In');
-
                             var errorMsg = 'Login failed, please check your credentials.';
                             if (xhr.responseJSON && xhr.responseJSON.message) {
                                 errorMsg = xhr.responseJSON.message;
@@ -159,8 +156,7 @@
                                     errorMsg = Object.values(errors).flat()[0];
                                 }
                             }
-
-                            $('#loginErrorSummary').text(errorMsg).show(); // Exibe o erro no local correto
+                            $('#loginErrorSummary').text(errorMsg).show();
                         }
                     });
                 });
@@ -173,7 +169,6 @@
                 </text>
             }
 
-                // Verificar código 2FA
                 $('#verifyTokenButton').on('click', function() {
                     var token = $('#twoFAToken').val().trim();
                     var errorContainer = $('#twoFATokenError');
@@ -217,23 +212,41 @@
                     });
                 });
 
-                // Limpar erro quando usuário digitar
                 $('#twoFAToken').on('input', function() {
                     $('#twoFATokenError').hide();
                 });
 
-                // Função para resetar o botão de verificação
                 function resetVerifyButton() {
                     $('#verifyButtonText').text('Verify');
                     $('#verifyButtonSpinner').addClass('d-none');
                     $('#verifyTokenButton').prop('disabled', false);
                 }
 
-                // Resetar o estado do modal e do botão ao fechar o modal
                 $('#twoFAModal').on('hidden.bs.modal', function() {
                     resetVerifyButton();
                     $('#twoFAToken').val('');
                     $('#twoFATokenError').hide();
+                });
+
+                // --- Lógica da Modal Forgot Password ---
+                $('#forgotPasswordLink').on('click', function(e) {
+                    e.preventDefault();
+
+                    $.ajax({
+                        url: '@Url.Action("ForgotPasswordPartial", "Account")',
+                        type: 'GET',
+                        success: function(data) {
+                            $('#forgotPasswordModalContent').html(data);
+                            $('#forgotPasswordModal').modal('show');
+                        },
+                        error: function() {
+                            alert('Could not load password reset form. Please try again.');
+                        }
+                    });
+                });
+
+                $('#forgotPasswordModal').on('hidden.bs.modal', function() {
+                    $('#forgotPasswordModalContent').empty();
                 });
             });
         </script>

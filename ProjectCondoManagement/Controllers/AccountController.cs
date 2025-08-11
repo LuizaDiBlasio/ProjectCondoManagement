@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
@@ -83,7 +84,7 @@ namespace ProjectCondoManagement.Controllers
                     return StatusCode(500, new { Message = "It was not possible to send SMS verification code" });
                 }
             }
-            else //seguir normalmente para ambiente de desenvolvimento
+            else //seguir normalmente para ambiente de desenvolvimento //TODO todo esse else vai ser apagado antes de publicar 
             {
                 // pede lista de roles do usuário (somente 1 item na lista)
                 var roles = await _userHelper.GetRolesAsync(user);
@@ -106,9 +107,11 @@ namespace ProjectCondoManagement.Controllers
                     return Ok(results);
                 }
 
+
             }
             return Unauthorized(new { Message = "Login failed, credentials are not valid." });
         }
+
 
 
         [HttpPost("Verify2FA")]
@@ -155,6 +158,36 @@ namespace ProjectCondoManagement.Controllers
 
 
 
+        [HttpPost("GenerateForgotPasswordTokenAndEmail")]
+        public async Task<IActionResult> GenerateForgotPasswordTokenAndEmail([FromBody] string email)
+        {
+            var user = await _userHelper.GetUserByEmailAsync(email);
+
+            if (user == null)
+            {
+                return StatusCode(404, new Response { Message = "User not found", IsSuccess = false });
+            }
+
+            string myToken = await _userHelper.GeneratePasswordResetTokenAsync(user); //gerar o token
+
+            // gera um link de confirmção para o email
+            string tokenLink = $"{webBaseAdress}/Account/RecoverPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
+
+            Response response = _mailHelper.SendEmail(email, "Retrieve your password", $"<h1>Retrieve your password</h1>" +
+           $"<br><br><a href = \"{tokenLink}\">Click here to reset your password</a>"); //Contruir email e enviá-lo com o link
+
+            if (response.IsSuccess) //se conseguiu enviar o email
+            {
+                return StatusCode(200, new {  Message = "A link to retrieve password has been sent to your email" });
+            }
+
+            //se não conseguiu enviar email:
+            return StatusCode(500, new  { Message = "Unable to retrieve password, please contact admin" });
+
+        }
+
+
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [Microsoft.AspNetCore.Mvc.HttpPost("AssociateUser")]
         public async Task<IActionResult> AssociateUser([FromBody] RegisterUserDto registerDtoModel)
@@ -182,6 +215,8 @@ namespace ProjectCondoManagement.Controllers
             //se não conseguiu enviar email:
             return StatusCode(500, new { Message = "User couldn't be logged" });
         }
+
+
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [Microsoft.AspNetCore.Mvc.HttpPost("Register")]
@@ -251,6 +286,8 @@ namespace ProjectCondoManagement.Controllers
             }   
         }
 
+
+
         [Microsoft.AspNetCore.Mvc.HttpPost("GenerateResetPasswordToken")]
         public async Task<IActionResult> GenerateResetPasswordToken([FromBody] ResetPasswordDto resetPasswordDto)
         {
@@ -274,6 +311,8 @@ namespace ProjectCondoManagement.Controllers
             return StatusCode(200, new Response { Token = passwordToken, IsSuccess = true });
         }
 
+
+
         [Microsoft.AspNetCore.Mvc.HttpPost("ResetPassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
@@ -295,6 +334,7 @@ namespace ProjectCondoManagement.Controllers
                 return StatusCode(400, new Response { Message = "An unexpected error occurred while resetting password, please try again", IsSuccess = false });
             }   
         }
+
     }
 }
 

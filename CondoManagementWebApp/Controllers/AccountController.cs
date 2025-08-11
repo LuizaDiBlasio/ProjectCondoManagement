@@ -2,6 +2,7 @@
 using ClassLibrary.DtoModels;
 using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
+using Humanizer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.IdentityModel.Tokens.Jwt;
+using System.Numerics;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -100,7 +102,7 @@ namespace CondoManagementWebApp.Controllers
 
                 if (tokenResponse.Requires2FA)
                 {
-                    // Para requisições AJAX, retorne um JSON que o JavaScript possa entender
+                   // Para requisições AJAX, retorne um JSON que o JavaScript possa entender
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
                         return Ok(new { isSuccess = true, requires2FA = true, username = model.Username });
@@ -195,6 +197,38 @@ namespace CondoManagementWebApp.Controllers
             }
         }
 
+        /// <summary>
+        /// Displays ForgotPasswordPartial View
+        /// </summary>
+        /// <returns>IActionResult of the view</returns>
+        //Get da _ForgotPasswordPartial
+        public IActionResult ForgotPasswordPartial()
+        {
+            return PartialView("_ForgotPasswordPartial");
+        }
+
+        /// <summary>
+        /// Call API to send a retrieve password link to user
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>A json containing the API call outcome</returns>
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            var jsonContent = new StringContent(
+                JsonSerializer.Serialize(model.Email, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                Encoding.UTF8,
+                "application/json");
+
+            var apiCall = await _httpClient.PostAsync($"{baseUrl}api/Account/GenerateForgotPasswordTokenAndEmail", jsonContent);
+
+            if (apiCall.IsSuccessStatusCode)
+            {
+                return Json(new { Message = "A retrieve password link has been sent to your email" });
+            }
+
+
+            return Json(new { Message = "Unable to send link, please contact admin." });
+        }
 
         /// <summary>
         /// Cleans Session, remove cookies and redirects to the Home page. 
@@ -320,8 +354,8 @@ namespace CondoManagementWebApp.Controllers
         /// Displays the view for resetting the user's password after email confirmation.
         /// </summary>
         /// <param name="userId">The ID of the user.</param>
-        /// <param name="token">The email confirmation token.</param>
-        /// <returns>The password reset view or a "User Not Found" view if parameters are invalid.</returns>
+        /// <param name="tokenEmail">The email confirmation token.</param>
+        /// <returns>The password reset view or a "NotAuthorized" view if parameters are invalid.</returns>
         //Get do ResetPassword
         public async Task<IActionResult> ResetPassword(string userId, string tokenEmail)
         {
@@ -357,11 +391,11 @@ namespace CondoManagementWebApp.Controllers
                     return View( model2);
                 }
 
-                return View("Error");
+                return new NotFoundViewResult("NotAuthorized");
             }
             catch
             {
-                return View("Error");
+                return new NotFoundViewResult("NotAuthorized");
             }
                 
         }
@@ -372,7 +406,7 @@ namespace CondoManagementWebApp.Controllers
         /// <param name="model">The model containing the username, reset token, and new password.</param>
         /// <returns>The password reset view with a success or error message.</returns>
         [HttpPost]
-        public async Task<IActionResult> SendResetPassword(ResetPasswordViewModel model) //recebo modelo preechido com dados para reset da password
+        public async Task<IActionResult> RequestResetPassword(ResetPasswordViewModel model) //recebo modelo preechido com dados para reset da password
         {
             if (string.IsNullOrEmpty(model.UserId) || string.IsNullOrEmpty(model.Token)) //verificar parâmetros (se o token for null, quer dizer que processo falhou e não autoriza)
             {
@@ -403,6 +437,77 @@ namespace CondoManagementWebApp.Controllers
                 return View("ResetPassword", new ResetPasswordViewModel());
             }
         }
+
+
+        /// <summary>
+        /// Displays the view for recovering the user's password after email confirmation.
+        /// </summary>
+        /// <param name="userId">The ID of the user.</param>
+        /// <param name="token">The email confirmation token.</param>
+        /// <returns>The password recover view or a "NotAuthorized" view if parameters are invalid.</returns>
+        //Get do RecoverPassword
+        public IActionResult RecoverPassword(string userId, string token)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token)) //verificar parâmetros
+            {
+                return new NotFoundViewResult("NotAuthorized");
+            }
+
+            var model = new ResetPasswordViewModel()
+            {
+                UserId = userId,
+                Token = token,
+                Password = String.Empty  //ainda não foi colocada a senha
+            };
+            
+            return View(model);
+        }
+
+
+        /// <summary>
+        /// Processes the user's password recover request.
+        /// </summary>
+        /// <param name="model">The model containing the username, reset token, and new password.</param>
+        /// <returns>The password recover view with a success or error message.</returns>
+        [HttpPost]
+        public async Task<IActionResult> RequestRecoverPassword(ResetPasswordViewModel model) //recebo modelo preechido com dados para recover da password
+        {
+            if (string.IsNullOrEmpty(model.UserId) || string.IsNullOrEmpty(model.Token)) //verificar parâmetros (se o token for null, quer dizer que processo falhou e não autoriza)
+            {
+                return new NotFoundViewResult("NotAuthorized");
+            }
+
+            var resetPasswordDto = _converterHelper.ToResetPasswordDto(model); //esse já contém password
+
+            var jsonContent = new StringContent(
+               JsonSerializer.Serialize(model, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+               Encoding.UTF8,
+               "application/json");
+
+            try
+            {
+                var apiCall = await _httpClient.PostAsync("api/Account/ResetPassword", jsonContent);
+
+                if (apiCall.IsSuccessStatusCode)
+                {
+                    _flashMessage.Confirmation("Password sucessfully reset");
+
+                    return View("RecoverPassword", new RecoverPasswordViewModel());
+                }
+
+                _flashMessage.Danger($"Unable to reset password, please contact admin");
+
+                return View("RecoverPassword", new RecoverPasswordViewModel());
+            }
+            catch (Exception e)
+            {
+                _flashMessage.Danger($"Unable to reset password, please contact admin");
+
+                return View("RecoverPassword", new RecoverPasswordViewModel());
+            }
+        }
+
+
 
         // <summary>
         /// Displays the "Not Authorized" view when a user tries to access a restricted area.

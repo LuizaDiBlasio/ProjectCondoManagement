@@ -16,6 +16,8 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
 
         public Company? Company { get; set; }
 
+        //public int? FinancialAccount {  get; set; }  
+
         public bool IsActive { get; set; }  = true; 
 
         public bool Uses2FA {  get; set; }  //TODO: Tirar essa propriedade quando publicar
