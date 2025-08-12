@@ -162,6 +162,11 @@ namespace CondoManagementWebApp.Controllers
             
         }
 
+        /// <summary>
+        /// Verifies sms code input from 2FA authentication
+        /// </summary>
+        /// <param name="model">model from modal partial view</param>
+        /// <returns>Json response containing outcome</returns>
         [HttpPost]
         public async Task<IActionResult> Verify2FA([FromBody] Verify2FADto model)
         {
@@ -676,19 +681,6 @@ namespace CondoManagementWebApp.Controllers
     }
 }
 
-//Explicação do fluxo do Login com jwt (apagar depois):
 
-//O login apiCall do frontend faz uma requisição HTTP com as informações de login para a API. A API checa essas informações,
-//caso elas sejam válidas, gera um token JWT Bearer e devolve isso para o frontend na sua resposta. O frontend, que é uma aplicação ASP.NET Core Web,
-//recebe o token, desserializa-o para extrair as claims (informações do usuário) e usa essas claims para criar um cookie de autenticação. Este cookie
-//será usado para manter o usuário autenticado na sessão do browser, permitindo o acesso às páginas protegidas do Web App. O Controller Account do cliente
-//também se encarrega de armazenar o token Jwt dentro de novos para que seja possível acessar aos dados via api. O Program.cs do frontend configura
-//a autenticação por cookies, enquanto o Program.cs do backend (API) configura o esquema de autenticação para validar os tokens JWT que são enviados em cada
-//requisição feita pelo  Web App (ou por qualquer outro cliente da API) para ele. O User Identity é usado na validação de informações do user na API,
-//mas deixa de ser utilizado para criação de token e armazenamento de cookie como no projeto passado
-
-//A cada requisição:
-//para cada requisição é necessário adicionar o token ao cabeçalho do json que será enviado na requisição http fazemos isso por meio do serviços de userApiCall
-//e da interface apiCall para as demais entidades
 
 
