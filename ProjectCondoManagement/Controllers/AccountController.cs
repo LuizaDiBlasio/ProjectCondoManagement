@@ -69,7 +69,7 @@ namespace ProjectCondoManagement.Controllers
             {
                 var token = await _userHelper.GenerateTwoFactorTokenAsync(user, "Phone");
 
-                var response = await _smsHelper.SendSmsAsync(user.PhoneNumber, $"Your authentication code is: {token}");
+                var response = await _smsHelper.SendSmsAsync("+351936752044", $"Your authentication code is: {token}");
 
                 if (response.IsSuccess)
                 {
@@ -189,7 +189,7 @@ namespace ProjectCondoManagement.Controllers
 
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "SysAdmin")]
         [Microsoft.AspNetCore.Mvc.HttpPost("AssociateUser")]
         public async Task<IActionResult> AssociateUser([FromBody] RegisterUserDto registerDtoModel)
         {
@@ -219,7 +219,7 @@ namespace ProjectCondoManagement.Controllers
 
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "SysAdmin")]
         [Microsoft.AspNetCore.Mvc.HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDto registerDtoModel)
         {
@@ -238,7 +238,7 @@ namespace ProjectCondoManagement.Controllers
                     return StatusCode(500, new { Message = "Internal server error: User not registered" });
                 }
 
-                //Adicionar roles ao user
+                //Adicionar roles ao user //TODO comentar
                 switch (registerDtoModel.SelectedRole)
                 {
                     case "CondoMember":
@@ -248,7 +248,7 @@ namespace ProjectCondoManagement.Controllers
                         await _userHelper.AddUserToRoleAsync(newUser, "CondoManager");
                         break;
                     case "Admin":
-                        await _userHelper.AddUserToRoleAsync(newUser, "Admin");
+                        await _userHelper.AddUserToRoleAsync(newUser, "CompanyAdmin");
                         break;
                 }
 

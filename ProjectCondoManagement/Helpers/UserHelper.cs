@@ -78,7 +78,7 @@ namespace ProjectCondoManagement.Helpers
                 case "CondoManager":
                     await AddUserToRoleAsync(user, "CondoManager");
                     break;
-                case "Admin":
+                case "CompanyAdmin":
                     await AddUserToRoleAsync(user, "CompanyAdmin");
                     break;
             }

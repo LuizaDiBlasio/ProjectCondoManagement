@@ -1,0 +1,125 @@
+﻿@model CondoManagementWebApp.Models.ProfileViewModel
+
+
+@* Estrutura do layout do template: header, sidebar e content-body *@
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Profile</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Profile</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">My Profile</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8 col-lg-6 mx-auto">
+                                @* Usando mx-auto para centralizar a coluna *@
+                                <flash dismissable="true" />
+
+                                @* Seção da Imagem de Perfil *@
+                                <div class="profile-img-container mb-4 text-center">
+                                    @* Alterado para centralizar a imagem no container *@
+                                    <img src="@Url.Content(Model.ImageFullPath)" alt="Profile Image" class="img-fluid rounded-circle" style="width:200px; height:200px; object-fit:cover;" />
+                                </div>
+
+                                @* Formulário de Perfil do Usuário *@
+                                <form asp-action="MyUserProfile" method="post" enctype="multipart/form-data">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <input type="hidden" asp-for="ImageUrl" />
+                                    <input type="hidden" asp-for="Email" />
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-group">
+                                                <label asp-for="FullName" class="form-label">Full Name</label> @* Alterado para form-label *@
+                                                <input asp-for="FullName" class="form-control" />
+                                                <span asp-validation-for="FullName" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-group">
+                                                <label asp-for="BirthDate" class="form-label">Birth Date</label>
+                                                <div>
+                                                    <input type="text" id="birthDateInput" asp-for="BirthDate" class="form-control" />
+                                                </div>
+                                                <span asp-validation-for="BirthDate" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-group">
+                                                <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                                                <input asp-for="PhoneNumber" class="form-control" />
+                                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-group">
+                                                <label asp-for="Address" class="form-label">Address</label>
+                                                <input asp-for="Address" class="form-control" />
+                                                <span asp-validation-for="Address" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-group">
+                                            <label asp-for="ImageFile" class="form-label">Image File</label>
+                                            <input asp-for="ImageFile" class="form-control" type="file" />
+                                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mt-3 d-flex justify-content-start align-items-center">
+                                        <input type="submit" value="Save" class="btn btn-primary me-2" />
+                                        <a asp-action="Index" asp-controller="Home" class="btn btn-action-secondary">Back to DashBoard</a>
+                                    </div>
+                                    @if (ViewBag.ErrorMessage != null)
+                                    {
+                                        <div class="alert alert-danger mt-3" role="alert">
+                                            @ViewBag.ErrorMessage
+                                        </div>
+                                    }
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<flash dismissable="true" />
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializa o DatePicker
+            var birthDatePicker = new ej.calendars.DatePicker({
+                format: 'MM/dd/yyyy',
+                placeholder: 'Select a date'
+            });
+            birthDatePicker.appendTo('#birthDateInput');
+        });
+    </script>
+}

@@ -102,7 +102,7 @@ namespace CondoManagementWebApp.Controllers
                     var content = await response.Content.ReadAsStringAsync();
                     var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                    if (tokenResponse.Requires2FA)
+                    if (tokenResponse.Requires2FA) //TODO remover esse if antes de publicar
                     {
                         // Para requisições AJAX, retorne um JSON que o JavaScript possa entender
                         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -136,10 +136,10 @@ namespace CondoManagementWebApp.Controllers
                         return RedirectToAction("Index", "Home");
                     }
                 }
-                else // Login falhou na API
+                    else // Login falhou na API
                 {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var error = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var content2 = await response.Content.ReadAsStringAsync();
+                    var error = JsonSerializer.Deserialize<Response>(content2, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
@@ -261,7 +261,7 @@ namespace CondoManagementWebApp.Controllers
         /// Cleans Session, remove cookies and redirects to the Home page. 
         /// </summary>
         /// <returns>A redirection to the Home page.</returns>
-        [Authorize(Roles = "CompanyAdmin, CondoManager, CondoMember")]
+        [Authorize(Roles = "CompanyAdmin, CondoManager, CondoMember, SysAdmin")]
         public async Task<IActionResult> Logout()
         {
             // Limpa o token JWT da sessão do Web App.
@@ -280,7 +280,7 @@ namespace CondoManagementWebApp.Controllers
         /// Populates available roles for selection.
         /// </summary>
         /// <returns>The registration view with available roles.</returns>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "SysAdmin")]
         public IActionResult Register() //só mostra a view do Register
         {
             //criar modelo com as opções da combobox
@@ -307,7 +307,7 @@ namespace CondoManagementWebApp.Controllers
         /// </summary>
         /// <param name="model">The model containing the data of the new user to be registered.</param>
         /// <returns>An action result indicating success or failure of the registration.</returns>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "SysAdmin")]
         [Microsoft.AspNetCore.Mvc.HttpPost]
         public async Task<IActionResult> RequestRegister(RegisterUserViewModel model) // registra o user
         {
@@ -580,6 +580,13 @@ namespace CondoManagementWebApp.Controllers
                 return View("ChangePassword", model);
             }
         } 
+
+        public IActionResult Profile()
+        { 
+            var model = new ProfileViewModel(); 
+
+            return View(model);
+        }
 
 
         // <summary>
