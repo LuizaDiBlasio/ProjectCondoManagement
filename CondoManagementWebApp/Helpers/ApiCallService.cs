@@ -55,5 +55,18 @@ namespace CondoManagementWebApp.Helpers
             return response;
         }
 
+        public async Task<TResponse> GetByEmailAsync<TRequest, TResponse>(string requestUri, TRequest data)
+        {
+            AddAuthorizationHeader();
+            var jsonContent = new StringContent(
+                JsonSerializer.Serialize(data),
+                Encoding.UTF8,
+                "application/json"
+            );
+            var response = await _httpClient.PostAsync(requestUri, jsonContent);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<TResponse>();
+        }
     }
 }

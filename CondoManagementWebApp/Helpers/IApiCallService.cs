@@ -11,6 +11,8 @@ namespace CondoManagementWebApp.Helpers
 
         public  Task<T> GetAsync<T>(string requestUri);
 
+        public Task<TResponse> GetByEmailAsync<TRequest, TResponse>(string requestUri, TRequest data); //TRequest será sempre string nesse caso
+
         public Task<HttpResponseMessage> DeleteAsync(string requestUri);
     }
 }

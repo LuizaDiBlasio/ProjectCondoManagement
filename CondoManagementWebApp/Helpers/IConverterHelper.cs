@@ -14,5 +14,9 @@ namespace CondoManagementWebApp.Helpers
         public RegisterUserDto ToRegisterDto(CondoMemberDto condoMember);
 
         public ChangePasswordDto ToChangePasswordDto(ChangePasswordViewModel model);
+
+        public UserDto ToUserDto(ProfileViewModel model);
+
+        public ProfileViewModel ToProfileViewModel(UserDto userDto);
     }
 }

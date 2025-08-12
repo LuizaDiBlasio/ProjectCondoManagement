@@ -238,20 +238,6 @@ namespace ProjectCondoManagement.Controllers
                     return StatusCode(500, new { Message = "Internal server error: User not registered" });
                 }
 
-                //Adicionar roles ao user //TODO comentar
-                switch (registerDtoModel.SelectedRole)
-                {
-                    case "CondoMember":
-                        await _userHelper.AddUserToRoleAsync(newUser, "CondoMember");
-                        break;
-                    case "CondoManager":
-                        await _userHelper.AddUserToRoleAsync(newUser, "CondoManager");
-                        break;
-                    case "Admin":
-                        await _userHelper.AddUserToRoleAsync(newUser, "CompanyAdmin");
-                        break;
-                }
-
                 var isCondoMember = await _userHelper.IsUserInRoleAsync(newUser, "CondoMember");
 
                 if (isCondoMember) // caso o user seja um condomember, criar condomember programaticamente
@@ -364,6 +350,50 @@ namespace ProjectCondoManagement.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Microsoft.AspNetCore.Mvc.HttpPost("GetUserByEmail")]
+
+        public async Task<IActionResult> GetUserByEmail([FromBody] string email)
+        {
+            var user = await _userHelper.GetUserByEmailAsync(email);
+
+            if (user == null)
+            {    
+                return NotFound(null);
+            }
+
+            var userDto = _converterHelper.ToUserDto(user);
+
+            return Ok(userDto);    
+        }
+
+
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Microsoft.AspNetCore.Mvc.HttpPost("EditProfile")]
+
+        public async Task<IActionResult> EditProfile([FromBody] UserDto userDto)
+        {
+            var user = await _userHelper.GetUserByEmailAsync(userDto.Email);
+            
+            if (user == null)
+            {
+                return NotFound(null);  
+            }
+
+            var response = await _userHelper.UpdateUserAsync(user);
+
+            if(response.Succeeded)
+            {
+                var editedUser = await _userHelper.GetUserByEmailAsync(userDto.Email);
+
+                var editedUserDto = _converterHelper.ToUserDto(editedUser);
+
+                return Ok(editedUserDto);
+            }
+
+            return StatusCode(500, new { error = "An internal server error occurred." });
+        }
 
     }
 }

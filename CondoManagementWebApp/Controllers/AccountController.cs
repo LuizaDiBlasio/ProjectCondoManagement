@@ -16,6 +16,7 @@ using System.Numerics;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Vereyon.Web;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -581,11 +582,76 @@ namespace CondoManagementWebApp.Controllers
             }
         } 
 
-        public IActionResult Profile()
-        { 
-            var model = new ProfileViewModel(); 
+        /// <summary>
+        /// Makes an http request to retrirve user's profile
+        /// </summary>
+        /// <returns>A view with user's profile details or empty if unsuccessfull</returns>
+        public async Task<IActionResult> Profile()
+        {
+            try
+            {
+                var apicall = await _apiCallService.GetByEmailAsync<string, UserDto?>("api/Account/GetUserByEmail", this.User.Identity.Name);
 
-            return View(model);
+                if (apicall == null)
+                {
+                    _flashMessage.Danger("Unable to retrive user's profile");
+                    return View(new ProfileViewModel());
+                }
+
+                var model = _converterHelper.ToProfileViewModel(apicall);
+
+                return View(model);
+            }
+            catch (Exception e)
+            {
+                _flashMessage.Danger("Unable to retrive user's profile");
+
+                return View(new ProfileViewModel());
+            }
+            
+        }
+
+
+        /// <summary>
+        /// Makes an http request to edit user's profile
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>A view with user's profile details edited or view with errors i case call is unsuccessfull</returns>
+        public async Task<IActionResult> EditProfile(ProfileViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("Profile", model);
+            }
+
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                var url = await _cloudinaryService.UploadImageAsync(model.ImageFile);
+                model.ImageUrl = url;
+            }
+
+            var userDto = _converterHelper.ToUserDto(model);
+
+            try
+            {
+                var apiCall = await _apiCallService.PostAsync<UserDto, UserDto?>("api/Account/EditProfile", userDto);
+
+                if (apiCall == null)
+                {
+                    _flashMessage.Danger("Unable to edit user's profile");
+                    return View("Profile", model);
+                }
+
+                var editedModel = _converterHelper.ToProfileViewModel(userDto);
+
+                return View("Profile", editedModel);
+            }
+            catch
+            {
+                _flashMessage.Danger("Unable to edit user's profile");
+                return View("Profile", model);
+            }
+           
         }
 
 

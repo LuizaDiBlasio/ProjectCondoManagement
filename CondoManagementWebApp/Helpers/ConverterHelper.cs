@@ -69,5 +69,35 @@ namespace CondoManagementWebApp.Helpers
             };
             return changePasswordDto;
         }
+
+        public UserDto ToUserDto(ProfileViewModel model)
+        {
+            var userDto = new UserDto()
+            {
+                FullName = model.FullName,
+                BirthDate = model.BirthDate,
+                PhoneNumber = model.PhoneNumber,
+                Address = model.Address,
+                ImageUrl = model.ImageUrl, 
+                Email = model.Email
+            };
+
+            return userDto; 
+        }
+
+        public ProfileViewModel ToProfileViewModel(UserDto userDto)
+        {
+            var model = new ProfileViewModel()
+            {
+                FullName = userDto.FullName,
+                BirthDate = userDto.BirthDate,
+                PhoneNumber = userDto.PhoneNumber,
+                Address = userDto.Address,
+                ImageUrl = userDto.ImageUrl,
+                Email = userDto.Email
+            };
+
+            return model;   
+        }
     }
 }

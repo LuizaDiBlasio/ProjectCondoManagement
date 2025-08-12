@@ -37,8 +37,9 @@
                                 </div>
 
                                 @* Formulário de Perfil do Usuário *@
-                                <form asp-action="MyUserProfile" method="post" enctype="multipart/form-data">
+                                <form asp-action="EditProfile" asp-controller="Account" method ="post" enctype="multipart/form-data">
                                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <input type="hidden" asp-for="Email" />
                                     <input type="hidden" asp-for="ImageUrl" />
                                     <input type="hidden" asp-for="Email" />
 
