@@ -37,8 +37,15 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CondoMember>>> GetCondoMembers()
         {
-            return await _condoMemberRepository.GetAll(_context).ToListAsync();
+            var condoMembers = await _condoMemberRepository.GetAll(_context).ToListAsync();
+
+            await _condoMemberRepository.LinkImages(condoMembers); // Link images to condo members
+
+            return condoMembers;
+
         }
+
+
 
         // GET: api/CondoMembers/5
         [HttpGet("{id}")]

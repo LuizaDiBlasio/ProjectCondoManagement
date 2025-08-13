@@ -1,24 +1,17 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
-using CloudinaryDotNet.Actions;
 using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
-using Humanizer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.IdentityModel.Tokens.Jwt;
-using System.Numerics;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Vereyon.Web;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CondoManagementWebApp.Controllers
 {
@@ -31,7 +24,6 @@ namespace CondoManagementWebApp.Controllers
         private readonly HttpClient _httpClient;
         private readonly IApiCallService _apiCallService;
 
-        private readonly string baseUrl = "https://localhost:7001/"; //TODO : Mudar depois que publicar
 
         public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient,
             IConverterHelper converterHelper, CloudinaryService cloudinaryService, IApiCallService apiCallService)
@@ -43,6 +35,7 @@ namespace CondoManagementWebApp.Controllers
             _cloudinaryService = cloudinaryService;
             _converterHelper = converterHelper;
             _apiCallService = apiCallService;
+
         }
 
         /// <summary>
@@ -52,8 +45,15 @@ namespace CondoManagementWebApp.Controllers
         //Get do login 
         public IActionResult Login()
         {
+
+
             if (User.Identity.IsAuthenticated) //caso usuário esteja autenticado
             {
+                if (User.IsInRole("SysAdmin"))
+                {
+                    return RedirectToAction("SysAdminDashBoard", "Account");
+                }
+
                 return RedirectToAction("Index", "Home"); //mandar para a view Index que possui o controller Home
             }
 
@@ -96,7 +96,7 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Login", jsonContent);
+                var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/Account/Login", jsonContent);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -112,6 +112,7 @@ namespace CondoManagementWebApp.Controllers
                         }
                         // Para requisições não AJAX, volte a view
                         var responseModel = new LoginViewModel() { Username = model.Username, Requires2FA = true };
+
                         return View("Login", responseModel);
                     }
                     else // Login bem-sucedido (sem 2FA)
@@ -133,11 +134,12 @@ namespace CondoManagementWebApp.Controllers
                         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                         {
                             return Ok(new { isSuccess = true, requires2FA = false });
+
                         }
                         return RedirectToAction("Index", "Home");
                     }
                 }
-                    else // Login falhou na API
+                else // Login falhou na API
                 {
                     var content2 = await response.Content.ReadAsStringAsync();
                     var error = JsonSerializer.Deserialize<Response>(content2, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -159,7 +161,7 @@ namespace CondoManagementWebApp.Controllers
                 }
                 return View("Login", model);
             }
-            
+
         }
 
         /// <summary>
@@ -186,7 +188,7 @@ namespace CondoManagementWebApp.Controllers
             try
             {
                 // Chamar o endpoint da sua API para verificar o código 2FA
-                var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Verify2FA", jsonContent);
+                var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/Account/Verify2FA", jsonContent);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -220,7 +222,7 @@ namespace CondoManagementWebApp.Controllers
             {
                 return BadRequest(ex.Message);
             }
-           
+
         }
 
         /// <summary>
@@ -247,7 +249,7 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var apiCall = await _httpClient.PostAsync($"{baseUrl}api/Account/GenerateForgotPasswordTokenAndEmail", jsonContent);
+                var apiCall = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/Account/GenerateForgotPasswordTokenAndEmail", jsonContent);
 
                 if (apiCall.IsSuccessStatusCode)
                 {
@@ -260,7 +262,7 @@ namespace CondoManagementWebApp.Controllers
             {
                 return BadRequest(ex.Message);
             }
-           
+
         }
 
         /// <summary>
@@ -324,9 +326,9 @@ namespace CondoManagementWebApp.Controllers
                 {
                     ModelState.AddModelError("SelectedRole", "You must select a valid role."); // Adiciona um erro específico para o campo SelectedRole
 
-                   
+
                     return View("Register", model); // Retorna a View com o erro
-                }               
+                }
 
                 //Cloudnary da imagem
 
@@ -379,7 +381,7 @@ namespace CondoManagementWebApp.Controllers
             // Se o result.Succeeded for false (login falhou )
             _flashMessage.Danger("An unexpected error occurred, user cannot be registered");
 
-            return View("Register",model);
+            return View("Register", model);
         }
 
 
@@ -410,7 +412,7 @@ namespace CondoManagementWebApp.Controllers
                 var apiCall = await _apiCallService.PostAsync<ResetPasswordDto, Response>("api/Account/GenerateResetPasswordToken", resetPasswordDto);
 
                 if (apiCall.IsSuccess)
-                { 
+                {
                     var model2 = new ResetPasswordViewModel
                     {
                         Token = apiCall.Token,
@@ -421,7 +423,7 @@ namespace CondoManagementWebApp.Controllers
 
                     ModelState.Remove("Token"); //limpa o ModelState para evitar o uso do token antigo de confirmação de email
 
-                    return View( model2);
+                    return View(model2);
                 }
 
                 return new NotFoundViewResult("NotAuthorized");
@@ -430,7 +432,7 @@ namespace CondoManagementWebApp.Controllers
             {
                 return new NotFoundViewResult("NotAuthorized");
             }
-                
+
         }
 
         /// <summary>
@@ -492,7 +494,7 @@ namespace CondoManagementWebApp.Controllers
                 Token = token,
                 Password = string.Empty  //ainda não foi colocada a senha
             };
-            
+
             return View(model);
         }
 
@@ -541,6 +543,7 @@ namespace CondoManagementWebApp.Controllers
         }
 
 
+
         /// <summary>
         /// Displays Change Password View
         /// </summary>
@@ -580,12 +583,12 @@ namespace CondoManagementWebApp.Controllers
                 _flashMessage.Danger($"{apiCall.Message}");
                 return View("ChangePassword", model);
             }
-            catch(Exception e) 
+            catch (Exception e)
             {
                 _flashMessage.Danger($"{e.Message}");
                 return View("ChangePassword", model);
             }
-        } 
+        }
 
         /// <summary>
         /// Makes an http request to retrirve user's profile
@@ -595,7 +598,7 @@ namespace CondoManagementWebApp.Controllers
         {
             try
             {
-                var apicall = await _apiCallService.GetByEmailAsync<string, UserDto?>("api/Account/GetUserByEmail", this.User.Identity.Name);
+                var apicall = await _apiCallService.GetByQueryAsync<UserDto?>("api/Account/GetUserByEmail", this.User.Identity.Name);
 
                 if (apicall == null)
                 {
@@ -613,7 +616,7 @@ namespace CondoManagementWebApp.Controllers
 
                 return View(new ProfileViewModel());
             }
-            
+
         }
 
 
@@ -656,8 +659,49 @@ namespace CondoManagementWebApp.Controllers
                 _flashMessage.Danger("Unable to edit user's profile");
                 return View("Profile", model);
             }
-           
+
         }
+
+
+
+        public async Task<IActionResult> SysAdminDashboard()
+        {
+            try
+            {
+                var model = new SysAdminDashboardViewModel();
+
+                var usersCondoMembers = await _apiCallService.GetAsync<IEnumerable<CondoMemberDto>>("api/CondoMember/GetCondoMembers");
+
+                if (usersCondoMembers.Any())
+                {
+                    model.CondoMembers = usersCondoMembers;
+                }
+
+                var usersCondoManagers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoManagers");
+
+                if (usersCondoManagers.Any())
+                {
+                    model.CondoManagers = usersCondoManagers;
+                }
+
+
+                var usersCompanyAdmin = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CompanyAdmin");
+
+                if (usersCompanyAdmin.Any())
+                {
+                    model.CompanyAdmins = usersCompanyAdmin;
+                }
+
+                return View(new SysAdminDashboardViewModel());
+
+            }
+            catch
+            {
+                return View(new SysAdminDashboardViewModel());
+            }
+
+        }
+
 
 
         // <summary>

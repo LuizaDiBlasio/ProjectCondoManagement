@@ -10,7 +10,7 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
 
         public IEnumerable<User> Users { get; set; }
 
-        public IEnumerable<CompanyCondominium> CompanyCondominiums { get; set; }
+        public IEnumerable<Company> Companies { get; set; }
 
         public string Email { get; set; }
 

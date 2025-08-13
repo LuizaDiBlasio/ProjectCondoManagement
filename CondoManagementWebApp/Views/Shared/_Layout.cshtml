@@ -38,42 +38,41 @@
                 </div>
             </div>
         </div>
-
-        <div class="deznav">
-            <div class="deznav-scroll">
-                <ul class="metismenu" id="menu">
-                    <li>
-                        <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                            <i class="flaticon-dashboard-1"></i>
-                            <span class="nav-text">Dashboard</span>
-                        </a>
-                        <ul aria-expanded="false">
-                            <li><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
-                            <li><a asp-controller="Analytics" asp-action="Index">Analytics</a></li>
-                            <li><a asp-controller="Review" asp-action="Index">Review</a></li>
-                            <li><a asp-controller="Order" asp-action="List">Order List</a></li>
-                            <li><a asp-controller="Customer" asp-action="List">Customer</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                            <i class="flaticon-381-user-7"></i>
-                            <span class="nav-text">Agents</span>
-                        </a>
-                        <ul aria-expanded="false">
-                            <li><a asp-controller="CondoMember" asp-action="Index">Condo Members</a></li>
-                            <li><a asp-controller="Agent" asp-action="AddWizard">Add Agent Wizard</a></li>
-                            <li><a asp-controller="Agent" asp-action="List">All Agents</a></li>
-                            <li><a asp-controller="Agent" asp-action="Profile">Agent Profile</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <div class="copyright">
-                    <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
-                    <p>by YourTeam</p>
+        @if (User.IsInRole("SysAdmin"))
+        {
+            <div class="deznav">
+                <div class="deznav-scroll">
+                    <ul class="metismenu" id="menu">
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="flaticon-dashboard-1"></i>
+                                <span class="nav-text">Companies</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="Order" asp-action="List">Add Company</a></li>
+                                <li><a asp-controller="Company" asp-action="Index">All Companies</a></li>
+                                <li><a asp-controller="Message" asp-action="GetCompaniesMessages">Messages</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="flaticon-381-user-7"></i>
+                                <span class="nav-text">Users</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="Account" asp-action="Register">Register Users</a></li>
+                                <li><a asp-controller="Message" asp-action="GetUsersMessages">Messages</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div class="copyright">
+                        <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
+                        <p>by YourTeam</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        }
+        
 
         <div class="header">
             <div class="header-content">
@@ -126,15 +125,6 @@
                                     </div>
                                 </li>
                                 
-
-                                @if (User.IsInRole("SysAdmin"))
-                                {
-                                    <li class="nav-item ms-3">
-                                        <a class="nav-link btn btn-info light" asp-controller="Account" asp-action="Register" title="Register New User">
-                                            <span class="d-none d-sm-inline ms-1">Register new user</span>
-                                        </a>
-                                    </li>
-                                }
                             }
                             else
                             {
@@ -177,7 +167,6 @@
     <script src="~/vendor/jqvmap/js/jquery.vmap.world.js"></script>
     <script src="~/vendor/jqvmap/js/jquery.vmap.usa.js"></script>
     <script src="~/vendor/peity/jquery.peity.min.js"></script>
-    <script src="~/vendor/jquery/jquery.min.js"></script>
 
     <!--Custom dashboard and app scripts -->
     <script src="~/js/dashboard/dashboard-1.js"></script>

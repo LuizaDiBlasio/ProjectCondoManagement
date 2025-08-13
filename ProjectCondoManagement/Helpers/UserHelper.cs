@@ -1,5 +1,8 @@
-﻿using ClassLibrary.DtoModels;
+﻿using ClassLibrary;
+using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
@@ -18,14 +21,18 @@ namespace ProjectCondoManagement.Helpers
 
         private readonly DataContextFinances _dataContextFinances;
 
+        private readonly DataContextUsers _dataContextUsers;
+
+
         public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager,
-            IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances)
+            IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances, DataContextUsers dataContextUsers  )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _financialAccountRepository = financialAccountRepository;
             _dataContextFinances = dataContextFinances;
+            _dataContextUsers = dataContextUsers;
         }
 
 
@@ -191,6 +198,15 @@ namespace ProjectCondoManagement.Helpers
         }
 
 
+        public async Task<List<User>> GetUsersByEmailsAsync(IEnumerable<string> emails)
+        {
+            return await _dataContextUsers.Users
+                .Where(u => emails.Contains(u.Email))
+                .ToListAsync();
+        }
+
+
+
         /// <summary>
         /// Asynchronously checks if a user is a member of a specified role.
         /// </summary>
@@ -338,6 +354,39 @@ namespace ProjectCondoManagement.Helpers
             return await _userManager.GetRolesAsync(user);
         }
 
+        public async Task<Response> DeactivateUserAsync(User user)
+        {
+            user.IsActive = false;
+
+            try
+            {
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    return new Response
+                    {
+                        IsSuccess = true,
+                    };
+                }
+
+                return new Response
+                {
+                    IsSuccess = false,
+                    Message = "User deactivation failed.",
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Response
+                {
+                    IsSuccess = false,
+                    Message = $"Error deactivating User.({ex.Message})"
+                };
+            }
+
+        }
+
+
         public async Task<string> GenerateTwoFactorTokenAsync(User user, string tokenProvider)
         {
             return await _userManager.GenerateTwoFactorTokenAsync(user, "Phone");
@@ -351,6 +400,16 @@ namespace ProjectCondoManagement.Helpers
         public async Task<bool> VerifyTwoFactorTokenAsync(User user, string tokenProvider, string token)
         {
             return await _userManager.VerifyTwoFactorTokenAsync(user, tokenProvider, token);
+        }
+
+        public async Task<IEnumerable<User>> GetUsersByRoleAsync(string role)
+        {
+            if (await _roleManager.RoleExistsAsync(role))
+            {
+                return await _userManager.GetUsersInRoleAsync(role);
+            }
+           
+            return new List<User>();
         }
     }
 }

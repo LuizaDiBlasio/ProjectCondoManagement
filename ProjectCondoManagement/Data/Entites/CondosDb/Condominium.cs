@@ -1,4 +1,5 @@
 ﻿using ClassLibrary;
+using ProjectCondoManagement.Data.Entites.UsersDb;
 using System.Reflection.Metadata;
 
 namespace ProjectCondoManagement.Data.Entites.CondosDb
@@ -8,6 +9,8 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
         public int Id { get; set; }
 
         public int CompanyId { get; set; }
+
+        public Company Company { get; set; }
 
         public string Address { get; set; }
 
