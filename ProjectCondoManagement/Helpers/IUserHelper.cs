@@ -2,6 +2,7 @@
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using System.Security.Claims;
 
 namespace ProjectCondoManagement.Helpers
 {
@@ -11,6 +12,7 @@ namespace ProjectCondoManagement.Helpers
         Task<User> CreateUser(RegisterUserDto registerDtoModel); //cria user com base no RegisterUserDto
         Task<User> GetUserByEmailAsync(string email); //passa o email para buscar user
 
+        Task<User> GetUserByEmailWithCompanyAsync(string email); //passa o email para buscar user com a empresa associada
         Task<List<User>> GetUsersByEmailsAsync(IEnumerable<string> emails); //recebe uma lista de emails e devolve uma lista de users 
 
         Task<IdentityResult> AddUserAsync(User user, string password); //adiciona user na BD
@@ -40,6 +42,8 @@ namespace ProjectCondoManagement.Helpers
         Task<IdentityResult> ConfirmEmailAsync(User user, string token); //Valida o email, verifica se o token é valido
 
         Task<User> GetUserByIdAsync(string id); //recebe um id e devolve o user correspondente
+
+        Task<User> GetUserAsync(ClaimsPrincipal principal); //recebe um ClaimsPrincipal e devolve o user correspondente, usado para obter o user logado        
 
         Task<IdentityResult> ResetPasswordAsync(User user, string token, string password); //Faz o reset da password
 

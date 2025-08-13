@@ -34,6 +34,10 @@ namespace ClassLibrary.DtoModels
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; }
 
+        public string ConduminiumId { get; set; }
+
+        public CondominiumDto CondominiumDto { get; set; }
+
 
         public string? ImageUrl { get; set; }
 

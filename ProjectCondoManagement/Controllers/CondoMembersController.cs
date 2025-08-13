@@ -65,6 +65,28 @@ namespace ProjectCondoManagement.Controllers
             return condoMember;
         }
 
+        // GET: api/CondoMembers/ByEmail/{email}
+        [HttpGet("ByEmail/{email}")]
+        public async Task<ActionResult<CondoMember>> GetCondoMemberByEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return BadRequest("Email is required.");
+            }
+
+            var condoMember = await _condoMemberRepository.GetAll(_context)
+                .FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
+
+            if (condoMember == null)
+            {
+                return null;
+            }
+
+            return condoMember;
+        }
+
+
+
         // POST: api/CondoMembers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("Edit/{id}")]

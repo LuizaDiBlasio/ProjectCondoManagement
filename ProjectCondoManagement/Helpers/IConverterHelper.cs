@@ -7,6 +7,7 @@ namespace ProjectCondoManagement.Helpers
     public interface IConverterHelper
     {
         CondoMember ToCondoMember(CondoMemberDto condoMemberDto);
-        public CondoMemberDto ToCondoMemberDto(User user);
+        CondoMemberDto ToCondoMemberDto(User user);
+        Condominium ToCondominium(CondominiumDto condominiumDto);
     }
 }

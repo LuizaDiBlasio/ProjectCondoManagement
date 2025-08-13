@@ -35,5 +35,20 @@ namespace ProjectCondoManagement.Helpers
             };
             return condoMemberDto;
         }
+
+        public Condominium ToCondominium(CondominiumDto condominiumDto)
+        {
+            var condominium = new Condominium
+            {
+                Id = condominiumDto.Id,
+                Address = condominiumDto.Address,
+                CompanyId = condominiumDto.CompanyId,
+                CondoName = condominiumDto.CondoName,
+                ManagerUserId = condominiumDto.ManagerUserId,
+
+            };
+
+            return condominium;
+        }
     }
 }

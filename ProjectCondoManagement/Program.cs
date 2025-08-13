@@ -79,6 +79,8 @@ builder.Services.AddScoped<IMailHelper, MailHelper>();
 
 builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
 
+builder.Services.AddScoped<ICondominiumRepository, CondominiumRepository>();
+
 builder.Services.AddHttpClient();
 
 builder.Services.AddAuthorization(options =>

@@ -20,6 +20,10 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public string? TaxIdNumber { get; set; }
 
+        public string ConduminiumId { get; set; }
+
+        public Condominium Condominium { get; set; }
+
         public IEnumerable<Meeting>? MeetingsAttended { get; set; }
 
         public string? ImageUrl { get; set; }

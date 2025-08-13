@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 
@@ -11,9 +12,11 @@ using ProjectCondoManagement.Data.Entites.CondosDb;
 namespace ProjectCondoManagement.Migrations.CondosDb
 {
     [DbContext(typeof(DataContextCondos))]
-    partial class DataContextCondosModelSnapshot : ModelSnapshot
+    [Migration("20250811190608_AddCondoIdCondoName")]
+    partial class AddCondoIdCondoName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,6 +125,7 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ManagerUserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

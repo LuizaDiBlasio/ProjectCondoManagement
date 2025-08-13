@@ -3,6 +3,7 @@ using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using System.Security.Claims;
 using System.Security.Policy;
 
 namespace ProjectCondoManagement.Helpers
@@ -169,6 +170,18 @@ namespace ProjectCondoManagement.Helpers
         public async Task<User> GetUserByEmailAsync(string email)
         {
             return await _userManager.FindByEmailAsync(email);
+        }
+
+        public async Task<User> GetUserByEmailWithCompanyAsync(string email)
+        {
+            return await _dataContextUsers.Users
+                .Include(u => u.Company) 
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<User> GetUserAsync(ClaimsPrincipal principal)
+        {
+            return await _userManager.GetUserAsync(principal);
         }
 
 

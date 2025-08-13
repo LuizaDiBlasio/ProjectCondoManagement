@@ -4,6 +4,7 @@ using CondoManagementWebApp.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Vereyon.Web;
 
 namespace CondoManagementWebApp.Controllers
 {
@@ -11,20 +12,31 @@ namespace CondoManagementWebApp.Controllers
     {
         private readonly IApiCallService _apiCallService;
         private readonly IConverterHelper _converterHelper;
+        private readonly IFlashMessage _flashMessage;
 
-        public CondoMemberController(IApiCallService apiCallService, IConverterHelper converterHelper)
+        public CondoMemberController(IApiCallService apiCallService, IConverterHelper converterHelper, IFlashMessage flashMessage)
         {
             _apiCallService = apiCallService;
             _converterHelper = converterHelper;
+            _flashMessage = flashMessage;
         }
 
 
         // GET: CondoMemberController
         public async Task<ActionResult> Index()
         {
-            var condoMembers = await _apiCallService.GetAsync<IEnumerable<CondoMemberDto>>("api/CondoMembers");
+            try
+            {
+                var condoMembers = await _apiCallService.GetAsync<IEnumerable<CondoMemberDto>>("api/CondoMembers");
+                return View(condoMembers);
+            }
+            catch (Exception ex)
+            {
+                _flashMessage.Danger($"An error occurred while fetching condo members.");
+                return View();
+            }
 
-            return View(condoMembers);
+            
         } 
 
         // GET: CondoMemberController/Details/5
@@ -60,35 +72,41 @@ namespace CondoManagementWebApp.Controllers
             if(condoMemberDto.BirthDate > DateTime.Today)
             {
                 ModelState.AddModelError("BirthDate", "Birth date cannot be in the future.");
+                return View(condoMemberDto);
             }
 
+
+            var result = await _apiCallService.PostAsync<CondoMemberDto, Response>("api/CondoMembers", condoMemberDto);
+
+            if (result.IsSuccess)
+            {
                 var registerUserDto = _converterHelper.ToRegisterDto(condoMemberDto);
 
-                registerUserDto.SelectedRole = "CondoMember"; 
+                registerUserDto.SelectedRole = "CondoMember";
 
                 var result2 = await _apiCallService.PostAsync<RegisterUserDto, Response>("api/Account/AssociateUser", registerUserDto);
                 if (!result2.IsSuccess)
                 {
-                    ModelState.AddModelError("", $"{result2.Message}");
+                    var createdMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{condoMemberDto.Email}");
+                    if (createdMember == null)
+                    {
+                        return NotFound("Condo member not found after creation.");
+                    }
+
+                    await _apiCallService.DeleteAsync($"api/CondoMembers/{createdMember.Id}");
+                    ModelState.AddModelError("", $"{result2.Message}");                    
                     return View(condoMemberDto);
                 }
- 
-
-                var result = await _apiCallService.PostAsync<CondoMemberDto, Response>("api/CondoMembers", condoMemberDto);
-
-
-
-                if (!result.IsSuccess)
-                {
-                    ModelState.AddModelError("", $"{result.Message}");
-                    return View(condoMemberDto);
-                }
-
-                
 
                 return RedirectToAction(nameof(Index));
-          
+            }
 
+
+            ModelState.AddModelError("", $"{result.Message}");
+            return View(condoMemberDto);
+
+            
+         
         }
 
         // GET: CondoMemberController/Edit/5

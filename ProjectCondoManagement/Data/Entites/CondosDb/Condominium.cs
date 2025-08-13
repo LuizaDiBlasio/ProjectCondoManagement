@@ -11,14 +11,22 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public string Address { get; set; }
 
-        public string ManagerUserId { get; set; }
+        public string CondoName { get; set; }
 
-        public IEnumerable<Unit> Units { get; set; }
+        public string? ManagerUserId { get; set; }
 
-        public IEnumerable<Document> Documents { get; set; }
+        public IEnumerable<CondoMember>? CondoMembers { get; set; }
 
-        public IEnumerable<Meeting> Meetings { get; set; }
+        public IEnumerable<Unit>? Units { get; set; }
 
-        public IEnumerable<Occurrence> Occurences { get; set; }
+        public IEnumerable<Document>? Documents { get; set; }
+
+        public IEnumerable<Meeting>? Meetings { get; set; }
+
+
+        public IEnumerable<Occurrence>? Occurences { get; set; }
+
+
+
     }
 }

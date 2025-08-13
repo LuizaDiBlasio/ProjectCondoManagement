@@ -1,0 +1,33 @@
+﻿@model ClassLibrary.DtoModels.CondominiumDto
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>New Condominium</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="CondoName" class="control-label"></label>
+                <input asp-for="CondoName" class="form-control" />
+                <span asp-validation-for="CondoName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Address" class="control-label"></label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-success" />
+                <a asp-action="Index" class="btn btn-outline-info">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
