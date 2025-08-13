@@ -11,7 +11,7 @@ namespace CondoManagementWebApp.Helpers
             {
                 Username = model.Username,
                 Password = model.Password,
-                RememberMe = model.RememberMe
+                Requires2FA = model.Requires2FA,    
             };
 
             return loginDto;
@@ -33,6 +33,18 @@ namespace CondoManagementWebApp.Helpers
             return registerDto;
         }
 
+        public ResetPasswordDto ToResetPasswordDto(ResetPasswordViewModel model)
+        {
+            var resetPasswordDto = new ResetPasswordDto()
+            {
+                Token = model.Token,
+                UserId = model.UserId,
+                Password = model.Password
+            };
+
+            return resetPasswordDto;
+        }
+
         public RegisterUserDto ToRegisterDto(CondoMemberDto condoMember)
         {
             var registerDto = new RegisterUserDto
@@ -47,5 +59,45 @@ namespace CondoManagementWebApp.Helpers
             return registerDto;
         }
 
+        public ChangePasswordDto ToChangePasswordDto(ChangePasswordViewModel model)
+        {
+            var changePasswordDto = new ChangePasswordDto()
+            {
+                OldPassword = model.OldPassword,
+                NewPassword = model.NewPassword,
+                Email = model.Email,    
+            };
+            return changePasswordDto;
+        }
+
+        public UserDto ToUserDto(ProfileViewModel model)
+        {
+            var userDto = new UserDto()
+            {
+                FullName = model.FullName,
+                BirthDate = model.BirthDate,
+                PhoneNumber = model.PhoneNumber,
+                Address = model.Address,
+                ImageUrl = model.ImageUrl, 
+                Email = model.Email
+            };
+
+            return userDto; 
+        }
+
+        public ProfileViewModel ToProfileViewModel(UserDto userDto)
+        {
+            var model = new ProfileViewModel()
+            {
+                FullName = userDto.FullName,
+                BirthDate = userDto.BirthDate,
+                PhoneNumber = userDto.PhoneNumber,
+                Address = userDto.Address,
+                ImageUrl = userDto.ImageUrl,
+                Email = userDto.Email
+            };
+
+            return model;   
+        }
     }
 }

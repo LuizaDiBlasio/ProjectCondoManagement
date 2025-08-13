@@ -36,6 +36,20 @@ namespace ProjectCondoManagement.Helpers
             return condoMemberDto;
         }
 
+        public UserDto ToUserDto(User user)
+        {
+            var userDto = new UserDto()
+            {
+                FullName = user.FullName,
+                BirthDate = user.BirthDate,
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address,
+                ImageUrl = user.ImageUrl,
+                Email = user.Email
+            };
+            return userDto; 
+        }
+
         public Condominium ToCondominium(CondominiumDto condominiumDto)
         {
             var condominium = new Condominium

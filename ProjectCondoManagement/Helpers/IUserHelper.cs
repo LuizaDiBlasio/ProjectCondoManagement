@@ -19,6 +19,12 @@ namespace ProjectCondoManagement.Helpers
 
         Task<SignInResult> LoginAsync(LoginDto model); //método que devolve tarefa SignInResult (ou tá signed in ou não)
 
+        Task<string> GenerateTwoFactorTokenAsync(User user, string tokenProvider); // criação de token 2FA
+
+        Task<IdentityResult> EnableTwoFactorAuthenticationAsync(User user, bool enable); // habilita 2FA
+
+        Task<bool> VerifyTwoFactorTokenAsync(User user, string tokenProvider, string token);
+
         Task LogoutAsync();
 
         Task<IdentityResult> UpdateUserAsync(User user); //update user na BD

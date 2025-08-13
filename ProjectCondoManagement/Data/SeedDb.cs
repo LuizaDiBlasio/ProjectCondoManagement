@@ -114,7 +114,8 @@ namespace ProjectCondoManagement.Data
                     Address = "Fonte da Saudade",
                     BirthDate = new DateTime(1990, 04, 06),
                     IsActive = true,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    FinancialAccountId = null
                 };
 
                 var result = await _userHelper.AddUserAsync(user, "123456"); //criar utilizador, mandar utilizador e password
@@ -124,14 +125,14 @@ namespace ProjectCondoManagement.Data
                     throw new InvalidOperationException("Coud not create the user in seeder"); //pára o programa
                 }
 
-                await _userHelper.AddUserToRoleAsync(user, "Admin"); //adiciona role ao user
+                await _userHelper.AddUserToRoleAsync(user, "SysAdmin"); //adiciona role ao user
             }
 
-            var isInRole = await _userHelper.IsUserInRoleAsync(user, "Admin"); //verifica se role foi designado para user existente
+            var isInRole = await _userHelper.IsUserInRoleAsync(user, "SysAdmin"); //verifica se role foi designado para user existente
 
             if (!isInRole) //se não estiver no role, colocar
             {
-                await _userHelper.AddUserToRoleAsync(user, "Admin"); //adiciona role ao user
+                await _userHelper.AddUserToRoleAsync(user, "SysAdmin"); //adiciona role ao user
             }
         }
     }

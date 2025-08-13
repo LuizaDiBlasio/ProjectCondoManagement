@@ -11,9 +11,10 @@
     <link rel="stylesheet" href="~/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" />
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/CondoManagementWebApp.styles.css" asp-append-version="true" />
-    <link href="https://cdn.syncfusion.com/ej2/30.2.4/bootstrap5.css" rel="stylesheet" />
+    <link href="https://cdn.syncfusion.com/ej2/30.2.4/bootstrap5.css" rel="stylesheet"   />
     <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon.png" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-***********" crossorigin="anonymous" referrerpolicy="no-referrer" /> @* Certifique-se de que o integrity e crossorigin estejam corretos *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-***********" crossorigin="anonymous" referrerpolicy="no-referrer" /> 
+
 </head>
 <body>
     <div id="preloader">
@@ -66,7 +67,7 @@
                     </li>
                 </ul>
                 <div class="copyright">
-                    <p><strong>CondoManagementWebApp</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
+                    <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
                     <p>by YourTeam</p>
                 </div>
             </div>
@@ -101,15 +102,16 @@
                             {
                                 <li class="nav-item dropdown header-profile">
                                     <a class="nav-link" href="javascript:void(0);" role="button" data-bs-toggle="dropdown">
-                                        <div class="header-info">
-                                            <span class="text-black">@User.Identity.Name</span>
-                                        </div>
-                                        <img src="~/images/profile/17.jpg" width="20" alt="Profile" />
+                                        <i class="fa-solid fa-user"></i>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-end">
                                         <a asp-controller="Account" asp-action="Profile" class="dropdown-item ai-icon">
                                             <svg id="icon-user1" class="text-primary" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                             <span class="ms-2">Profile</span>
+                                        </a>
+                                        <a asp-controller="Account" asp-action="ChangePassword" class="dropdown-item ai-icon">
+                                            <i class="fa-solid fa-key text-light-blue me-2"></i>
+                                            <span class="ms-2">Change Password</span>
                                         </a>
                                         <a asp-controller="Email" asp-action="Inbox" class="dropdown-item ai-icon">
                                             <svg id="icon-inbox" class="text-success" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
@@ -121,18 +123,12 @@
                                         </a>
                                     </div>
                                 </li>
-                                <li class="nav-item ms-3">
-                                    <a class="nav-link btn btn-primary light" asp-controller="Account" asp-action="Logout" title="Logout">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                        <span class="d-none d-sm-inline ms-1">Logout</span>
-                                    </a>
-                                </li>
+                                
 
-                                @if (User.IsInRole("Admin"))
+                                @if (User.IsInRole("SysAdmin"))
                                 {
                                     <li class="nav-item ms-3">
                                         <a class="nav-link btn btn-info light" asp-controller="Account" asp-action="Register" title="Register New User">
-                                            <i class="fas fa-user-plus"></i>
                                             <span class="d-none d-sm-inline ms-1">Register new user</span>
                                         </a>
                                     </li>
@@ -179,12 +175,14 @@
     <script src="~/vendor/jqvmap/js/jquery.vmap.world.js"></script>
     <script src="~/vendor/jqvmap/js/jquery.vmap.usa.js"></script>
     <script src="~/vendor/peity/jquery.peity.min.js"></script>
+    <script src="~/vendor/jquery/jquery.min.js"></script>
 
     <!--Custom dashboard and app scripts -->
     <script src="~/js/dashboard/dashboard-1.js"></script>
     <script src="~/js/custom.min.js"></script>
     <script src="~/js/deznav-init.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
 
     <script>
         function carouselReview() {
@@ -217,6 +215,8 @@
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
     <ejs-scripts></ejs-scripts>
+
 </body>
 </html>

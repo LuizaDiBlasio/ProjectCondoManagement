@@ -1,10 +1,11 @@
-﻿using ClassLibrary;
-using ClassLibrary.DtoModels;
+﻿using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using System.Security.Claims;
 using System.Security.Policy;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 
 namespace ProjectCondoManagement.Helpers
 {
@@ -19,11 +20,19 @@ namespace ProjectCondoManagement.Helpers
         private readonly DataContextUsers _dataContextUsers;
 
         public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, DataContextUsers dataContextUsers)
+        private readonly IFinancialAccountRepository _financialAccountRepository;
+
+        private readonly DataContextFinances _dataContextFinances;
+
+        public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager,
+            IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _dataContextUsers = dataContextUsers;
+            _financialAccountRepository = financialAccountRepository;
+            _dataContextFinances = dataContextFinances;
         }
 
 
@@ -37,20 +46,28 @@ namespace ProjectCondoManagement.Helpers
             var user = await GetUserByEmailAsync(registerDtoModel.Email); //buscar user  
             if (user != null)
             {
-                return null;
+                return null; //já existe o user --> resposta negativa (null)
             }
 
-            user = new User
+            var financialAccount = new FinancialAccount()
             {
-                FullName = registerDtoModel.FullName,
-                Email = registerDtoModel.Email,
-                UserName = registerDtoModel.Email,
-                Address = registerDtoModel.Address,
-                PhoneNumber = registerDtoModel.PhoneNumber,
-                ImageUrl = registerDtoModel.ImageUrl,
-                BirthDate = registerDtoModel.BirthDate,
-                CompanyId = registerDtoModel.CompanyId,
-            };
+                InitialDeposit = 0 // depósito inicial vai ser sempre 0
+            }; 
+
+            await _financialAccountRepository.CreateAsync(financialAccount, _dataContextFinances); //add FinAcc na Bd
+
+                user = new User
+                {
+                    FullName = registerDtoModel.FullName,
+                    Email = registerDtoModel.Email,
+                    UserName = registerDtoModel.Email,
+                    Address = registerDtoModel.Address,
+                    PhoneNumber = registerDtoModel.PhoneNumber,
+                    ImageUrl = registerDtoModel.ImageUrl,
+                    BirthDate = registerDtoModel.BirthDate,
+                    CompanyId = registerDtoModel.CompanyId,
+                    FinancialAccountId = financialAccount.Id
+                };
 
             var result = await AddUserAsync(user, "123456"); //add user depois de criado
 
@@ -68,9 +85,17 @@ namespace ProjectCondoManagement.Helpers
                 case "CondoManager":
                     await AddUserToRoleAsync(user, "CondoManager");
                     break;
-                case "Admin":
-                    await AddUserToRoleAsync(user, "Admin");
+                case "CompanyAdmin":
+                    await AddUserToRoleAsync(user, "CompanyAdmin");
                     break;
+            }
+
+            //TODO Tirar o if e essa atribuição de bool quando publicar, manter só o método de ativação
+            user.Uses2FA = true;
+
+            if (user.Uses2FA == true)
+            {
+                var activation2FA = await EnableTwoFactorAuthenticationAsync(user, true);
             }
 
 
@@ -144,7 +169,7 @@ namespace ProjectCondoManagement.Helpers
         /// <returns>A "Task" that represents the asynchronous operation.</returns>
         public async Task CreateRolesAsync()
         {
-            string[] roleNames = { "CondoManager", "CondoMember", "Admin" };
+            string[] roleNames = { "CondoManager", "CondoMember", "CompanyAdmin", "SysAdmin" };
 
             foreach (var roleName in roleNames)
             {
@@ -217,7 +242,7 @@ namespace ProjectCondoManagement.Helpers
         /// </returns>
         public async Task<SignInResult> LoginAsync(LoginDto model)
         {
-            return await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false);
+            return await _signInManager.PasswordSignInAsync(model.Username, model.Password, false, false);
         }
 
 
@@ -285,6 +310,7 @@ namespace ProjectCondoManagement.Helpers
         public async Task<IdentityResult> ConfirmEmailAsync(User user, string token)
         {
             return await _userManager.ConfirmEmailAsync(user, token);
+
         }
 
 
@@ -373,5 +399,20 @@ namespace ProjectCondoManagement.Helpers
 
 
 
+
+        public async Task<string> GenerateTwoFactorTokenAsync(User user, string tokenProvider)
+        {
+            return await _userManager.GenerateTwoFactorTokenAsync(user, "Phone");
+        }
+
+        public async Task<IdentityResult> EnableTwoFactorAuthenticationAsync(User user, bool enable)
+        {
+            return await _userManager.SetTwoFactorEnabledAsync(user, true);
+        }
+
+        public async Task<bool> VerifyTwoFactorTokenAsync(User user, string tokenProvider, string token)
+        {
+            return await _userManager.VerifyTwoFactorTokenAsync(user, tokenProvider, token);
+        }
     }
 }

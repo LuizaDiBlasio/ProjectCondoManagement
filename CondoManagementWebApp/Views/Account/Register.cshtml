@@ -17,7 +17,7 @@
 
                         <div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
 
-                        <form asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data">
+                        <form asp-controller="Account" asp-action="RequestRegister" method="post" enctype="multipart/form-data">
 
                             <div class="form-group mb-4">
                                 <label class="form-label" asp-for="FullName">Full Name</label>
@@ -44,38 +44,20 @@
                             </div>
 
                             <div class="form-group mb-4">
-                                <label asp-for="BirthDate" class="control-label">Date of Birth</label>
-                                <input type="text" id="birthDateInput" asp-for="BirthDate" class="form-control" placeholder="Select a date" />
-                                <span asp-validation-for="BirthDate" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group mb-4">
-                                <label class="form-label">Password</label>
-                                <div class="position-relative">
-                                    <input type="password" id="dz-password" name="Password" class="form-control">
-                                    <span class="show-pass eye">
-                                        <i class="fa fa-eye-slash"></i>
-                                        <i class="fa fa-eye"></i>
-                                    </span>
+                                <label asp-for="BirthDate" class="control-label"></label>
+                                <div>
+                                    <input type="text" id="birthDateInput" asp-for="BirthDate" class="form-control" />
                                 </div>
-                                <span class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group mb-4">
-                                <label class="form-label">Confirm Password</label>
-                                <div class="position-relative">
-                                    <input type="password" name="ConfirmPassword" class="form-control">
-                                </div>
-                                <span class="text-danger"></span>
+                                <span asp-validation-for="BirthDate" class="text-warning"></span>
                             </div>
 
                             <div class="form-group mb-4">
                                 <label asp-for="SelectedRole" class="form-label">User role</label>
-                                <select asp-for="SelectedRole" asp-items="Model.AvailableRoles" class="form-control"></select>
+                                <select asp-for="SelectedRole" asp-items="Model.AvailableRoles" class="form-control" id="SelectedRole"></select>
                                 <span asp-validation-for="SelectedRole" class="text-danger"></span>
                             </div>
 
-                            <div class="form-group mb-4">
+                            <div class="form-group mb-4" id="company-selection-group">
                                 <label asp-for="SelectedCompanyId" class="form-label">Company</label>
                                 <select asp-for="SelectedCompanyId" asp-items="Model.Companies" class="form-control"></select>
                                 <span asp-validation-for="SelectedCompanyId" class="text-danger"></span>
@@ -92,9 +74,7 @@
                             </div>
                         </form>
 
-                        <div class="new-account mt-3">
-                            <p>Already have an account? <a class="text-primary" asp-controller="Account" asp-action="Login">Sign in</a></p>
-                        </div>
+                        <flash dismissable="true" />
                     </div>
                 </div>
             </div>
@@ -108,13 +88,38 @@
     }
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
+            // Lógica para mostrar/ocultar o campo da empresa
+            var roleDropdown = document.getElementById('SelectedRole');
+            var companyGroup = document.getElementById('company-selection-group');
+
+            function toggleCompanyField() {
+                var selectedRole = roleDropdown.value;
+                if (selectedRole === 'CondoManager' || selectedRole === 'Admin') {
+                    companyGroup.style.display = ''; // Mostra o elemento
+                } else {
+                    companyGroup.style.display = 'none'; // Oculta o elemento
+                }
+            }
+
+            // Adiciona um listener para o evento 'change'
+            roleDropdown.addEventListener('change', toggleCompanyField);
+
+            // Executa a função uma vez no carregamento da página para definir o estado inicial
+            toggleCompanyField();
+        });
+    </script>
+
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializa o DatePicker para StartDate
             var birthDatePicker = new ej.calendars.DatePicker({
                 format: 'MM/dd/yyyy',
                 placeholder: 'Select a date',
-                max: new Date()
+                 max: new Date()
             });
-            birthDatePicker.appendTo('#birthDateInput');
+            birthDatePicker.appendTo('#birthDateInput'); //ligação ao elemento de StartDate
+
+
         });
     </script>
-    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
 }

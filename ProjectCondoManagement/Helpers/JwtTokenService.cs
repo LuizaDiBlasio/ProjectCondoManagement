@@ -21,8 +21,8 @@ namespace ProjectCondoManagement.Helpers
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, role) 
+                new Claim(ClaimTypes.Role, role), // Adiciona a role diretamente
+                new Claim(ClaimTypes.Name, user.Email) 
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]));

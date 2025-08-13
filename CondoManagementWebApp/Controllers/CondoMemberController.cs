@@ -43,31 +43,20 @@ namespace CondoManagementWebApp.Controllers
         public async Task<IActionResult> Details(int? id)
         {
 
-            if (id == null)
-            {
-                return NotFound();
-            }
+//        // GET: CondoMemberController/Details/5
+//        public async Task<IActionResult> Details(int? id)
+//        {
 
             var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id.Value}");
 
             return View(condoMember);
         }
 
-        // GET: CondoMemberController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
+//            try
+//            {
+//                var registerUserDto = _converterHelper.ToRegisterDto(condoMemberDto);
 
-        // POST: CondoMemberController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(CondoMemberDto condoMemberDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(condoMemberDto);
-            }
+//                registerUserDto.SelectedRole = "CondoMember"; 
 
             if(condoMemberDto.BirthDate > DateTime.Today)
             {
@@ -109,14 +98,14 @@ namespace CondoManagementWebApp.Controllers
          
         }
 
-        // GET: CondoMemberController/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
+//        // GET: CondoMemberController/Edit/5
+//        public async Task<IActionResult> Edit(int? id)
+//        {
 
-            if (id == null)
-            {
-                return  NotFound();
-            }
+//            if (id == null)
+//            {
+//                return  NotFound();
+//            }
 
             var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id.Value}");
             if (condoMember == null)
@@ -125,24 +114,24 @@ namespace CondoManagementWebApp.Controllers
             }
 
 
-            return View(condoMember);
-        }
+//            return View(condoMember);
+//        }
 
-        // POST: CondoMemberController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, CondoMemberDto condoMemberDto)
-        {
+//        // POST: CondoMemberController/Edit/5
+//        [HttpPost]
+//        [ValidateAntiForgeryToken]
+//        public async Task<IActionResult> Edit(int id, CondoMemberDto condoMemberDto)
+//        {
 
-            if (id != condoMemberDto.Id)
-            {
-                return NotFound();
-            }
+//            if (id != condoMemberDto.Id)
+//            {
+//                return NotFound();
+//            }
 
-            if (!ModelState.IsValid)
-            {
-                return View(condoMemberDto);
-            }
+//            if (!ModelState.IsValid)
+//            {
+//                return View(condoMemberDto);
+//            }
 
                var result = await _apiCallService.PostAsync<CondoMemberDto, Response>($"api/CondoMembers/Edit/{id}", condoMemberDto);
                if (!result.IsSuccess)
@@ -155,13 +144,13 @@ namespace CondoManagementWebApp.Controllers
            
         }
 
-        // GET: CondoMemberController/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+//        // GET: CondoMemberController/Delete/5
+//        public async Task<IActionResult> Delete(int? id)
+//        {
+//            if (id == null)
+//            {
+//                return NotFound();
+//            }
 
             var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id.Value}"); ;
             if (condoMember == null)
@@ -170,21 +159,21 @@ namespace CondoManagementWebApp.Controllers
             }
 
 
-            return View(condoMember);
-        }
+//            return View(condoMember);
+//        }
 
-        // POST: CondoMemberController/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+//        // POST: CondoMemberController/Delete/5
+//        [HttpPost, ActionName("Delete")]
+//        [ValidateAntiForgeryToken]
+//        public async Task<IActionResult> DeleteConfirmed(int? id)
+//        {
+//            if (id == null)
+//            {
+//                return NotFound();
+//            }
 
-            try
-            {                            
+//            try
+//            {                            
 
                 var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id.Value}");
                 if (condoMember == null)

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 
@@ -11,9 +12,11 @@ using ProjectCondoManagement.Data.Entites.UsersDb;
 namespace ProjectCondoManagement.Migrations.UsersDb
 {
     [DbContext(typeof(DataContextUsers))]
-    partial class DataContextUsersModelSnapshot : ModelSnapshot
+    [Migration("20250807154350_UserEntityChange")]
+    partial class UserEntityChange
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -229,9 +232,6 @@ namespace ProjectCondoManagement.Migrations.UsersDb
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<int?>("FinancialAccountId")
-                        .HasColumnType("int");
 
                     b.Property<string>("FullName")
                         .IsRequired()

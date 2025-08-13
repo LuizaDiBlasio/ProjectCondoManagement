@@ -1,18 +1,11 @@
-﻿namespace CondoManagementWebApp.Helpers
+﻿using System.Net.Http;
+using System.Text;
+
+namespace CondoManagementWebApp.Helpers
 {
     public interface IApiCallService
     {
-        //Task<IEnumerable<T>> GetAllAsync(string requestUri);
-
-        //Task<T> GetByIdAsync(string requestUri);
-
-
-        //Task<bool> CreateAsync(string requestUri, T obj);
-
-        //Task<bool> EditAsync(string requestUri,T obj);
-
-        //Task<bool> DeleteAsync(string requestUri);
-
+        Task<IEnumerable<T>> GetAllAsync(string requestUri);
 
         public void AddAuthorizationHeader();
 
@@ -20,7 +13,8 @@
 
         public Task<T> GetAsync<T>(string requestUri);
 
-        public Task<HttpResponseMessage> DeleteAsync(string requestUri);
+        public Task<TResponse> GetByEmailAsync<TRequest, TResponse>(string requestUri, TRequest data); //TRequest será sempre string nesse caso
 
+        public Task<HttpResponseMessage> DeleteAsync(string requestUri);
     }
 }
