@@ -1,6 +1,8 @@
 ﻿using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 
 namespace ProjectCondoManagement.Helpers
 {
@@ -12,15 +14,86 @@ namespace ProjectCondoManagement.Helpers
 
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager)
+        private readonly IFinancialAccountRepository _financialAccountRepository;
+
+        private readonly DataContextFinances _dataContextFinances;
+
+        public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager,
+            IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
-
+            _financialAccountRepository = financialAccountRepository;
+            _dataContextFinances = dataContextFinances;
         }
 
 
+        public async Task<User> CreateUser(RegisterUserDto registerDtoModel)
+        {
+            if (registerDtoModel == null) // se o modelo for nulo, retorna nulo
+            {
+                return null;
+            }
+
+            var user = await GetUserByEmailAsync(registerDtoModel.Email); //buscar user  
+            if (user != null)
+            {
+                return null; //já existe o user --> resposta negativa (null)
+            }
+
+            var financialAccount = new FinancialAccount()
+            {
+                InitialDeposit = 0 // depósito inicial vai ser sempre 0
+            }; 
+
+            await _financialAccountRepository.CreateAsync(financialAccount, _dataContextFinances); //add FinAcc na Bd
+
+                user = new User
+                {
+                    FullName = registerDtoModel.FullName,
+                    Email = registerDtoModel.Email,
+                    UserName = registerDtoModel.Email,
+                    Address = registerDtoModel.Address,
+                    PhoneNumber = registerDtoModel.PhoneNumber,
+                    ImageUrl = registerDtoModel.ImageUrl,
+                    BirthDate = registerDtoModel.BirthDate,
+                    CompanyId = registerDtoModel.CompanyId,
+                    FinancialAccountId = financialAccount.Id
+                };
+
+            var result = await AddUserAsync(user, "123456"); //add user depois de criado
+
+            if (result != IdentityResult.Success) // caso não consiga criar user
+            {
+                return null;
+            }
+
+            //Adicionar roles ao user
+            switch (registerDtoModel.SelectedRole)
+            {
+                case "CondoMember":
+                    await AddUserToRoleAsync(user, "CondoMember");
+                    break;
+                case "CondoManager":
+                    await AddUserToRoleAsync(user, "CondoManager");
+                    break;
+                case "CompanyAdmin":
+                    await AddUserToRoleAsync(user, "CompanyAdmin");
+                    break;
+            }
+
+            //TODO Tirar o if e essa atribuição de bool quando publicar, manter só o método de ativação
+            user.Uses2FA = true;
+
+            if (user.Uses2FA == true)
+            {
+                var activation2FA = await EnableTwoFactorAuthenticationAsync(user, true);
+            }
+
+
+            return user;
+        }
 
         /// <summary>
         /// Creates a new user with the specified password.
@@ -77,6 +150,7 @@ namespace ProjectCondoManagement.Helpers
                 {
                     Name = roleName
                 });
+
             }
 
         }
@@ -88,7 +162,7 @@ namespace ProjectCondoManagement.Helpers
         /// <returns>A "Task" that represents the asynchronous operation.</returns>
         public async Task CreateRolesAsync()
         {
-            string[] roleNames = { "CondoManager", "CondoMember", "Admin" };
+            string[] roleNames = { "CondoManager", "CondoMember", "CompanyAdmin", "SysAdmin" };
 
             foreach (var roleName in roleNames)
             {
@@ -142,7 +216,7 @@ namespace ProjectCondoManagement.Helpers
         /// </returns>
         public async Task<SignInResult> LoginAsync(LoginDto model)
         {
-            return await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false);
+            return await _signInManager.PasswordSignInAsync(model.Username, model.Password, false, false);
         }
 
 
@@ -210,6 +284,7 @@ namespace ProjectCondoManagement.Helpers
         public async Task<IdentityResult> ConfirmEmailAsync(User user, string token)
         {
             return await _userManager.ConfirmEmailAsync(user, token);
+
         }
 
 
@@ -255,6 +330,27 @@ namespace ProjectCondoManagement.Helpers
         public async Task<SignInResult> ValidatePasswordAsync(User user, string password)
         {
             return await _signInManager.CheckPasswordSignInAsync(user, password, false);
+        }
+
+
+        public async Task<IList<string>> GetRolesAsync(User user)
+        {
+            return await _userManager.GetRolesAsync(user);
+        }
+
+        public async Task<string> GenerateTwoFactorTokenAsync(User user, string tokenProvider)
+        {
+            return await _userManager.GenerateTwoFactorTokenAsync(user, "Phone");
+        }
+
+        public async Task<IdentityResult> EnableTwoFactorAuthenticationAsync(User user, bool enable)
+        {
+            return await _userManager.SetTwoFactorEnabledAsync(user, true);
+        }
+
+        public async Task<bool> VerifyTwoFactorTokenAsync(User user, string tokenProvider, string token)
+        {
+            return await _userManager.VerifyTwoFactorTokenAsync(user, tokenProvider, token);
         }
     }
 }

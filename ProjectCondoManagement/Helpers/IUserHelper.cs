@@ -6,11 +6,19 @@ namespace ProjectCondoManagement.Helpers
 {
     public interface IUserHelper
     {
+
+        Task<User> CreateUser(RegisterUserDto registerDtoModel); //cria user com base no RegisterUserDto
         Task<User> GetUserByEmailAsync(string email); //passa o email para buscar user
 
         Task<IdentityResult> AddUserAsync(User user, string password); //adiciona user na BD
 
         Task<SignInResult> LoginAsync(LoginDto model); //método que devolve tarefa SignInResult (ou tá signed in ou não)
+
+        Task<string> GenerateTwoFactorTokenAsync(User user, string tokenProvider); // criação de token 2FA
+
+        Task<IdentityResult> EnableTwoFactorAuthenticationAsync(User user, bool enable); // habilita 2FA
+
+        Task<bool> VerifyTwoFactorTokenAsync(User user, string tokenProvider, string token);
 
         Task LogoutAsync();
 
@@ -37,5 +45,7 @@ namespace ProjectCondoManagement.Helpers
         Task<User> GetUserByIdAsync(string id); //recebe um id e devolve o user correspondente
 
         Task<IdentityResult> ResetPasswordAsync(User user, string token, string password); //Faz o reset da password
+
+        Task<IList<string>> GetRolesAsync(User user); //busca o role do user
     }
 }

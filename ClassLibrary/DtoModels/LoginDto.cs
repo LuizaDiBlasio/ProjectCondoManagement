@@ -12,6 +12,6 @@ namespace ClassLibrary.DtoModels
 
         public string Password { get; set; }
 
-        public bool RememberMe { get; set; }
+        public bool Requires2FA { get; set; }
     }
 }

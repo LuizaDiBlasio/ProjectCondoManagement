@@ -5,7 +5,7 @@ using System.Security.Principal;
 
 namespace ProjectCondoManagement.Data.Repositories.Finances
 {
-    public class AccountReposirory : GenericRepository<FinancialAccount, DataContextFinances>, IAccountRepository
+    public class FinancialAccountReposirory : GenericRepository<FinancialAccount, DataContextFinances>, IFinancialAccountRepository
     {
     }
 }

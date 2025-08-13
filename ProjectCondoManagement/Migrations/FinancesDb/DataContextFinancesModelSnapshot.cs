@@ -58,15 +58,8 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("Assets")
+                    b.Property<decimal>("InitialDeposit")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

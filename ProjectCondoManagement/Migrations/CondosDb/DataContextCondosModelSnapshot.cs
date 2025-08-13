@@ -88,10 +88,6 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.Property<string>("TaxIdNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
                     b.ToTable("CondoMembers");

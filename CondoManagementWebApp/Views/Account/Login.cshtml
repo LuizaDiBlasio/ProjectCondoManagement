@@ -6,34 +6,13 @@
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title>Omah - Real Estate Admin Dashboard Template</title>
-
+    <title>Login - Condo Management</title>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="author" content="DexignZone">
-    <meta name="robots" content="index, follow">
-
-    <meta name="keywords" content="admin, dashboard, admin dashboard, admin template, template, admin panel, administration, analytics, bootstrap, hospital admin, modern, property, real estate, responsive, creative, retina ready, modern Dashboard">
-    <meta name="description" content="Your Ultimate Real Estate Admin Dashboard Template. Streamline property management, analyze market trends, and boost productivity with our intuitive and feature-rich solution. Elevate your real estate business today!">
-
-    <meta property="og:title" content="Omah - Real Estate Admin Dashboard Template">
-    <meta property="og:description" content="Your Ultimate Real Estate Admin Dashboard Template. Streamline property management, analyze market trends, and boost productivity with our intuitive and feature-rich solution. Elevate your real estate business today!">
-    <meta property="og:image" content="https://omah.dexignzone.com/xhtml/social-image.png">
-    <meta name="format-detection" content="telephone=no">
-
-    <meta name="twitter:title" content="Omah - Real Estate Admin Dashboard Template">
-    <meta name="twitter:description" content="Your Ultimate Real Estate Admin Dashboard Template. Streamline property management, analyze market trends, and boost productivity with our intuitive and feature-rich solution. Elevate your real estate business today!">
-    <meta name="twitter:image" content="https://omah.dexignzone.com/xhtml/social-image.png">
-    <meta name="twitter:card" content="summary_large_image">
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon.png"> 
-    <link href="~/css/style.css" rel="stylesheet"> 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-***********" crossorigin="anonymous" referrerpolicy="no-referrer" /> @* Verifique o integrity e crossorigin *@
-
+    <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon.png">
+    <link href="~/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 
 <body>
@@ -44,50 +23,43 @@
                     <div class="card mb-0 h-auto">
                         <div class="card-body">
                             <div class="text-center mb-3">
-                                <a asp-controller="Home" asp-action="Index"><img class="logo-auth" src="~/images/logo-full.png" alt="Logo"></a> 
+                                <a asp-controller="Home" asp-action="Index">
+                                    <img class="logo-auth" src="~/images/logo-full.png" alt="Logo">
+                                </a>
                             </div>
                             <h4 class="text-center mb-4">Sign in your account</h4>
 
-                           
-                            <form asp-action="Login" asp-controller="Account" method="post" asp-route-returnUrl="@ViewData["ReturnUrl"]">
-                                <div asp-validation-summary="ModelOnly" class="text-danger"></div> 
+                            <form asp-action="RequestLogin" asp-controller="Account" method="post" id="loginForm">
+                                <div id="loginErrorSummary" class="text-danger mb-4" style="display: none;"></div>
+                                <input type="hidden" asp-for="Requires2FA" />
 
                                 <div class="form-group mb-4">
-                                    <label class="form-label" asp-for="Username">Username</label> 
-                                    <input type="email" asp-for="Username" class="form-control" placeholder="Enter username (Email)" id="username"> 
-                                    <span asp-validation-for="Username" class="text-danger"></span> 
+                                    <label class="form-label" asp-for="Username">Username</label>
+                                    <input type="email" asp-for="Username" class="form-control" placeholder="Enter username (Email)" id="username">
+                                    <span asp-validation-for="Username" class="text-danger"></span>
                                 </div>
 
                                 <div class="form-group mb-3 mb-sm-4">
-                                    <label class="form-label" asp-for="Password">Password</label> 
+                                    <label class="form-label" asp-for="Password">Password</label>
                                     <div class="position-relative">
-                                        <input type="password" asp-for="Password" class="form-control" placeholder="Enter password" id="dz-password"> 
-                                        <span class="show-pass eye">
+                                        <input type="password" asp-for="Password" class="form-control" placeholder="Enter password" id="dz-password">
+                                        <span asp-validation-for="Password" class="text-danger"></span> <span class="show-pass eye">
                                             <i class="fa fa-eye-slash"></i>
                                             <i class="fa fa-eye"></i>
                                         </span>
                                     </div>
-                                    <span asp-validation-for="Password" class="text-danger"></span> 
                                 </div>
 
                                 <div class="form-row d-flex flex-wrap justify-content-between align-items-baseline mb-2">
-                                    <div class="form-group mb-sm-4 mb-1">
-                                        <div class="form-check custom-checkbox ms-1">
-                                            <input type="checkbox" asp-for="RememberMe" class="form-check-input" id="basic_checkbox_1"> 
-                                            <label class="form-check-label" for="basic_checkbox_1">Remember my preference</label>
-                                        </div>
-                                    </div>
                                     <div class="form-group ms-2">
-                                        <a asp-controller="Account" asp-action="ForgotPassword">Forgot Password?</a> 
+                                        <a href="#" id="forgotPasswordLink">Forgot Password?</a>
                                     </div>
                                 </div>
+
                                 <div class="text-center">
-                                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                                    <button type="submit" class="btn btn-primary btn-block" id="loginButton">Sign In</button>
                                 </div>
                             </form>
-                            <div class="new-account mt-3">
-                                <p>Don't have an account? <a class="text-primary" asp-controller="Account" asp-action="Register">Sign up</a></p> 
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -95,14 +67,194 @@
         </div>
     </div>
 
-    <script src="~/vendor/global/global.min.js"></script> 
-    <script src="~/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script> 
-    <script src="~/js/custom.min.js"></script> 
-    <script src="~/js/deznav-init.js"></script> 
+    <div class="modal fade" id="twoFAModal" tabindex="-1" aria-labelledby="twoFAModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="twoFAModalLabel">Two factor authentication</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>A confirmation sms has been sent to your phone. Please insert the code bellow:</p>
+                    <div class="form-group mb-4">
+                        <label class="form-label" for="twoFAToken">Verification code</label>
+                        <input type="text" id="twoFAToken" class="form-control" placeholder="Insert the 6 digits code" maxlength="6">
+                        <div id="twoFATokenError" class="text-danger mt-2" style="display: none;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="verifyTokenButton">
+                        <span id="verifyButtonText">Verify</span>
+                        <span id="verifyButtonSpinner" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div id="forgotPasswordModalContent"></div>
+            </div>
+        </div>
+    </div>
 
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+
+        <script>
+            $(document).ready(function() {
+                var currentUsername = '';
+
+                // --- Lógica do Login e 2FA ---
+                $('#loginForm').on('submit', function(event) {
+                    event.preventDefault();
+
+                    var username = $('#username').val();
+                    var password = $('#dz-password').val();
+
+                    currentUsername = username;
+
+                    $('#loginButton').prop('disabled', true).text('Logging in...');
+
+                    $('#loginErrorSummary').text('').hide();
+                    $('#username').removeClass('is-invalid');
+                    $('#dz-password').removeClass('is-invalid');
+
+                    $.ajax({
+                        url: '@Url.Action("RequestLogin", "Account")',
+                        type: 'POST',
+                        data: {
+                            Username: username,
+                            Password: password
+                        },
+                        success: function(data) {
+                            $('#loginButton').prop('disabled', false).text('Sign In');
+                            if (data.isSuccess) {
+                                if (data.requires2FA === true) {
+                                    $('#twoFAModal').modal('show');
+                                } else {
+                                    window.location.href = '@Url.Action("Index", "Home")';
+                                }
+                            } else {
+                                var errorMsg = data.message || 'Login failed, please check your credentials.';
+                                $('#loginErrorSummary').text(errorMsg).show();
+                            }
+                        },
+                        error: function(xhr) {
+                            $('#loginButton').prop('disabled', false).text('Sign In');
+                            var errorMsg = 'Login failed, please check your credentials.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMsg = xhr.responseJSON.message;
+                            } else if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
+                                var errors = xhr.responseJSON.errors;
+                                if (Object.keys(errors).length > 0) {
+                                    errorMsg = Object.values(errors).flat()[0];
+                                }
+                            }
+                            $('#loginErrorSummary').text(errorMsg).show();
+                        }
+                    });
+                });
+
+            @if (Model != null && Model.Requires2FA == true)
+            {
+                <text>
+                            currentUsername = '@Model.Username';
+                            $('#twoFAModal').modal('show');
+                </text>
+            }
+
+                $('#verifyTokenButton').on('click', function() {
+                    var token = $('#twoFAToken').val().trim();
+                    var errorContainer = $('#twoFATokenError');
+
+                    if (!token || token.length !== 6 || !/^\d{6}$/.test(token)) {
+                        errorContainer.text('The code must have 6 digits only.').show();
+                        return;
+                    }
+
+                    errorContainer.hide();
+
+                    $('#verifyButtonText').text('Verifying...');
+                    $('#verifyButtonSpinner').removeClass('d-none');
+                    $('#verifyTokenButton').prop('disabled', true);
+
+                    $.ajax({
+                        url: '@Url.Action("Verify2FA", "Account")',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            Username: currentUsername,
+                            Token: token
+                        }),
+                        success: function(data) {
+                            if (data.isSuccess) {
+                                $('#twoFAModal').modal('hide');
+                                window.location.href = '@Url.Action("Index", "Home")';
+                            } else {
+                                resetVerifyButton();
+                                errorContainer.text(data.message || 'Invalid code.').show();
+                            }
+                        },
+                        error: function(xhr) {
+                            resetVerifyButton();
+                            var errorMsg = 'Invalid code, please try again.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMsg = xhr.responseJSON.message;
+                            }
+                            errorContainer.text(errorMsg).show();
+                        }
+                    });
+                });
+
+                $('#twoFAToken').on('input', function() {
+                    $('#twoFATokenError').hide();
+                });
+
+                function resetVerifyButton() {
+                    $('#verifyButtonText').text('Verify');
+                    $('#verifyButtonSpinner').addClass('d-none');
+                    $('#verifyTokenButton').prop('disabled', false);
+                }
+
+                $('#twoFAModal').on('hidden.bs.modal', function() {
+                    resetVerifyButton();
+                    $('#twoFAToken').val('');
+                    $('#twoFATokenError').hide();
+                });
+
+                // --- Lógica da Modal Forgot Password ---
+                $('#forgotPasswordLink').on('click', function(e) {
+                    e.preventDefault();
+
+                    $.ajax({
+                        url: '@Url.Action("ForgotPasswordPartial", "Account")',
+                        type: 'GET',
+                        success: function(data) {
+                            $('#forgotPasswordModalContent').html(data);
+                            $('#forgotPasswordModal').modal('show');
+                        },
+                        error: function() {
+                            alert('Could not load password reset form. Please try again.');
+                        }
+                    });
+                });
+
+                $('#forgotPasswordModal').on('hidden.bs.modal', function() {
+                    $('#forgotPasswordModalContent').empty();
+                });
+            });
+        </script>
+    }
+
+    <script src="~/vendor/global/global.min.js"></script>
+    <script src="~/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+    <script src="~/js/custom.min.js"></script>
+    <script src="~/js/deznav-init.js"></script>
 </body>
-
 </html>

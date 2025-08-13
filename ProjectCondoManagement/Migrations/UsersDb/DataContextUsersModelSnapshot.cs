@@ -230,6 +230,9 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("FinancialAccountId")
+                        .HasColumnType("int");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -258,6 +261,7 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
@@ -272,6 +276,9 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("Uses2FA")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
