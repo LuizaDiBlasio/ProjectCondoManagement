@@ -289,7 +289,7 @@ namespace CondoManagementWebApp.Controllers
         [Authorize(Roles = "SysAdmin")]
         public IActionResult Register() //só mostra a view do Register
         {
-            //criar modelo com as opções da combobox
+            // modelo com as opções da combobox
             var selectList = new List<SelectListItem>
             {
                 new SelectListItem{Value = "0", Text = "Select a role..."},
