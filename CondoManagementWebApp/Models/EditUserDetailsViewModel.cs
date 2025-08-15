@@ -3,11 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CondoManagementWebApp.Models
 {
-    public class ProfileViewModel
+    public class EditUserDetailsViewModel
     {
-        public int Id { get; set; }
-
-
         [Required]
         [Display(Name = "Full Name")]
         [MaxLength(50, ErrorMessage = "The field {0} allows only {1} characters")] //mensagem não chega a ser mostrada
@@ -29,8 +26,21 @@ namespace CondoManagementWebApp.Models
         [Required]
         public string Address { get; set; }
 
-    
+        [Required]
         public string? Email { get; set; }
+
+        [Display(Name = "Financial Account number")]
+        public int? FinancialAccountId { get; set; }
+
+
+        [Display(Name = "Company name")]
+        public string? CompanyName { get; set; }  
+
+
+        public int? CompanyId { get; set; } 
+
+
+        public bool IsActive { get; set; }  
 
 
         [Display(Name = "Profile Image")]

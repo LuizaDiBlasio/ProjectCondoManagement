@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
+using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using ProjectCondoManagement.Data.Entites.CondosDb;
@@ -45,7 +46,7 @@ namespace ProjectCondoManagement.Controllers
             _jwtTokenService = jwtTokenService;
             _condoMemberRepository = condoMemberRepository;
             _smsHelper = smsHelper;
-       
+
         }
 
         /// <summary>
@@ -60,10 +61,85 @@ namespace ProjectCondoManagement.Controllers
         [Microsoft.AspNetCore.Mvc.HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDtoModel)
         {
-            //ver se user está ativo
+            ////ver se user está ativo
+            //var user = await _userHelper.GetUserByEmailAsync(loginDtoModel.Username);
+
+            //if(user == null)
+            //{
+            //    return NotFound(new { Message = "Login failed, user not found." });
+            //}
+
+            //if (user.IsActive == false)
+            //{
+            //    return Unauthorized(new Response { Message = "User is not active in the system, please contact admin" });
+            //}
+
+            //var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login 
+
+
+
+            //if (result.RequiresTwoFactor) //se login for bem sucedido
+            //{
+            //    var token = await _userHelper.GenerateTwoFactorTokenAsync(user, "Phone");
+
+            //    var response = await _smsHelper.SendSmsAsync("+351936752044", $"Your authentication code is: {token}");
+
+            //    if (response.IsSuccess)
+            //    {
+            //        return Ok(new Response
+            //        {
+            //            Token = null,
+            //            Expiration = null,
+            //            Requires2FA = true,
+            //            Role = null, // Não tem o role ainda aqui, precisa do 2FA.
+            //            IsSuccess = true
+            //        });
+            //    }
+            //    else
+            //    {
+            //        return StatusCode(500, new { Message = "It was not possible to send SMS verification code" });
+            //    }
+            //}
+            //else
+            //{
+            //    return StatusCode(500, new { Message = "Wrong credentials, please try again" });
+            //}
+
+
+            ////else //seguir normalmente para ambiente de desenvolvimento //TODO todo esse else vai ser apagado antes de publicar 
+            ////{
+            ////    // pede lista de roles do usuário (somente 1 item na lista)
+            ////    var roles = await _userHelper.GetRolesAsync(user);
+
+            ////    // verifica se a lista não está vazia e pega a primeira role.
+            ////    if (roles != null && roles.Any())
+            ////    {
+            ////        var userRole = roles.First();
+
+            ////        // gerar o token jwt
+            ////        var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
+
+            ////        var results = new Response()
+            ////        {
+            ////            Token = tokenJwt,
+            ////            Expiration = DateTime.UtcNow.AddDays(15),
+            ////            Requires2FA = false,
+            ////            Role = userRole, 
+            ////            IsSuccess = true
+            ////        };
+
+            ////        return Ok(results);
+            ////    }
+
+
+            ////}
+            ////return Unauthorized(new { Message = "Login failed, credentials are not valid." });
+
+            //__________________________________novo login____________________________________________
+
             var user = await _userHelper.GetUserByEmailAsync(loginDtoModel.Username);
 
-            if(user == null)
+            if (user == null)
             {
                 return NotFound(new { Message = "Login failed, user not found." });
             }
@@ -73,32 +149,12 @@ namespace ProjectCondoManagement.Controllers
                 return Unauthorized(new Response { Message = "User is not active in the system, please contact admin" });
             }
 
-            var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login (Este é o seu método que usa PasswordSignInAsync internamente)
+            var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login 
 
-            if (result.RequiresTwoFactor) //se login for bem sucedido
+            if (result.Succeeded)
             {
-                var token = await _userHelper.GenerateTwoFactorTokenAsync(user, "Phone");
-
-                var response = await _smsHelper.SendSmsAsync("+351936752044", $"Your authentication code is: {token}");
-
-                if (response.IsSuccess)
-                {
-                    return Ok(new TokenResponseModel
-                    {
-                        Token = null,
-                        Expiration = null,
-                        Requires2FA = true,
-                    });
-                }
-                else
-                {
-                    return StatusCode(500, new { Message = "It was not possible to send SMS verification code" });
-                }
-            }
-            else //seguir normalmente para ambiente de desenvolvimento //TODO todo esse else vai ser apagado antes de publicar 
-            {
-                // pede lista de roles do usuário (somente 1 item na lista)
-                var roles = await _userHelper.GetRolesAsync(user);
+                //pede lista de roles do usuário(somente 1 item na lista)
+                    var roles = await _userHelper.GetRolesAsync(user);
 
                 // verifica se a lista não está vazia e pega a primeira role.
                 if (roles != null && roles.Any())
@@ -108,18 +164,21 @@ namespace ProjectCondoManagement.Controllers
                     // gerar o token jwt
                     var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
 
-                    var results = new TokenResponseModel()
+                    var results = new Response()
                     {
                         Token = tokenJwt,
                         Expiration = DateTime.UtcNow.AddDays(15),
-                        Requires2FA = false
+                        Requires2FA = false,
+                        Role = userRole,
+                        IsSuccess = true
                     };
 
                     return Ok(results);
                 }
 
-
+                return Unauthorized(new { Message = "Login failed, credentials are not valid." });
             }
+
             return Unauthorized(new { Message = "Login failed, credentials are not valid." });
         }
 
@@ -162,11 +221,14 @@ namespace ProjectCondoManagement.Controllers
                     var userRole = roles.First();
                     var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
 
-                    var results = new TokenResponseModel()
+                    var results = new Response()
                     {
                         Token = tokenJwt,
                         Expiration = DateTime.UtcNow.AddDays(15),
-                        Requires2FA = false
+                        Requires2FA = false,
+                        Role = userRole,
+                        IsSuccess = true,
+                        Message = "Two-factor authentication successful."
                     };
 
                     return Ok(results);
@@ -454,7 +516,7 @@ namespace ProjectCondoManagement.Controllers
 
         public async Task<IActionResult> EditProfile([FromBody] UserDto userDto)
         {
-            var user = await _userHelper.GetUserByEmailAsync(userDto.Email);
+            var user = await _converterHelper.ToEditedProfile(userDto);
             
             if (user == null)
             {
@@ -463,11 +525,26 @@ namespace ProjectCondoManagement.Controllers
 
             var response = await _userHelper.UpdateUserAsync(user);
 
+           
             if(response.Succeeded)
             {
                 var editedUser = await _userHelper.GetUserByEmailAsync(userDto.Email);
 
                 var editedUserDto = _converterHelper.ToUserDto(editedUser);
+
+                if (await _userHelper.IsUserInRoleAsync(user, "CondoMember"))
+                {
+                    var condomember = await _converterHelper.FromUserToCondoMember(user);
+
+                    if (condomember == null)
+                    {
+                        return NotFound();
+                    }
+
+                    await _condoMemberRepository.UpdateAsync(condomember, _dataContextCondos);
+
+                    return Ok(editedUserDto);    
+                }
 
                 return Ok(editedUserDto);
             }
@@ -476,16 +553,76 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetAllUsersByRole([FromBody] string role)
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //[HttpPost("EditUserDetails")]
+        //public async Task<IActionResult> EditUserDetails([FromBody] EditUserDetailsDto editUserDetailsDto)
+        //{
+        //    var user = await _userHelper.GetUserByEmailAsync(editUserDetailsDto.Email);
+
+        //    if (user == null)
+        //    {
+        //        return NotFound(null);  
+        //    }
+
+        //    await _userHelper.UpdateUserAsync(user);
+
+        //    var editedUser = await _userHelper.GetUserByEmailAsync(user.Email);
+
+        //    if (user == null)
+        //    {
+        //        return NotFound(null);
+        //    }
+
+        //    return Ok(editedUser);
+        //}
+
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("EditUserDetails")]
+        public async Task<IActionResult> EditUserDetails([FromBody] EditUserDetailsDto editUserDetailsDto)
+        {
+            var editedUser = await _converterHelper.ToEditedUser(editUserDetailsDto);
+
+            if (editedUser == null)
+            {
+                return NotFound(new Response { IsSuccess = false, Message = "Unable to update, user not found in the system"});
+            }
+
+            await _userHelper.UpdateUserAsync(editedUser); 
+
+            if (await _userHelper.IsUserInRoleAsync(editedUser, "CondoMember"))
+            {
+                var condomember = await _converterHelper.FromUserToCondoMember(editedUser);
+
+                if (condomember == null)
+                {
+                    return NotFound(new Response { IsSuccess = false, Message = "Unable to update, user not found in the system" });
+                }
+
+                await _condoMemberRepository.UpdateAsync(condomember, _dataContextCondos);
+
+                return Ok(new Response { IsSuccess = true });
+            }
+
+            return Ok(new Response { IsSuccess = true});
+        }
+
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("GetAllUsersByRole")]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsersByRole([FromBody] string role)
         {
             var users = await _userHelper.GetUsersByRoleAsync($"{role}");
 
-            return users.ToList();
+            var usersDto = users.Select(u => _converterHelper.ToUserDto(u)).ToList();
+
+            return usersDto;
 
         }
 
+
         
+
 
     }
 }

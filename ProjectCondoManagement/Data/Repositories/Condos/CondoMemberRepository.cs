@@ -1,4 +1,6 @@
 ﻿using ClassLibrary;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
@@ -9,10 +11,13 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
     {
 
         private readonly IUserHelper _userHelper;
+        private readonly DataContextCondos _context;
 
-        public CondoMemberRepository(IUserHelper userHelper)
+
+        public CondoMemberRepository(IUserHelper userHelper, DataContextCondos context)
         {
             _userHelper = userHelper;
+            _context = context;
         }
 
 
@@ -56,5 +61,20 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
                 };
             }
         }
+
+        public async Task<CondoMember> GetCondoMemberByEmailAsync(string email)
+        {
+            var condoMember = await GetAll(_context).FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
+            
+            if (condoMember == null)
+            {
+                return null;
+            }
+
+            return condoMember; 
+        }
+            
+
+        
     }
 }

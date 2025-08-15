@@ -12,11 +12,15 @@ namespace ClassLibrary
 
         public string Message { get; set; }
 
-
         public object Results { get; set; }
 
+        public string? Token { get; set; }
 
-        public string Token { get; set; }  
+        public DateTime? Expiration { get; set; }
+
+        public bool Requires2FA { get; set; } = false;
+
+        public string? Role { get; set; }
     }
 }
 

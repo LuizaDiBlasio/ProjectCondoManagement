@@ -1,5 +1,6 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
+using CloudinaryDotNet.Actions;
 using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -12,6 +13,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Vereyon.Web;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CondoManagementWebApp.Controllers
 {
@@ -70,21 +72,104 @@ namespace CondoManagementWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> RequestLogin(LoginViewModel model)
         {
-            //verificação para saber se a requisição é um AJAX POST
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            ////verificação para saber se a requisição é um AJAX POST
+            //if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            //{
+            //    if (!ModelState.IsValid)
+            //    {
+            //        // Retorne um JSON para requisições AJAX que falham a validação
+            //        return BadRequest(new { isSuccess = false, message = "Invalid input, please fill in the form correctly." });
+            //    }
+            //}
+            //else // Requesição não AJAX (se você quiser manter o comportamento de form tradicional)
+            //{
+            //    if (!ModelState.IsValid)
+            //    {
+            //        return View("Login", model);
+            //    }
+            //}
+
+            //var loginDto = _converterHelper.ToLoginDto(model);
+            //var jsonContent = new StringContent(
+            //    JsonSerializer.Serialize(loginDto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+            //    Encoding.UTF8,
+            //    "application/json"
+            //);
+
+            //try
+            //{
+            //    var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/Account/Login", jsonContent);
+
+            ////    if (response.IsSuccessStatusCode)
+            ////    {
+            ////        var content = await response.Content.ReadAsStringAsync();
+            ////        var tokenResponse = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            ////        //if (tokenResponse.Requires2FA) //TODO remover esse if antes de publicar
+            ////        //{
+            ////            // Para requisições AJAX, retorne um JSON que o JavaScript possa entender
+            ////            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            ////            {
+            ////                return Ok(new { isSuccess = true, requires2FA = true, username = model.Username });
+            ////            }
+            ////            // Para requisições não AJAX, volte a view
+            ////            var responseModel = new LoginViewModel() { Username = model.Username, Requires2FA = true };
+
+            ////            return View("Login", responseModel);
+            ////        //}
+            ////        //else // Login bem-sucedido (sem 2FA)
+            ////        //{
+            ////        //    //sessão com token
+            ////        //    var handler = new JwtSecurityTokenHandler();
+            ////        //    var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
+
+            ////        //    //armazenar token na sessão para futuras requisições da api
+            ////        //    HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
+
+            ////        //    // ClaimsPrincipal com base nas claims do token JWT
+            ////        //    var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            ////        //    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            ////        //    // login no  WebApp, criando um cookie de autenticação
+            ////        //    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
+            ////        //    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            ////        //    {
+            ////        //        return Ok(new { isSuccess = true, requires2FA = false });
+
+            ////        //    }
+            ////        //    return RedirectToAction("Index", "Home");
+            ////        //}
+            ////    }
+            ////    else // Login falhou na API
+            ////    {
+            ////        var content2 = await response.Content.ReadAsStringAsync();
+            ////        var error = JsonSerializer.Deserialize<Response>(content2, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            ////        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            ////        {
+            ////            return BadRequest(new { isSuccess = false, message = error.Message });
+            ////        }
+
+            ////        this.ModelState.AddModelError(string.Empty, error.Message);
+            ////        return View("Login", model);
+            ////    }
+            ////}
+            ////catch (Exception ex)
+            ////{
+            ////    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            ////    {
+            ////        return BadRequest(new { message = ex.Message });
+            ////    }
+            ////    return View("Login", model);
+            ////}
+            ///
+
+            //______________________________novo Login_______________________
+
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    // Retorne um JSON para requisições AJAX que falham a validação
-                    return BadRequest(new { isSuccess = false, message = "Invalid input, please fill in the form correctly." });
-                }
-            }
-            else // Requesição não AJAX (se você quiser manter o comportamento de form tradicional)
-            {
-                if (!ModelState.IsValid)
-                {
-                    return View("Login", model);
-                }
+                return View("Login", model);
             }
 
             var loginDto = _converterHelper.ToLoginDto(model);
@@ -101,67 +186,33 @@ namespace CondoManagementWebApp.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var tokenResponse = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                    if (tokenResponse.Requires2FA) //TODO remover esse if antes de publicar
-                    {
-                        // Para requisições AJAX, retorne um JSON que o JavaScript possa entender
-                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        {
-                            return Ok(new { isSuccess = true, requires2FA = true, username = model.Username });
-                        }
-                        // Para requisições não AJAX, volte a view
-                        var responseModel = new LoginViewModel() { Username = model.Username, Requires2FA = true };
+                    var handler = new JwtSecurityTokenHandler();
+                    var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
 
-                        return View("Login", responseModel);
-                    }
-                    else // Login bem-sucedido (sem 2FA)
-                    {
-                        //sessão com token
-                        var handler = new JwtSecurityTokenHandler();
-                        var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
+                    //armazenar token na sessão para futuras requisições da api
+                    HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
 
-                        //armazenar token na sessão para futuras requisições da api
-                        HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
+                    // ClaimsPrincipal com base nas claims do token JWT
+                    var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
-                        // ClaimsPrincipal com base nas claims do token JWT
-                        var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                        var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                    // login no  WebApp, criando um cookie de autenticação
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
-                        // login no  WebApp, criando um cookie de autenticação
-                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
-
-                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        {
-                            return Ok(new { isSuccess = true, requires2FA = false });
-
-                        }
-                        return RedirectToAction("Index", "Home");
-                    }
+                   
+                    return RedirectToAction("Account", "SysAdminDashboard");
                 }
-                else // Login falhou na API
-                {
-                    var content2 = await response.Content.ReadAsStringAsync();
-                    var error = JsonSerializer.Deserialize<Response>(content2, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    {
-                        return BadRequest(new { isSuccess = false, message = error.Message });
-                    }
-
-                    this.ModelState.AddModelError(string.Empty, error.Message);
-                    return View("Login", model);
-                }
+                this.ModelState.AddModelError(string.Empty, "Unable to proceed with login");
+                return View("Login", model);
             }
             catch (Exception ex)
             {
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                {
-                    return BadRequest(new { message = ex.Message });
-                }
+                this.ModelState.AddModelError(string.Empty, ex.Message);
                 return View("Login", model);
             }
-
         }
 
         /// <summary>
@@ -172,13 +223,11 @@ namespace CondoManagementWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Verify2FA([FromBody] Verify2FADto model)
         {
-            // Apenas para garantir que a validação do modelo funciona
             if (!ModelState.IsValid)
             {
                 return BadRequest(new { isSuccess = false, message = "Invalid input for 2FA." });
             }
 
-            // Serializar o modelo para JSON para enviar para a API
             var jsonContent = new StringContent(
                 JsonSerializer.Serialize(model, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
                 Encoding.UTF8,
@@ -187,43 +236,45 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                // Chamar o endpoint da sua API para verificar o código 2FA
                 var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/Account/Verify2FA", jsonContent);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var tokenResponse = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                    // Se o token for válido, o login é completado
-                    var handler = new JwtSecurityTokenHandler();
-                    var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
+                    // **1. Recebe o tokenResponse COMPLETO da API**
+                    if (tokenResponse.IsSuccess)
+                    {
+                        var handler = new JwtSecurityTokenHandler();
+                        var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
 
-                    HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
+                        HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
 
-                    var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+                        var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
-                    // Retorna sucesso para o AJAX no front-end
-                    return Ok(new { isSuccess = true });
+                        // **2. RETORNA o objeto COMPLETO, incluindo o Role, para o frontend**
+                        return Ok(new { isSuccess = true, role = tokenResponse.Role });
+                    }
                 }
                 else
                 {
                     // Se a API retornar um erro (ex: código inválido)
                     var errorContent = await response.Content.ReadAsStringAsync();
                     var error = JsonSerializer.Deserialize<Response>(errorContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                    // Retorna o erro para o AJAX
                     return BadRequest(new { isSuccess = false, message = error?.Message ?? "Invalid verification code" });
                 }
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { isSuccess = false, message = ex.Message });
             }
 
+            return BadRequest(new { isSuccess = false, message = "An unknown error occurred." });
         }
+
 
         /// <summary>
         /// Displays ForgotPasswordPartial View
@@ -594,6 +645,7 @@ namespace CondoManagementWebApp.Controllers
         /// Makes an http request to retrirve user's profile
         /// </summary>
         /// <returns>A view with user's profile details or empty if unsuccessfull</returns>
+        [Authorize]
         public async Task<IActionResult> Profile()
         {
             try
@@ -625,6 +677,7 @@ namespace CondoManagementWebApp.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns>A view with user's profile details edited or view with errors i case call is unsuccessfull</returns>
+        [Authorize]
         public async Task<IActionResult> EditProfile(ProfileViewModel model)
         {
             if (!ModelState.IsValid)
@@ -632,17 +685,29 @@ namespace CondoManagementWebApp.Controllers
                 return View("Profile", model);
             }
 
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
-            {
-                var url = await _cloudinaryService.UploadImageAsync(model.ImageFile);
-                model.ImageUrl = url;
-            }
-
-            var userDto = _converterHelper.ToUserDto(model);
-
             try
             {
-                var apiCall = await _apiCallService.PostAsync<UserDto, UserDto?>("api/Account/EditProfile", userDto);
+                //buscar imagem do user
+                var userDto = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", model.Email);
+
+                if (userDto == null)
+                {
+                    _flashMessage.Danger("Unable to upload user's current picture");
+                    return View("Profile", model);
+                }
+
+                model.ImageUrl = userDto.ImageUrl;
+
+                if (model.ImageFile != null && model.ImageFile.Length > 0)
+                {
+                    var url = await _cloudinaryService.UploadImageAsync(model.ImageFile);
+                    model.ImageUrl = url;
+                }
+
+                var userDto2 = _converterHelper.ToUserDto(model);
+
+            
+                var apiCall = await _apiCallService.PostAsync<UserDto, UserDto?>("api/Account/EditProfile", userDto2);
 
                 if (apiCall == null)
                 {
@@ -650,7 +715,7 @@ namespace CondoManagementWebApp.Controllers
                     return View("Profile", model);
                 }
 
-                var editedModel = _converterHelper.ToProfileViewModel(userDto);
+                var editedModel = _converterHelper.ToProfileViewModel(userDto2);
 
                 return View("Profile", editedModel);
             }
@@ -662,15 +727,14 @@ namespace CondoManagementWebApp.Controllers
 
         }
 
-
-
+        [Authorize]
         public async Task<IActionResult> SysAdminDashboard()
         {
             try
             {
                 var model = new SysAdminDashboardViewModel();
 
-                var usersCondoMembers = await _apiCallService.GetAsync<IEnumerable<CondoMemberDto>>("api/CondoMember/GetCondoMembers");
+                var usersCondoMembers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoMember");
 
                 if (usersCondoMembers.Any())
                 {
@@ -692,15 +756,188 @@ namespace CondoManagementWebApp.Controllers
                     model.CompanyAdmins = usersCompanyAdmin;
                 }
 
-                return View(new SysAdminDashboardViewModel());
+                return View(model);
 
             }
-            catch
+            catch(Exception)
             {
                 return View(new SysAdminDashboardViewModel());
             }
 
         }
+
+        [Authorize]
+        public async Task<IActionResult> EditUserDetails(string email)
+        {
+            try
+            {
+                var userdto = await _apiCallService.GetByQueryAsync<UserDto>($"api/Account/GetUserByEmail", email);
+
+
+                if (userdto == null)
+                {
+                    var model1 = new EditUserDetailsViewModel();
+                    _flashMessage.Danger("Unable to retrieve details, user not found");
+                    return View(model1);
+                }
+
+
+                //Buscar a company name 
+
+                if (userdto.CompanyId != null)
+                {
+                    var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/Details/{userdto.CompanyId}");
+
+                    if(company == null) // se correu mal
+                    {
+                        _flashMessage.Danger("Unable to retrieve user's company");
+                        var model2 = _converterHelper.ToEditUserDetailsViewModel(userdto, null);
+                        return View(model2);
+                    }
+
+                    var model3 = _converterHelper.ToEditUserDetailsViewModel(userdto, company.Name);
+
+                    return View(model3);
+                }
+
+                //se não tem company
+                var model4 = _converterHelper.ToEditUserDetailsViewModel(userdto, null);
+                return View(model4);
+
+            }
+            catch (Exception)
+            {
+                var model = new EditUserDetailsViewModel();
+                _flashMessage.Danger("Unable to retrieve details, ser not found");
+                return View(model);
+            }
+            
+        }
+
+
+        [Authorize]
+        public async Task<IActionResult> RequestEditUserDetails(EditUserDetailsViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("EditUserDetails", model);
+            }
+            try
+            {
+                //buscar imagem do user
+                var userDto = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", model.Email);
+
+                if (userDto == null)
+                {
+                    _flashMessage.Danger("Unable to upload user's current picture");
+                    return View("Profile", model);
+                }
+
+                model.ImageUrl = userDto.ImageUrl;
+
+                if (model.ImageFile != null && model.ImageFile.Length > 0)
+                {
+                    var url = await _cloudinaryService.UploadImageAsync(model.ImageFile);
+                    model.ImageUrl = url;
+                }
+ 
+                var editUserDetailsDto = _converterHelper.ToEditUserDetailsDto(model, model.CompanyName);
+
+                var apiCall = await _apiCallService.PostAsync<EditUserDetailsDto, Response>("api/Account/EditUserDetails", editUserDetailsDto);
+
+                if (apiCall.IsSuccess)
+                {
+                    var editedUserDto = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", model.Email);
+
+                    if (editedUserDto != null)
+                    {
+                        if (editedUserDto.CompanyId != null)
+                        {
+                            var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/Details/{editedUserDto.CompanyId}");
+
+                            if (company == null) // se correu mal
+                            {
+                                _flashMessage.Danger("Unable to retrieve user's company");
+                                var model2 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
+                                return View("EditUserDetails", model2);
+                            }
+
+                            var editedUserDetailsViewModel = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, company.Name);
+
+                            return View("EditUserDetails", editedUserDetailsViewModel);
+                        }
+
+                        var model3 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
+                        return View("EditUserDetails", model3);
+
+                    }
+
+                    _flashMessage.Danger(apiCall.Message);
+                    var model4 = new EditUserDetailsViewModel();
+                    return View("EditUserDetails", model4);
+                }
+
+                _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
+                var model5 = new EditUserDetailsViewModel();
+                return View("EditUserDetails", model5);
+            }
+            catch (Exception)
+            {
+                _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
+                var model6 = new EditUserDetailsViewModel();
+                return View("EditUserDetails", model6);
+            }
+
+        }
+
+
+        //[Authorize]
+        //public async Task<IActionResult> RequestEditUserDetails(EditUserDetailsViewModel model)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return View("EditUserDetails", model);
+        //    }
+        //    try
+        //    {
+        //        var editUserDetailsDto = _converterHelper.ToEditUserDetailsDto(model, model.CompanyName);
+
+        //        var editedUserDto = await _apiCallService.PostAsync<EditUserDetailsDto, UserDto>("api/Account/EditUserDetails", editUserDetailsDto);
+
+        //        if (editedUserDto != null)
+        //        {
+        //            if (editedUserDto.CompanyId != null)
+        //            {
+        //                var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/Details/{editedUserDto.CompanyId}");
+
+        //                if (company == null) // se correu mal
+        //                {
+        //                    _flashMessage.Danger("Unable to retrieve user's company");
+        //                    var model1 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
+        //                    return View("EditUserDetails", model1);
+        //                }
+
+        //                var editedUserDetailsViewModel = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, company.Name);
+
+        //                return View(editedUserDetailsViewModel);
+        //            }
+
+        //            var model2 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
+        //            return View("EditUserDetails", model2);
+        //        }
+
+        //        _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
+        //        var model3 = new EditUserDetailsViewModel();
+        //        return View("EditUserDetails", model3);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
+        //        var model4 = new EditUserDetailsViewModel();
+        //        return View("EditUserDetails", model4);
+        //    }
+
+        //}
 
 
 

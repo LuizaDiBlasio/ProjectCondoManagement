@@ -1,25 +1,18 @@
 ﻿using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Protocol.Core.Types;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ProjectCondoManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "SysAdmin")]
     public class CondoMembersController : ControllerBase
     {
         private readonly DataContextCondos _context;
@@ -35,13 +28,15 @@ namespace ProjectCondoManagement.Controllers
 
         // GET: api/CondoMembers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CondoMember>>> GetCondoMembers()
+        public async Task<ActionResult<IEnumerable<CondoMemberDto>>> GetCondoMembers()
         {
             var condoMembers = await _condoMemberRepository.GetAll(_context).ToListAsync();
 
             await _condoMemberRepository.LinkImages(condoMembers); // Link images to condo members
 
-            return condoMembers;
+            var condoMembersDtos = condoMembers.Select(c => _converterHelper.ToCondoMemberDto(c)).ToList();
+
+            return condoMembersDtos;
 
         }
 
@@ -64,7 +59,7 @@ namespace ProjectCondoManagement.Controllers
         // POST: api/CondoMembers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("Edit/{id}")]
-        public async Task<IActionResult> EditCondoMember(int id, [FromBody]CondoMemberDto condoMemberDto)
+        public async Task<IActionResult> EditCondoMember(int id, [FromBody] CondoMemberDto condoMemberDto)
         {
             if (id != condoMemberDto.Id)
             {
@@ -98,14 +93,14 @@ namespace ProjectCondoManagement.Controllers
         // POST: api/CondoMembers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<IActionResult> PostCondoMember([FromBody]CondoMemberDto condoMemberDto)
+        public async Task<IActionResult> PostCondoMember([FromBody] CondoMemberDto condoMemberDto)
         {
 
             if (condoMemberDto == null)
             {
                 return BadRequest("Request body is null.");
             }
-        
+
 
             try
             {
@@ -118,7 +113,7 @@ namespace ProjectCondoManagement.Controllers
 
                 await _condoMemberRepository.CreateAsync(condoMember, _context);
 
-                return Ok(); 
+                return Ok();
             }
             //catch (Exception ex)
             //{
@@ -150,6 +145,6 @@ namespace ProjectCondoManagement.Controllers
             return NoContent();
         }
 
-     
+
     }
 }

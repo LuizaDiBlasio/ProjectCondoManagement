@@ -195,7 +195,14 @@
                         success: function(data) {
                             if (data.isSuccess) {
                                 $('#twoFAModal').modal('hide');
-                                window.location.href = '@Url.Action("Index", "Home")';
+                                   
+                                     // <-- ADICIONAR OS ROLES E ENCAMINHAMENTOS AQUI 
+
+                                    if (data.role === "SysAdmin") {
+                                        window.location.href = '@Url.Action("SysAdminDashBoard", "Account")';
+                                    } else {
+                                        window.location.href = '@Url.Action("Index", "Home")';
+                                    }
                             } else {
                                 resetVerifyButton();
                                 errorContainer.text(data.message || 'Invalid code.').show();

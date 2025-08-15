@@ -79,7 +79,8 @@ namespace CondoManagementWebApp.Helpers
                 PhoneNumber = model.PhoneNumber,
                 Address = model.Address,
                 ImageUrl = model.ImageUrl, 
-                Email = model.Email
+                Email = model.Email,
+               
             };
 
             return userDto; 
@@ -98,6 +99,44 @@ namespace CondoManagementWebApp.Helpers
             };
 
             return model;   
+        }
+
+        public EditUserDetailsViewModel ToEditUserDetailsViewModel (UserDto userDto, string? companyName)
+        {
+            var model = new EditUserDetailsViewModel()
+            {
+                FullName = userDto.FullName,
+                BirthDate = userDto.BirthDate,
+                PhoneNumber = userDto.PhoneNumber,
+                Address = userDto.Address,
+                ImageUrl = userDto.ImageUrl,
+                IsActive = userDto.IsActive,
+                Email = userDto.Email,
+                CompanyName = companyName,
+                CompanyId = userDto.CompanyId,
+                FinancialAccountId = userDto.FinancialAccountId
+            };
+
+            return model;
+        }
+
+        public EditUserDetailsDto ToEditUserDetailsDto (EditUserDetailsViewModel model, string? companyName)
+        {
+            var editUserDetailsDto = new EditUserDetailsDto()
+            {
+                FullName = model.FullName,
+                BirthDate = model.BirthDate,
+                PhoneNumber = model.PhoneNumber,
+                Address = model.Address,
+                Email = model.Email,
+                IsActive = model.IsActive,
+                ImageUrl = model.ImageUrl,
+                CompanyName = model.CompanyName,
+                FinancialAccountId = model.FinancialAccountId, 
+                CompanyId = model.CompanyId 
+            };
+
+            return editUserDetailsDto;
         }
     }
 }

@@ -1,0 +1,187 @@
+﻿@model CondoManagementWebApp.Models.EditUserDetailsViewModel
+
+@{
+	ViewData["Title"] = "User Details";
+}
+
+
+<div class="content-body">
+	<div class="container-fluid">
+		<div class="row page-titles mx-0">
+			<div class="col-sm-6 p-md-0">
+				<div class="welcome-text">
+					<h4>User Details</h4>
+				</div>
+			</div>
+			<div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+					<li class="breadcrumb-item active"><a href="javascript:void(0)">User Details</a></li>
+				</ol>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xl-12 col-xxl-12">
+				<div class="card">
+					<div class="card-header">
+						<h4 class="card-title">@Model.FullName's Details</h4>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-md-8 col-lg-6 mx-auto">
+								<flash dismissable="true" />
+
+								@* Seção da Imagem de Perfil *@
+								<div class="profile-img-container mb-4 text-center">
+									<img src="@Url.Content(Model.ImageFullPath)" alt="Profile Image" class="img-fluid rounded-circle" style="width:200px; height:200px; object-fit:cover;" />
+								</div>
+
+
+
+								@* Formulário de Edição de Detalhes do Usuário *@
+								<form asp-action="RequestEditUserDetails" asp-controller="Account" method="post" enctype="multipart/form-data">
+
+									<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+									<input type="hidden" asp-for="Email" />
+									<input type="hidden" asp-for="ImageUrl" />
+									<input type="hidden" asp-for="CompanyId" />
+
+									<div class="row">
+										<div class="col-md-6 mb-3">
+											<div class="form-group">
+												<label asp-for="IsActive" class="form-label">Status</label>
+												<div class="form-check form-switch d-flex align-items-center">
+													<input class="form-check-input me-2" type="checkbox" id="isActiveSwitch" asp-for="IsActive">
+													<label class="form-check-label" for="isActiveSwitch" id="isActiveLabel">
+														@if (Model.IsActive)
+														{
+															<span class="text-success">Active</span>
+														}
+														else
+														{
+															<span class="text-danger">Inactive</span>
+														}
+													</label>
+												</div>
+												<span asp-validation-for="IsActive" class="text-danger"></span>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-md-6 mb-3">
+											<div class="form-group">
+												<label asp-for="FullName" class="form-label">Full Name</label>
+												<input asp-for="FullName" class="form-control" />
+												<span asp-validation-for="FullName" class="text-danger"></span>
+											</div>
+										</div>
+										<div class="col-md-6 mb-3">
+											<div class="form-group">
+												<label asp-for="BirthDate" class="form-label">Birth Date</label>
+												<div>
+													<input type="text" id="birthDateInput" asp-for="BirthDate" class="form-control" />
+												</div>
+												<span asp-validation-for="BirthDate" class="text-danger"></span>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-md-6 mb-3">
+											<div class="form-group">
+												<label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+												<input asp-for="PhoneNumber" class="form-control" />
+												<span asp-validation-for="PhoneNumber" class="text-danger"></span>
+											</div>
+										</div>
+										<div class="col-md-6 mb-3">
+											<div class="form-group">
+												<label asp-for="Address" class="form-label">Address</label>
+												<input asp-for="Address" class="form-control" />
+												<span asp-validation-for="Address" class="text-danger"></span>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-md-6 mb-3">
+											<div class="form-group">
+												<label asp-for="FinancialAccountId" class="form-label">Financial Account Id</label>
+												<input asp-for="FinancialAccountId" class="form-control" readonly/>
+												<span asp-validation-for="FinancialAccountId" class="text-danger"></span>
+											</div>
+										</div>
+
+										@if (Model.CompanyName != null)
+										{
+											<div class="col-md-6 mb-3">
+												<div class="form-group">
+													<label asp-for="CompanyName" class="form-label">Company </label>
+													<input asp-for="CompanyName" class="form-control" readonly />
+													<span asp-validation-for="CompanyName" class="text-danger"></span>
+												</div>
+											</div>
+										}
+									</div>
+
+									
+									
+
+									<div class="mb-3">
+										<div class="form-group">
+											<label asp-for="ImageFile" class="form-label">Image File</label>
+											<input asp-for="ImageFile" class="form-control" type="file" />
+											<span asp-validation-for="ImageFile" class="text-danger"></span>
+										</div>
+									</div>
+
+									<div class="form-group mt-3 d-flex justify-content-start align-items-center">
+										<input type="submit" value="Save" class="btn btn-primary me-2" />
+										<a asp-action="SysAdminDashboard" asp-controller="Account" class="btn btn-outline-secondary">Back to DashBoard</a>
+									</div>
+									@if (ViewBag.ErrorMessage != null)
+									{
+										<div class="alert alert-danger mt-3" role="alert">
+											@ViewBag.ErrorMessage
+										</div>
+									}
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+
+	<script type="text/javascript">
+		document.addEventListener('DOMContentLoaded', function () {
+			// Inicializa o DatePicker
+			var birthDatePicker = new ej.calendars.DatePicker({
+				format: 'MM/dd/yyyy',
+				placeholder: 'Select a date'
+			});
+			birthDatePicker.appendTo('#birthDateInput');
+
+			// Script para o switch de status
+			const isActiveSwitch = document.getElementById('isActiveSwitch');
+			const isActiveLabel = document.getElementById('isActiveLabel');
+
+			isActiveSwitch.addEventListener('change', function() {
+				if (this.checked) {
+					isActiveLabel.innerHTML = '<span class="text-success">Active</span>';
+				} else {
+					isActiveLabel.innerHTML = '<span class="text-danger">Inactive</span>';
+				}
+			});
+		});
+	</script>
+}

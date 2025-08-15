@@ -1,29 +1,172 @@
-﻿@model IEnumerable<CondoManagementWebApp.Models.SysAdminDashboardViewModel>
+﻿@model CondoManagementWebApp.Models.SysAdminDashboardViewModel
 
 @{
     ViewData["Title"] = "SysAdminDashboard";
 }
 
-<h1>SysAdminDashboard</h1>
+<input type="hidden" asp-for="Email" />
+<h1 class="mb-4">Manage users</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
+
+@* Accordion for Condo Members *@
+<div class="accordion" id="accordionCondoMembers">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingCondoMembers">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCondoMembers" aria-expanded="true" aria-controls="collapseCondoMembers">
+                Condo Members
+            </button>
+        </h2>
+        <div id="collapseCondoMembers" class="accordion-collapse collapse show" aria-labelledby="headingCondoMembers" data-bs-parent="#accordionCondoMembers">
+            <div class="accordion-body">
+                <table class="table">
+                    @if (Model.CondoMembers != null && Model.CondoMembers.Any())
+                        {
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                            @foreach (var member in Model.CondoMembers)
+                            {
+                                <tr>
+                                    <td>
+                                        <img src="@(member.ImageFullPath)" alt="User Image" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                                    </td>
+                                    <td>@member.FullName</td>
+                                    <td>@member.Email</td>
+                                    <td>
+                                            <label class="form-check-label" for="memberSwitch_@member.Email">@(member.IsActive ? "Active" : "Inactive")</label>
+                                    </td>
+
+                                    <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@member.Email">Edit Details</a></td>
+                                </tr>
+                            }
+                        
+                    </tbody>
+                    }
+                    else
+                    {
+                        <tr><td colspan="2" class="text-center text-muted">No condo members found.</td></tr>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Accordion for Company Admins *@
+<div class="accordion mt-4" id="accordionCompanyAdmins">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingCompanyAdmins">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCompanyAdmins" aria-expanded="false" aria-controls="collapseCompanyAdmins">
+                Company Admins
+            </button>
+        </h2>
+        <div id="collapseCompanyAdmins" class="accordion-collapse collapse" aria-labelledby="headingCompanyAdmins" data-bs-parent="#accordionCompanyAdmins">
+            <div class="accordion-body">
+                <table class="table">
+                   
+                        @if (Model.CompanyAdmins != null && Model.CompanyAdmins.Any())
+                        {
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                        <tbody>
+                            @foreach (var admin in Model.CompanyAdmins)
+                            {
+                                <tr>
+                                    <td>
+                                        <img src="@(admin.ImageFullPath)" alt="User Image" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                                    </td>
+                                    <td>@admin.FullName</td>
+                                    <td>@admin.Email</td>
+                                    <td>
+                                        <label class="form-check-label" for="memberSwitch_@admin.Email">@(admin.IsActive ? "Active" : "Inactive")</label>
+                                    </td>
+
+                                    <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@admin.Email">Edit Details</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                        }
+                        else
+                        {
+                            <tbody>
+                            <tr><td colspan="2" class="text-center text-muted">No company admins found.</td></tr>
+                            </tbody>
+                        }
+                   
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Accordion for Condo Managers *@
+<div class="accordion mt-4" id="accordionCondoManagers">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingCondoManagers">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCondoManagers" aria-expanded="false" aria-controls="collapseCondoManagers">
+                Condo Managers
+            </button>
+        </h2>
+        <div id="collapseCondoManagers" class="accordion-collapse collapse" aria-labelledby="headingCondoManagers" data-bs-parent="#accordionCondoManagers">
+            <div class="accordion-body">
+                <table class="table">
+                   
+                        @if (Model.CondoManagers != null && Model.CondoManagers.Any())
+                        {
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                           
+                            @foreach (var manager in Model.CondoManagers)
+                            {
+                                <tr>
+                                    <td>
+                                        <img src="@(manager.ImageFullPath)" alt="User Image" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                                    </td>
+                                    <td>@manager.FullName</td>
+                                    <td>@manager.Email</td>
+                                    <td>
+                                        <label class="form-check-label" for="memberSwitch_@manager.Email">@(manager.IsActive ? "Active" : "Inactive")</label>
+                                    </td>
+
+                                    <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@manager.Email">Edit Details</a></td>
+                                </tr>
+                            }
+                            
+                        </tbody>
+                        }
+                        else
+                        {
+                            <tbody>
+                            <tr><td colspan="2" class="text-center text-muted">No condo managers found.</td></tr>
+                            </tbody>
+                        }
+                   
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+   
 }
-    </tbody>
-</table>
