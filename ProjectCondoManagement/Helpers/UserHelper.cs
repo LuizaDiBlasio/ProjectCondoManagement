@@ -387,6 +387,14 @@ namespace ProjectCondoManagement.Helpers
         }
 
 
+        public async Task<List<User>> GetUsersByFullName(string cleanedFullName)
+        {
+            return await _dataContextUsers.Users
+               .Where(s => s.FullName.ToLower() == cleanedFullName)
+               .ToListAsync();
+        }
+
+
         public async Task<string> GenerateTwoFactorTokenAsync(User user, string tokenProvider)
         {
             return await _userManager.GenerateTwoFactorTokenAsync(user, "Phone");

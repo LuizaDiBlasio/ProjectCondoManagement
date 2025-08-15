@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using NuGet.Versioning;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -890,6 +891,87 @@ namespace CondoManagementWebApp.Controllers
 
         }
 
+        [HttpPost]
+        public async Task<IActionResult> SearchUsers(SysAdminDashboardViewModel model)
+        {
+           
+            if (string.IsNullOrEmpty(model.SearchTerm))
+            {
+                _flashMessage.Danger("Please provide a search term.");
+                
+                await LoadDashboardDataAsync(model); // Recarrega os dados da dashboard antes de retornar a view, metodo auxiliar abaixo
+                return View("SysAdminDashboard", model);
+            }
+
+            try
+            { 
+                // Chamada à API para buscar usuários por nome
+                var users = await _apiCallService.GetAsync<List<UserDto>>($"api/Account/GetUsersByFullName?userFullName={model.SearchTerm}"); //criar uma query string pra passar o parametro
+
+                if (users == null || !users.Any())
+                {
+                    _flashMessage.Danger("No users found with that name.");
+                    await LoadDashboardDataAsync(model); // Recarrega os dados
+                    return View("SysAdminDashboard", model);
+                }
+
+                if (users.Count == 1)
+                {
+                    var user = users.First(); // puxa o primeiro e único da lista
+
+
+                    //criar view model para EditUserDetails
+                    if (user.CompanyId != null)
+                    {
+                        var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/Details/{user.CompanyId}");
+
+                        if (company == null) // se correu mal
+                        {
+                            _flashMessage.Danger("Unable to retrieve user's company");
+                            var model2 = _converterHelper.ToEditUserDetailsViewModel(user, null);
+                            return View("EditUserDetails", model2);
+                        }
+
+                        var editedUserDetailsViewModel = _converterHelper.ToEditUserDetailsViewModel(user, company.Name);
+
+                        return RedirectToAction("EditUserDetails", editedUserDetailsViewModel);
+                    }
+
+                    var model3 = _converterHelper.ToEditUserDetailsViewModel(user, null);
+
+                    return RedirectToAction("EditUserDetails", model3);
+                }
+                else
+                {
+                    model.HomonymUsers = users;
+                    await LoadDashboardDataAsync(model); // Recarrega os dados
+                    return View("SysAdminDashboard", model);
+            }
+
+            }
+            catch
+            {
+                _flashMessage.Danger("Unable to search due to error");
+
+                await LoadDashboardDataAsync(model); 
+                return View("SysAdminDashboard", model);
+            }
+           
+        }
+
+        /// <summary>
+        /// Auxiliar method for SearchUsers(); Loads the 3 lists of users
+        /// </summary>
+        /// <param name="model">View model</param>
+        /// <returns>Task</returns>
+        private async Task LoadDashboardDataAsync(SysAdminDashboardViewModel model)
+        {
+            model.CondoMembers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoMember");
+            model.CompanyAdmins = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CompanyAdmin");
+            model.CondoManagers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoManagers");
+        }
+
+
 
         //[Authorize]
         //public async Task<IActionResult> RequestEditUserDetails(EditUserDetailsViewModel model)
@@ -902,49 +984,49 @@ namespace CondoManagementWebApp.Controllers
         //    {
         //        var editUserDetailsDto = _converterHelper.ToEditUserDetailsDto(model, model.CompanyName);
 
-        //        var editedUserDto = await _apiCallService.PostAsync<EditUserDetailsDto, UserDto>("api/Account/EditUserDetails", editUserDetailsDto);
+            //        var editedUserDto = await _apiCallService.PostAsync<EditUserDetailsDto, UserDto>("api/Account/EditUserDetails", editUserDetailsDto);
 
-        //        if (editedUserDto != null)
-        //        {
-        //            if (editedUserDto.CompanyId != null)
-        //            {
-        //                var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/Details/{editedUserDto.CompanyId}");
+            //        if (editedUserDto != null)
+            //        {
+            //            if (editedUserDto.CompanyId != null)
+            //            {
+            //                var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/Details/{editedUserDto.CompanyId}");
 
-        //                if (company == null) // se correu mal
-        //                {
-        //                    _flashMessage.Danger("Unable to retrieve user's company");
-        //                    var model1 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
-        //                    return View("EditUserDetails", model1);
-        //                }
+            //                if (company == null) // se correu mal
+            //                {
+            //                    _flashMessage.Danger("Unable to retrieve user's company");
+            //                    var model1 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
+            //                    return View("EditUserDetails", model1);
+            //                }
 
-        //                var editedUserDetailsViewModel = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, company.Name);
+            //                var editedUserDetailsViewModel = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, company.Name);
 
-        //                return View(editedUserDetailsViewModel);
-        //            }
+            //                return View(editedUserDetailsViewModel);
+            //            }
 
-        //            var model2 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
-        //            return View("EditUserDetails", model2);
-        //        }
+            //            var model2 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
+            //            return View("EditUserDetails", model2);
+            //        }
 
-        //        _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
-        //        var model3 = new EditUserDetailsViewModel();
-        //        return View("EditUserDetails", model3);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
-        //        var model4 = new EditUserDetailsViewModel();
-        //        return View("EditUserDetails", model4);
-        //    }
+            //        _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
+            //        var model3 = new EditUserDetailsViewModel();
+            //        return View("EditUserDetails", model3);
+            //    }
+            //    catch (Exception)
+            //    {
+            //        _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
+            //        var model4 = new EditUserDetailsViewModel();
+            //        return View("EditUserDetails", model4);
+            //    }
 
-        //}
+            //}
 
 
 
-        // <summary>
-        /// Displays the "Not Authorized" view when a user tries to access a restricted area.
-        /// </summary>
-        /// <returns>The "Not Authorized" view.</returns>
+            // <summary>
+            /// Displays the "Not Authorized" view when a user tries to access a restricted area.
+            /// </summary>
+            /// <returns>The "Not Authorized" view.</returns>
         public IActionResult NotAuthorized()
         {
             return View();

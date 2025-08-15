@@ -4,8 +4,28 @@
     ViewData["Title"] = "SysAdminDashboard";
 }
 
-<input type="hidden" asp-for="Email" />
-<h1 class="mb-4">Manage users</h1>
+<div class="row d-flex justify-content-between align-items-center mb-4">
+    <div class="col-auto">
+        <h1 class="mb-0">Manage users</h1>
+    </div>
+    <div class="col-auto">
+        @* Barra de busca com formulário *@
+        <form asp-action="SearchUsers" asp-controller="Account" method="post">
+            <div class="input-group search-area d-xl-inline-flex d-none">
+                <input class="form-control" type="text" name="SearchTerm" placeholder="Search Here" aria-label="Search" />
+                <button class="input-group-text">
+                    <span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M23.707 22.293L19.314 17.9A9.953 9.953 0 0 0 20 10c0-5.514-4.486-10-10-10S0 4.486 0 10s4.486 10 10 10c2.396 0 4.604-.848 6.357-2.268l4.394 4.393a1 1 0 0 0 1.414 0 1 1 0 0 0 0-1.414zM10 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" fill="#000000" />
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<flash dismissable="true" />
 
 
 @* Accordion for Condo Members *@
@@ -20,18 +40,17 @@
             <div class="accordion-body">
                 <table class="table">
                     @if (Model.CondoMembers != null && Model.CondoMembers.Any())
-                        {
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        
+                    {
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
                             @foreach (var member in Model.CondoMembers)
                             {
                                 <tr>
@@ -41,14 +60,12 @@
                                     <td>@member.FullName</td>
                                     <td>@member.Email</td>
                                     <td>
-                                            <label class="form-check-label" for="memberSwitch_@member.Email">@(member.IsActive ? "Active" : "Inactive")</label>
+                                        <label class="form-check-label" for="memberSwitch_@member.Email">@(member.IsActive ? "Active" : "Inactive")</label>
                                     </td>
-
                                     <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@member.Email">Edit Details</a></td>
                                 </tr>
                             }
-                        
-                    </tbody>
+                        </tbody>
                     }
                     else
                     {
@@ -71,10 +88,9 @@
         <div id="collapseCompanyAdmins" class="accordion-collapse collapse" aria-labelledby="headingCompanyAdmins" data-bs-parent="#accordionCompanyAdmins">
             <div class="accordion-body">
                 <table class="table">
-                   
-                        @if (Model.CompanyAdmins != null && Model.CompanyAdmins.Any())
-                        {
-                            <thead>
+                    @if (Model.CompanyAdmins != null && Model.CompanyAdmins.Any())
+                    {
+                        <thead>
                             <tr>
                                 <th></th>
                                 <th>Name</th>
@@ -82,7 +98,7 @@
                                 <th>Status</th>
                                 <th></th>
                             </tr>
-                            </thead>
+                        </thead>
                         <tbody>
                             @foreach (var admin in Model.CompanyAdmins)
                             {
@@ -95,19 +111,17 @@
                                     <td>
                                         <label class="form-check-label" for="memberSwitch_@admin.Email">@(admin.IsActive ? "Active" : "Inactive")</label>
                                     </td>
-
                                     <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@admin.Email">Edit Details</a></td>
                                 </tr>
                             }
                         </tbody>
-                        }
-                        else
-                        {
-                            <tbody>
+                    }
+                    else
+                    {
+                        <tbody>
                             <tr><td colspan="2" class="text-center text-muted">No company admins found.</td></tr>
-                            </tbody>
-                        }
-                   
+                        </tbody>
+                    }
                 </table>
             </div>
         </div>
@@ -125,17 +139,18 @@
         <div id="collapseCondoManagers" class="accordion-collapse collapse" aria-labelledby="headingCondoManagers" data-bs-parent="#accordionCondoManagers">
             <div class="accordion-body">
                 <table class="table">
-                   
-                        @if (Model.CondoManagers != null && Model.CondoManagers.Any())
-                        {
+                    @if (Model.CondoManagers != null && Model.CondoManagers.Any())
+                    {
                         <thead>
                             <tr>
+                                <th></th>
                                 <th>Name</th>
-                                <th>Actions</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                           
                             @foreach (var manager in Model.CondoManagers)
                             {
                                 <tr>
@@ -147,26 +162,69 @@
                                     <td>
                                         <label class="form-check-label" for="memberSwitch_@manager.Email">@(manager.IsActive ? "Active" : "Inactive")</label>
                                     </td>
-
                                     <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@manager.Email">Edit Details</a></td>
                                 </tr>
                             }
-                            
                         </tbody>
-                        }
-                        else
-                        {
-                            <tbody>
+                    }
+                    else
+                    {
+                        <tbody>
                             <tr><td colspan="2" class="text-center text-muted">No condo managers found.</td></tr>
-                            </tbody>
-                        }
-                   
+                        </tbody>
+                    }
                 </table>
             </div>
         </div>
     </div>
 </div>
 
+@* Modal de Homônimos *@
+<div id="homonymDialog" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Multiple users found</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Multiple users were found with that name. Please select the correct user:</p>
+                <ul class="list-group">
+                    @if (Model.HasHomonyms)
+                    {
+                        @foreach (var user in Model.HomonymUsers)
+                        {
+                            <li class="list-group-item">
+                                <a asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@user.Email">
+                                    @user.FullName (@user.Email)
+                                </a>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
-   
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    @* Se o modelo indicar homônimos, exibir o modal *@
+    <script type="text/javascript">
+        $(document).ready(function () {
+        @if (Model.HasHomonyms)
+        {
+            <text>
+                        $('#homonymDialog').modal('show');
+            </text>
+        }
+        });
+    </script>
 }

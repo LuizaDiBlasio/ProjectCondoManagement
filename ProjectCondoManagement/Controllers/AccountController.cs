@@ -30,6 +30,7 @@ namespace ProjectCondoManagement.Controllers
         private readonly DataContextCondos _dataContextCondos;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly ISmsHelper _smsHelper;
+        
 
         string webBaseAdress = "https://localhost:7081"; //TODO mudar quando publicar
 
@@ -575,6 +576,25 @@ namespace ProjectCondoManagement.Controllers
 
         //    return Ok(editedUser);
         //}
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("GetUsersByFullName")]
+        public async Task<List<UserDto>> GetUsersByFullName([FromQuery] string userFullName) //pegar parametro da query, depois do [?]
+        {
+            if (string.IsNullOrEmpty(userFullName))
+            {
+                return new List<UserDto>(); // retorna lista vazia
+            }
+
+            string cleanedFullName = userFullName.Trim().ToLower();
+
+            var users = await _userHelper.GetUsersByFullName(cleanedFullName);
+
+            var usersDto = users.Select(u => _converterHelper.ToUserDto(u)).ToList();
+
+            return usersDto;
+        }
+
 
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

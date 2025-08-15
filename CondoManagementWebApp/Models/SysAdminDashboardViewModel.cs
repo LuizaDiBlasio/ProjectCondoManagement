@@ -10,7 +10,12 @@ namespace CondoManagementWebApp.Models
 
         public IEnumerable<UserDto> CondoManagers { get; set; }
 
-        public string Email { get; set; }   
+        public string Email { get; set; }
+
+        // PROPRIEDADES PARA A BUSCA
+        public string? SearchTerm { get; set; }
+        public List<UserDto>? HomonymUsers { get; set; }
+        public bool HasHomonyms => HomonymUsers != null && HomonymUsers.Count > 1; //true se houver mais de um user com o mesmo nome
 
         public SysAdminDashboardViewModel()
         {
