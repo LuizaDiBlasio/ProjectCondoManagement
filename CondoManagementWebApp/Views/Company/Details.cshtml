@@ -93,40 +93,48 @@
             @* Card para a Tabela de Condomínios *@
             <div class="col-xl-12 col-xxl-12 mt-4">
                 <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">Company Condominiums</h4>
-                    </div>
-                    <div class="card-body">
-                        @if (!Model.CondominiumDtos.Any())
-                        {
-                            <p>This company doesn't manage any condominiums yet.</p>
-                        }
-                        else
-                        {
-                            <div class="table-responsive">
-                                <table class="table table-striped table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Address</th>
-                                            <th>Condo Manager</th>
-                                            @* Adicione mais colunas conforme necessário *@
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var item in Model.CondominiumDtos)
+                        @* Accordion for Condominiums *@
+                        <div class="accordion" id="accordionCondos">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingCondos">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCondos" aria-expanded="true" aria-controls="collapseCondos">
+                                        <h4 class="card-title">Company Condominiums</h4>
+                                    </button>
+                                </h2>
+                                <div id="collapseCondos" class="accordion-collapse collapse show" aria-labelledby="headingCondos" data-bs-parent="#accordionCondos">
+                                    <div class="accordion-body">
+                                        @if (!Model.CondominiumDtos.Any())
                                         {
-                                            <tr>
-                                                <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                                                <td>@Html.DisplayFor(modelItem => item.Address)</td>
-                                                <td>@item.Manager?.FullName ?? "No condo manager assigned yet"</td>
-                                            </tr>
+                                            <p>This company doesn't manage any condominiums yet.</p>
                                         }
-                                    </tbody>
-                                </table>
+                                        else
+                                        {
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Address</th>
+                                                            <th>Condo Manager</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in Model.CondominiumDtos)
+                                                        {
+                                                            <tr>
+                                                                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.Address)</td>
+                                                                <td>@item.Manager?.FullName ?? "No condo manager assigned yet"</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
                             </div>
-                        }
-                    </div>
+                        </div>
                 </div>
             </div>
         </div>

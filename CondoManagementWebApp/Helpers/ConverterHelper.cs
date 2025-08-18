@@ -144,6 +144,7 @@ namespace CondoManagementWebApp.Helpers
             
             var companyDto = new CompanyDto()
             {
+                Id = model.Id,
                 Name = model.Name, 
                 CompanyAdminId = model.SelectedCompanyAdminId,
                 SelectedCondominiumIds = model.SelectedCondominiumIds,

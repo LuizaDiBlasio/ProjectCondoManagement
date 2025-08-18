@@ -73,104 +73,21 @@ namespace CondoManagementWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> RequestLogin(LoginViewModel model)
         {
-            ////verificação para saber se a requisição é um AJAX POST
-            //if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            //{
-            //    if (!ModelState.IsValid)
-            //    {
-            //        // Retorne um JSON para requisições AJAX que falham a validação
-            //        return BadRequest(new { isSuccess = false, message = "Invalid input, please fill in the form correctly." });
-            //    }
-            //}
-            //else // Requesição não AJAX (se você quiser manter o comportamento de form tradicional)
-            //{
-            //    if (!ModelState.IsValid)
-            //    {
-            //        return View("Login", model);
-            //    }
-            //}
-
-            //var loginDto = _converterHelper.ToLoginDto(model);
-            //var jsonContent = new StringContent(
-            //    JsonSerializer.Serialize(loginDto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
-            //    Encoding.UTF8,
-            //    "application/json"
-            //);
-
-            //try
-            //{
-            //    var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/Account/Login", jsonContent);
-
-            ////    if (response.IsSuccessStatusCode)
-            ////    {
-            ////        var content = await response.Content.ReadAsStringAsync();
-            ////        var tokenResponse = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            ////        //if (tokenResponse.Requires2FA) //TODO remover esse if antes de publicar
-            ////        //{
-            ////            // Para requisições AJAX, retorne um JSON que o JavaScript possa entender
-            ////            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            ////            {
-            ////                return Ok(new { isSuccess = true, requires2FA = true, username = model.Username });
-            ////            }
-            ////            // Para requisições não AJAX, volte a view
-            ////            var responseModel = new LoginViewModel() { Username = model.Username, Requires2FA = true };
-
-            ////            return View("Login", responseModel);
-            ////        //}
-            ////        //else // Login bem-sucedido (sem 2FA)
-            ////        //{
-            ////        //    //sessão com token
-            ////        //    var handler = new JwtSecurityTokenHandler();
-            ////        //    var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
-
-            ////        //    //armazenar token na sessão para futuras requisições da api
-            ////        //    HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
-
-            ////        //    // ClaimsPrincipal com base nas claims do token JWT
-            ////        //    var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            ////        //    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
-            ////        //    // login no  WebApp, criando um cookie de autenticação
-            ////        //    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
-
-            ////        //    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            ////        //    {
-            ////        //        return Ok(new { isSuccess = true, requires2FA = false });
-
-            ////        //    }
-            ////        //    return RedirectToAction("Index", "Home");
-            ////        //}
-            ////    }
-            ////    else // Login falhou na API
-            ////    {
-            ////        var content2 = await response.Content.ReadAsStringAsync();
-            ////        var error = JsonSerializer.Deserialize<Response>(content2, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            ////        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            ////        {
-            ////            return BadRequest(new { isSuccess = false, message = error.Message });
-            ////        }
-
-            ////        this.ModelState.AddModelError(string.Empty, error.Message);
-            ////        return View("Login", model);
-            ////    }
-            ////}
-            ////catch (Exception ex)
-            ////{
-            ////    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            ////    {
-            ////        return BadRequest(new { message = ex.Message });
-            ////    }
-            ////    return View("Login", model);
-            ////}
-            ///
-
-            //______________________________novo Login_______________________
-
-            if (!ModelState.IsValid)
+            //verificação para saber se a requisição é um AJAX POST
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                return View("Login", model);
+                if (!ModelState.IsValid)
+                {
+                    // Retorne um JSON para requisições AJAX que falham a validação
+                    return BadRequest(new { isSuccess = false, message = "Invalid input, please fill in the form correctly." });
+                }
+            }
+            else // Requesição não AJAX (se você quiser manter o comportamento de form tradicional)
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View("Login", model);
+                }
             }
 
             var loginDto = _converterHelper.ToLoginDto(model);
@@ -189,31 +106,67 @@ namespace CondoManagementWebApp.Controllers
                     var content = await response.Content.ReadAsStringAsync();
                     var tokenResponse = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                    var handler = new JwtSecurityTokenHandler();
-                    var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
+                    if (tokenResponse.Requires2FA) //TODO remover esse if antes de publicar
+                    {
+                        // Para requisições AJAX, retorne um JSON que o JavaScript possa entender
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        {
+                            return Ok(new { isSuccess = true, requires2FA = true, username = model.Username });
+                        }
+                        // Para requisições não AJAX, volte a view
+                        var responseModel = new LoginViewModel() { Username = model.Username, Requires2FA = true };
 
-                    //armazenar token na sessão para futuras requisições da api
-                    HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
+                        return View("Login", responseModel);
+                    }
+                    else // Login bem-sucedido (sem 2FA)
+                    {
+                        //sessão com token
+                        var handler = new JwtSecurityTokenHandler();
+                        var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
 
-                    // ClaimsPrincipal com base nas claims do token JWT
-                    var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                        //armazenar token na sessão para futuras requisições da api
+                        HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
 
-                    // login no  WebApp, criando um cookie de autenticação
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+                        // ClaimsPrincipal com base nas claims do token JWT
+                        var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
-                   
-                    return RedirectToAction("Account", "SysAdminDashboard");
+                        // login no  WebApp, criando um cookie de autenticação
+                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        {
+                            return Ok(new { isSuccess = true, requires2FA = false });
+
+                        }
+                        return RedirectToAction("Index", "Home");
+                    }
                 }
+                else // Login falhou na API
+                {
+                    var content2 = await response.Content.ReadAsStringAsync();
+                    var error = JsonSerializer.Deserialize<Response>(content2, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                this.ModelState.AddModelError(string.Empty, "Unable to proceed with login");
-                return View("Login", model);
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return BadRequest(new { isSuccess = false, message = error.Message });
+                    }
+
+                    this.ModelState.AddModelError(string.Empty, error.Message);
+                    return View("Login", model);
+                }
             }
             catch (Exception ex)
             {
-                this.ModelState.AddModelError(string.Empty, ex.Message);
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return BadRequest(new { message = ex.Message });
+                }
                 return View("Login", model);
             }
+
+
+
         }
 
         /// <summary>

@@ -11,10 +11,10 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public string Name { get; set; }    
 
-        public int CompanyId { get; set; }
+        public int? CompanyId { get; set; }
 
         [NotMapped]
-        public Company Company { get; set; }
+        public Company? Company { get; set; }
 
         public string Address { get; set; }
 

@@ -69,6 +69,11 @@ namespace ProjectCondoManagement.Helpers
 
         public UserDto ToUserDto(User user)
         {
+            if(user == null)
+            {
+                return null;
+            }
+
             var userDto = new UserDto()
             {
                 Id = user.Id,   
@@ -161,12 +166,13 @@ namespace ProjectCondoManagement.Helpers
             return condoMember; 
         }
 
-        public  CompanyDto ToCompanyDto(Company company, IEnumerable<Condominium> companyCondominiums)
+        public  CompanyDto ToCompanyDto(Company company)
         {
             var companyDto = new CompanyDto()
             {
+                Id = company.Id,    
                 Name = company.Name,
-                CondominiumDtos = companyCondominiums?.Select(c => ToCondominiumDto(c)).ToList() ?? new List<CondominiumDto>(),
+                CondominiumDtos = company.Condominiums?.Select(c => ToCondominiumDto(c)).ToList() ?? new List<CondominiumDto>(),
                 CompanyAdmin = ToUserDto(company.CompanyAdmin),
                 Email = company.Email,
                 Address = company.Address,
@@ -218,7 +224,7 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = condominium.Id,
                 Name = condominium.Name,    
-                CompanyId = condominium.CompanyId,
+                CompanyId = condominium.CompanyId.Value,
                 Address = condominium.Address,
                 ManagerUserId = condominium.ManagerUserId,
                 UnitDtos = condominium.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),

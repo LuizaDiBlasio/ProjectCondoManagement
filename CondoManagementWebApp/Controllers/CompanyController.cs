@@ -49,7 +49,7 @@ namespace CondoManagementWebApp.Controllers
         {
             try
             {
-                var companyDto = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany{id}");
+                var companyDto = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{id}");
 
                 if (companyDto == null)
                 {
@@ -139,20 +139,10 @@ namespace CondoManagementWebApp.Controllers
                     return View("NotFound");
                 }
 
-                var model = new CreateEditCompanyViewModel()
-                {
-                    Name = companyDto.Name,    
-                    Email = companyDto.Email,
-                    Address = companyDto.Address,   
-                    TaxIdDocument = companyDto.TaxIdDocument,
-                    PhoneNumber = companyDto.PhoneNumber,
-                    SelectedCompanyAdminId = companyDto.CompanyAdminId,
-                    SelectedCondominiumIds = companyDto.SelectedCondominiumIds,
-                    CondominiumsToSelect = selectLists.Condos,
-                    CompanyAdminsToSelect = selectLists.Admins
-                };
+                var model = _converterHelper.ToCreateEditCompanyViewModel(companyDto);
 
-
+                model.CondominiumsToSelect = selectLists.Condos;
+                model.CompanyAdminsToSelect = selectLists.Admins;
 
                 return View(model);
             }
@@ -176,42 +166,35 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var editedCompany = await _apiCallService.PostAsync<CompanyDto, CompanyDto>("api/Company/Edit", companyDto);
+                var apiCall = await _apiCallService.PostAsync<CompanyDto, Response>($"api/Company/EditCompany", companyDto);
 
-                if (editedCompany == null)
+                if (!apiCall.IsSuccess)
                 {
-                    _flashMessage.Danger("Unable to updata company information due to error");
+                    _flashMessage.Danger(apiCall.Message);
 
                     return View("Edit", model);
                 }
 
-                var editedModel = _converterHelper.ToCreateEditCompanyViewModel(editedCompany);
 
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondos");
-
-                //adicionar listas de deleção ao modelo
-
-                editedModel.CondominiumsToSelect = selectLists.Condos;
-                editedModel.CompanyAdminsToSelect = selectLists.Admins; 
-
-                return View("Edit", editedModel);
+                _flashMessage.Confirmation(apiCall.Message);
+                return View("Edit", model);
             }
             catch
             {
-                _flashMessage.Danger("Unable to updata company information due to error");
+                _flashMessage.Danger("Unable to update company information due to error");
                 return View("Edit", model);
             }
         }
 
-        
+
 
         // POST: Company/RequestDelete/5
-        [Microsoft.AspNetCore.Mvc.HttpPost]
+        [Microsoft.AspNetCore.Mvc.HttpPost("Company/RequestDelete/{id}")] 
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> RequestDelete(int id)
         {
             try
             {
-                var apiCall = await _apiCallService.DeleteAsync($"api/Company/DeleteCompany{id}");
+                var apiCall = await _apiCallService.DeleteAsync($"api/Company/DeleteCompany/{id}");
 
                 if (apiCall.IsSuccessStatusCode)
                 {
@@ -219,7 +202,11 @@ namespace CondoManagementWebApp.Controllers
                     return Json(new { success = true });
                 }
 
-                return Json(new { success = false, message = "Unable to delete company due to error" });
+                var responseBody = await apiCall.Content.ReadFromJsonAsync<Response>();
+
+                // Retorna o JSON com a mensagem de erro da API
+                return Json(new { success = false, message = responseBody?.Message ?? "Unable to delete company due to error" });
+
             }
             catch
             {

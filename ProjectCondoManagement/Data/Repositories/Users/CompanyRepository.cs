@@ -29,11 +29,24 @@ namespace ProjectCondoManagement.Data.Repositories.Users
 
         public async Task<Company> GetCompanyWithcCondosAndAdmin(int id, DataContextUsers contextUsers)
         {
-            return await contextUsers.Companies.
+            //buscar company
+            var company= await contextUsers.Companies.
                 Where(c => c.Id == id)
                 .Include(c => c.CompanyAdmin)
-                .Include(c => c.Condominiums)
-                .FirstOrDefaultAsync();     
+                .FirstOrDefaultAsync();
+
+            //buscar condos da company
+           
+            var  companyCondos = await _contextCondos.Condominiums.
+                Where(c => c.CompanyId == id).ToListAsync();    
+            
+            if(company != null)
+            {
+                company.Condominiums = companyCondos;
+                return company;
+            }
+
+            return null;
         }
 
         public async Task<List<SelectListItem>> GetCondosSelectListAsync(DataContextCondos contextCondos)

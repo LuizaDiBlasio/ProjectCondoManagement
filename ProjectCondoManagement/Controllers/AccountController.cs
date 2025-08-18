@@ -62,82 +62,7 @@ namespace ProjectCondoManagement.Controllers
         [Microsoft.AspNetCore.Mvc.HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDtoModel)
         {
-            ////ver se user está ativo
-            //var user = await _userHelper.GetUserByEmailAsync(loginDtoModel.Username);
-
-            //if(user == null)
-            //{
-            //    return NotFound(new { Message = "Login failed, user not found." });
-            //}
-
-            //if (user.IsActive == false)
-            //{
-            //    return Unauthorized(new Response { Message = "User is not active in the system, please contact admin" });
-            //}
-
-            //var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login 
-
-
-
-            //if (result.RequiresTwoFactor) //se login for bem sucedido
-            //{
-            //    var token = await _userHelper.GenerateTwoFactorTokenAsync(user, "Phone");
-
-            //    var response = await _smsHelper.SendSmsAsync("+351936752044", $"Your authentication code is: {token}");
-
-            //    if (response.IsSuccess)
-            //    {
-            //        return Ok(new Response
-            //        {
-            //            Token = null,
-            //            Expiration = null,
-            //            Requires2FA = true,
-            //            Role = null, // Não tem o role ainda aqui, precisa do 2FA.
-            //            IsSuccess = true
-            //        });
-            //    }
-            //    else
-            //    {
-            //        return StatusCode(500, new { Message = "It was not possible to send SMS verification code" });
-            //    }
-            //}
-            //else
-            //{
-            //    return StatusCode(500, new { Message = "Wrong credentials, please try again" });
-            //}
-
-
-            ////else //seguir normalmente para ambiente de desenvolvimento //TODO todo esse else vai ser apagado antes de publicar 
-            ////{
-            ////    // pede lista de roles do usuário (somente 1 item na lista)
-            ////    var roles = await _userHelper.GetRolesAsync(user);
-
-            ////    // verifica se a lista não está vazia e pega a primeira role.
-            ////    if (roles != null && roles.Any())
-            ////    {
-            ////        var userRole = roles.First();
-
-            ////        // gerar o token jwt
-            ////        var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
-
-            ////        var results = new Response()
-            ////        {
-            ////            Token = tokenJwt,
-            ////            Expiration = DateTime.UtcNow.AddDays(15),
-            ////            Requires2FA = false,
-            ////            Role = userRole, 
-            ////            IsSuccess = true
-            ////        };
-
-            ////        return Ok(results);
-            ////    }
-
-
-            ////}
-            ////return Unauthorized(new { Message = "Login failed, credentials are not valid." });
-
-            //__________________________________novo login____________________________________________
-
+            //ver se user está ativo
             var user = await _userHelper.GetUserByEmailAsync(loginDtoModel.Username);
 
             if (user == null)
@@ -152,35 +77,34 @@ namespace ProjectCondoManagement.Controllers
 
             var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login 
 
-            if (result.Succeeded)
+
+
+            if (result.RequiresTwoFactor) //se login for bem sucedido
             {
-                //pede lista de roles do usuário(somente 1 item na lista)
-                    var roles = await _userHelper.GetRolesAsync(user);
+                var token = await _userHelper.GenerateTwoFactorTokenAsync(user, "Phone");
 
-                // verifica se a lista não está vazia e pega a primeira role.
-                if (roles != null && roles.Any())
+                var response = await _smsHelper.SendSmsAsync("+351936752044", $"Your authentication code is: {token}");
+
+                if (response.IsSuccess)
                 {
-                    var userRole = roles.First();
-
-                    // gerar o token jwt
-                    var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
-
-                    var results = new Response()
+                    return Ok(new Response
                     {
-                        Token = tokenJwt,
-                        Expiration = DateTime.UtcNow.AddDays(15),
-                        Requires2FA = false,
-                        Role = userRole,
+                        Token = null,
+                        Expiration = null,
+                        Requires2FA = true,
+                        Role = null, // Não tem o role ainda aqui, precisa do 2FA.
                         IsSuccess = true
-                    };
-
-                    return Ok(results);
+                    });
                 }
-
-                return Unauthorized(new { Message = "Login failed, credentials are not valid." });
+                else
+                {
+                    return StatusCode(500, new { Message = "It was not possible to send SMS verification code" });
+                }
             }
-
-            return Unauthorized(new { Message = "Login failed, credentials are not valid." });
+            else
+            {
+                return StatusCode(500, new { Message = "Wrong credentials, please try again" });
+            }
         }
 
 

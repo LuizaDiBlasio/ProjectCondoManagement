@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Users;
 using ProjectCondoManagement.Helpers;
 
@@ -20,13 +22,18 @@ namespace ProjectCondoManagement.Controllers
         private readonly DataContextUsers _contextUsers;
         private readonly IConverterHelper _converterHelper;
         private readonly DataContextCondos _contextCondos;
+        private readonly IFinancialAccountRepository _financialAccountRepository;
+        private readonly DataContextFinances _contextFinances;
 
-        public CompanyController(ICompanyRepository companyRepository, DataContextUsers contextUsers, IConverterHelper converterHelper, DataContextCondos contextCondos)
+        public CompanyController(ICompanyRepository companyRepository, DataContextUsers contextUsers, IConverterHelper converterHelper, 
+            DataContextCondos contextCondos, IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances)
         {
             _companyRepository = companyRepository;
             _contextUsers = contextUsers;
             _converterHelper = converterHelper;
             _contextCondos = contextCondos;
+            _financialAccountRepository = financialAccountRepository;
+            _contextFinances = dataContextFinances;
         }
 
         /// <summary>
@@ -52,7 +59,7 @@ namespace ProjectCondoManagement.Controllers
          /// <returns>A CompanyDto object if the company is found; otherwise, returns null.</returns>
         // GET: CompanyController/GetCompany/5
         [HttpGet("GetCompany/{id}")]
-        public async Task<CompanyDto?> GetCompanyWithCondosAndAdmin(int id)
+        public async Task<CompanyDto?> GetCompany(int id)
         {
             var company = await _companyRepository.GetCompanyWithcCondosAndAdmin(id, _contextUsers);
 
@@ -99,6 +106,14 @@ namespace ProjectCondoManagement.Controllers
                     return Conflict(new Response {IsSuccess = false, Message ="Company already registered"});
                 }
 
+
+                var financialAccount = new FinancialAccount()
+                {
+                    InitialDeposit = 0 // depósito inicial vai ser sempre 0
+                };
+
+                await _financialAccountRepository.CreateAsync(financialAccount, _contextFinances);
+
                 await _companyRepository.CreateAsync(company, _contextUsers);
 
                 return Ok(new Response { IsSuccess = true});
@@ -138,18 +153,16 @@ namespace ProjectCondoManagement.Controllers
 
                 if (company == null)
                 {
-                    return BadRequest("Conversion failed. Invalid data.");
+                    return BadRequest(new Response { IsSuccess = false, Message = "Unable to edit company, record not found." });
                 }
 
                 await _companyRepository.UpdateAsync(company, _contextUsers);
 
-                return Ok();
+                return Ok(new Response { IsSuccess = true, Message = "Company details updated successfully!" });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                var errorMessage = ex.InnerException?.Message ?? ex.Message;
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    $"An error occurred: {errorMessage}");
+                return BadRequest(new Response { IsSuccess = false, Message = "Unable to edit company due to internal error" });
             }
         }
 
@@ -163,20 +176,28 @@ namespace ProjectCondoManagement.Controllers
          /// Returns Ok on successful deletion, NotFound if the company does not exist, or BadRequest on an error.
          /// </returns>
         // DELETE: CompanyController/DeleteCompany/5
-        [HttpPost("DeleteCompany/{id}")]
+        [HttpDelete("DeleteCompany/{id}")]
         public async Task<IActionResult> DeleteCompany(int id)
         {
-            var company = await _companyRepository.GetByIdAsync(id, _contextUsers);
+            var company = await _companyRepository.GetCompanyWithcCondosAndAdmin(id, _contextUsers);
 
             if (company == null)
             {
-                return NotFound();
+                return NotFound(new Response { IsSuccess = false, Message = "Unable to delete company, record not found." });
             }
 
             try
             {
-                await _companyRepository.DeleteAsync(company, _contextUsers);
-                return Ok();    
+                
+                if (!company.Condominiums.Any() && company.CompanyAdmin == null)
+                {
+                    await _companyRepository.DeleteAsync(company, _contextUsers);
+                    return Ok();
+                }
+
+                return Conflict(new Response { IsSuccess = false, Message = "Unable to delete company due to conflict: company still associated with users or condominiuns." });
+                
+                  
             }
             catch
             {
