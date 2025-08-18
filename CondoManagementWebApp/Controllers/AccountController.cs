@@ -321,7 +321,7 @@ namespace CondoManagementWebApp.Controllers
         /// Cleans Session, remove cookies and redirects to the Home page. 
         /// </summary>
         /// <returns>A redirection to the Home page.</returns>
-        [Authorize(Roles = "CompanyAdmin, CondoManager, CondoMember, SysAdmin")]
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             // Limpa o token JWT da sessão do Web App.
@@ -355,8 +355,6 @@ namespace CondoManagementWebApp.Controllers
             var model = new RegisterUserViewModel();
 
             model.AvailableRoles = selectList;
-
-            model.Companies = new List<SelectListItem>();
 
             return View(model);
         }
@@ -600,6 +598,7 @@ namespace CondoManagementWebApp.Controllers
         /// Displays Change Password View
         /// </summary>
         /// <returns>IActionResult containing view ChangePassword</returns>
+        [Authorize] 
         public IActionResult ChangePassword()
         {
             return View();
@@ -728,7 +727,15 @@ namespace CondoManagementWebApp.Controllers
 
         }
 
-        [Authorize]
+
+        /// <summary>
+         /// Renders the SysAdmin dashboard by retrieving a list of users for each administrative role.
+         /// </summary>
+         /// <returns>
+         /// An IActionResult that returns the SysAdminDashboard view with the populated user data.
+         /// Returns an empty model on a caught exception.
+         /// </returns>
+        [Authorize(Roles = "SysAdmin")]
         public async Task<IActionResult> SysAdminDashboard()
         {
             try
@@ -767,7 +774,16 @@ namespace CondoManagementWebApp.Controllers
 
         }
 
-        [Authorize]
+
+        /// <summary>
+         /// Renders the user details edit view, retrieving user information by email.
+         /// </summary>
+         /// <param name="email">The email of the user to retrieve details for.</param>
+         /// <returns>
+         /// An IActionResult that returns the EditUserDetails view populated with the user's data.
+         /// Returns an empty model and an error message if the user or their company cannot be found.
+         /// </returns>
+        [Authorize(Roles = "SysAdmin")]
         public async Task<IActionResult> EditUserDetails(string email)
         {
             try
@@ -787,7 +803,7 @@ namespace CondoManagementWebApp.Controllers
 
                 if (userdto.CompanyId != null)
                 {
-                    var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/Details/{userdto.CompanyId}");
+                    var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{userdto.CompanyId}");
 
                     if(company == null) // se correu mal
                     {
@@ -816,7 +832,15 @@ namespace CondoManagementWebApp.Controllers
         }
 
 
-        [Authorize]
+        /// <summary>
+         /// Handles the form submission for updating a user's details, including their profile picture.
+         /// </summary>
+         /// <param name="model">The view model containing the updated user details.</param>
+         /// <returns>
+         /// An IActionResult that redirects to the EditUserDetails view on success.
+         /// Returns the same view with an error message on failure or validation errors.
+         /// </returns>
+        [Authorize(Roles = "SysAdmin")]
         public async Task<IActionResult> RequestEditUserDetails(EditUserDetailsViewModel model)
         {
             if (!ModelState.IsValid)
@@ -854,7 +878,7 @@ namespace CondoManagementWebApp.Controllers
                     {
                         if (editedUserDto.CompanyId != null)
                         {
-                            var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/Details/{editedUserDto.CompanyId}");
+                            var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{editedUserDto.CompanyId}");
 
                             if (company == null) // se correu mal
                             {
@@ -891,6 +915,16 @@ namespace CondoManagementWebApp.Controllers
 
         }
 
+
+        /// <summary>
+         /// Handles user searches from the SysAdmin dashboard.
+         /// </summary>
+         /// <param name="model">The view model containing the search term.</param>
+         /// <returns>
+         /// An IActionResult that redirects to the EditUserDetails view if a single user is found.
+         /// Returns the SysAdminDashboard view with a list of matching users if multiple are found, or an error message if none are found.
+         /// </returns>
+        [Authorize(Roles = "SysAdmin")]
         [HttpPost]
         public async Task<IActionResult> SearchUsers(SysAdminDashboardViewModel model)
         {
@@ -923,7 +957,7 @@ namespace CondoManagementWebApp.Controllers
                     //criar view model para EditUserDetails
                     if (user.CompanyId != null)
                     {
-                        var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/Details/{user.CompanyId}");
+                        var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{user.CompanyId}");
 
                         if (company == null) // se correu mal
                         {
@@ -964,6 +998,7 @@ namespace CondoManagementWebApp.Controllers
         /// </summary>
         /// <param name="model">View model</param>
         /// <returns>Task</returns>
+        [Authorize(Roles = "SysAdmin")]
         private async Task LoadDashboardDataAsync(SysAdminDashboardViewModel model)
         {
             model.CondoMembers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoMember");
@@ -990,7 +1025,7 @@ namespace CondoManagementWebApp.Controllers
             //        {
             //            if (editedUserDto.CompanyId != null)
             //            {
-            //                var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/Details/{editedUserDto.CompanyId}");
+            //                var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{editedUserDto.CompanyId}");
 
             //                if (company == null) // se correu mal
             //                {

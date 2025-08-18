@@ -42,7 +42,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.AccessDeniedPath = "/Account/NotAuthorized";
 
         //atribuir o nome, assim a cada sessão o nome terá que ser unico e os cookies nunca serão guardados
         options.Cookie.Name = cookieName;

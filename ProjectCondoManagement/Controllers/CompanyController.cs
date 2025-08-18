@@ -1,8 +1,14 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ClassLibrary;
+using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Users;
+using ProjectCondoManagement.Helpers;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -12,95 +18,183 @@ namespace ProjectCondoManagement.Controllers
     {
         private readonly ICompanyRepository _companyRepository;
         private readonly DataContextUsers _contextUsers;
+        private readonly IConverterHelper _converterHelper;
+        private readonly DataContextCondos _contextCondos;
 
-
-        public CompanyController(ICompanyRepository companyRepository, DataContextUsers contextUsers    )
+        public CompanyController(ICompanyRepository companyRepository, DataContextUsers contextUsers, IConverterHelper converterHelper, DataContextCondos contextCondos)
         {
             _companyRepository = companyRepository;
             _contextUsers = contextUsers;
+            _converterHelper = converterHelper;
+            _contextCondos = contextCondos;
         }
 
-        // GET: CompanyController
-        //public ActionResult Index()
-        //{
-        //    return View();
-        //}
-
-        // GET: CompanyController/Details/5
-        [HttpGet("Details/{id}")]
-        public async Task<Company?> Details(int id)
+        /// <summary>
+         /// Retrieves a list of all companies.
+         /// </summary>
+         /// <returns>A collection of CompanyDto objects representing all companies.</returns>
+        //GET: CompanyController
+        [HttpGet("GetCompanies")]
+        public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompanies()
         {
-            var company = await _companyRepository.GetByIdAsync(id, _contextUsers);
+           var companies = _companyRepository.GetAll(_contextUsers).ToList();
+
+            var companiesDtos = companies.Select(c => _converterHelper.ToCompanyDto(c)).ToList();
+
+            return companiesDtos;
+        }
+
+
+        /// <summary>
+         /// Retrieves the details of a specific company by its ID.
+         /// </summary>
+         /// <param name="id">The unique identifier of the company.</param>
+         /// <returns>A CompanyDto object if the company is found; otherwise, returns null.</returns>
+        // GET: CompanyController/GetCompany/5
+        [HttpGet("GetCompany/{id}")]
+        public async Task<CompanyDto?> GetCompanyWithCondosAndAdmin(int id)
+        {
+            var company = await _companyRepository.GetCompanyWithcCondosAndAdmin(id, _contextUsers);
 
             if (company == null)
             {
                 return null;
             }
 
-            return company; 
+            var companyDto = _converterHelper.ToCompanyDto(company);
+
+            return companyDto;
         }
 
-        // GET: CompanyController/Create
-        //public ActionResult Create()
-        //{
-        //    return View();
-        //}
 
-        // POST: CompanyController/Create
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Create(IFormCollection collection)
-        //{
-        //    try
-        //    {
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    catch
-        //    {
-        //        return View();
-        //    }
-        //}
+        /// <summary>
+         /// Creates a new company based on the provided data.
+         /// </summary>
+         /// <param name="companyDto">The data transfer object containing the company details.</param>
+         /// <returns>
+         /// An IActionResult indicating the result of the operation.
+         /// Returns Ok on success, BadRequest for invalid input, or a 500 Internal Server Error on an unexpected exception.
+         /// </returns>
+        // POST: CompanyController/PostCompany
+        [HttpPost("PostCompany")]
+        public async Task<IActionResult> PostCompany([FromBody] CompanyDto companyDto)
+        {
+            if (companyDto == null)
+            {
+                return BadRequest("Request body is null.");
+            }
 
-        // GET: CompanyController/Edit/5
-        //public ActionResult Edit(int id)
-        //{
-        //    return View();
-        //}
 
-        // POST: CompanyController/Edit/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Edit(int id, IFormCollection collection)
-        //{
-        //    try
-        //    {
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    catch
-        //    {
-        //        return View();
-        //    }
-        //}
+            try
+            {
+                var company = _converterHelper.ToCompany(companyDto, true);
 
-        // GET: CompanyController/Delete/5
-        //public ActionResult Delete(int id)
-        //{
-        //    return View();
-        //}
+                if (company == null)
+                {
+                    return BadRequest(new Response{ IsSuccess = false, Message = "Conversion failed. Invalid data." });
+                }
 
-        // POST: CompanyController/Delete/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Delete(int id, IFormCollection collection)
-        //{
-        //    try
-        //    {
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    catch
-        //    {
-        //        return View();
-        //    }
-        //}
+                if (await _companyRepository.ExistingCompany(company))
+                {
+                    return Conflict(new Response {IsSuccess = false, Message ="Company already registered"});
+                }
+
+                await _companyRepository.CreateAsync(company, _contextUsers);
+
+                return Ok(new Response { IsSuccess = true});
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = ex.InnerException?.Message ?? ex.Message;
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"An error occurred: {errorMessage}");
+            }
+        }
+
+
+        /// <summary>
+        /// Updates a company based on the provided data.
+        /// </summary>
+        /// <param name="companyDto">The data transfer object containing the company details.</param>
+        /// <returns> Returns Ok on success, BadRequest for invalid input, or a 500 Internal Server Error on an unexpected exception.</returns>
+        [HttpPost("EditCompany")]
+        public async Task<IActionResult> EditCompany([FromBody] CompanyDto companyDto)
+        {
+            if (companyDto == null)
+            {
+                return BadRequest("Request body is null.");
+            }
+
+
+            try
+            {
+                //buscar entidades selecionadas com base nos ids selecionados
+                var selectedAdminAdnCondosDto = await _companyRepository.SelectedAdminAndCondos(companyDto);
+
+                companyDto.CondominiumDtos = selectedAdminAdnCondosDto.SelectedCondos;
+                companyDto.CompanyAdmin = selectedAdminAdnCondosDto.SelectedAdmin;
+
+                var company = _converterHelper.ToCompany(companyDto, false);
+
+                if (company == null)
+                {
+                    return BadRequest("Conversion failed. Invalid data.");
+                }
+
+                await _companyRepository.UpdateAsync(company, _contextUsers);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = ex.InnerException?.Message ?? ex.Message;
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"An error occurred: {errorMessage}");
+            }
+        }
+
+
+        /// <summary>
+         /// Deletes a company by its unique identifier.
+         /// </summary>
+         /// <param name="id">The unique identifier of the company to delete.</param>
+         /// <returns>
+         /// An IActionResult indicating the result of the operation.
+         /// Returns Ok on successful deletion, NotFound if the company does not exist, or BadRequest on an error.
+         /// </returns>
+        // DELETE: CompanyController/DeleteCompany/5
+        [HttpPost("DeleteCompany/{id}")]
+        public async Task<IActionResult> DeleteCompany(int id)
+        {
+            var company = await _companyRepository.GetByIdAsync(id, _contextUsers);
+
+            if (company == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                await _companyRepository.DeleteAsync(company, _contextUsers);
+                return Ok();    
+            }
+            catch
+            {
+                return BadRequest();
+            }
+
+        }
+
+
+        [HttpGet("LoadAdminsAndCondos")]
+        public async Task<IActionResult> LoadAdminsAndCondos()
+        {
+            var condosList = await _companyRepository.GetCondosSelectListAsync(_contextCondos);
+
+            var adminsList = await _companyRepository.GetCompanyAdminsSelectListAsync();
+
+            return Ok(new AdminsAndCondosDto { Admins = adminsList, Condos = condosList});
+        }
+
     }
 }

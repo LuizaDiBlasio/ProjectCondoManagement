@@ -1,9 +1,13 @@
-﻿using ClassLibrary;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace ProjectCondoManagement.Data.Entites.CondosDb
+namespace ClassLibrary.DtoModels
 {
-    public class Document : IEntity
+    public class DocumentDto
     {
         public int Id { get; set; }
 
@@ -21,7 +25,5 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public DateTime DataUpload { get; set; }
 
-        [NotMapped]
-        public IFormFile FileUpload { get; set; }
     }
 }

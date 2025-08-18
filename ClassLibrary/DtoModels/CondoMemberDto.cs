@@ -32,6 +32,9 @@ namespace ClassLibrary.DtoModels
         public string PhoneNumber { get; set; }
 
 
+        public IEnumerable<UnitDto> Units { get; set; }
+
+
         public string? ImageUrl { get; set; }
 
     }

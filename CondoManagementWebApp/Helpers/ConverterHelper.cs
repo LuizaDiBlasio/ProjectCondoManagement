@@ -1,5 +1,6 @@
 ﻿using ClassLibrary.DtoModels;
 using CondoManagementWebApp.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace CondoManagementWebApp.Helpers
 {
@@ -27,7 +28,6 @@ namespace CondoManagementWebApp.Helpers
                 BirthDate = model.BirthDate,
                 PhoneNumber = model.PhoneNumber,
                 SelectedRole = model.SelectedRole,
-                CompanyId = model.SelectedCompanyId,
                 ImageUrl = model.ImageUrl
             };
             return registerDto;
@@ -138,5 +138,39 @@ namespace CondoManagementWebApp.Helpers
 
             return editUserDetailsDto;
         }
+
+        public CompanyDto ToCompanyDto(CreateEditCompanyViewModel model)
+        {
+            
+            var companyDto = new CompanyDto()
+            {
+                Name = model.Name, 
+                CompanyAdminId = model.SelectedCompanyAdminId,
+                SelectedCondominiumIds = model.SelectedCondominiumIds,
+                Email = model.Email,
+                Address = model.Address,
+                PhoneNumber= model.PhoneNumber, 
+                TaxIdDocument = model.TaxIdDocument,    
+            };
+
+            return companyDto;
+        }
+
+        public CreateEditCompanyViewModel ToCreateEditCompanyViewModel(CompanyDto editedCompany)
+        {
+            var model = new CreateEditCompanyViewModel()
+            {
+                Name = editedCompany.Name,
+                SelectedCompanyAdminId = editedCompany.CompanyAdminId,
+                SelectedCondominiumIds = editedCompany.SelectedCondominiumIds,
+                Email = editedCompany.Email,
+                Address = editedCompany.Address,
+                PhoneNumber = editedCompany.PhoneNumber,
+                TaxIdDocument = editedCompany.TaxIdDocument
+            };
+
+            return model;   
+        }
+
     }
 }

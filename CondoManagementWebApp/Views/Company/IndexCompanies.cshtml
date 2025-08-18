@@ -1,0 +1,103 @@
+﻿@model CondoManagementWebApp.Models.IndexCompaniesViewModel
+
+@{
+    ViewData["Title"] = "IndexCompanies";
+}
+
+<h1>Companies</h1>
+
+@if (!Model.Companies.Any())
+{
+<p>No companies registerd in the app yet</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Tax Id</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Companies)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Email</td>
+                    <td>@item.TaxIdDocument</td>
+                    <td>
+                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                        @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                        <a href="#" class="btn-delete-company" data-id="@item.Id" data-bs-toggle="modal" data-bs-target="#deleteDialog">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+<div id="deleteDialog" class="modal fade">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Company</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this company?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnNoDelete">Cancel</button>
+                <button type="button" class="btn btn-danger" id="btnYesDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var idToDelete = 0;
+
+            // Este evento é o clique no link de "Delete" da tabela
+            $('.btn-delete-company').click(function () {
+                idToDelete = $(this).data('id'); // Captura o ID do atributo data-id
+            });
+
+            // Clique no botão "Excluir" (Yes) dentro da modal
+            $("#btnYesDelete").click(function () {
+                $.ajax({
+                    url: '/Companies/RequestDelete/' + idToDelete, // URL do método de ação nocontrolador do web app
+                    type: 'POST',
+                    success: function (response) {
+                        $("#deleteDialog").modal('hide'); // Esconde o modal
+
+                        if (response.success) {
+                            window.location.reload(); // Recarrega a página para atualizar a lista
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $("#deleteDialog").modal('hide');
+                        alert('An unexpected error occurred. Please try again.');
+                        console.error('AJAX Error:', status, error, xhr.responseText);
+                    }
+                });
+            });
+
+            // botão "Cancel" (No) dentro da modal
+            $("#btnNoDelete").click(function () {
+                $("#deleteDialog").modal('hide'); // Esconde a modal
+            });
+        });
+    </script>
+}

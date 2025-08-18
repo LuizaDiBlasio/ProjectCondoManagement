@@ -32,7 +32,7 @@ namespace ProjectCondoManagement.Controllers
         private readonly ISmsHelper _smsHelper;
         
 
-        string webBaseAdress = "https://localhost:7081"; //TODO mudar quando publicar
+      
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
                                IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService, ICondoMemberRepository condoMemberRepository
@@ -260,7 +260,7 @@ namespace ProjectCondoManagement.Controllers
             string myToken = await _userHelper.GeneratePasswordResetTokenAsync(user); //gerar o token
 
             // gera um link de confirmção para o email
-            string tokenLink = $"{webBaseAdress}/Account/RecoverPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
+            string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/RecoverPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
             Response response = _mailHelper.SendEmail(email, "Retrieve your password", $"<h1>Retrieve your password</h1>" +
            $"<br><br><a href = \"{tokenLink}\">Click here to reset your password</a>"); //Contruir email e enviá-lo com o link
@@ -299,7 +299,7 @@ namespace ProjectCondoManagement.Controllers
             string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
 
             // gera um link de confirmção para o email
-            string tokenLink = $"{webBaseAdress}/Account/ResetPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
+            string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/ResetPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
             Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
            $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link
@@ -362,7 +362,7 @@ namespace ProjectCondoManagement.Controllers
                 string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(newUser); //gerar o token
 
                 // gera um link de confirmção para o email
-                string tokenLink = $"{webBaseAdress}/Account/ResetPassword?userId={newUser.Id}&tokenEmail={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
+                string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/ResetPassword?userId={newUser.Id}&tokenEmail={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
                 Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
                $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password. </a>"); //Contruir email e enviá-lo com o link 
@@ -577,6 +577,12 @@ namespace ProjectCondoManagement.Controllers
         //    return Ok(editedUser);
         //}
 
+
+        /// <summary>
+         /// Retrieves a list of users whose full name matches the provided search query.
+         /// </summary>
+         /// <param name="userFullName">The full name to search for, passed as a query parameter.</param>
+         /// <returns>A list of UserDto objects that match the search criteria. Returns an empty list if the query is null or empty.</returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("GetUsersByFullName")]
         public async Task<List<UserDto>> GetUsersByFullName([FromQuery] string userFullName) //pegar parametro da query, depois do [?]
@@ -596,7 +602,14 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-
+        /// <summary>
+         /// Edits the details of an existing user and, if the user is a "CondoMember," updates their associated condo details.
+         /// </summary>
+         /// <param name="editUserDetailsDto">The data transfer object containing the user details to be updated.</param>
+         /// <returns>
+         /// An IActionResult indicating the result of the operation.
+         /// Returns NotFound if the user is not found, otherwise returns Ok on successful update.
+         /// </returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("EditUserDetails")]
         public async Task<IActionResult> EditUserDetails([FromBody] EditUserDetailsDto editUserDetailsDto)
@@ -628,6 +641,11 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
+        /// <summary>
+         /// Retrieves a list of all users assigned to a specific role.
+         /// </summary>
+         /// <param name="role">The name of the role to search for, passed in the request body.</param>
+         /// <returns>A collection of UserDto objects for all users found with the specified role.</returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("GetAllUsersByRole")]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsersByRole([FromBody] string role)

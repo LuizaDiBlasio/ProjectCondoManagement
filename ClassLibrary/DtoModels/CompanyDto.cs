@@ -13,11 +13,17 @@ namespace ClassLibrary.DtoModels
 
         public string Name { get; set; }
 
-        public IEnumerable<UserDto> UserDtos { get; set; }
+        public UserDto? CompanyAdmin { get; set; }
+
+        public string? CompanyAdminId { get; set; }    
+
+        public IEnumerable<CondominiumDto>? CondominiumDtos { get; set; }
+
+        public List<int>? SelectedCondominiumIds { get; set; }    
 
         public string Email { get; set; }
 
-        public string Addres { get; set; }
+        public string Address { get; set; }
 
         public string PhoneNumber { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using ClassLibrary;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection.Metadata;
 
 namespace ProjectCondoManagement.Data.Entites.CondosDb
@@ -8,8 +9,11 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
     {
         public int Id { get; set; }
 
+        public string Name { get; set; }    
+
         public int CompanyId { get; set; }
 
+        [NotMapped]
         public Company Company { get; set; }
 
         public string Address { get; set; }
@@ -22,6 +26,6 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public IEnumerable<Meeting> Meetings { get; set; }
 
-        public IEnumerable<Occurrence> Occurences { get; set; }
+        public IEnumerable<Occurrence> Occurrences { get; set; }
     }
 }

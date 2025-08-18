@@ -57,20 +57,15 @@
                                 <span asp-validation-for="SelectedRole" class="text-danger"></span>
                             </div>
 
-                            <div class="form-group mb-4" id="company-selection-group">
-                                <label asp-for="SelectedCompanyId" class="form-label">Company</label>
-                                <select asp-for="SelectedCompanyId" asp-items="Model.Companies" class="form-control"></select>
-                                <span asp-validation-for="SelectedCompanyId" class="text-danger"></span>
-                            </div>
-
                             <div class="form-group mb-4">
                                 <label asp-for="ImageFile" class="form-label">Profile picture</label>
                                 <input asp-for="ImageFile" class="form-control" type="file" />
                                 <span asp-validation-for="ImageFile" class="text-danger"></span>
                             </div>
 
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary btn-block">Register User</button>
+                            <div class="form-group mt-3 d-flex justify-content-between align-items-center">
+                                <button type="submit" class="btn btn-primary">Register User</button>
+                                <a asp-action="SysAdminDashboard" asp-controller="Account" class="btn btn-outline-secondary">Back to DashBoard</a>
                             </div>
                         </form>
 
@@ -86,28 +81,6 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            // Lógica para mostrar/ocultar o campo da empresa
-            var roleDropdown = document.getElementById('SelectedRole');
-            var companyGroup = document.getElementById('company-selection-group');
-
-            function toggleCompanyField() {
-                var selectedRole = roleDropdown.value;
-                if (selectedRole === 'CondoManager' || selectedRole === 'Admin') {
-                    companyGroup.style.display = ''; // Mostra o elemento
-                } else {
-                    companyGroup.style.display = 'none'; // Oculta o elemento
-                }
-            }
-
-            // Adiciona um listener para o evento 'change'
-            roleDropdown.addEventListener('change', toggleCompanyField);
-
-            // Executa a função uma vez no carregamento da página para definir o estado inicial
-            toggleCompanyField();
-        });
-    </script>
 
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {

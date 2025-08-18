@@ -45,11 +45,11 @@ namespace CondoManagementWebApp.Models
         public IEnumerable<SelectListItem> AvailableRoles { get; set; } = new List<SelectListItem>();   
 
 
-        [Display(Name = "Company")]
-        public int? SelectedCompanyId { get; set; } //mudar depois
+        //[Display(Name = "Company")]
+        //public int? SelectedCompanyId { get; set; } //mudar depois
 
-        [BindNever]
-        public IEnumerable<SelectListItem> Companies { get; set; } = new List<SelectListItem>();    
+        //[BindNever]
+        //public IEnumerable<SelectListItem> Companies { get; set; } = new List<SelectListItem>();    
 
         [Display(Name = "Profile picture")]
         [MaxFileSize(5 * 1024 * 1024)]
