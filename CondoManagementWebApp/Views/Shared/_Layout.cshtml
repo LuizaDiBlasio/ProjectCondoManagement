@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] - CondoManagementWebApp</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/vendor/jqvmap/css/jqvmap.min.css" />
     <link rel="stylesheet" href="~/vendor/owl-carousel/owl.carousel.css" />
     <link rel="stylesheet" href="~/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" />
@@ -14,6 +15,7 @@
     <link href="https://cdn.syncfusion.com/ej2/30.2.4/bootstrap5.css" rel="stylesheet" />
     <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon.png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-***********" crossorigin="anonymous" referrerpolicy="no-referrer" /> @* Certifique-se de que o integrity e crossorigin estejam corretos *@
+
 </head>
 <body>
     <div id="preloader">
@@ -47,7 +49,12 @@
                             <span class="nav-text">Dashboard</span>
                         </a>
                         <ul aria-expanded="false">
-                            <li><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+                            
+                            @if(User.IsInRole("CompanyAdmin"))
+                            {
+                                <li><a asp-controller="Account" asp-action="CompanyAdminDashboard">Dashboard</a></li>
+                            }
+
                             <li><a asp-controller="Analytics" asp-action="Index">Analytics</a></li>
                             <li><a asp-controller="Review" asp-action="Index">Review</a></li>
                             <li><a asp-controller="Order" asp-action="List">Order List</a></li>
@@ -139,6 +146,8 @@
                                         </a>
                                     </li>
                                 }
+
+    
                             }
                             else
                             {

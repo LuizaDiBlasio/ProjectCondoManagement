@@ -14,6 +14,8 @@ using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
 using ProjectCondoManagement.Helpers;
 using System.Text;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Finances;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +80,8 @@ builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
 builder.Services.AddScoped<IMailHelper, MailHelper>();
 
 builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
+
+builder.Services.AddScoped<IFeeRepository, FeeRepository>();
 
 builder.Services.AddHttpClient();
 

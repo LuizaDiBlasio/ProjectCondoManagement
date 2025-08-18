@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -19,18 +20,20 @@ namespace CondoManagementWebApp.Controllers
         private readonly IConfiguration _configuration;
         private readonly IConverterHelper _converterHelper;
         private readonly CloudinaryService _cloudinaryService;
+        private readonly IApiCallService _apiCallService;
         private readonly HttpClient _httpClient;
 
         private readonly string baseUrl = "https://localhost:7001/"; //TODO : Mudar depois que publicar
 
         public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient,
-            IConverterHelper converterHelper, CloudinaryService cloudinaryService)
+            IConverterHelper converterHelper, CloudinaryService cloudinaryService,IApiCallService apiCallService)
         {
 
             _flashMessage = flashMessage;
             _configuration = configuration;
             _httpClient = httpClient;
             _cloudinaryService = cloudinaryService;
+            _apiCallService = apiCallService;
             _converterHelper = converterHelper;
         }
 
@@ -39,6 +42,7 @@ namespace CondoManagementWebApp.Controllers
         /// </summary>
         /// <returns>The login view or a redirection to the Home page.</returns>
         //Get do login 
+        [HttpGet("Login")]
         public IActionResult Login()
         {
             if (User.Identity.IsAuthenticated) //caso usuário esteja autenticado
@@ -249,6 +253,32 @@ namespace CondoManagementWebApp.Controllers
 
         }
 
+        
+        public async Task<IActionResult> CompanyAdminDashboard()
+        {
+            var model = new CompanyAdminDashboardViewModel
+            {
+                Fees = await GetFeesAsync()
+            };
+
+            return View(model);
+        }
+
+        public async Task<IEnumerable<Fee>> GetFeesAsync()
+        {
+            var fees = await _apiCallService.GetAsync<IEnumerable<Fee>>("api/Finances/GetFees");
+
+            return fees;
+        }
+
+        // <summary>
+        /// Displays the "Not Authorized" view when a user tries to access a restricted area.
+        /// </summary>
+        /// <returns>The "Not Authorized" view.</returns>
+        public IActionResult NotAuthorized()
+        {
+            return View();
+        }
 
     }
 }

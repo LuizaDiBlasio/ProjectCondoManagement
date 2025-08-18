@@ -28474,6 +28474,14 @@ span#counter {
   .house-bx svg {
     margin-right: 30px; }
 
+.fees-bx {
+    background: #282C4B;}
+    .fees-bx p {
+        color: rgba(255, 255, 255, 0.6);
+        font-weight: 300;}
+    .fees-bx svg {
+        margin-right: 30px;}
+
 .property-social {
   display: flex;
   justify-content: center; }

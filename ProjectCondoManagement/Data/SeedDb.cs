@@ -79,6 +79,26 @@ namespace ProjectCondoManagement.Data
             {
                 await _userHelper.AddUserToRoleAsync(user, "Admin"); //adiciona role ao user
             }
+
+            if (!_contextFinances.Fees.Any())
+            {
+                AddFee("Administrative Fee", 2m);
+                AddFee("Processing Fee", 1.5m);
+                AddFee("Maintenance Fee", 0.5m);
+                AddFee("Environmental Fee", 0.5m);
+                await _contextFinances.SaveChangesAsync();
+            }
         }
+
+        public void AddFee(string name, decimal value)
+        {
+            _contextFinances.Fees.Add(new Fee
+            {
+                Name = name,
+                Value = value
+            });
+
+        }
+
     }
 }

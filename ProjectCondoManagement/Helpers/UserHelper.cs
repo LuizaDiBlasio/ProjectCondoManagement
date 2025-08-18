@@ -179,6 +179,11 @@ namespace ProjectCondoManagement.Helpers
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            return await _userManager.Users.ToListAsync();
+        }
+
         /// <summary>
         /// Asynchronously checks if a user is a member of a specified role.
         /// </summary>

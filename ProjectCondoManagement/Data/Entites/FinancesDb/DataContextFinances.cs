@@ -19,6 +19,9 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public DbSet<Transaction> Transactions { get; set; }
 
+        public DbSet<Fee> Fees { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

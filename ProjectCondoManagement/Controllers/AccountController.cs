@@ -10,9 +10,9 @@ using ProjectCondoManagement.Helpers;
 
 namespace ProjectCondoManagement.Controllers
 {
+    [Area("Api")]
     [ApiController]
     [Route("api/[controller]")]
-
     public class AccountController : ControllerBase
     {
         private readonly IUserHelper _userHelper;
@@ -160,6 +160,7 @@ namespace ProjectCondoManagement.Controllers
 
 
         }
+
     }
 }
 
