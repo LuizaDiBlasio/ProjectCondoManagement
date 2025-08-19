@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Users;
 using ProjectCondoManagement.Helpers;
@@ -25,10 +26,11 @@ namespace ProjectCondoManagement.Controllers
         private readonly IFinancialAccountRepository _financialAccountRepository;
         private readonly DataContextFinances _contextFinances;
         private readonly IUserHelper _userHelper;
+        private readonly ICondominiumRepository _condominiumRepository; 
 
         public CompanyController(ICompanyRepository companyRepository, DataContextUsers contextUsers, IConverterHelper converterHelper, 
             DataContextCondos contextCondos, IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances,
-            IUserHelper userHelper)
+            IUserHelper userHelper, ICondominiumRepository condominiumRepository)
         {
             _companyRepository = companyRepository;
             _contextUsers = contextUsers;
@@ -37,6 +39,7 @@ namespace ProjectCondoManagement.Controllers
             _financialAccountRepository = financialAccountRepository;
             _contextFinances = dataContextFinances;
             _userHelper = userHelper;
+            _condominiumRepository = condominiumRepository;
         }
 
         /// <summary>
@@ -183,6 +186,16 @@ namespace ProjectCondoManagement.Controllers
                     return BadRequest(new Response { IsSuccess = false, Message = "Unable to edit company, record not found." });
                 }
 
+                if (company.Condominiums.Any())
+                {
+                    foreach (var condo in company.Condominiums)
+                    {
+                        condo.CompanyId = company.Id;
+                        await _condominiumRepository.UpdateAsync(condo, _contextCondos);    
+                    }
+                }
+                
+
                 await _companyRepository.UpdateAsync(company, _contextUsers);
 
                 return Ok(new Response { IsSuccess = true, Message = "Company details updated successfully!" });
@@ -232,6 +245,8 @@ namespace ProjectCondoManagement.Controllers
             }
 
         }
+
+
 
 
         [HttpGet("LoadAdminsAndCondos")]

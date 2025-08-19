@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Security;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -18,14 +20,17 @@ namespace ProjectCondoManagement.Data
 
         private readonly IUserHelper _userHelper;
 
+        private readonly ICondominiumRepository _condominiumRepository;
 
 
-        public SeedDb(DataContextCondos contextCondos, DataContextFinances dataContextFinances, DataContextUsers contextUsers, IUserHelper userHelper)
+
+        public SeedDb(DataContextCondos contextCondos, DataContextFinances dataContextFinances, DataContextUsers contextUsers, IUserHelper userHelper, ICondominiumRepository condominiumRepository) //TODO apagar condo repository
         {
             _contextCondos = contextCondos;
             _contextFinances = dataContextFinances;
             _contextUsers = contextUsers;   
             _userHelper = userHelper;
+            _condominiumRepository = condominiumRepository;
         }
 
         public async Task SeedAsync() //método para inicializar com admin
@@ -92,41 +97,54 @@ namespace ProjectCondoManagement.Data
                 await _userHelper.AddUserToRoleAsync(user2, "CondoManager"); //adiciona role ao user
             }
 
-            ////TODO CRIAÇÃO DE CONDOMINIO  Teste APAGAR
-            //var condominium1 = new Condominium
-            //{
-            //    CondoName = "PazuVilla",
-            //    Company = null,
-            //    Address = "Pazulandia, 5",
-            //    ManagerUserId = null,
-            //    ManagerUser = null,
-            //    CondoMembers = null,
-            //    Units = null,
-            //    Documents = null,
-            //    Meetings = null,
-            //    Occurrences = null,
-            //    CompanyId = 0
-            //};
-            //var create = await _contextCondos.Condominiums.AddAsync(condominium1);
-            //await _contextCondos.SaveChangesAsync();
-            
+            //TODO CRIAÇÃO DE CONDOMINIO  Teste APAGAR
 
-            //var condominium2 = new Condominium
-            //{
-            //    CondoName = "NikitinhaVilla",
-            //    Company = null,
-            //    Address = "Nikilandia, 5",
-            //    ManagerUserId = null,
-            //    ManagerUser = null,
-            //    CondoMembers = null,
-            //    Units = null,
-            //    Documents = null,
-            //    Meetings = null,
-            //    Occurrences = null,
-            //    CompanyId = 0   
-            //};
-            //var create2 = await _contextCondos.Condominiums.AddAsync(condominium2);
-            //await _contextCondos.SaveChangesAsync();
+            var condominium = await _condominiumRepository.GetByIdAsync(2, _contextCondos);
+
+            if(condominium == null)
+            {
+                var condominium1 = new Condominium
+                {
+                    CondoName = "PazuVilla",
+                    Company = null,
+                    Address = "Pazulandia, 5",
+                    ManagerUserId = null,
+                    ManagerUser = null,
+                    CondoMembers = null,
+                    Units = null,
+                    Documents = null,
+                    Meetings = null,
+                    Occurrences = null,
+                    CompanyId = 0
+                };
+                var create = await _contextCondos.Condominiums.AddAsync(condominium1);
+                await _contextCondos.SaveChangesAsync();
+            }
+
+
+            var condominium2 = await _condominiumRepository.GetByIdAsync(2, _contextCondos);
+
+            if (condominium2 == null)
+            {
+
+                var condominium3 = new Condominium
+                {
+                    CondoName = "NikitinhaVilla",
+                    Company = null,
+                    Address = "Nikilandia, 5",
+                    ManagerUserId = null,
+                    ManagerUser = null,
+                    CondoMembers = null,
+                    Units = null,
+                    Documents = null,
+                    Meetings = null,
+                    Occurrences = null,
+                    CompanyId = 0
+                };
+                var create2 = await _contextCondos.Condominiums.AddAsync(condominium2);
+                await _contextCondos.SaveChangesAsync();
+
+            }
 
 
             await _userHelper.CheckRoleAsync("Admin"); //verificar se já existe um role de admin, se não existir cria

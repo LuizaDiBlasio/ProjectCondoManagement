@@ -133,11 +133,27 @@ namespace CondoManagementWebApp.Controllers
                 //Buscar selectList de condominiums 
                 var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondos");
 
+                
                 var companyDto = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{id}");
 
-                if(companyDto == null)
+                if (companyDto == null)
                 {
                     return View("NotFound");
+                }
+
+                //buscar condos que contenham a id desta company com CompanyId
+
+                var condos = await _apiCallService.GetAsync<IEnumerable<CondominiumDto>>("api/Condominiums");
+
+                if (condos.Any())
+                {
+                    foreach (var condo in condos)
+                    {
+                        if(condo.CompanyId == companyDto.Id)
+                        {
+                            companyDto.SelectedCondominiumIds.Add(condo.Id);
+                        }
+                    }
                 }
 
                 var model = _converterHelper.ToCreateEditCompanyViewModel(companyDto);
