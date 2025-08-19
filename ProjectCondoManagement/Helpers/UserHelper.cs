@@ -1,6 +1,8 @@
-﻿using ClassLibrary.DtoModels;
+﻿using ClassLibrary;
+using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using System.Security.Claims;
@@ -24,8 +26,11 @@ namespace ProjectCondoManagement.Helpers
 
         private readonly DataContextFinances _dataContextFinances;
 
-        public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, DataContextUsers dataContextUsers,
-            IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances)
+        private readonly DataContextUsers _dataContextUsers;
+
+
+        public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager,
+            IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances, DataContextUsers dataContextUsers  )
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -33,6 +38,7 @@ namespace ProjectCondoManagement.Helpers
             _dataContextUsers = dataContextUsers;
             _financialAccountRepository = financialAccountRepository;
             _dataContextFinances = dataContextFinances;
+            _dataContextUsers = dataContextUsers;
         }
 
 
@@ -204,18 +210,14 @@ namespace ProjectCondoManagement.Helpers
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<User> GetUserAsync(ClaimsPrincipal principal)
-        {
-            return await _userManager.GetUserAsync(principal);
-        }
-
-
         public async Task<List<User>> GetUsersByEmailsAsync(IEnumerable<string> emails)
         {
             return await _dataContextUsers.Users
                 .Where(u => emails.Contains(u.Email))
                 .ToListAsync();
         }
+
+
 
         /// <summary>
         /// Asynchronously checks if a user is a member of a specified role.
@@ -384,7 +386,7 @@ namespace ProjectCondoManagement.Helpers
                     IsSuccess = false,
                     Message = "User deactivation failed.",
                 };
-            }          
+            }
             catch (Exception ex)
             {
                 return new Response
@@ -392,12 +394,17 @@ namespace ProjectCondoManagement.Helpers
                     IsSuccess = false,
                     Message = $"Error deactivating User.({ex.Message})"
                 };
-            }                 
+            }
 
         }
 
 
-
+        public async Task<List<User>> GetUsersByFullName(string cleanedFullName)
+        {
+            return await _dataContextUsers.Users
+               .Where(s => s.FullName.ToLower() == cleanedFullName)
+               .ToListAsync();
+        }
 
 
         public async Task<string> GenerateTwoFactorTokenAsync(User user, string tokenProvider)
@@ -415,9 +422,14 @@ namespace ProjectCondoManagement.Helpers
             return await _userManager.VerifyTwoFactorTokenAsync(user, tokenProvider, token);
         }
 
-        public async Task<IEnumerable<User>> GetUsersInRoleAsync(string v)
+        public async Task<IEnumerable<User>> GetUsersByRoleAsync(string role)
         {
-            return await _userManager.GetUsersInRoleAsync(v); 
+            if (await _roleManager.RoleExistsAsync(role))
+            {
+                return await _userManager.GetUsersInRoleAsync(role);
+            }
+           
+            return new List<User>();
         }
     }
 }

@@ -13,12 +13,11 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public string ContentType { get; set; } // Propriedade vinda de IFormFile , contente tipo MIME (ex: image/jpeg)
 
-        public Guid BlobId { get; set; }
+        public string? DocumentUrl { get; set; }
 
-        //TODO Tratar do bloc
-        public string BlobUrl => BlobId == Guid.Empty
-       ? $"https://gestaoescolar.blob.core.windows.net/imagens/noImage.jpeg"
-         : $"https://gestaoescolar.blob.core.windows.net/imagens/{BlobId}";
+        public string? DocumentFullPath => DocumentUrl == null ?
+                    $"https://res.cloudinary.com/ddnkq9dyb/image/upload/v1754230681/noimage_q8mayx.jpg" // caminho relativo ao Url no image
+                    : DocumentUrl;
 
         public DateTime DataUpload { get; set; }
 

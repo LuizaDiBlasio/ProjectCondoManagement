@@ -1,5 +1,6 @@
 ﻿using ClassLibrary.DtoModels;
 using CondoManagementWebApp.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace CondoManagementWebApp.Helpers
 {
@@ -27,7 +28,6 @@ namespace CondoManagementWebApp.Helpers
                 BirthDate = model.BirthDate,
                 PhoneNumber = model.PhoneNumber,
                 SelectedRole = model.SelectedRole,
-                CompanyId = model.SelectedCompanyId,
                 ImageUrl = model.ImageUrl
             };
             return registerDto;
@@ -79,7 +79,8 @@ namespace CondoManagementWebApp.Helpers
                 PhoneNumber = model.PhoneNumber,
                 Address = model.Address,
                 ImageUrl = model.ImageUrl, 
-                Email = model.Email
+                Email = model.Email,
+               
             };
 
             return userDto; 
@@ -99,5 +100,78 @@ namespace CondoManagementWebApp.Helpers
 
             return model;   
         }
+
+        public EditUserDetailsViewModel ToEditUserDetailsViewModel (UserDto userDto, string? companyName)
+        {
+            var model = new EditUserDetailsViewModel()
+            {
+                FullName = userDto.FullName,
+                BirthDate = userDto.BirthDate,
+                PhoneNumber = userDto.PhoneNumber,
+                Address = userDto.Address,
+                ImageUrl = userDto.ImageUrl,
+                IsActive = userDto.IsActive,
+                Email = userDto.Email,
+                CompanyName = companyName,
+                CompanyId = userDto.CompanyId,
+                FinancialAccountId = userDto.FinancialAccountId
+            };
+
+            return model;
+        }
+
+        public EditUserDetailsDto ToEditUserDetailsDto (EditUserDetailsViewModel model, string? companyName)
+        {
+            var editUserDetailsDto = new EditUserDetailsDto()
+            {
+                FullName = model.FullName,
+                BirthDate = model.BirthDate,
+                PhoneNumber = model.PhoneNumber,
+                Address = model.Address,
+                Email = model.Email,
+                IsActive = model.IsActive,
+                ImageUrl = model.ImageUrl,
+                CompanyName = model.CompanyName,
+                FinancialAccountId = model.FinancialAccountId, 
+                CompanyId = model.CompanyId 
+            };
+
+            return editUserDetailsDto;
+        }
+
+        public CompanyDto ToCompanyDto(CreateEditCompanyViewModel model)
+        {
+            
+            var companyDto = new CompanyDto()
+            {
+                Id = model.Id,
+                Name = model.Name, 
+                CompanyAdminId = model.SelectedCompanyAdminId,
+                SelectedCondominiumIds = model.SelectedCondominiumIds,
+                Email = model.Email,
+                Address = model.Address,
+                PhoneNumber= model.PhoneNumber, 
+                TaxIdDocument = model.TaxIdDocument,    
+            };
+
+            return companyDto;
+        }
+
+        public CreateEditCompanyViewModel ToCreateEditCompanyViewModel(CompanyDto editedCompany)
+        {
+            var model = new CreateEditCompanyViewModel()
+            {
+                Name = editedCompany.Name,
+                SelectedCompanyAdminId = editedCompany.CompanyAdminId,
+                SelectedCondominiumIds = editedCompany.SelectedCondominiumIds,
+                Email = editedCompany.Email,
+                Address = editedCompany.Address,
+                PhoneNumber = editedCompany.PhoneNumber,
+                TaxIdDocument = editedCompany.TaxIdDocument
+            };
+
+            return model;   
+        }
+
     }
 }

@@ -14,7 +14,7 @@ namespace CondoManagementWebApp.Models
         public string FullName { get; set; }
 
 
-
+        [Required]
         [Display(Name = "Date of Birth")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
@@ -29,13 +29,13 @@ namespace CondoManagementWebApp.Models
         [Required]
         public string Address { get; set; }
 
-
+    
         public string? Email { get; set; }
 
 
         [Display(Name = "Profile Image")]
         [MaxFileSize(5 * 1024 * 1024)]
-        public IFormFile ImageFile { get; set; }
+        public IFormFile? ImageFile { get; set; }
 
         public string? ImageUrl { get; set; }
 

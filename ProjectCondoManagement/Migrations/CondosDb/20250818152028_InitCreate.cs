@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ProjectCondoManagement.Migrations.CondosDb
 {
     /// <inheritdoc />
-    public partial class InitCondosDb : Migration
+    public partial class InitCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,8 +24,7 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IdDocument = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TaxIdNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -38,6 +37,7 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CompanyId = table.Column<int>(type: "int", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ManagerUserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -56,7 +56,7 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     CondominiumId = table.Column<int>(type: "int", nullable: true),
                     FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BlobId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DocumentUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DataUpload = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -114,6 +114,30 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         name: "FK_Meeting_Documents_ReportId",
                         column: x => x.ReportId,
                         principalTable: "Documents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CondoMemberUnit",
+                columns: table => new
+                {
+                    CondoMembersId = table.Column<int>(type: "int", nullable: false),
+                    UnitsId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CondoMemberUnit", x => new { x.CondoMembersId, x.UnitsId });
+                    table.ForeignKey(
+                        name: "FK_CondoMemberUnit_CondoMembers_CondoMembersId",
+                        column: x => x.CondoMembersId,
+                        principalTable: "CondoMembers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CondoMemberUnit_Units_UnitsId",
+                        column: x => x.UnitsId,
+                        principalTable: "Units",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -247,6 +271,11 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                 column: "MeetingsAttendedId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CondoMemberUnit_UnitsId",
+                table: "CondoMemberUnit",
+                column: "UnitsId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Documents_CondominiumId",
                 table: "Documents",
                 column: "CondominiumId");
@@ -302,6 +331,9 @@ namespace ProjectCondoManagement.Migrations.CondosDb
         {
             migrationBuilder.DropTable(
                 name: "CondoMemberMeeting");
+
+            migrationBuilder.DropTable(
+                name: "CondoMemberUnit");
 
             migrationBuilder.DropTable(
                 name: "OccurrenceUnit");

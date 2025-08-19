@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>809fadee-0ff7-467e-834b-0b2f9aca4406</UserSecretsId>
+    <UserSecretsId>fa1614c5-5db7-448b-9642-4c6f89c9f835</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +25,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClassLibrary\ClassLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\CondosDb\" />
+    <Folder Include="Migrations\UsersDb\" />
   </ItemGroup>
 
 </Project>

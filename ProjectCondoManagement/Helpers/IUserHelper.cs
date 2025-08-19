@@ -39,6 +39,8 @@ namespace ProjectCondoManagement.Helpers
 
         Task CreateRolesAsync(); //cria roles
 
+        Task<Response> DeactivateUserAsync(User user);
+
         Task<SignInResult> ValidatePasswordAsync(User user, string password); //não faz login, só valida a password para acesso à API
 
         Task<string> GenerateEmailConfirmationTokenAsync(User user); //Gera o email de confirmação e insere o Token 
@@ -54,6 +56,13 @@ namespace ProjectCondoManagement.Helpers
         Task<IdentityResult> ResetPasswordAsync(User user, string token, string password); //Faz o reset da password
 
         Task<IList<string>> GetRolesAsync(User user); //busca o role do user
+
+        Task<List<User>> GetUsersByEmailsAsync(IEnumerable<string> emails);
+
+        Task<IEnumerable<User>> GetUsersByRoleAsync(string role);
+
+        public Task<List<User>> GetUsersByFullName(string cleanedFullName);
+
 
         Task<Response> DeactivateUserAsync(User user); //Desativa o user, não o elimina da BD, só altera o IsActive para false 
         Task<IEnumerable<User>> GetUsersInRoleAsync(string v);

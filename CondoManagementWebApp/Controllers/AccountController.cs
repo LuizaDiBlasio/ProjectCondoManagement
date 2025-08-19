@@ -3,20 +3,16 @@ using ClassLibrary.DtoModels;
 using CloudinaryDotNet.Actions;
 using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
-using Humanizer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using NuGet.Versioning;
 using System.IdentityModel.Tokens.Jwt;
-using System.Numerics;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Vereyon.Web;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -31,7 +27,6 @@ namespace CondoManagementWebApp.Controllers
         private readonly HttpClient _httpClient;
         private readonly IApiCallService _apiCallService;
 
-        private readonly string baseUrl = "https://localhost:7001/"; //TODO : Mudar depois que publicar
 
         public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient,
             IConverterHelper converterHelper, CloudinaryService cloudinaryService, IApiCallService apiCallService)
@@ -43,6 +38,7 @@ namespace CondoManagementWebApp.Controllers
             _cloudinaryService = cloudinaryService;
             _converterHelper = converterHelper;
             _apiCallService = apiCallService;
+
         }
 
         /// <summary>
@@ -52,8 +48,15 @@ namespace CondoManagementWebApp.Controllers
         //Get do login 
         public IActionResult Login()
         {
+
+
             if (User.Identity.IsAuthenticated) //caso usuário esteja autenticado
             {
+                if (User.IsInRole("SysAdmin"))
+                {
+                    return RedirectToAction("SysAdminDashBoard", "Account");
+                }
+
                 return RedirectToAction("Index", "Home"); //mandar para a view Index que possui o controller Home
             }
 
@@ -96,12 +99,12 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Login", jsonContent);
+                var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/Account/Login", jsonContent);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var tokenResponse = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (tokenResponse.Requires2FA) //TODO remover esse if antes de publicar
                     {
@@ -112,6 +115,7 @@ namespace CondoManagementWebApp.Controllers
                         }
                         // Para requisições não AJAX, volte a view
                         var responseModel = new LoginViewModel() { Username = model.Username, Requires2FA = true };
+
                         return View("Login", responseModel);
                     }
                     else // Login bem-sucedido (sem 2FA)
@@ -133,11 +137,12 @@ namespace CondoManagementWebApp.Controllers
                         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                         {
                             return Ok(new { isSuccess = true, requires2FA = false });
+
                         }
                         return RedirectToAction("Index", "Home");
                     }
                 }
-                    else // Login falhou na API
+                else // Login falhou na API
                 {
                     var content2 = await response.Content.ReadAsStringAsync();
                     var error = JsonSerializer.Deserialize<Response>(content2, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -159,7 +164,9 @@ namespace CondoManagementWebApp.Controllers
                 }
                 return View("Login", model);
             }
-            
+
+
+
         }
 
         /// <summary>
@@ -170,13 +177,11 @@ namespace CondoManagementWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Verify2FA([FromBody] Verify2FADto model)
         {
-            // Apenas para garantir que a validação do modelo funciona
             if (!ModelState.IsValid)
             {
                 return BadRequest(new { isSuccess = false, message = "Invalid input for 2FA." });
             }
 
-            // Serializar o modelo para JSON para enviar para a API
             var jsonContent = new StringContent(
                 JsonSerializer.Serialize(model, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
                 Encoding.UTF8,
@@ -185,43 +190,45 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                // Chamar o endpoint da sua API para verificar o código 2FA
-                var response = await _httpClient.PostAsync($"{baseUrl}api/Account/Verify2FA", jsonContent);
+                var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/Account/Verify2FA", jsonContent);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var tokenResponse = JsonSerializer.Deserialize<TokenResponseModel>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var tokenResponse = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                    // Se o token for válido, o login é completado
-                    var handler = new JwtSecurityTokenHandler();
-                    var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
+                    // **1. Recebe o tokenResponse COMPLETO da API**
+                    if (tokenResponse.IsSuccess)
+                    {
+                        var handler = new JwtSecurityTokenHandler();
+                        var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
 
-                    HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
+                        HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
 
-                    var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+                        var claimsIdentity = new ClaimsIdentity(jwtToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
-                    // Retorna sucesso para o AJAX no front-end
-                    return Ok(new { isSuccess = true });
+                        // **2. RETORNA o objeto COMPLETO, incluindo o Role, para o frontend**
+                        return Ok(new { isSuccess = true, role = tokenResponse.Role });
+                    }
                 }
                 else
                 {
                     // Se a API retornar um erro (ex: código inválido)
                     var errorContent = await response.Content.ReadAsStringAsync();
                     var error = JsonSerializer.Deserialize<Response>(errorContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                    // Retorna o erro para o AJAX
                     return BadRequest(new { isSuccess = false, message = error?.Message ?? "Invalid verification code" });
                 }
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { isSuccess = false, message = ex.Message });
             }
-           
+
+            return BadRequest(new { isSuccess = false, message = "An unknown error occurred." });
         }
+
 
         /// <summary>
         /// Displays ForgotPasswordPartial View
@@ -247,7 +254,7 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var apiCall = await _httpClient.PostAsync($"{baseUrl}api/Account/GenerateForgotPasswordTokenAndEmail", jsonContent);
+                var apiCall = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/Account/GenerateForgotPasswordTokenAndEmail", jsonContent);
 
                 if (apiCall.IsSuccessStatusCode)
                 {
@@ -260,14 +267,14 @@ namespace CondoManagementWebApp.Controllers
             {
                 return BadRequest(ex.Message);
             }
-           
+
         }
 
         /// <summary>
         /// Cleans Session, remove cookies and redirects to the Home page. 
         /// </summary>
         /// <returns>A redirection to the Home page.</returns>
-        [Authorize(Roles = "CompanyAdmin, CondoManager, CondoMember, SysAdmin")]
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             // Limpa o token JWT da sessão do Web App.
@@ -302,8 +309,6 @@ namespace CondoManagementWebApp.Controllers
 
             model.AvailableRoles = selectList;
 
-            model.Companies = new List<SelectListItem>();
-
             return View(model);
         }
 
@@ -324,9 +329,9 @@ namespace CondoManagementWebApp.Controllers
                 {
                     ModelState.AddModelError("SelectedRole", "You must select a valid role."); // Adiciona um erro específico para o campo SelectedRole
 
-                   
+
                     return View("Register", model); // Retorna a View com o erro
-                }               
+                }
 
                 //Cloudnary da imagem
 
@@ -379,7 +384,7 @@ namespace CondoManagementWebApp.Controllers
             // Se o result.Succeeded for false (login falhou )
             _flashMessage.Danger("An unexpected error occurred, user cannot be registered");
 
-            return View("Register",model);
+            return View("Register", model);
         }
 
 
@@ -410,7 +415,7 @@ namespace CondoManagementWebApp.Controllers
                 var apiCall = await _apiCallService.PostAsync<ResetPasswordDto, Response>("api/Account/GenerateResetPasswordToken", resetPasswordDto);
 
                 if (apiCall.IsSuccess)
-                { 
+                {
                     var model2 = new ResetPasswordViewModel
                     {
                         Token = apiCall.Token,
@@ -421,7 +426,7 @@ namespace CondoManagementWebApp.Controllers
 
                     ModelState.Remove("Token"); //limpa o ModelState para evitar o uso do token antigo de confirmação de email
 
-                    return View( model2);
+                    return View(model2);
                 }
 
                 return new NotFoundViewResult("NotAuthorized");
@@ -430,7 +435,7 @@ namespace CondoManagementWebApp.Controllers
             {
                 return new NotFoundViewResult("NotAuthorized");
             }
-                
+
         }
 
         /// <summary>
@@ -492,7 +497,7 @@ namespace CondoManagementWebApp.Controllers
                 Token = token,
                 Password = string.Empty  //ainda não foi colocada a senha
             };
-            
+
             return View(model);
         }
 
@@ -541,10 +546,12 @@ namespace CondoManagementWebApp.Controllers
         }
 
 
+
         /// <summary>
         /// Displays Change Password View
         /// </summary>
         /// <returns>IActionResult containing view ChangePassword</returns>
+        [Authorize] 
         public IActionResult ChangePassword()
         {
             return View();
@@ -580,22 +587,23 @@ namespace CondoManagementWebApp.Controllers
                 _flashMessage.Danger($"{apiCall.Message}");
                 return View("ChangePassword", model);
             }
-            catch(Exception e) 
+            catch (Exception e)
             {
                 _flashMessage.Danger($"{e.Message}");
                 return View("ChangePassword", model);
             }
-        } 
+        }
 
         /// <summary>
         /// Makes an http request to retrirve user's profile
         /// </summary>
         /// <returns>A view with user's profile details or empty if unsuccessfull</returns>
+        [Authorize]
         public async Task<IActionResult> Profile()
         {
             try
             {
-                var apicall = await _apiCallService.GetByEmailAsync<string, UserDto?>("api/Account/GetUserByEmail", this.User.Identity.Name);
+                var apicall = await _apiCallService.GetByQueryAsync<UserDto?>("api/Account/GetUserByEmail", this.User.Identity.Name);
 
                 if (apicall == null)
                 {
@@ -613,7 +621,7 @@ namespace CondoManagementWebApp.Controllers
 
                 return View(new ProfileViewModel());
             }
-            
+
         }
 
 
@@ -622,6 +630,7 @@ namespace CondoManagementWebApp.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns>A view with user's profile details edited or view with errors i case call is unsuccessfull</returns>
+        [Authorize]
         public async Task<IActionResult> EditProfile(ProfileViewModel model)
         {
             if (!ModelState.IsValid)
@@ -629,17 +638,29 @@ namespace CondoManagementWebApp.Controllers
                 return View("Profile", model);
             }
 
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
-            {
-                var url = await _cloudinaryService.UploadImageAsync(model.ImageFile);
-                model.ImageUrl = url;
-            }
-
-            var userDto = _converterHelper.ToUserDto(model);
-
             try
             {
-                var apiCall = await _apiCallService.PostAsync<UserDto, UserDto?>("api/Account/EditProfile", userDto);
+                //buscar imagem do user
+                var userDto = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", model.Email);
+
+                if (userDto == null)
+                {
+                    _flashMessage.Danger("Unable to upload user's current picture");
+                    return View("Profile", model);
+                }
+
+                model.ImageUrl = userDto.ImageUrl;
+
+                if (model.ImageFile != null && model.ImageFile.Length > 0)
+                {
+                    var url = await _cloudinaryService.UploadImageAsync(model.ImageFile);
+                    model.ImageUrl = url;
+                }
+
+                var userDto2 = _converterHelper.ToUserDto(model);
+
+            
+                var apiCall = await _apiCallService.PostAsync<UserDto, UserDto?>("api/Account/EditProfile", userDto2);
 
                 if (apiCall == null)
                 {
@@ -647,7 +668,7 @@ namespace CondoManagementWebApp.Controllers
                     return View("Profile", model);
                 }
 
-                var editedModel = _converterHelper.ToProfileViewModel(userDto);
+                var editedModel = _converterHelper.ToProfileViewModel(userDto2);
 
                 return View("Profile", editedModel);
             }
@@ -656,14 +677,344 @@ namespace CondoManagementWebApp.Controllers
                 _flashMessage.Danger("Unable to edit user's profile");
                 return View("Profile", model);
             }
-           
+
         }
 
 
-        // <summary>
-        /// Displays the "Not Authorized" view when a user tries to access a restricted area.
+        /// <summary>
+         /// Renders the SysAdmin dashboard by retrieving a list of users for each administrative role.
+         /// </summary>
+         /// <returns>
+         /// An IActionResult that returns the SysAdminDashboard view with the populated user data.
+         /// Returns an empty model on a caught exception.
+         /// </returns>
+        [Authorize(Roles = "SysAdmin")]
+        public async Task<IActionResult> SysAdminDashboard()
+        {
+            try
+            {
+                var model = new SysAdminDashboardViewModel();
+
+                var usersCondoMembers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoMember");
+
+                if (usersCondoMembers.Any())
+                {
+                    model.CondoMembers = usersCondoMembers;
+                }
+
+                var usersCondoManagers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoManagers");
+
+                if (usersCondoManagers.Any())
+                {
+                    model.CondoManagers = usersCondoManagers;
+                }
+
+
+                var usersCompanyAdmin = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CompanyAdmin");
+
+                if (usersCompanyAdmin.Any())
+                {
+                    model.CompanyAdmins = usersCompanyAdmin;
+                }
+
+                return View(model);
+
+            }
+            catch(Exception)
+            {
+                return View(new SysAdminDashboardViewModel());
+            }
+
+        }
+
+
+        /// <summary>
+         /// Renders the user details edit view, retrieving user information by email.
+         /// </summary>
+         /// <param name="email">The email of the user to retrieve details for.</param>
+         /// <returns>
+         /// An IActionResult that returns the EditUserDetails view populated with the user's data.
+         /// Returns an empty model and an error message if the user or their company cannot be found.
+         /// </returns>
+        [Authorize(Roles = "SysAdmin")]
+        public async Task<IActionResult> EditUserDetails(string email)
+        {
+            try
+            {
+                var userdto = await _apiCallService.GetByQueryAsync<UserDto>($"api/Account/GetUserByEmail", email);
+
+
+                if (userdto == null)
+                {
+                    var model1 = new EditUserDetailsViewModel();
+                    _flashMessage.Danger("Unable to retrieve details, user not found");
+                    return View(model1);
+                }
+
+
+                //Buscar a company name 
+
+                if (userdto.CompanyId != null)
+                {
+                    var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{userdto.CompanyId}");
+
+                    if(company == null) // se correu mal
+                    {
+                        _flashMessage.Danger("Unable to retrieve user's company");
+                        var model2 = _converterHelper.ToEditUserDetailsViewModel(userdto, null);
+                        return View(model2);
+                    }
+
+                    var model3 = _converterHelper.ToEditUserDetailsViewModel(userdto, company.Name);
+
+                    return View(model3);
+                }
+
+                //se não tem company
+                var model4 = _converterHelper.ToEditUserDetailsViewModel(userdto, null);
+                return View(model4);
+
+            }
+            catch (Exception)
+            {
+                var model = new EditUserDetailsViewModel();
+                _flashMessage.Danger("Unable to retrieve details, ser not found");
+                return View(model);
+            }
+            
+        }
+
+
+        /// <summary>
+         /// Handles the form submission for updating a user's details, including their profile picture.
+         /// </summary>
+         /// <param name="model">The view model containing the updated user details.</param>
+         /// <returns>
+         /// An IActionResult that redirects to the EditUserDetails view on success.
+         /// Returns the same view with an error message on failure or validation errors.
+         /// </returns>
+        [Authorize(Roles = "SysAdmin")]
+        public async Task<IActionResult> RequestEditUserDetails(EditUserDetailsViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("EditUserDetails", model);
+            }
+            try
+            {
+                //buscar imagem do user
+                var userDto = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", model.Email);
+
+                if (userDto == null)
+                {
+                    _flashMessage.Danger("Unable to upload user's current picture");
+                    return View("Profile", model);
+                }
+
+                model.ImageUrl = userDto.ImageUrl;
+
+                if (model.ImageFile != null && model.ImageFile.Length > 0)
+                {
+                    var url = await _cloudinaryService.UploadImageAsync(model.ImageFile);
+                    model.ImageUrl = url;
+                }
+ 
+                var editUserDetailsDto = _converterHelper.ToEditUserDetailsDto(model, model.CompanyName);
+
+                var apiCall = await _apiCallService.PostAsync<EditUserDetailsDto, Response>("api/Account/EditUserDetails", editUserDetailsDto);
+
+                if (apiCall.IsSuccess)
+                {
+                    var editedUserDto = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", model.Email);
+
+                    if (editedUserDto != null)
+                    {
+                        if (editedUserDto.CompanyId != null)
+                        {
+                            var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{editedUserDto.CompanyId}");
+
+                            if (company == null) // se correu mal
+                            {
+                                _flashMessage.Danger("Unable to retrieve user's company");
+                                var model2 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
+                                return View("EditUserDetails", model2);
+                            }
+
+                            var editedUserDetailsViewModel = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, company.Name);
+
+                            return View("EditUserDetails", editedUserDetailsViewModel);
+                        }
+
+                        var model3 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
+                        return View("EditUserDetails", model3);
+
+                    }
+
+                    _flashMessage.Danger(apiCall.Message);
+                    var model4 = new EditUserDetailsViewModel();
+                    return View("EditUserDetails", model4);
+                }
+
+                _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
+                var model5 = new EditUserDetailsViewModel();
+                return View("EditUserDetails", model5);
+            }
+            catch (Exception)
+            {
+                _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
+                var model6 = new EditUserDetailsViewModel();
+                return View("EditUserDetails", model6);
+            }
+
+        }
+
+
+        /// <summary>
+         /// Handles user searches from the SysAdmin dashboard.
+         /// </summary>
+         /// <param name="model">The view model containing the search term.</param>
+         /// <returns>
+         /// An IActionResult that redirects to the EditUserDetails view if a single user is found.
+         /// Returns the SysAdminDashboard view with a list of matching users if multiple are found, or an error message if none are found.
+         /// </returns>
+        [Authorize(Roles = "SysAdmin")]
+        [HttpPost]
+        public async Task<IActionResult> SearchUsers(SysAdminDashboardViewModel model)
+        {
+           
+            if (string.IsNullOrEmpty(model.SearchTerm))
+            {
+                _flashMessage.Danger("Please provide a search term.");
+                
+                await LoadDashboardDataAsync(model); // Recarrega os dados da dashboard antes de retornar a view, metodo auxiliar abaixo
+                return View("SysAdminDashboard", model);
+            }
+
+            try
+            { 
+                // Chamada à API para buscar usuários por nome
+                var users = await _apiCallService.GetAsync<List<UserDto>>($"api/Account/GetUsersByFullName?userFullName={model.SearchTerm}"); //criar uma query string pra passar o parametro
+
+                if (users == null || !users.Any())
+                {
+                    _flashMessage.Danger("No users found with that name.");
+                    await LoadDashboardDataAsync(model); // Recarrega os dados
+                    return View("SysAdminDashboard", model);
+                }
+
+                if (users.Count == 1)
+                {
+                    var user = users.First(); // puxa o primeiro e único da lista
+
+
+                    //criar view model para EditUserDetails
+                    if (user.CompanyId != null)
+                    {
+                        var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{user.CompanyId}");
+
+                        if (company == null) // se correu mal
+                        {
+                            _flashMessage.Danger("Unable to retrieve user's company");
+                            var model2 = _converterHelper.ToEditUserDetailsViewModel(user, null);
+                            return View("EditUserDetails", model2);
+                        }
+
+                        var editedUserDetailsViewModel = _converterHelper.ToEditUserDetailsViewModel(user, company.Name);
+
+                        return RedirectToAction("EditUserDetails", editedUserDetailsViewModel);
+                    }
+
+                    var model3 = _converterHelper.ToEditUserDetailsViewModel(user, null);
+
+                    return RedirectToAction("EditUserDetails", model3);
+                }
+                else
+                {
+                    model.HomonymUsers = users;
+                    await LoadDashboardDataAsync(model); // Recarrega os dados
+                    return View("SysAdminDashboard", model);
+            }
+
+            }
+            catch
+            {
+                _flashMessage.Danger("Unable to search due to error");
+
+                await LoadDashboardDataAsync(model); 
+                return View("SysAdminDashboard", model);
+            }
+           
+        }
+
+        /// <summary>
+        /// Auxiliar method for SearchUsers(); Loads the 3 lists of users
         /// </summary>
-        /// <returns>The "Not Authorized" view.</returns>
+        /// <param name="model">View model</param>
+        /// <returns>Task</returns>
+        [Authorize(Roles = "SysAdmin")]
+        private async Task LoadDashboardDataAsync(SysAdminDashboardViewModel model)
+        {
+            model.CondoMembers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoMember");
+            model.CompanyAdmins = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CompanyAdmin");
+            model.CondoManagers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoManagers");
+        }
+
+
+
+        //[Authorize]
+        //public async Task<IActionResult> RequestEditUserDetails(EditUserDetailsViewModel model)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return View("EditUserDetails", model);
+        //    }
+        //    try
+        //    {
+        //        var editUserDetailsDto = _converterHelper.ToEditUserDetailsDto(model, model.CompanyName);
+
+            //        var editedUserDto = await _apiCallService.PostAsync<EditUserDetailsDto, UserDto>("api/Account/EditUserDetails", editUserDetailsDto);
+
+            //        if (editedUserDto != null)
+            //        {
+            //            if (editedUserDto.CompanyId != null)
+            //            {
+            //                var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{editedUserDto.CompanyId}");
+
+            //                if (company == null) // se correu mal
+            //                {
+            //                    _flashMessage.Danger("Unable to retrieve user's company");
+            //                    var model1 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
+            //                    return View("EditUserDetails", model1);
+            //                }
+
+            //                var editedUserDetailsViewModel = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, company.Name);
+
+            //                return View(editedUserDetailsViewModel);
+            //            }
+
+            //            var model2 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
+            //            return View("EditUserDetails", model2);
+            //        }
+
+            //        _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
+            //        var model3 = new EditUserDetailsViewModel();
+            //        return View("EditUserDetails", model3);
+            //    }
+            //    catch (Exception)
+            //    {
+            //        _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
+            //        var model4 = new EditUserDetailsViewModel();
+            //        return View("EditUserDetails", model4);
+            //    }
+
+            //}
+
+
+
+            // <summary>
+            /// Displays the "Not Authorized" view when a user tries to access a restricted area.
+            /// </summary>
+            /// <returns>The "Not Authorized" view.</returns>
         public IActionResult NotAuthorized()
         {
             return View();

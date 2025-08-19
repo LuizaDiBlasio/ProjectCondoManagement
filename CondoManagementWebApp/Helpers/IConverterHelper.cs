@@ -18,5 +18,13 @@ namespace CondoManagementWebApp.Helpers
         public UserDto ToUserDto(ProfileViewModel model);
 
         public ProfileViewModel ToProfileViewModel(UserDto userDto);
+
+        public EditUserDetailsViewModel ToEditUserDetailsViewModel(UserDto userDto, string? companyName);
+
+        public EditUserDetailsDto ToEditUserDetailsDto(EditUserDetailsViewModel model, string? companyName);
+
+        public CompanyDto ToCompanyDto(CreateEditCompanyViewModel model);
+
+        public CreateEditCompanyViewModel ToCreateEditCompanyViewModel(CompanyDto editedCompany);
     }
 }

@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
+using Microsoft.CodeAnalysis.Host.Mef;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
@@ -28,8 +30,9 @@ namespace ProjectCondoManagement.Controllers
         private readonly DataContextCondos _dataContextCondos;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly ISmsHelper _smsHelper;
-        private readonly DataContextUsers _dataContextUsers;
-        string webBaseAdress = "https://localhost:7081"; //TODO mudar quando publicar
+        
+
+      
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
                                IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService, ICondoMemberRepository condoMemberRepository
@@ -44,16 +47,25 @@ namespace ProjectCondoManagement.Controllers
             _jwtTokenService = jwtTokenService;
             _condoMemberRepository = condoMemberRepository;
             _smsHelper = smsHelper;
-       
+
         }
 
+        /// <summary>
+        /// Authenticates a user based on their login credentials.
+        /// If the user's account requires two-factor authentication (2FA), a verification token is sent via SMS.
+        /// </summary>
+        /// <param name="loginDtoModel">The login credentials, including username and password.</param>
+        /// <returns>
+        /// An <see cref="IActionResult"/> with a JWT token and expiration if login is successful and 2FA is not required,
+        /// or a response indicating that 2FA is required and the token was sent.
+        /// </returns>
         [Microsoft.AspNetCore.Mvc.HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDtoModel)
         {
             //ver se user está ativo
             var user = await _userHelper.GetUserByEmailAsync(loginDtoModel.Username);
 
-            if(user == null)
+            if (user == null)
             {
                 return NotFound(new { Message = "Login failed, user not found." });
             }
@@ -63,7 +75,9 @@ namespace ProjectCondoManagement.Controllers
                 return Unauthorized(new Response { Message = "User is not active in the system, please contact admin" });
             }
 
-            var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login (Este é o seu método que usa PasswordSignInAsync internamente)
+            var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login 
+
+
 
             if (result.RequiresTwoFactor) //se login for bem sucedido
             {
@@ -73,11 +87,13 @@ namespace ProjectCondoManagement.Controllers
 
                 if (response.IsSuccess)
                 {
-                    return Ok(new TokenResponseModel
+                    return Ok(new Response
                     {
                         Token = null,
                         Expiration = null,
                         Requires2FA = true,
+                        Role = null, // Não tem o role ainda aqui, precisa do 2FA.
+                        IsSuccess = true
                     });
                 }
                 else
@@ -85,36 +101,23 @@ namespace ProjectCondoManagement.Controllers
                     return StatusCode(500, new { Message = "It was not possible to send SMS verification code" });
                 }
             }
-            else //seguir normalmente para ambiente de desenvolvimento //TODO todo esse else vai ser apagado antes de publicar 
+            else
             {
-                // pede lista de roles do usuário (somente 1 item na lista)
-                var roles = await _userHelper.GetRolesAsync(user);
-
-                // verifica se a lista não está vazia e pega a primeira role.
-                if (roles != null && roles.Any())
-                {
-                    var userRole = roles.First();
-
-                    // gerar o token jwt
-                    var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
-
-                    var results = new TokenResponseModel()
-                    {
-                        Token = tokenJwt,
-                        Expiration = DateTime.UtcNow.AddDays(15),
-                        Requires2FA = false
-                    };
-
-                    return Ok(results);
-                }
-
-
+                return StatusCode(500, new { Message = "Wrong credentials, please try again" });
             }
-            return Unauthorized(new { Message = "Login failed, credentials are not valid." });
         }
 
 
 
+        /// <summary>
+        /// Verifies a user-provided two-factor authentication (2FA) token.
+        /// If the token is valid, a JWT token is generated and returned to the client.
+        /// </summary>
+        /// <param name="verify2FADto">The user's username and the 2FA token to be verified.</param>
+        /// <returns>
+        /// An <see cref="IActionResult"/> with a JWT token and expiration if the 2FA token is valid,
+        /// otherwise, a BadRequest response with an error message.
+        /// </returns>
         [HttpPost("Verify2FA")]
         public async Task<IActionResult> Verify2FA([FromBody] Verify2FADto verify2FADto)
         {
@@ -143,11 +146,14 @@ namespace ProjectCondoManagement.Controllers
                     var userRole = roles.First();
                     var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
 
-                    var results = new TokenResponseModel()
+                    var results = new Response()
                     {
                         Token = tokenJwt,
                         Expiration = DateTime.UtcNow.AddDays(15),
-                        Requires2FA = false
+                        Requires2FA = false,
+                        Role = userRole,
+                        IsSuccess = true,
+                        Message = "Two-factor authentication successful."
                     };
 
                     return Ok(results);
@@ -158,7 +164,13 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-
+        /// <summary>
+        /// Generates a password reset token for a user and sends a recovery link to their email.
+        /// </summary>
+        /// <param name="email">The email of the user requesting a password reset.</param>
+        /// <returns>
+        /// An <see cref="IActionResult"/> indicating if the email was sent successfully or if an error occurred.
+        /// </returns>
         [HttpPost("GenerateForgotPasswordTokenAndEmail")]
         public async Task<IActionResult> GenerateForgotPasswordTokenAndEmail([FromBody] string email)
         {
@@ -172,7 +184,7 @@ namespace ProjectCondoManagement.Controllers
             string myToken = await _userHelper.GeneratePasswordResetTokenAsync(user); //gerar o token
 
             // gera um link de confirmção para o email
-            string tokenLink = $"{webBaseAdress}/Account/RecoverPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
+            string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/RecoverPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
             Response response = _mailHelper.SendEmail(email, "Retrieve your password", $"<h1>Retrieve your password</h1>" +
            $"<br><br><a href = \"{tokenLink}\">Click here to reset your password</a>"); //Contruir email e enviá-lo com o link
@@ -188,7 +200,15 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-
+        /// <summary>
+        /// Creates a new user account and sends a confirmation email. Method used to associate user to condoMember
+        /// This endpoint is intended for use by a system administrator.
+        /// </summary>
+        /// <param name="registerDtoModel">The registration details for the new user.</param>
+        /// <returns>
+        /// An <see cref="IActionResult"/> with a success message if the user is registered and the email is sent,
+        /// otherwise, an error response.
+        /// </returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "SysAdmin")]
         [Microsoft.AspNetCore.Mvc.HttpPost("AssociateUser")]
         public async Task<IActionResult> AssociateUser([FromBody] RegisterUserDto registerDtoModel)
@@ -202,7 +222,7 @@ namespace ProjectCondoManagement.Controllers
             string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
 
             // gera um link de confirmção para o email
-            string tokenLink = $"{webBaseAdress}/Account/ResetPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
+            string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/ResetPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
             Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
            $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link
@@ -217,7 +237,15 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-
+        /// <summary>
+        /// Creates a new user account and sends a confirmation email.
+        /// This endpoint is intended for use by a system administrator.
+        /// </summary>
+        /// <param name="registerDtoModel">The registration details for the new user.</param>
+        /// <returns>
+        /// An <see cref="IActionResult"/> with a success message if the user is registered and the email is sent,
+        /// otherwise, an error response.
+        /// </returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "SysAdmin")]
         [Microsoft.AspNetCore.Mvc.HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDto registerDtoModel)
@@ -257,7 +285,7 @@ namespace ProjectCondoManagement.Controllers
                 string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(newUser); //gerar o token
 
                 // gera um link de confirmção para o email
-                string tokenLink = $"{webBaseAdress}/Account/ResetPassword?userId={newUser.Id}&tokenEmail={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
+                string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/ResetPassword?userId={newUser.Id}&tokenEmail={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
                 Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
                $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password. </a>"); //Contruir email e enviá-lo com o link 
@@ -273,7 +301,15 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-
+        /// <summary>
+        /// Verifies an email confirmation token and then generates a password reset token.
+        /// This is a step in the password recovery process.
+        /// </summary>
+        /// <param name="resetPasswordDto">The user's ID and the email confirmation token.</param>
+        /// <returns>
+        /// An <see cref="IActionResult"/> with a password reset token if the email token is valid,
+        /// otherwise, a 404 Not Found response.
+        /// </returns>
         [Microsoft.AspNetCore.Mvc.HttpPost("GenerateResetPasswordToken")]
         public async Task<IActionResult> GenerateResetPasswordToken([FromBody] ResetPasswordDto resetPasswordDto)
         {
@@ -298,7 +334,14 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-
+        /// <summary>
+        /// Resets a user's password using a valid password reset token.
+        /// </summary>
+        /// <param name="resetPasswordDto">The user's ID, the password reset token, and the new password.</param>
+        /// <returns>
+        /// An <see cref="IActionResult"/> with a success message if the password was reset successfully,
+        /// otherwise, a 400 Bad Request response.
+        /// </returns>
         [Microsoft.AspNetCore.Mvc.HttpPost("ResetPassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
@@ -322,7 +365,14 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-
+        /// <summary>
+        /// Allows a logged-in user to change their password by providing their old and new passwords.
+        /// </summary>
+        /// <param name="changePasswordDto">The user's email, old password, and new password.</param>
+        /// <returns>
+        /// An <see cref="IActionResult"/> with a success message if the password was changed,
+        /// otherwise, a 400 Bad Request or 404 Not Found response.
+        /// </returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Microsoft.AspNetCore.Mvc.HttpPost("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
@@ -349,6 +399,16 @@ namespace ProjectCondoManagement.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Retrieves a user's DTO (Data Transfer Object) based on their email.
+        /// This endpoint requires a valid JWT token.
+        /// </summary>
+        /// <param name="email">The email of the user to retrieve.</param>
+        /// <returns>
+        /// An <see cref="IActionResult"/> with the user's DTO if the user is found,
+        /// otherwise, a 404 Not Found response.
+        /// </returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Microsoft.AspNetCore.Mvc.HttpPost("GetUserByEmail")]
 
@@ -367,13 +427,20 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-
+        /// <summary>
+        /// Allows a logged-in user to update their profile information.
+        /// </summary>
+        /// <param name="userDto">The DTO containing the updated user information.</param>
+        /// <returns>
+        /// An <see cref="IActionResult"/> with the updated user DTO if the update is successful,
+        /// otherwise, a 404 Not Found or 500 Internal Server Error response.
+        /// </returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Microsoft.AspNetCore.Mvc.HttpPost("EditProfile")]
 
         public async Task<IActionResult> EditProfile([FromBody] UserDto userDto)
         {
-            var user = await _userHelper.GetUserByEmailAsync(userDto.Email);
+            var user = await _converterHelper.ToEditedProfile(userDto);
             
             if (user == null)
             {
@@ -382,17 +449,141 @@ namespace ProjectCondoManagement.Controllers
 
             var response = await _userHelper.UpdateUserAsync(user);
 
+           
             if(response.Succeeded)
             {
                 var editedUser = await _userHelper.GetUserByEmailAsync(userDto.Email);
 
                 var editedUserDto = _converterHelper.ToUserDto(editedUser);
 
+                if (await _userHelper.IsUserInRoleAsync(user, "CondoMember"))
+                {
+                    var condomember = await _converterHelper.FromUserToCondoMember(user);
+
+                    if (condomember == null)
+                    {
+                        return NotFound();
+                    }
+
+                    await _condoMemberRepository.UpdateAsync(condomember, _dataContextCondos);
+
+                    return Ok(editedUserDto);    
+                }
+
                 return Ok(editedUserDto);
             }
 
             return StatusCode(500, new { error = "An internal server error occurred." });
         }
+
+
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //[HttpPost("EditUserDetails")]
+        //public async Task<IActionResult> EditUserDetails([FromBody] EditUserDetailsDto editUserDetailsDto)
+        //{
+        //    var user = await _userHelper.GetUserByEmailAsync(editUserDetailsDto.Email);
+
+        //    if (user == null)
+        //    {
+        //        return NotFound(null);  
+        //    }
+
+        //    await _userHelper.UpdateUserAsync(user);
+
+        //    var editedUser = await _userHelper.GetUserByEmailAsync(user.Email);
+
+        //    if (user == null)
+        //    {
+        //        return NotFound(null);
+        //    }
+
+        //    return Ok(editedUser);
+        //}
+
+
+        /// <summary>
+         /// Retrieves a list of users whose full name matches the provided search query.
+         /// </summary>
+         /// <param name="userFullName">The full name to search for, passed as a query parameter.</param>
+         /// <returns>A list of UserDto objects that match the search criteria. Returns an empty list if the query is null or empty.</returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("GetUsersByFullName")]
+        public async Task<List<UserDto>> GetUsersByFullName([FromQuery] string userFullName) //pegar parametro da query, depois do [?]
+        {
+            if (string.IsNullOrEmpty(userFullName))
+            {
+                return new List<UserDto>(); // retorna lista vazia
+            }
+
+            string cleanedFullName = userFullName.Trim().ToLower();
+
+            var users = await _userHelper.GetUsersByFullName(cleanedFullName);
+
+            var usersDto = users.Select(u => _converterHelper.ToUserDto(u)).ToList();
+
+            return usersDto;
+        }
+
+
+        /// <summary>
+         /// Edits the details of an existing user and, if the user is a "CondoMember," updates their associated condo details.
+         /// </summary>
+         /// <param name="editUserDetailsDto">The data transfer object containing the user details to be updated.</param>
+         /// <returns>
+         /// An IActionResult indicating the result of the operation.
+         /// Returns NotFound if the user is not found, otherwise returns Ok on successful update.
+         /// </returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("EditUserDetails")]
+        public async Task<IActionResult> EditUserDetails([FromBody] EditUserDetailsDto editUserDetailsDto)
+        {
+            var editedUser = await _converterHelper.ToEditedUser(editUserDetailsDto);
+
+            if (editedUser == null)
+            {
+                return NotFound(new Response { IsSuccess = false, Message = "Unable to update, user not found in the system"});
+            }
+
+            await _userHelper.UpdateUserAsync(editedUser); 
+
+            if (await _userHelper.IsUserInRoleAsync(editedUser, "CondoMember"))
+            {
+                var condomember = await _converterHelper.FromUserToCondoMember(editedUser);
+
+                if (condomember == null)
+                {
+                    return NotFound(new Response { IsSuccess = false, Message = "Unable to update, user not found in the system" });
+                }
+
+                await _condoMemberRepository.UpdateAsync(condomember, _dataContextCondos);
+
+                return Ok(new Response { IsSuccess = true });
+            }
+
+            return Ok(new Response { IsSuccess = true});
+        }
+
+
+        /// <summary>
+         /// Retrieves a list of all users assigned to a specific role.
+         /// </summary>
+         /// <param name="role">The name of the role to search for, passed in the request body.</param>
+         /// <returns>A collection of UserDto objects for all users found with the specified role.</returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("GetAllUsersByRole")]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsersByRole([FromBody] string role)
+        {
+            var users = await _userHelper.GetUsersByRoleAsync($"{role}");
+
+            var usersDto = users.Select(u => _converterHelper.ToUserDto(u)).ToList();
+
+            return usersDto;
+
+        }
+
+
+        
+
 
 
 

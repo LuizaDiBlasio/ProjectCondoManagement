@@ -39,6 +39,9 @@ namespace ClassLibrary.DtoModels
         public CondominiumDto CondominiumDto { get; set; }
 
 
+        public IEnumerable<UnitDto> Units { get; set; }
+
+
         public string? ImageUrl { get; set; }
 
         public string ImageFullPath =>

@@ -1,5 +1,7 @@
 ﻿using ClassLibrary;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using ProjectCondoManagement.Controllers;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
@@ -11,11 +13,15 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
 {
     public class CondoMemberRepository : GenericRepository<CondoMember, DataContextCondos>, ICondoMemberRepository
     {
-        private readonly IUserHelper _userHelper;
 
-        public CondoMemberRepository(IUserHelper userHelper)
-        {            
+        private readonly IUserHelper _userHelper;
+        private readonly DataContextCondos _context;
+
+
+        public CondoMemberRepository(IUserHelper userHelper, DataContextCondos context)
+        {
             _userHelper = userHelper;
+            _context = context;
         }
 
 
@@ -24,9 +30,9 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             try
             {
                 var emails = condoMembers
-                     .Select(c => c.Email)
-                     .Where(e => !string.IsNullOrWhiteSpace(e))
-                     .ToList();
+                    .Select(c => c.Email)
+                    .Where(e => !string.IsNullOrEmpty(e))
+                    .ToList();
 
                 var users = await _userHelper.GetUsersByEmailsAsync(emails);
 
@@ -34,10 +40,12 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
                     .Select(c =>
                     {
                         var user = users.FirstOrDefault(u => u.Email == c.Email);
+
                         if (user != null)
                         {
                             c.ImageUrl = user.ImageUrl;
                         }
+
                         return c;
                     })
                     .ToList();
@@ -55,10 +63,22 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
                     IsSuccess = false,
                     Message = $"Error linking images: {ex.Message}"
                 };
+            }
+        }
 
+        public async Task<CondoMember> GetCondoMemberByEmailAsync(string email)
+        {
+            var condoMember = await GetAll(_context).FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
+            
+            if (condoMember == null)
+            {
+                return null;
             }
 
-
+            return condoMember; 
         }
+            
+
+        
     }
 }

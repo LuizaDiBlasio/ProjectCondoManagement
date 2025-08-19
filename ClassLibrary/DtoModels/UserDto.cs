@@ -9,7 +9,8 @@ namespace ClassLibrary.DtoModels
 {
     public class UserDto
     {
-        public string Id { get; set; }
+        public string Id { get; set; }    
+
         public string FullName { get; set; } 
 
         public string Address { get; set; } 
@@ -28,7 +29,11 @@ namespace ClassLibrary.DtoModels
 
         public bool Uses2FA { get; set; }   //TODO: Tirar essa propriedade quando publicar
 
-        public string? ImageUrl { get; set; } 
+        public string? ImageUrl { get; set; }
+
+        public string? ImageFullPath => ImageUrl == null ?
+                    $"https://res.cloudinary.com/ddnkq9dyb/image/upload/v1754230681/noimage_q8mayx.jpg" // caminho relativo ao Url no image
+                    : ImageUrl;
 
     }
 }

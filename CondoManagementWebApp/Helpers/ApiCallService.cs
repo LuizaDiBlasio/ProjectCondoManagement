@@ -10,12 +10,16 @@ namespace CondoManagementWebApp.Helpers
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IConfiguration _configuration; 
 
-        public ApiCallService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public ApiCallService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, IConfiguration configuration )
         {
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor; //possibilita aceder ao httpContext fora do controller 
-            _httpClient.BaseAddress = new Uri("https://localhost:7001/");  // adiciona base address ao httpClient //TODO : Mudar depois que publicar
+            _configuration = configuration;
+
+            _httpClient.BaseAddress = new Uri($"{_configuration["ApiSettings:BaseUrl"]}");  // adiciona base address ao httpClient 
+            _configuration = configuration;
         }
 
         public void AddAuthorizationHeader()
@@ -61,14 +65,17 @@ namespace CondoManagementWebApp.Helpers
         }
 
 
-        public async Task<TResponse> GetByEmailAsync<TRequest, TResponse>(string requestUri, TRequest data)
+        public async Task<TResponse> GetByQueryAsync<TResponse>(string requestUri, string query)
         {
             AddAuthorizationHeader();
+
+            // Serializa o objeto
             var jsonContent = new StringContent(
-                JsonSerializer.Serialize(data),
+                JsonSerializer.Serialize(query),
                 Encoding.UTF8,
                 "application/json"
             );
+
             var response = await _httpClient.PostAsync(requestUri, jsonContent);
             response.EnsureSuccessStatusCode();
 

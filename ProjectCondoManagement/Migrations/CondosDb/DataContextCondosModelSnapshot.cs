@@ -37,6 +37,21 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.ToTable("CondoMemberMeeting");
                 });
 
+            modelBuilder.Entity("CondoMemberUnit", b =>
+                {
+                    b.Property<int>("CondoMembersId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UnitsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CondoMembersId", "UnitsId");
+
+                    b.HasIndex("UnitsId");
+
+                    b.ToTable("CondoMemberUnit");
+                });
+
             modelBuilder.Entity("OccurrenceUnit", b =>
                 {
                     b.Property<int>("OccurrencesId")
@@ -124,6 +139,10 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.Property<string>("ManagerUserId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Condominiums");
@@ -137,9 +156,6 @@ namespace ProjectCondoManagement.Migrations.CondosDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("BlobId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int?>("CondominiumId")
                         .HasColumnType("int");
 
@@ -149,6 +165,9 @@ namespace ProjectCondoManagement.Migrations.CondosDb
 
                     b.Property<DateTime>("DataUpload")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("DocumentUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FileName")
                         .IsRequired()
@@ -318,6 +337,21 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CondoMemberUnit", b =>
+                {
+                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.CondoMember", null)
+                        .WithMany()
+                        .HasForeignKey("CondoMembersId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Unit", null)
+                        .WithMany()
+                        .HasForeignKey("UnitsId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("OccurrenceUnit", b =>
                 {
                     b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Occurrence", null)
@@ -373,7 +407,7 @@ namespace ProjectCondoManagement.Migrations.CondosDb
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Occurrence", b =>
                 {
                     b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Condominium", null)
-                        .WithMany("Occurences")
+                        .WithMany("Occurrences")
                         .HasForeignKey("CondominiumId");
 
                     b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Meeting", null)
@@ -426,7 +460,7 @@ namespace ProjectCondoManagement.Migrations.CondosDb
 
                     b.Navigation("Meetings");
 
-                    b.Navigation("Occurences");
+                    b.Navigation("Occurrences");
 
                     b.Navigation("Units");
                 });

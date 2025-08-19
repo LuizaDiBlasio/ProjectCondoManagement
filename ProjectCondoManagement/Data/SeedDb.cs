@@ -125,6 +125,8 @@ namespace ProjectCondoManagement.Data
                     throw new InvalidOperationException("Coud not create the user in seeder"); //pára o programa
                 }
 
+                var activation2FA = await _userHelper.EnableTwoFactorAuthenticationAsync(user, true); // habilitar 2fa
+
                 await _userHelper.AddUserToRoleAsync(user, "SysAdmin"); //adiciona role ao user
             }
 
