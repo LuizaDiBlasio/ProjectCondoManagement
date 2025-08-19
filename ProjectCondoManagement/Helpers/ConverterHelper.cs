@@ -56,6 +56,7 @@ namespace ProjectCondoManagement.Helpers
         {
             var userDto = new UserDto()
             {
+                Id = user.Id,
                 FullName = user.FullName,
                 BirthDate = user.BirthDate,
                 PhoneNumber = user.PhoneNumber,
