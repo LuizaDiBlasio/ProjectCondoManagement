@@ -28,5 +28,7 @@ namespace ClassLibrary.DtoModels
         public string PhoneNumber { get; set; }
 
         public string TaxIdDocument { get; set; }
+
+        public int FinancialAccountId { get; set; } 
     }
 }

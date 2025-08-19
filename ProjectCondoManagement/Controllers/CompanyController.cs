@@ -24,9 +24,11 @@ namespace ProjectCondoManagement.Controllers
         private readonly DataContextCondos _contextCondos;
         private readonly IFinancialAccountRepository _financialAccountRepository;
         private readonly DataContextFinances _contextFinances;
+        private readonly IUserHelper _userHelper;
 
         public CompanyController(ICompanyRepository companyRepository, DataContextUsers contextUsers, IConverterHelper converterHelper, 
-            DataContextCondos contextCondos, IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances)
+            DataContextCondos contextCondos, IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances,
+            IUserHelper userHelper)
         {
             _companyRepository = companyRepository;
             _contextUsers = contextUsers;
@@ -34,6 +36,7 @@ namespace ProjectCondoManagement.Controllers
             _contextCondos = contextCondos;
             _financialAccountRepository = financialAccountRepository;
             _contextFinances = dataContextFinances;
+            _userHelper = userHelper;
         }
 
         /// <summary>
@@ -88,12 +91,28 @@ namespace ProjectCondoManagement.Controllers
         {
             if (companyDto == null)
             {
-                return BadRequest("Request body is null.");
+                return BadRequest(new Response { IsSuccess = false, Message = "System error" });
             }
 
 
             try
             {
+                if (companyDto.CompanyAdminId != null)
+                {
+                    var companyAdminUserDto = _converterHelper.ToUserDto(await _userHelper.GetUserByIdAsync(companyDto.CompanyAdminId));
+
+                    if (companyAdminUserDto == null)
+                    {
+                        return NotFound(new Response { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
+                    }
+
+                    //atribuir admin à company dto
+
+                    companyDto.CompanyAdmin = companyAdminUserDto;  
+                }
+
+                //converter para company
+
                 var company = _converterHelper.ToCompany(companyDto, true);
 
                 if (company == null)
@@ -107,12 +126,19 @@ namespace ProjectCondoManagement.Controllers
                 }
 
 
+                //criar financial account 
+
                 var financialAccount = new FinancialAccount()
                 {
                     InitialDeposit = 0 // depósito inicial vai ser sempre 0
                 };
 
                 await _financialAccountRepository.CreateAsync(financialAccount, _contextFinances);
+
+
+                //Atribuir financial account
+
+                company.FinancialAccountId = financialAccount.Id;
 
                 await _companyRepository.CreateAsync(company, _contextUsers);
 
@@ -143,6 +169,7 @@ namespace ProjectCondoManagement.Controllers
 
             try
             {
+
                 //buscar entidades selecionadas com base nos ids selecionados
                 var selectedAdminAdnCondosDto = await _companyRepository.SelectedAdminAndCondos(companyDto);
 

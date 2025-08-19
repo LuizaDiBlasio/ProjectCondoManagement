@@ -50,6 +50,10 @@
                                 <p>@Html.DisplayFor(model => model.PhoneNumber)</p>
                             </div>
                             <div class="col-md-6 mb-3">
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.FinancialAccountId)</label>
+                                <p>@Html.DisplayFor(model => model.FinancialAccountId)</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.TaxIdDocument)</label>
                                 <p>@Html.DisplayFor(model => model.TaxIdDocument)</p>
                             </div>
@@ -72,17 +76,22 @@
                         else
                         {
                             <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyAdmin.FullName)</label>
-                                    <p>@Html.DisplayFor(model => model.CompanyAdmin.FullName)</p>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyAdmin.Email)</label>
-                                    <p>@Html.DisplayFor(model => model.CompanyAdmin.Email)</p>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyAdmin.PhoneNumber)</label>
-                                    <p>@Html.DisplayFor(model => model.CompanyAdmin.PhoneNumber)</p>
+                                <div class="col-12 d-flex align-items-center">
+                                    <div class="col-auto me-5">
+                                        <img src="@Html.DisplayFor(model => model.CompanyAdmin.ImageFullPath)" alt="User Image" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                                    </div>
+                                    <div class="col-sm d-flex flex-column me-4">
+                                        <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyAdmin.FullName)</label>
+                                        <p class="mb-0">@Html.DisplayFor(model => model.CompanyAdmin.FullName)</p>
+                                    </div>
+                                    <div class="col-sm d-flex flex-column me-4">
+                                        <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyAdmin.Email)</label>
+                                        <p class="mb-0">@Html.DisplayFor(model => model.CompanyAdmin.Email)</p>
+                                    </div>
+                                    <div class="col-sm d-flex flex-column">
+                                        <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyAdmin.PhoneNumber)</label>
+                                        <p class="mb-0">@Html.DisplayFor(model => model.CompanyAdmin.PhoneNumber)</p>
+                                    </div>
                                 </div>
                             </div>
                         }
@@ -96,12 +105,12 @@
                         @* Accordion for Condominiums *@
                         <div class="accordion" id="accordionCondos">
                             <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingCondos">
-                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCondos" aria-expanded="true" aria-controls="collapseCondos">
-                                        <h4 class="card-title">Company Condominiums</h4>
-                                    </button>
-                                </h2>
-                                <div id="collapseCondos" class="accordion-collapse collapse show" aria-labelledby="headingCondos" data-bs-parent="#accordionCondos">
+                            <h2 class="accordion-header" id="headingCondos">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCondos" aria-expanded="false" aria-controls="collapseCondos">
+                                    <h4 class="card-title">Company Condominiums</h4>
+                                </button>
+                            </h2>
+                            <div id="collapseCondos" class="accordion-collapse collapse" aria-labelledby="headingCondos" data-bs-parent="#accordionCondos">
                                     <div class="accordion-body">
                                         @if (!Model.CondominiumDtos.Any())
                                         {

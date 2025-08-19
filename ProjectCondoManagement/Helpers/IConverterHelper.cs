@@ -42,5 +42,7 @@ namespace ProjectCondoManagement.Helpers
 
         public DocumentDto ToDocumentDto(Document document);
 
+        public MessageDto ToMessageDto(Message message);
+
     }
 }

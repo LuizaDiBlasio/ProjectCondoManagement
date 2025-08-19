@@ -177,7 +177,8 @@ namespace ProjectCondoManagement.Helpers
                 Email = company.Email,
                 Address = company.Address,
                 PhoneNumber = company.PhoneNumber,
-                TaxIdDocument = company.TaxIdDocument
+                TaxIdDocument = company.TaxIdDocument,
+                FinancialAccountId = company.FinancialAccountId
             };
 
             return companyDto;
@@ -194,7 +195,8 @@ namespace ProjectCondoManagement.Helpers
                 Email = companyDto.Email,
                 Address = companyDto.Address,
                 PhoneNumber = companyDto.PhoneNumber,
-                TaxIdDocument = companyDto.TaxIdDocument
+                TaxIdDocument = companyDto.TaxIdDocument,
+                FinancialAccountId = companyDto.FinancialAccountId  
             };
 
             return company; 
@@ -319,6 +321,22 @@ namespace ProjectCondoManagement.Helpers
                 DataUpload = document.DataUpload
             };
             return documentDto;
+        }
+
+        public MessageDto ToMessageDto(Message message)
+        {
+            var messageDto = new MessageDto()
+            {
+                Id = message.Id,
+                PostingDate = message.PostingDate,
+                MessageTitle = message.MessageTitle,    
+                MessageContent = message.MessageContent,
+                SenderEmail = message.SenderEmail,
+                ReceiverEmail = message.ReceiverEmail,
+                Status = new EnumDto { Name = message.Status.ToString(), Value = (int) message.Status }
+            };
+
+            return messageDto;
         }
     }
 }

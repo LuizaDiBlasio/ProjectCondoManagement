@@ -66,7 +66,7 @@ namespace CondoManagementWebApp.Controllers
         }
 
 
-        // GET: Company/CreateCompany
+        // GET: Company/Create
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Create()
         {
             try
@@ -175,6 +175,11 @@ namespace CondoManagementWebApp.Controllers
                     return View("Edit", model);
                 }
 
+                //Buscar selectList de condominiums 
+                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondos");
+
+                model.CondominiumsToSelect = selectLists.Condos;
+                model.CompanyAdminsToSelect = selectLists.Admins;
 
                 _flashMessage.Confirmation(apiCall.Message);
                 return View("Edit", model);
