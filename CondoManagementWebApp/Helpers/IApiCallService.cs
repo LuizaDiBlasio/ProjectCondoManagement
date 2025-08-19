@@ -5,8 +5,6 @@ namespace CondoManagementWebApp.Helpers
 {
     public interface IApiCallService
     {
-        Task<IEnumerable<T>> GetAllAsync(string requestUri);
-
         public void AddAuthorizationHeader();
 
         public Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest data);

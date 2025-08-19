@@ -27,153 +27,203 @@ namespace CondoManagementWebApp.Controllers
         {
             try
             {
-                var condoMembers = await _apiCallService.GetAsync<IEnumerable<CondoMemberDto>>("api/CondoMembers");
+                var condoMembers = await _apiCallService.GetAsync<IEnumerable<CondoMemberDto>>("api/CondoMembers")?? new List<CondoMemberDto>();
                 return View(condoMembers);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _flashMessage.Danger($"An error occurred while fetching condo members.");
-                return View();
+                return View(new List<CondoMemberDto>());
             }
 
-            
-        } 
+
+        }
 
         // GET: CondoMemberController/Details/5
         public async Task<IActionResult> Details(int? id)
         {
 
-//        // GET: CondoMemberController/Details/5
-//        public async Task<IActionResult> Details(int? id)
-//        {
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-            var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id.Value}");
+            try
+            {
+                var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id.Value}");
 
-            return View(condoMember);
+                return View(condoMember);
+            }
+            catch (Exception)
+            {
+                _flashMessage.Danger($"An error occurred while fetching the condo member.");
+                return View(new CondoMemberDto());
+            }
         }
 
-//            try
-//            {
-//                var registerUserDto = _converterHelper.ToRegisterDto(condoMemberDto);
+        // GET: CondoMemberController/Create
+        public ActionResult Create()
+        {
+            return View();
+        }
 
-//                registerUserDto.SelectedRole = "CondoMember"; 
+        // POST: CondoMemberController/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Create(CondoMemberDto condoMemberDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(condoMemberDto);
+            }
 
-            if(condoMemberDto.BirthDate > DateTime.Today)
+            if (condoMemberDto.BirthDate > DateTime.Today)
             {
                 ModelState.AddModelError("BirthDate", "Birth date cannot be in the future.");
                 return View(condoMemberDto);
             }
 
 
-            var result = await _apiCallService.PostAsync<CondoMemberDto, Response>("api/CondoMembers", condoMemberDto);
-
-            if (result.IsSuccess)
+            try
             {
-                var registerUserDto = _converterHelper.ToRegisterDto(condoMemberDto);
-
-                registerUserDto.SelectedRole = "CondoMember";
-
-                var result2 = await _apiCallService.PostAsync<RegisterUserDto, Response>("api/Account/AssociateUser", registerUserDto);
-                if (!result2.IsSuccess)
+                var result = await _apiCallService.PostAsync<CondoMemberDto, Response>("api/CondoMembers", condoMemberDto);
+                if (result == null)
                 {
-                    var createdMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{condoMemberDto.Email}");
-                    if (createdMember == null)
-                    {
-                        return NotFound("Condo member not found after creation.");
-                    }
-
-                    await _apiCallService.DeleteAsync($"api/CondoMembers/{createdMember.Id}");
-                    ModelState.AddModelError("", $"{result2.Message}");                    
+                    _flashMessage.Danger($"An error occurred while creating the condo member.");
                     return View(condoMemberDto);
                 }
 
-                return RedirectToAction(nameof(Index));
+                if (result.IsSuccess)
+                {
+                    var registerUserDto = _converterHelper.ToRegisterDto(condoMemberDto);
+
+                    registerUserDto.SelectedRole = "CondoMember";
+
+                    var result2 = await _apiCallService.PostAsync<RegisterUserDto, Response>("api/Account/AssociateUser", registerUserDto);
+                    if (!result2.IsSuccess)
+                    {
+                        var createdMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{condoMemberDto.Email}");
+                        if (createdMember == null)
+                        {
+                            return NotFound("Condo member not found after creation.");
+                        }
+
+                        await _apiCallService.DeleteAsync($"api/CondoMembers/{createdMember.Id}");
+                        ModelState.AddModelError("", $"{result2.Message}");
+                        return View(condoMemberDto);
+                    }
+
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (Exception)
+            {
+
+                _flashMessage.Danger($"An error occurred while creating the condo member.");
+                return View(condoMemberDto);
             }
 
 
-            ModelState.AddModelError("", $"{result.Message}");
+            _flashMessage.Danger($"An error occurred while creating the condo member.");
             return View(condoMemberDto);
 
-            
-         
         }
 
-//        // GET: CondoMemberController/Edit/5
-//        public async Task<IActionResult> Edit(int? id)
-//        {
 
-//            if (id == null)
-//            {
-//                return  NotFound();
-//            }
 
-            var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id.Value}");
-            if (condoMember == null)
+        // GET: CondoMemberController/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+
+            if (id == null)
             {
                 return NotFound();
             }
 
+            try
+            {
+                var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id.Value}");
+                return View(condoMember);
+            }
+            catch (Exception)
+            {
 
-//            return View(condoMember);
-//        }
+               _flashMessage.Danger($"An error occurred while fetching the condo member for editing.");
+               return View(new CondoMemberDto());
+            }
 
-//        // POST: CondoMemberController/Edit/5
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public async Task<IActionResult> Edit(int id, CondoMemberDto condoMemberDto)
-//        {
+  
+        }
 
-//            if (id != condoMemberDto.Id)
-//            {
-//                return NotFound();
-//            }
+        // POST: CondoMemberController/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, CondoMemberDto condoMemberDto)
+        {
 
-//            if (!ModelState.IsValid)
-//            {
-//                return View(condoMemberDto);
-//            }
+            if (id != condoMemberDto.Id)
+            {
+                return NotFound();
+            }
 
-               var result = await _apiCallService.PostAsync<CondoMemberDto, Response>($"api/CondoMembers/Edit/{id}", condoMemberDto);
-               if (!result.IsSuccess)
-               {
-                   ModelState.AddModelError("", $"{result.Message}");
-                   return View(condoMemberDto);
-               }
+            if (!ModelState.IsValid)
+            {
+                return View(condoMemberDto);
+            }
 
+            var result = await _apiCallService.PostAsync<CondoMemberDto, Response>($"api/CondoMembers/Edit/{id}", condoMemberDto);
+            if (result == null)
+            {
+                _flashMessage.Danger($"An error occurred while updating the condo member.");
+                return View(condoMemberDto);
+            }
+            if (!result.IsSuccess)
+            {
+                _flashMessage.Danger($"An error occurred while updating the condo member.");
+                return View(condoMemberDto);
+            }
+
+            return RedirectToAction(nameof(Index));
+
+        }
+
+        // GET: CondoMemberController/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id.Value}");
+                if (condoMember == null)
+                {
+                    return NotFound();
+                }
+
+                return View(id);
+            }
+            catch (Exception)
+            {
+                _flashMessage.Danger($"An error occurred while fetching the condo member for deletion.");
                 return RedirectToAction(nameof(Index));
-           
+            }            
         }
 
-//        // GET: CondoMemberController/Delete/5
-//        public async Task<IActionResult> Delete(int? id)
-//        {
-//            if (id == null)
-//            {
-//                return NotFound();
-//            }
-
-            var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id.Value}"); ;
-            if (condoMember == null)
+        // POST: CondoMemberController/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int? id)
+        {
+            if (id == null)
             {
                 return NotFound();
             }
 
-
-//            return View(condoMember);
-//        }
-
-//        // POST: CondoMemberController/Delete/5
-//        [HttpPost, ActionName("Delete")]
-//        [ValidateAntiForgeryToken]
-//        public async Task<IActionResult> DeleteConfirmed(int? id)
-//        {
-//            if (id == null)
-//            {
-//                return NotFound();
-//            }
-
-//            try
-//            {                            
+            try
+            {
 
                 var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id.Value}");
                 if (condoMember == null)
@@ -184,17 +234,17 @@ namespace CondoManagementWebApp.Controllers
                 var result = await _apiCallService.DeleteAsync($"api/CondoMembers/{id.Value}");
                 if (!result.IsSuccessStatusCode)
                 {
-                    ModelState.AddModelError("", "Failed to delete condo member. Please try again.");
+                    _flashMessage.Danger("Failed to delete condo member. Please try again.");
                     return View(condoMember);
                 }
 
 
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch(Exception)
             {
-                ModelState.AddModelError("", "An unexpected error occurred. Please try again.");
-                return View(id);
+                _flashMessage.Danger("An unexpected error occurred while deleting the condo member.");
+                return RedirectToAction(nameof(Index));
             }
         }
     }

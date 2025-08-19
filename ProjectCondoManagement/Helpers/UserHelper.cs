@@ -6,6 +6,7 @@ using ProjectCondoManagement.Data.Entites.UsersDb;
 using System.Security.Claims;
 using System.Security.Policy;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
+using ClassLibrary;
 
 namespace ProjectCondoManagement.Helpers
 {
@@ -19,12 +20,11 @@ namespace ProjectCondoManagement.Helpers
 
         private readonly DataContextUsers _dataContextUsers;
 
-        public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, DataContextUsers dataContextUsers)
         private readonly IFinancialAccountRepository _financialAccountRepository;
 
         private readonly DataContextFinances _dataContextFinances;
 
-        public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager,
+        public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, DataContextUsers dataContextUsers,
             IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances)
         {
             _userManager = userManager;
@@ -413,6 +413,11 @@ namespace ProjectCondoManagement.Helpers
         public async Task<bool> VerifyTwoFactorTokenAsync(User user, string tokenProvider, string token)
         {
             return await _userManager.VerifyTwoFactorTokenAsync(user, tokenProvider, token);
+        }
+
+        public async Task<IEnumerable<User>> GetUsersInRoleAsync(string v)
+        {
+            return await _userManager.GetUsersInRoleAsync(v); 
         }
     }
 }

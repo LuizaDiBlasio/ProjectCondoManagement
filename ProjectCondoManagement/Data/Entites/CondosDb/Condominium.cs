@@ -1,4 +1,6 @@
 ﻿using ClassLibrary;
+using ProjectCondoManagement.Data.Entites.UsersDb;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection.Metadata;
 
 namespace ProjectCondoManagement.Data.Entites.CondosDb
@@ -9,11 +11,17 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public int CompanyId { get; set; }
 
+        [NotMapped]
+        public Company Company { get; set; }
+
         public string Address { get; set; }
 
         public string CondoName { get; set; }
 
         public string? ManagerUserId { get; set; }
+
+        [NotMapped]
+        public User? ManagerUser { get; set; }
 
         public IEnumerable<CondoMember>? CondoMembers { get; set; }
 

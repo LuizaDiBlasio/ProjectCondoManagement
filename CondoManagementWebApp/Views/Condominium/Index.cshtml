@@ -38,9 +38,14 @@
                     {
                         <a class="text-danger">No Manager Assigned</a>
                     }
-                @Html.DisplayFor(modelItem => item.ManagerUserId)
+                    else
+                    {
+                        @Html.DisplayFor(modelItem => item.ManagerUser.FullName)
+                    }
+                    
             </td>
                 <td>
+                    <a class="btn btn-outline-primary" asp-action="AssignManager" asp-route-id="@item.Id">Assign Manager</a>
                     <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
                     <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id">Details</a>
                     <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>

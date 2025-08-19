@@ -14,7 +14,7 @@
             @Html.DisplayNameFor(model => model.CompanyId)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CompanyId)
+            @Html.DisplayFor(model => model.Company.Name)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Address)
@@ -28,16 +28,23 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.CondoName)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.ManagerUserId)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ManagerUserId)
+        <dd class="col-sm-10">
+            @if (Model.ManagerUserId == null)
+            {
+                <span class="text-danger">No Manager Assigned</span>
+            }
+            else
+            {
+                @Html.DisplayFor(model => model.ManagerUserId)
+            }
         </dd>
     </dl>
     
     <form asp-action="Delete">
         <input type="submit" value="Delete" class="btn btn-danger" />
-        <a asp-action="Index">Back to List</a>
+        <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
     </form>
 </div>

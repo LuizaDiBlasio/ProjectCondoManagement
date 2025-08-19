@@ -394,6 +394,24 @@ namespace ProjectCondoManagement.Controllers
             return StatusCode(500, new { error = "An internal server error occurred." });
         }
 
+
+
+    
+        [HttpGet("GetManagers")]
+        public async Task<IActionResult> GetManagers()
+        {
+            var managers = await _userHelper.GetUsersInRoleAsync("CondoManager");
+
+            if (managers == null || !managers.Any())
+            {
+                return NotFound(new { Message = "No Condo Managers found." });
+            }
+
+            var managersDto = managers.Select(m => _converterHelper.ToUserDto((User)m)).ToList();
+
+            return Ok(managersDto);
+        }
+
     }
 }
 

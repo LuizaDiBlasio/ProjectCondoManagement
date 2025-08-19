@@ -13,10 +13,14 @@ namespace ClassLibrary.DtoModels
         public int Id { get; set; }
 
         [Display(Name = "Company")]
-        public int CompanyId { get; set; }
+        public int? CompanyId { get; set; }
+
+        public CompanyDto? Company { get; set; }
+
 
         [Required(ErrorMessage = "Address is required.")]
         public string Address { get; set; }
+
 
         [Display(Name = "Condo Name")]
         [Required(ErrorMessage = "Condo name is required.")]
@@ -24,6 +28,8 @@ namespace ClassLibrary.DtoModels
 
         [Display(Name = "Condo Manager")]
         public string? ManagerUserId { get; set; }
+
+        public UserDto? ManagerUser { get; set; }
 
 
         public IEnumerable<CondoMemberDto>? CondoMembers { get; set; }

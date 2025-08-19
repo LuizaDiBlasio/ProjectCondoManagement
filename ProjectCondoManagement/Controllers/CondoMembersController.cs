@@ -38,40 +38,50 @@ namespace ProjectCondoManagement.Controllers
 
         // GET: api/CondoMembers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CondoMember>>> GetCondoMembers()
+        public async Task<ActionResult<IEnumerable<CondoMemberDto>>> GetCondoMembers()
         {
             var condoMembers = await _condoMemberRepository.GetAll(_context).ToListAsync();
 
+            if (condoMembers == null)
+            {
+                return NotFound();
+            }
+
             await _condoMemberRepository.LinkImages(condoMembers); // Link images to condo members
-            
-            return condoMembers;
+
+            var condoMembersDtos = condoMembers.Select(c => _converterHelper.ToCondoMemberDto(c)).ToList();
+
+            return condoMembersDtos;
 
         }
 
         // GET: api/CondoMembers/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<CondoMember>> GetCondoMember(int id)
+        public async Task<ActionResult<CondoMemberDto>> GetCondoMember(int id)
         {
             var condoMember = await _condoMemberRepository.GetByIdAsync(id, _context);
-
-            var condoMembers = new List<CondoMember> { condoMember };// Create a list with the single condo member for linking images
-            await _condoMemberRepository.LinkImages(condoMembers); // Link images to the single condo member
-
             if (condoMember == null)
             {
                 return NotFound();
             }
 
-            return condoMember;
+            var condoMembers = new List<CondoMember> { condoMember };// Create a list with the single condo member for linking images
+            await _condoMemberRepository.LinkImages(condoMembers); // Link images to the single condo member
+
+            var condoMemberDto = _converterHelper.ToCondoMemberDto(condoMember);
+
+           
+
+            return condoMemberDto;
         }
 
         // GET: api/CondoMembers/ByEmail/{email}
         [HttpGet("ByEmail/{email}")]
-        public async Task<ActionResult<CondoMember>> GetCondoMemberByEmail(string email)
+        public async Task<ActionResult<CondoMemberDto>> GetCondoMemberByEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
             {
-                return BadRequest("Email is required.");
+                return BadRequest();
             }
 
             var condoMember = await _condoMemberRepository.GetAll(_context)
@@ -82,7 +92,9 @@ namespace ProjectCondoManagement.Controllers
                 return null;
             }
 
-            return condoMember;
+            var condoMemberDto = _converterHelper.ToCondoMemberDto(condoMember);
+
+            return condoMemberDto;
         }
 
 

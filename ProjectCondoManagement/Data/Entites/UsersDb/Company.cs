@@ -1,4 +1,6 @@
 ﻿using ClassLibrary;
+using ProjectCondoManagement.Data.Entites.CondosDb;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProjectCondoManagement.Data.Entites.UsersDb
 {
@@ -10,7 +12,8 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
 
         public IEnumerable<User> Users { get; set; }
 
-        public IEnumerable<CompanyCondominium> CompanyCondominiums { get; set; }
+        [NotMapped]
+        public IEnumerable<Condominium>? Condominiums { get; set; }
 
         public string Email { get; set; }
 

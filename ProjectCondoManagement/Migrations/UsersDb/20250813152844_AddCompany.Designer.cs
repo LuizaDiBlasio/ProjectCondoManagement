@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 
@@ -11,9 +12,11 @@ using ProjectCondoManagement.Data.Entites.UsersDb;
 namespace ProjectCondoManagement.Migrations.UsersDb
 {
     [DbContext(typeof(DataContextUsers))]
-    partial class DataContextUsersModelSnapshot : ModelSnapshot
+    [Migration("20250813152844_AddCompany")]
+    partial class AddCompany
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -188,6 +191,19 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                     b.ToTable("Companies");
                 });
 
+            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.CompanyCondominium", b =>
+                {
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CondominiumId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CompanyId", "CondominiumId");
+
+                    b.ToTable("CompanyCondominiums");
+                });
+
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.User", b =>
                 {
                     b.Property<string>("Id")
@@ -333,6 +349,17 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.CompanyCondominium", b =>
+                {
+                    b.HasOne("ProjectCondoManagement.Data.Entites.UsersDb.Company", "Company")
+                        .WithMany("CompanyCondominiums")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.User", b =>
                 {
                     b.HasOne("ProjectCondoManagement.Data.Entites.UsersDb.Company", "Company")
@@ -344,6 +371,8 @@ namespace ProjectCondoManagement.Migrations.UsersDb
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.Company", b =>
                 {
+                    b.Navigation("CompanyCondominiums");
+
                     b.Navigation("Users");
                 });
 #pragma warning restore 612, 618

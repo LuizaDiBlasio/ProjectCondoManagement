@@ -12,6 +12,7 @@ using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances;
 using ProjectCondoManagement.Helpers;
 using System.Text;
+using ProjectCondoManagement.Data.Repositories.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,6 +82,10 @@ builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
 builder.Services.AddScoped<IFinancialAccountRepository, FinancialAccountReposirory>();
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
+
+builder.Services.AddScoped<ICondominiumHelper, CondominiumHelper>();
+
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 
 builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
 

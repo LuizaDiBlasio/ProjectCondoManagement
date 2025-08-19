@@ -22,6 +22,22 @@ namespace ProjectCondoManagement.Helpers
             return condoMember;
         }
 
+        public CondoMemberDto ToCondoMemberDto(CondoMember condoMember)
+        {
+            var condoMemberDto = new CondoMemberDto
+            {
+                Id = condoMember.Id,
+                FullName = condoMember.FullName,
+                Email = condoMember.Email,
+                Address = condoMember.Address,
+                BirthDate = condoMember.BirthDate,
+                PhoneNumber = condoMember.PhoneNumber,
+                ImageUrl = condoMember.ImageUrl
+            };
+
+            return condoMemberDto;
+        }
+
         public CondoMemberDto ToCondoMemberDto(User user)
         {
             var condoMemberDto = new CondoMemberDto
@@ -56,13 +72,44 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = condominiumDto.Id,
                 Address = condominiumDto.Address,
-                CompanyId = condominiumDto.CompanyId,
+                CompanyId = condominiumDto.CompanyId.Value,
                 CondoName = condominiumDto.CondoName,
                 ManagerUserId = condominiumDto.ManagerUserId,
 
             };
 
             return condominium;
+        }
+
+        public CondominiumDto ToCondominiumDto(Condominium condominium)
+        {
+            var condominiumDto = new CondominiumDto
+            {
+                Id = condominium.Id,
+                Address = condominium.Address,
+                CompanyId = condominium.CompanyId,
+                CondoName = condominium.CondoName,
+                ManagerUserId = condominium.ManagerUserId
+
+            };
+
+            return condominiumDto;
+        }
+
+        public CompanyDto ToCompanyDto(Company company)
+        {
+            var companyDto = new CompanyDto
+            {
+                Id = company.Id,
+                Name = company.Name,
+                PhoneNumber = company.PhoneNumber,
+                Email = company.Email,
+                Addres = company.Addres,
+                TaxIdDocument = company.TaxIdDocument
+
+            };
+
+            return companyDto;
         }
     }
 }

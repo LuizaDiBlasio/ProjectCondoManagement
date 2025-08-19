@@ -13,13 +13,14 @@ using ProjectCondoManagement.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     //[Authorize(Roles = "Admin")]
     public class CondominiumsController : ControllerBase
     {
@@ -27,25 +28,48 @@ namespace ProjectCondoManagement.Controllers
         private readonly ICondominiumRepository _condominiumRepository;
         private readonly IConverterHelper _converterHelper;
         private readonly IUserHelper _userHelper;
+        private readonly ICondominiumHelper _condominiumHelper;
 
-        public CondominiumsController(DataContextCondos context, ICondominiumRepository condominiumRepository, IConverterHelper converterHelper, IUserHelper userHelper)
+        public CondominiumsController(DataContextCondos context,
+                                      ICondominiumRepository condominiumRepository,
+                                      IConverterHelper converterHelper,
+                                      IUserHelper userHelper,
+                                      ICondominiumHelper condominiumHelper)
         {
             _context = context;
             _condominiumRepository = condominiumRepository;
             _converterHelper = converterHelper;
             _userHelper = userHelper;
+            _condominiumHelper = condominiumHelper;
         }
 
         // GET: api/Condominiums
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Condominium>>> GetCondominiums()
+        public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetCondominiums()
         {
-            return await _condominiumRepository.GetAll(_context).ToListAsync(); ;
+            var condominiums = await _condominiumRepository.GetAll(_context).ToListAsync();
+            if (condominiums == null)
+            {
+                return new List<CondominiumDto>();
+            }
+
+            
+
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c)).ToList();                   
+            
+            if (condominiumsDtos == null)
+            {
+                return new List<CondominiumDto>();
+            }
+
+            await _condominiumRepository.LinkManager(condominiumsDtos);
+
+            return condominiumsDtos;
         }
 
         // GET: api/Condominiums/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Condominium>> GetCondominium(int id)
+        public async Task<ActionResult<CondominiumDto>> GetCondominium(int id)
         {
             var condominium = await _condominiumRepository.GetByIdAsync(id, _context);
 
@@ -54,7 +78,20 @@ namespace ProjectCondoManagement.Controllers
                 return NotFound();
             }
 
-            return condominium;
+            var condominiumDto = _converterHelper.ToCondominiumDto(condominium);
+            if (condominiumDto == null)
+            {
+                return NotFound();
+            }
+
+            var result = await _condominiumHelper.LinkCompanyToCondominiumAsync(condominiumDto);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Message);
+            }
+
+
+            return condominiumDto;
         }
 
 
@@ -104,9 +141,7 @@ namespace ProjectCondoManagement.Controllers
             if (condominiumDto == null)
             {
                 return BadRequest("Request body is null.");
-            }
-
-           
+            } 
 
             try
             {               
