@@ -16,7 +16,6 @@ namespace ProjectCondoManagement.Helpers
 
         public UserDto ToUserDto(User user);
 
-        public CondoMemberDto ToCondoMemberDto(CondoMember condoMember);
 
         public Task<User> ToEditedUser(EditUserDetailsDto editUserDetailsDto);
 
@@ -24,7 +23,6 @@ namespace ProjectCondoManagement.Helpers
 
         public Task<CondoMember> FromUserToCondoMember(User user);
 
-        public CompanyDto ToCompanyDto(Company company);
 
         public User ToUser(UserDto userDto);
 

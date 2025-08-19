@@ -7,17 +7,12 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 {
     public class Condominium : IEntity
     {
-        public int Id { get; set; }
-
-        public string Name { get; set; }    
+        public int Id { get; set; }  
 
         public int? CompanyId { get; set; }
 
         [NotMapped]
         public Company? Company { get; set; }
-
-        [NotMapped]
-        public Company Company { get; set; }
 
         public string Address { get; set; }
 
@@ -37,7 +32,7 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
         public IEnumerable<Meeting>? Meetings { get; set; }
 
 
-        public IEnumerable<Occurrence>? Occurences { get; set; }
+        public IEnumerable<Occurrence>? Occurrences { get; set; }
 
 
 

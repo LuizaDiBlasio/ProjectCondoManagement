@@ -55,7 +55,7 @@ namespace ProjectCondoManagement.Data.Repositories.Users
                 .Select(s => new SelectListItem
                 {
                     Value = s.Id.ToString(),
-                    Text = s.Name
+                    Text = s.CondoName
                 })
                 .OrderBy(s => s.Text)
                 .ToListAsync();

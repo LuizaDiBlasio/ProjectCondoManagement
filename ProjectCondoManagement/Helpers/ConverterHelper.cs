@@ -207,13 +207,13 @@ namespace ProjectCondoManagement.Helpers
             var condominium = new Condominium()
             {
                 Id = isNew ? 0 : condominiumDto.Id,
-                Name = condominiumDto.Name, 
+                CondoName = condominiumDto.CondoName, 
                 CompanyId = condominiumDto.CompanyId,
                 Address = condominiumDto.Address,
                 ManagerUserId = condominiumDto.ManagerUserId,
-                Units = condominiumDto.UnitDtos?.Select(u => ToUnit(u,false)).ToList() ?? new List<Unit>(), 
-                Documents = condominiumDto.DocumentDtos?.Select(d => ToDocument(d,false)).ToList() ?? new List<Document>(),
-                Occurrences = condominiumDto.OccurrenceDtos?.Select(o => ToOccurrence(o,false)).ToList() ?? new List<Occurrence>()
+                Units = condominiumDto.Units?.Select(u => ToUnit(u,false)).ToList() ?? new List<Unit>(), 
+                Documents = condominiumDto.Documents?.Select(d => ToDocument(d,false)).ToList() ?? new List<Document>(),
+                Occurrences = condominiumDto.Occurrences?.Select(o => ToOccurrence(o,false)).ToList() ?? new List<Occurrence>()
             };
 
             return condominium; 
@@ -225,13 +225,13 @@ namespace ProjectCondoManagement.Helpers
             var condominiumDto = new CondominiumDto()
             {
                 Id = condominium.Id,
-                Name = condominium.Name,    
+                CondoName = condominium.CondoName,    
                 CompanyId = condominium.CompanyId.Value,
                 Address = condominium.Address,
                 ManagerUserId = condominium.ManagerUserId,
-                UnitDtos = condominium.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),
-                DocumentDtos = condominium.Documents?.Select(d => ToDocumentDto(d)).ToList() ?? new List<DocumentDto>(),
-                OccurrenceDtos = condominium.Occurrences?.Select(o => ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>()
+                Units = condominium.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),
+                Documents = condominium.Documents?.Select(d => ToDocumentDto(d)).ToList() ?? new List<DocumentDto>(),
+                Occurrences = condominium.Occurrences?.Select(o => ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>()
             };
 
             return condominiumDto;

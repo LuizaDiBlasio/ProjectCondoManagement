@@ -61,7 +61,7 @@ else
     </div>
 </div>
 
-@section Scripts {
+@* @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
@@ -80,7 +80,7 @@ else
                      console.log('URL da requisição:', '/Company/RequestDelete/' + idToDelete);
                 $.ajax({
                     url: '/Company/RequestDelete/' + idToDelete,
-                    type: 'POST',
+                    type: 'DELETE',
                     success: function (response) {
                         $("#deleteDialog").modal('hide');
                         if (response.success) {
@@ -95,6 +95,58 @@ else
                     }
                 });
             });
+
+         
+
+            $("#btnNoDelete").click(function () {
+                $("#deleteDialog").modal('hide');
+            });
+        });
+    </script>
+} *@
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var idToDelete = 0;
+
+            // Use o seletor para o link que abre o modal de deleção
+            $('a[data-bs-target="#deleteDialog"]').click(function () {
+                idToDelete = $(this).data('id');
+                // Limpe a mensagem de erro anterior quando o modal é reaberto
+                $('#delete-error-message').text('').hide();
+            });
+
+            $("#btnYesDelete").click(function () {
+                console.log('ID para deletar:', idToDelete);
+                console.log('URL da requisição:', '/Company/RequestDelete/' + idToDelete);
+
+                $.ajax({
+                    url: '/Company/RequestDelete/' + idToDelete,
+                    type: 'DELETE',
+                    success: function (response) {
+                        // Verifique se a operação foi um sucesso
+                        if (response.success) {
+                            $("#deleteDialog").modal('hide'); // Fecha a modal APENAS no sucesso
+                            window.location.reload();
+                        } else {
+                            // Se for um erro, exibe a mensagem, mas NÃO fecha a modal
+                            $('#delete-error-message').text(response.message).show();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        // Tratar erros de servidor (por exemplo, 500 Internal Server Error)
+                        $("#deleteDialog").modal('hide');
+                        console.error('AJAX Error:', status, error, xhr.responseText);
+                        alert('Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.');
+                    }
+                });
+            });
+
             $("#btnNoDelete").click(function () {
                 $("#deleteDialog").modal('hide');
             });

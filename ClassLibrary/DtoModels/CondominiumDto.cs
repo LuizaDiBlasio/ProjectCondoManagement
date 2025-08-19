@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ClassLibrary.DtoModels
 {
@@ -27,11 +20,12 @@ namespace ClassLibrary.DtoModels
         [Required(ErrorMessage = "Condo name is required.")]
         public string CondoName { get; set; }
 
+
         [Display(Name = "Condo Manager")]
         public string? ManagerUserId { get; set; }
 
-        public UserDto? ManagerUser { get; set; }
 
+        public UserDto? ManagerUser { get; set; }
 
         public IEnumerable<CondoMemberDto>? CondoMembers { get; set; }
 
@@ -41,7 +35,7 @@ namespace ClassLibrary.DtoModels
 
         public IEnumerable<MeetingDto>? Meetings { get; set; }
 
-        public IEnumerable<OccurrenceDto>? Occurences { get; set; }
+        public IEnumerable<OccurrenceDto>? Occurrences { get; set; }
 
     }
 }

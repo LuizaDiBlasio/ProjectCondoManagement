@@ -10,8 +10,8 @@ namespace ProjectCondoManagement.Migrations.UsersDb
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "CompanyCondominiums");
+            //migrationBuilder.DropTable(
+            //    name: "CompanyCondominiums");
         }
 
         /// <inheritdoc />

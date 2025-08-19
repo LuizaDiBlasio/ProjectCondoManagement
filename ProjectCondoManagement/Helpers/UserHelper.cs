@@ -2,13 +2,9 @@
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
-using System.Security.Claims;
-using System.Security.Policy;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
-using ClassLibrary;
 
 namespace ProjectCondoManagement.Helpers
 {
@@ -26,11 +22,10 @@ namespace ProjectCondoManagement.Helpers
 
         private readonly DataContextFinances _dataContextFinances;
 
-        private readonly DataContextUsers _dataContextUsers;
 
 
         public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager,
-            IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances, DataContextUsers dataContextUsers  )
+            IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances, DataContextUsers dataContextUsers)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -58,22 +53,22 @@ namespace ProjectCondoManagement.Helpers
             var financialAccount = new FinancialAccount()
             {
                 InitialDeposit = 0 // depósito inicial vai ser sempre 0
-            }; 
+            };
 
             await _financialAccountRepository.CreateAsync(financialAccount, _dataContextFinances); //add FinAcc na Bd
 
-                user = new User
-                {
-                    FullName = registerDtoModel.FullName,
-                    Email = registerDtoModel.Email,
-                    UserName = registerDtoModel.Email,
-                    Address = registerDtoModel.Address,
-                    PhoneNumber = registerDtoModel.PhoneNumber,
-                    ImageUrl = registerDtoModel.ImageUrl,
-                    BirthDate = registerDtoModel.BirthDate,
-                    CompanyId = registerDtoModel.CompanyId,
-                    FinancialAccountId = financialAccount.Id
-                };
+            user = new User
+            {
+                FullName = registerDtoModel.FullName,
+                Email = registerDtoModel.Email,
+                UserName = registerDtoModel.Email,
+                Address = registerDtoModel.Address,
+                PhoneNumber = registerDtoModel.PhoneNumber,
+                ImageUrl = registerDtoModel.ImageUrl,
+                BirthDate = registerDtoModel.BirthDate,
+                CompanyId = registerDtoModel.CompanyId,
+                FinancialAccountId = financialAccount.Id
+            };
 
             var result = await AddUserAsync(user, "123456"); //add user depois de criado
 
@@ -206,7 +201,7 @@ namespace ProjectCondoManagement.Helpers
         public async Task<User> GetUserByEmailWithCompanyAsync(string email)
         {
             return await _dataContextUsers.Users
-                .Include(u => u.Company) 
+                .Include(u => u.Company)
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
@@ -428,8 +423,12 @@ namespace ProjectCondoManagement.Helpers
             {
                 return await _userManager.GetUsersInRoleAsync(role);
             }
-           
+
             return new List<User>();
         }
+
+
+
+
     }
 }

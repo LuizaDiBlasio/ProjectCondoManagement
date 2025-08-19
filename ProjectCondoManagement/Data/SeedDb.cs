@@ -60,7 +60,7 @@ namespace ProjectCondoManagement.Data
                     company = new Company
                     {
                         Name = "Frederico Augusto Lda",
-                        Addres = "Rua Laranja, 123",
+                        Address = "Rua Laranja, 123",
                         PhoneNumber = "123456789",
                         Email = "fredericoaugusto@gmail.com",
                         TaxIdDocument = "123456789", 

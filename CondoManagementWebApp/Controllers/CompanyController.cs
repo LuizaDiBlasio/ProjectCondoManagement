@@ -5,6 +5,7 @@ using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Net;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Vereyon.Web;
@@ -194,7 +195,7 @@ namespace CondoManagementWebApp.Controllers
 
 
         // POST: Company/RequestDelete/5
-        [Microsoft.AspNetCore.Mvc.HttpPost("Company/RequestDelete/{id}")] 
+        [Microsoft.AspNetCore.Mvc.HttpDelete("Company/RequestDelete/{id}")] 
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> RequestDelete(int id)
         {
             try
@@ -213,9 +214,22 @@ namespace CondoManagementWebApp.Controllers
                 return Json(new { success = false, message = responseBody?.Message ?? "Unable to delete company due to error" });
 
             }
-            catch
+            catch(HttpRequestException ex) //buscar o tipo de exceção para ver se tem conflito
             {
-                return Json(new { success = false, message = "Unable to delete company due to error" });
+                if (ex.StatusCode == HttpStatusCode.Conflict)
+                {
+                    return Json(new { success = false, message = "Unable to delete company due to conflict, company associated with users or condos" });
+                }
+                else
+                {
+                    
+                    return Json(new { success = false, message = "An HTTP error occurred. Please try again later." });
+                }
+            }
+            catch (Exception)
+            {
+                // Para outros tipos de exceções inesperadas
+                return Json(new { success = false, message = "An unexpected error occurred. Please try again later." });
             }
         }
     }

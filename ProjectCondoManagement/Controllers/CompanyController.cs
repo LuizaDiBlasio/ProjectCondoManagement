@@ -210,7 +210,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (company == null)
             {
-                return NotFound(new Response { IsSuccess = false, Message = "Unable to delete company, record not found." });
+                return NotFound();
             }
 
             try
@@ -222,7 +222,7 @@ namespace ProjectCondoManagement.Controllers
                     return Ok();
                 }
 
-                return Conflict(new Response { IsSuccess = false, Message = "Unable to delete company due to conflict: company still associated with users or condominiuns." });
+                return Conflict();
                 
                   
             }
