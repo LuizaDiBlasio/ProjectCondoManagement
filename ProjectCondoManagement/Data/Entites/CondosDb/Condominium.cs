@@ -16,16 +16,30 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
         [NotMapped]
         public Company? Company { get; set; }
 
+        [NotMapped]
+        public Company Company { get; set; }
+
         public string Address { get; set; }
 
-        public string ManagerUserId { get; set; }
+        public string CondoName { get; set; }
 
-        public IEnumerable<Unit> Units { get; set; }
+        public string? ManagerUserId { get; set; }
 
-        public IEnumerable<Document> Documents { get; set; }
+        [NotMapped]
+        public User? ManagerUser { get; set; }
 
-        public IEnumerable<Meeting> Meetings { get; set; }
+        public IEnumerable<CondoMember>? CondoMembers { get; set; }
 
-        public IEnumerable<Occurrence> Occurrences { get; set; }
+        public IEnumerable<Unit>? Units { get; set; }
+
+        public IEnumerable<Document>? Documents { get; set; }
+
+        public IEnumerable<Meeting>? Meetings { get; set; }
+
+
+        public IEnumerable<Occurrence>? Occurences { get; set; }
+
+
+
     }
 }

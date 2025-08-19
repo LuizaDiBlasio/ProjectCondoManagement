@@ -87,7 +87,13 @@ builder.Services.AddScoped<IFinancialAccountRepository, FinancialAccountReposiro
 
 builder.Services.AddScoped<IMailHelper, MailHelper>();
 
+builder.Services.AddScoped<ICondominiumHelper, CondominiumHelper>();
+
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+
 builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
+
+builder.Services.AddScoped<ICondominiumRepository, CondominiumRepository>();
 
 builder.Services.AddHttpClient();
 

@@ -214,7 +214,6 @@ namespace ProjectCondoManagement.Controllers
         public async Task<IActionResult> AssociateUser([FromBody] RegisterUserDto registerDtoModel)
         {
             var user = await _userHelper.CreateUser(registerDtoModel);
-
             if (user == null)
             {
                 return StatusCode(500, new { Message = "Internal server error: User not registered" });
@@ -234,7 +233,7 @@ namespace ProjectCondoManagement.Controllers
             }
 
             //se não conseguiu enviar email:
-            return StatusCode(500, new { Message = "User couldn't be logged" });
+            return StatusCode(500, new Response { IsSuccess = false, Message = "Internal server error: User not registered" });
         }
 
 
@@ -585,6 +584,24 @@ namespace ProjectCondoManagement.Controllers
 
         
 
+
+
+
+    
+        [HttpGet("GetManagers")]
+        public async Task<IActionResult> GetManagers()
+        {
+            var managers = await _userHelper.GetUsersInRoleAsync("CondoManager");
+
+            if (managers == null || !managers.Any())
+            {
+                return NotFound(new { Message = "No Condo Managers found." });
+            }
+
+            var managersDto = managers.Select(m => _converterHelper.ToUserDto((User)m)).ToList();
+
+            return Ok(managersDto);
+        }
 
     }
 }

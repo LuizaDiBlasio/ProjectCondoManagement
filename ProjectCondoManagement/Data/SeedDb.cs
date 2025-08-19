@@ -45,7 +45,61 @@ namespace ProjectCondoManagement.Data
 
             await _userHelper.CreateRolesAsync();
 
-            await _userHelper.CheckRoleAsync("SysAdmin"); //verificar se já existe um role de admin, se não existir cria
+
+
+
+
+            //TODO: TESTE DE CONDOMINIO APAGAR.
+            var user2 = await _userHelper.GetUserByEmailAsync("fredericoaugusto@gmail.com"); //ver se user já existe 
+
+            if (user2 == null) // caso não encontre o utilizador 
+            {
+                var company = await _contextUsers.Companies.FirstOrDefaultAsync(c => c.Name == "Frederico Augusto Lda");
+                if (company == null) // se não existir a empresa, cria uma nova
+                {
+                    company = new Company
+                    {
+                        Name = "Frederico Augusto Lda",
+                        Addres = "Rua Laranja, 123",
+                        PhoneNumber = "123456789",
+                        Email = "fredericoaugusto@gmail.com",
+                        TaxIdDocument = "123456789", 
+                    };
+                }
+                user2 = new User // cria utilizador admin
+                {
+                    FullName = "Frederico Augusto",
+                    Email = "fredericoaugusto@gmail.com",
+                    UserName = "fredericoaugusto@gmail.com",
+                    PhoneNumber = "12345678",
+                    Address = "Rua Laranja",
+                    BirthDate = new DateTime(1997, 05, 10),
+                    Company = company,
+
+
+                    IsActive = true,
+                    EmailConfirmed = true
+                };
+
+                var result = await _userHelper.AddUserAsync(user2, "123456"); //criar utilizador, mandar utilizador e password
+
+                if (result != IdentityResult.Success) //se o resultado não for bem sucedido (usa propriedade da classe Identity) 
+                {
+                    throw new InvalidOperationException("Coud not create the user in seeder"); //pára o programa
+                }
+                await _userHelper.CheckRoleAsync("CondoManager");
+                await _userHelper.AddUserToRoleAsync(user2, "CondoManager"); //adiciona role ao user
+            }
+
+
+
+
+
+
+
+
+
+            await _userHelper.CheckRoleAsync("Admin"); //verificar se já existe um role de admin, se não existir cria
 
             var user = await _userHelper.GetUserByEmailAsync("luizabandeira90@gmail.com"); //ver se user já existe 
 

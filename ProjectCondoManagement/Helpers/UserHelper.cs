@@ -5,7 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using System.Security.Claims;
+using System.Security.Policy;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
+using ClassLibrary;
 
 namespace ProjectCondoManagement.Helpers
 {
@@ -16,6 +19,8 @@ namespace ProjectCondoManagement.Helpers
         private readonly SignInManager<User> _signInManager;
 
         private readonly RoleManager<IdentityRole> _roleManager;
+
+        private readonly DataContextUsers _dataContextUsers;
 
         private readonly IFinancialAccountRepository _financialAccountRepository;
 
@@ -30,6 +35,7 @@ namespace ProjectCondoManagement.Helpers
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _dataContextUsers = dataContextUsers;
             _financialAccountRepository = financialAccountRepository;
             _dataContextFinances = dataContextFinances;
             _dataContextUsers = dataContextUsers;
@@ -197,6 +203,12 @@ namespace ProjectCondoManagement.Helpers
             return await _userManager.FindByEmailAsync(email);
         }
 
+        public async Task<User> GetUserByEmailWithCompanyAsync(string email)
+        {
+            return await _dataContextUsers.Users
+                .Include(u => u.Company) 
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
 
         public async Task<List<User>> GetUsersByEmailsAsync(IEnumerable<string> emails)
         {

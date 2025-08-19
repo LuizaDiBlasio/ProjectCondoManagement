@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿
+using ClassLibrary;
+using Microsoft.AspNetCore.Mvc;
+using System.Text;
 using System.Text.Json;
 
 namespace CondoManagementWebApp.Helpers
@@ -32,7 +35,7 @@ namespace CondoManagementWebApp.Helpers
         {
             AddAuthorizationHeader();
             var response = await _httpClient.GetAsync(requestUri);
-            response.EnsureSuccessStatusCode(); // Lança exceção se o status não for sucesso
+            response.EnsureSuccessStatusCode(); // Lança exceção se o status não for 2xx
 
             return await response.Content.ReadFromJsonAsync<T>();
         }
@@ -50,6 +53,8 @@ namespace CondoManagementWebApp.Helpers
 
             return await response.Content.ReadFromJsonAsync<TResponse>();
         }
+
+
 
         public async Task<HttpResponseMessage> DeleteAsync(string requestUri)
         {
@@ -76,5 +81,7 @@ namespace CondoManagementWebApp.Helpers
 
             return await response.Content.ReadFromJsonAsync<TResponse>();
         }
+
+
     }
 }

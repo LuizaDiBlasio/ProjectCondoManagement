@@ -9,7 +9,7 @@ namespace CondoManagementWebApp.Helpers
 
         public Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest data);
 
-        public  Task<T> GetAsync<T>(string requestUri);
+        public Task<T> GetAsync<T>(string requestUri);
 
         public Task<TResponse> GetByQueryAsync<TResponse>(string requestUri, string query);
 

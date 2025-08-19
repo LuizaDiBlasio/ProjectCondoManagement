@@ -13,6 +13,7 @@ namespace ClassLibrary.DtoModels
 
         [Required(ErrorMessage = "Full name is required.")]
         [MaxLength(100, ErrorMessage = "Full name cannot exceed 100 characters.")]
+        [Display(Name = "Full Name")]
         public string FullName { get; set; }
 
         [EmailAddress(ErrorMessage = "Invalid email address format.")]
@@ -25,11 +26,17 @@ namespace ClassLibrary.DtoModels
 
         [Required(ErrorMessage = "Birth date is required.")]
         [DataType(DataType.Date, ErrorMessage = "Invalid date format.")]
+        [Display(Name = "Birth Date")]
         public DateTime? BirthDate { get; set; }
 
         [Required(ErrorMessage = "Phone number is required.")]  
         [Phone(ErrorMessage = "Invalid phone number format.")]
+        [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; }
+
+        public string ConduminiumId { get; set; }
+
+        public CondominiumDto CondominiumDto { get; set; }
 
 
         public IEnumerable<UnitDto> Units { get; set; }
@@ -37,5 +44,9 @@ namespace ClassLibrary.DtoModels
 
         public string? ImageUrl { get; set; }
 
+        public string ImageFullPath =>
+          string.IsNullOrWhiteSpace(ImageUrl)
+          ? "https://res.cloudinary.com/ddnkq9dyb/image/upload/v1754230681/noimage_q8mayx.jpg"
+          : ImageUrl;
     }
 }

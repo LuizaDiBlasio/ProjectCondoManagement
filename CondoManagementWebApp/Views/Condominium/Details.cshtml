@@ -1,0 +1,42 @@
+﻿@model ClassLibrary.DtoModels.CondominiumDto
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>CondominiumDto</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.CompanyId)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Company.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Address)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Address)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.ManagerUserId)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.ManagerUserId == null)
+            {
+                <span class="text-danger">No Manager Assigned</span>
+            }
+            else
+            {
+                @Html.DisplayFor(model => model.ManagerUserId)
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+</div>

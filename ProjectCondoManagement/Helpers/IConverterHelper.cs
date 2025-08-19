@@ -6,9 +6,13 @@ namespace ProjectCondoManagement.Helpers
 {
     public interface IConverterHelper
     {
+        CompanyDto? ToCompanyDto(Company company);
+
         public CondoMember ToCondoMember(CondoMemberDto condoMemberDto);
 
-        public CondoMemberDto ToCondoMemberDto(User user);
+       public CondoMemberDto ToCondoMemberDto(CondoMember condoMember);
+
+       public CondoMemberDto ToCondoMemberDto(User user);
 
         public UserDto ToUserDto(User user);
 
