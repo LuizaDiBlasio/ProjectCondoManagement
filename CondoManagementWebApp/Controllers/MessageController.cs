@@ -6,7 +6,7 @@ namespace CondoManagementWebApp.Controllers
     public class MessageController : Controller
     {
         // GET: MessageController
-        public ActionResult Inbox()
+        public ActionResult Index()
         {
             return View();
         }
