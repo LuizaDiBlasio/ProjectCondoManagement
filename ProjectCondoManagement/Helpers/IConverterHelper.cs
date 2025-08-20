@@ -46,5 +46,7 @@ namespace ProjectCondoManagement.Helpers
 
         public MessageDto ToMessageDto(Message message);
 
+        public Message ToMessage(MessageDto messageDto, bool isNew);
+
     }
 }

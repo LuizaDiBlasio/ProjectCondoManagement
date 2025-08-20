@@ -53,8 +53,6 @@ namespace ProjectCondoManagement.Controllers
                 return new List<CondominiumDto>();
             }
 
-            
-
             var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c)).ToList();                   
             
             if (condominiumsDtos == null)

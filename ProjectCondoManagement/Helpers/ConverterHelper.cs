@@ -1,6 +1,7 @@
 ﻿using ClassLibrary.DtoModels;
 using Humanizer;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.Enums;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using System.Threading.Tasks;
@@ -337,6 +338,22 @@ namespace ProjectCondoManagement.Helpers
             };
 
             return messageDto;
+        }
+
+        public Message ToMessage(MessageDto messageDto, bool isNew)
+        {
+            var message = new Message()
+            {
+                Id = isNew ? 0 : messageDto.Id,
+                PostingDate = messageDto.PostingDate,
+                MessageTitle = messageDto.MessageTitle,
+                MessageContent = messageDto.MessageContent,
+                SenderEmail = messageDto.SenderEmail,
+                ReceiverEmail = messageDto.ReceiverEmail,
+                Status = (MessageStatus)messageDto.Status.Value,
+            };
+
+            return message; 
         }
     }
 }

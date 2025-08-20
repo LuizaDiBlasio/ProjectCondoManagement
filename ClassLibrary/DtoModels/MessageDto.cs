@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -25,15 +26,24 @@ namespace ClassLibrary.DtoModels
 
         [Required]
         [StringLength(400, ErrorMessage = "The {0} field must be at most {1} characters long.")]
+        [Display(Name ="Message")]
         public string MessageContent { get; set; }
 
-        [Required]
+
+        
+        [Display(Name = "To")]
         public string SenderEmail { get; set; }
 
+
         [Required]
+        [Display(Name = "From")]
         public string ReceiverEmail { get; set; }
 
 
-        public EnumDto Status { get; set; }
+        [Display(Name = "Message Status")]
+        public EnumDto Status { get; set; } 
+
+
+        public List<SelectListItem> StatusList { get; set; } = new List<SelectListItem>();
     }
 }

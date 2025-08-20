@@ -1,0 +1,84 @@
+﻿@model ClassLibrary.DtoModels.MessageDto
+
+@{
+    ViewData["Title"] = "Edit Message";
+}
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-8 col-xxl-8">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <h4 class="card-title welcome-text mb-0">Edit Message</h4>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <form asp-action="Edit" asp-controller="Message" method="post">
+
+                            <input type="hidden" asp-for="Id" />
+
+                            <div class="form-group mb-3">
+                                <label asp-for="PostingDate" class="form-label font-weight-bold"></label>
+                                <input asp-for="PostingDate" class="form-control" readonly />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="MessageTitle" class="form-label font-weight-bold"></label>
+                                <input asp-for="MessageTitle" class="form-control" readonly />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="MessageContent" class="form-label font-weight-bold"></label>
+                                <textarea asp-for="MessageContent" class="form-control" rows="8" readonly></textarea>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="SenderEmail" class="form-label font-weight-bold"></label>
+                                <input asp-for="SenderEmail" class="form-control" readonly />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="ReceiverEmail" class="form-label font-weight-bold"></label>
+                                <input asp-for="ReceiverEmail" class="form-control" readonly />
+                            </div>
+
+                            @* O campo Status com destaque em roxo *@
+                            <div class="form-group mb-3">
+                                <label asp-for="Status" class="form-label font-weight-bold text-purple"></label>
+                                <select asp-for="Status.Value" asp-items="Model.StatusList" class="form-control custom-select bg-purple text-white"></select>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <style>
+        .text-purple {
+            color: #8A2BE2 !important;
+        }
+
+        .bg-purple {
+            background-color: #8A2BE2 !important;
+        }
+
+            .bg-purple option {
+                background-color: white !important;
+                color: black !important;
+            }
+    </style>
+}

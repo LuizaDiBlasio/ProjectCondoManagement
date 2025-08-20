@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ClassLibrary.DtoModels.MessageDto>
+﻿@* @model IEnumerable<ClassLibrary.DtoModels.MessageDto>
 
 @{
     ViewData["Title"] = "Index";
@@ -11,55 +11,149 @@
 </p>
 <table class="table">
     <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PostingDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MessageTitle)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MessageContent)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SenderEmail)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ReceiverEmail)
-            </th>
-            <th></th>
-        </tr>
+        @if (!Model.Any())
+        {
+            <tr>
+                <th>
+                    No messages
+                </th>
+            </tr>
+        }
+        else
+        {
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Id)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PostingDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.MessageTitle)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.SenderEmail)
+                </th>
+                <th></th>
+            </tr>
+        }
+
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PostingDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MessageTitle)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MessageContent)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SenderEmail)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ReceiverEmail)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-                @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new { id=item.Id })
-            </td>
-        </tr>
-}
+        @foreach (var item in Model) {
+            @if(item.ReceiverEmail == this.User.Identity.Name)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Id)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PostingDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.MessageTitle)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.SenderEmail)
+                    </td>
+                    <td>
+                        @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                        @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+
+                </tr>
+            }
+        }
+
     </tbody>
 </table>
+ *@
+
+@model IEnumerable<ClassLibrary.DtoModels.MessageDto>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Messages Inbox</h1>
+    <div>
+        <a asp-controller="Message" asp-action="CreateMessage" class="btn btn-primary">New </a>
+        <a asp-controller="Message" asp-action="SentMessages" class="btn btn-secondary">Sent</a>
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        @if ((Model != null && !Model.Any()) || Model == null)
+        {
+            <tr>
+                <th>
+                    No messages
+                </th>
+            </tr>
+        }
+        else
+        {
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Id)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PostingDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.MessageTitle)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.SenderEmail)
+                </th>
+                <th></th>
+            </tr>
+        }
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            @foreach (var item in Model)
+            {
+                @if (item.ReceiverEmail == this.User.Identity.Name)
+                {
+                    <tr class="message-row" data-message-id="@item.Id" style="cursor: pointer;">
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PostingDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.MessageTitle)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.SenderEmail)
+                        </td>
+                        <td>
+                            @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                        </td>
+                    </tr>
+                }
+            }
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".message-row").click(function () {
+                var messageId = $(this).data("message-id");
+                window.location.href = "/Message/Details/" + messageId;
+            });
+        });
+    </script>
+}
