@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Helpers
 {
-    
+
 
     public class ConverterHelper : IConverterHelper
     {
@@ -56,7 +56,7 @@ namespace ProjectCondoManagement.Helpers
         public CondoMemberDto ToCondoMemberDto(User user)
         {
             var condoMemberDto = new CondoMemberDto
-            {               
+            {
                 FullName = user.FullName,
                 Email = user.Email,
                 Address = user.Address,
@@ -69,14 +69,14 @@ namespace ProjectCondoManagement.Helpers
 
         public UserDto ToUserDto(User user)
         {
-            if(user == null)
+            if (user == null)
             {
                 return null;
             }
 
             var userDto = new UserDto()
             {
-                Id = user.Id,   
+                Id = user.Id,
                 FullName = user.FullName,
                 BirthDate = user.BirthDate,
                 PhoneNumber = user.PhoneNumber,
@@ -84,10 +84,10 @@ namespace ProjectCondoManagement.Helpers
                 ImageUrl = user.ImageUrl,
                 IsActive = user.IsActive,
                 Email = user.Email,
-                CompanyId = user.CompanyId, 
+                CompanyId = user.CompanyId,
                 FinancialAccountId = user.FinancialAccountId,
             };
-            return userDto; 
+            return userDto;
         }
 
         public User ToUser(UserDto userDto)
@@ -104,27 +104,27 @@ namespace ProjectCondoManagement.Helpers
                 CompanyId = userDto.CompanyId,
                 FinancialAccountId = userDto.FinancialAccountId,
             };
-            return user;    
+            return user;
         }
 
         public async Task<User> ToEditedUser(EditUserDetailsDto editUserDetailsDto)
         {
-           var user = await _userHelper.GetUserByEmailAsync(editUserDetailsDto.Email);
+            var user = await _userHelper.GetUserByEmailAsync(editUserDetailsDto.Email);
 
             if (user == null)
             {
                 return null;
             }
 
-            user.FullName = editUserDetailsDto.FullName; 
+            user.FullName = editUserDetailsDto.FullName;
             user.BirthDate = editUserDetailsDto.BirthDate;
             user.PhoneNumber = editUserDetailsDto.PhoneNumber;
             user.Address = editUserDetailsDto.Address;
             user.ImageUrl = editUserDetailsDto.ImageUrl;
-            user.Email = editUserDetailsDto.Email;  
+            user.Email = editUserDetailsDto.Email;
             user.IsActive = editUserDetailsDto.IsActive;
-            user.CompanyId = editUserDetailsDto.CompanyId;  
-            user.FinancialAccountId = editUserDetailsDto.FinancialAccountId;    
+            user.CompanyId = editUserDetailsDto.CompanyId;
+            user.FinancialAccountId = editUserDetailsDto.FinancialAccountId;
 
             return user;
         }
@@ -160,17 +160,17 @@ namespace ProjectCondoManagement.Helpers
             condoMember.FullName = user.FullName;
             condoMember.PhoneNumber = user.PhoneNumber;
             condoMember.Address = user.Address;
-            condoMember.ImageUrl = user.ImageUrl;   
+            condoMember.ImageUrl = user.ImageUrl;
             condoMember.BirthDate = user.BirthDate;
 
-            return condoMember; 
+            return condoMember;
         }
 
-        public  CompanyDto ToCompanyDto(Company company)
+        public CompanyDto ToCompanyDto(Company company)
         {
             var companyDto = new CompanyDto()
             {
-                Id = company.Id,    
+                Id = company.Id,
                 Name = company.Name,
                 CondominiumDtos = company.Condominiums?.Select(c => ToCondominiumDto(c)).ToList() ?? new List<CondominiumDto>(),
                 CompanyAdmin = ToUserDto(company.CompanyAdmin),
@@ -191,15 +191,15 @@ namespace ProjectCondoManagement.Helpers
                 Id = isNew ? 0 : companyDto.Id,
                 Name = companyDto.Name,
                 Condominiums = companyDto.CondominiumDtos?.Select(c => ToCondominium(c, false)).ToList() ?? new List<Condominium>(),
-                CompanyAdmin = companyDto.CompanyAdmin == null? null : ToUser(companyDto.CompanyAdmin),
+                CompanyAdmin = companyDto.CompanyAdmin == null ? null : ToUser(companyDto.CompanyAdmin),
                 Email = companyDto.Email,
                 Address = companyDto.Address,
                 PhoneNumber = companyDto.PhoneNumber,
                 TaxIdDocument = companyDto.TaxIdDocument,
-                FinancialAccountId = companyDto.FinancialAccountId  
+                FinancialAccountId = companyDto.FinancialAccountId
             };
 
-            return company; 
+            return company;
         }
 
         public Condominium ToCondominium(CondominiumDto condominiumDto, bool isNew)
@@ -207,16 +207,16 @@ namespace ProjectCondoManagement.Helpers
             var condominium = new Condominium()
             {
                 Id = isNew ? 0 : condominiumDto.Id,
-                Name = condominiumDto.Name, 
+                CondoName = condominiumDto.CondoName,
                 CompanyId = condominiumDto.CompanyId,
                 Address = condominiumDto.Address,
                 ManagerUserId = condominiumDto.ManagerUserId,
-                Units = condominiumDto.UnitDtos?.Select(u => ToUnit(u,false)).ToList() ?? new List<Unit>(), 
-                Documents = condominiumDto.DocumentDtos?.Select(d => ToDocument(d,false)).ToList() ?? new List<Document>(),
-                Occurrences = condominiumDto.OccurrenceDtos?.Select(o => ToOccurrence(o,false)).ToList() ?? new List<Occurrence>()
+                Units = condominiumDto.Units?.Select(u => ToUnit(u, false)).ToList() ?? new List<Unit>(),
+                Documents = condominiumDto.Documents?.Select(d => ToDocument(d, false)).ToList() ?? new List<Document>(),
+                Occurrences = condominiumDto.Occurrences?.Select(o => ToOccurrence(o, false)).ToList() ?? new List<Occurrence>()
             };
 
-            return condominium; 
+            return condominium;
         }
 
         public CondominiumDto ToCondominiumDto(Condominium condominium)
@@ -225,13 +225,13 @@ namespace ProjectCondoManagement.Helpers
             var condominiumDto = new CondominiumDto()
             {
                 Id = condominium.Id,
-                Name = condominium.Name,    
+                CondoName = condominium.CondoName,
                 CompanyId = condominium.CompanyId.Value,
                 Address = condominium.Address,
                 ManagerUserId = condominium.ManagerUserId,
-                UnitDtos = condominium.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),
-                DocumentDtos = condominium.Documents?.Select(d => ToDocumentDto(d)).ToList() ?? new List<DocumentDto>(),
-                OccurrenceDtos = condominium.Occurrences?.Select(o => ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>()
+                Units = condominium.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),
+                Documents = condominium.Documents?.Select(d => ToDocumentDto(d)).ToList() ?? new List<DocumentDto>(),
+                Occurrences = condominium.Occurrences?.Select(o => ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>()
             };
 
             return condominiumDto;
@@ -263,7 +263,7 @@ namespace ProjectCondoManagement.Helpers
             };
             return occurence;
         }
-      
+
 
         public Unit ToUnit(UnitDto unitDto, bool isNew)
         {
@@ -306,7 +306,7 @@ namespace ProjectCondoManagement.Helpers
                 DocumentUrl = documentDto.DocumentUrl,
                 DataUpload = documentDto.DataUpload
             };
-            return document;    
+            return document;
         }
 
         public DocumentDto ToDocumentDto(Document document)
@@ -329,11 +329,11 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = message.Id,
                 PostingDate = message.PostingDate,
-                MessageTitle = message.MessageTitle,    
+                MessageTitle = message.MessageTitle,
                 MessageContent = message.MessageContent,
                 SenderEmail = message.SenderEmail,
                 ReceiverEmail = message.ReceiverEmail,
-                Status = new EnumDto { Name = message.Status.ToString(), Value = (int) message.Status }
+                Status = new EnumDto { Name = message.Status.ToString(), Value = (int)message.Status }
             };
 
             return messageDto;

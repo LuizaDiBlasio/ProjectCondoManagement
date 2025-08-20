@@ -131,9 +131,9 @@
                                                         @foreach (var item in Model.CondominiumDtos)
                                                         {
                                                             <tr>
-                                                                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.CondoName)</td>
                                                                 <td>@Html.DisplayFor(modelItem => item.Address)</td>
-                                                                <td>@item.Manager?.FullName ?? "No condo manager assigned yet"</td>
+                                                                <td>@item.ManagerUser?.FullName ?? "No condo manager assigned yet"</td>
                                                             </tr>
                                                         }
                                                     </tbody>

@@ -591,7 +591,7 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet("GetManagers")]
         public async Task<IActionResult> GetManagers()
         {
-            var managers = await _userHelper.GetUsersInRoleAsync("CondoManager");
+            var managers = await _userHelper.GetUsersByRoleAsync("CondoManager");
 
             if (managers == null || !managers.Any())
             {

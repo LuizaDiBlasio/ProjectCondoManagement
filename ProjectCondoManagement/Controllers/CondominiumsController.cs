@@ -113,7 +113,7 @@ namespace ProjectCondoManagement.Controllers
             }
 
 
-            var condominium = _converterHelper.ToCondominium(condominiumDto);
+            var condominium = _converterHelper.ToCondominium(condominiumDto , false);
 
 
             try
@@ -163,7 +163,7 @@ namespace ProjectCondoManagement.Controllers
                 }
 
 
-                var condominium = _converterHelper.ToCondominium(condominiumDto);
+                var condominium = _converterHelper.ToCondominium(condominiumDto, true);
 
                 if (condominium == null)
                 {

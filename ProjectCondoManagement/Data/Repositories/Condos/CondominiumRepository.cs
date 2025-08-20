@@ -23,7 +23,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
         {
             try
             {
-                IEnumerable<User> managers = await  _userHelper.GetUsersInRoleAsync("CondoManager");
+                IEnumerable<User> managers = await  _userHelper.GetUsersByRoleAsync("CondoManager");
                 if (managers == null || !managers.Any())
                 {
                     return new Response

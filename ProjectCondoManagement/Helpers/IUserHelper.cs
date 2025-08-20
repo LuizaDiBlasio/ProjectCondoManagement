@@ -49,22 +49,15 @@ namespace ProjectCondoManagement.Helpers
 
         Task<IdentityResult> ConfirmEmailAsync(User user, string token); //Valida o email, verifica se o token é valido
 
-        Task<User> GetUserByIdAsync(string id); //recebe um id e devolve o user correspondente
-
-        Task<User> GetUserAsync(ClaimsPrincipal principal); //recebe um ClaimsPrincipal e devolve o user correspondente, usado para obter o user logado        
+        Task<User> GetUserByIdAsync(string id); //recebe um id e devolve o user correspondente       
 
         Task<IdentityResult> ResetPasswordAsync(User user, string token, string password); //Faz o reset da password
 
         Task<IList<string>> GetRolesAsync(User user); //busca o role do user
 
-        Task<List<User>> GetUsersByEmailsAsync(IEnumerable<string> emails);
-
         Task<IEnumerable<User>> GetUsersByRoleAsync(string role);
 
         public Task<List<User>> GetUsersByFullName(string cleanedFullName);
 
-
-        Task<Response> DeactivateUserAsync(User user); //Desativa o user, não o elimina da BD, só altera o IsActive para false 
-        Task<IEnumerable<User>> GetUsersInRoleAsync(string v);
     }
 }

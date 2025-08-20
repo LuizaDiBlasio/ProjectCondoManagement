@@ -26,7 +26,6 @@ namespace ProjectCondoManagement.Helpers
 
         private readonly DataContextFinances _dataContextFinances;
 
-        private readonly DataContextUsers _dataContextUsers;
 
 
         public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager,
@@ -38,7 +37,6 @@ namespace ProjectCondoManagement.Helpers
             _dataContextUsers = dataContextUsers;
             _financialAccountRepository = financialAccountRepository;
             _dataContextFinances = dataContextFinances;
-            _dataContextUsers = dataContextUsers;
         }
 
 
