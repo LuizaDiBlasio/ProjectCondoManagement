@@ -105,7 +105,6 @@ namespace CondoManagementWebApp.Controllers
                 }
 
                 //Popular propriedades de message dto fora do model
-
                 DateTime date = DateTime.Now;
                 string senderEmail = this.User.Identity.Name;
                 var status = new EnumDto() { Value = 1, Name = "Unresolved" };
@@ -116,7 +115,16 @@ namespace CondoManagementWebApp.Controllers
 
                 if (apiCall.IsSuccess)
                 {
-                    return RedirectToAction(nameof(IndexSent));
+                    //Enviar notificação via email para quem recebe mensagem 
+                    var sendEmail = await _apiCallService.PostAsync<string, Response>("api/Message/SendEmailNotification", messageDto.ReceiverEmail);
+
+                    if (sendEmail.IsSuccess)
+                    {
+                        return RedirectToAction(nameof(IndexSent));
+                    }
+
+                    _flashMessage.Warning(sendEmail.Message);
+                    return View("CreateMessage", model);
                 }
 
                 _flashMessage.Danger($"{apiCall.Message}");

@@ -69,7 +69,7 @@
 @{
     ViewData["Title"] = "Create Message";
 }
-
+<flash dismissable="true" />
 <div class="content-body">
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -81,7 +81,7 @@
                             @* A barra de navegação da direita foi removida *@
                         </div>
                     </div>
-                    <flash dismissable="true" />
+                
                     <div class="card-body">
                         @using (Html.BeginForm("RequestCreateMessages", "Message", FormMethod.Post))
                         {
