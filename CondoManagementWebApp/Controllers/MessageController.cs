@@ -5,36 +5,78 @@ using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Net;
+using System.Threading.Tasks;
 using Vereyon.Web;
 
 namespace CondoManagementWebApp.Controllers
 {
+    
     public class MessageController : Controller
     {
         private readonly IApiCallService _apiCallService;
         private readonly IFlashMessage _flashMessage;
+        private readonly IConverterHelper _converterHelper; 
 
-        public MessageController(IApiCallService apiCallService, IFlashMessage flashMessage)
+        public MessageController(IApiCallService apiCallService, IFlashMessage flashMessage, IConverterHelper converterHelper)
         {
             _apiCallService = apiCallService;
             _flashMessage = flashMessage;
+            _converterHelper = converterHelper;
         }
 
 
         // GET: Message
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> IndexReceived()
         {
             try
             {
-                var messages = await _apiCallService.GetAsync<List<MessageDto>>("api/GetAllMessages");
+                var messagesDto = await _apiCallService.GetAsync<List<MessageDto>>("api/Message/GetAllMessages");
 
-                return View(messages);
+                var receivedMessagesDto = new List<MessageDto>();  
+
+                foreach (var messageDto in messagesDto)
+                {
+                    if (messageDto.DeletedByReceiver == false && messageDto.ReceiverEmail == User.Identity.Name)
+                    {
+                        receivedMessagesDto.Add(messageDto);
+                    }
+                }
+
+                return View(receivedMessagesDto);
             }
             catch
             {
                 return View("Error");
             }
             
+        }
+
+
+        // GET: Message
+        public async Task<IActionResult> IndexSent()
+        {
+            try
+            {
+                var messagesDto = await _apiCallService.GetAsync<List<MessageDto>>("api/Message/GetAllMessages");
+
+                var receivedMessagesDto = new List<MessageDto>();
+
+                foreach (var messageDto in messagesDto)
+                {
+                    if (messageDto.DeletedBySender == false && messageDto.SenderEmail == User.Identity.Name)
+                    {
+                        receivedMessagesDto.Add(messageDto);
+                    }
+                }
+
+                return View(receivedMessagesDto);
+            }
+            catch
+            {
+                return View("Error");
+            }
+
         }
 
         // GET: CreateMessage
@@ -44,41 +86,75 @@ namespace CondoManagementWebApp.Controllers
             return View();
         }
 
-        public async Task<ActionResult> RequestCreateMessages(MessageDto messageDto)
+        public async Task<ActionResult> RequestCreateMessages(CreateMessageViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View("CreateMessage", messageDto);   
+                _flashMessage.Danger("Unable to send message, due to system error");
+                return View("CreateMessage", model);   
             }
 
-            messageDto.SenderEmail = this.User.Identity.Name;
-            messageDto.PostingDate = DateTime.Now;
-            messageDto.Status = new EnumDto() {Value = 1, Name = "Unresolved" };
-
-            var apiCall = await _apiCallService.PostAsync<MessageDto, Response>("api/Message/CreateMessage", messageDto);
-
-            if (apiCall.IsSuccess)
+            try
             {
-                return RedirectToAction("Index");   
+                var user = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", model.ReceiverEmail);
+
+                if (user == null)
+                {
+                    _flashMessage.Danger("Unable to send message. No user was found under this email");
+                    return View("CreateMessage", model);
+                }
+
+                //Popular propriedades de message dto fora do model
+
+                DateTime date = DateTime.Now;
+                string senderEmail = this.User.Identity.Name;
+                var status = new EnumDto() { Value = 1, Name = "Unresolved" };
+
+                var messageDto = _converterHelper.ToMessageDto(model, date, senderEmail, status);
+
+                var apiCall = await _apiCallService.PostAsync<MessageDto, Response>("api/Message/CreateMessage", messageDto);
+
+                if (apiCall.IsSuccess)
+                {
+                    return RedirectToAction(nameof(IndexSent));
+                }
+
+                _flashMessage.Danger($"{apiCall.Message}");
+
+                return View("CreateMessage", model);
             }
-
-            _flashMessage.Danger($"{apiCall.Message}");
-
-            return View("CreateMessage", messageDto);
+            catch (HttpRequestException ex)
+            {
+                // Captura a exceção específica para requisições HTTP
+                if (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                   
+                    _flashMessage.Danger("Unable to send message. No user was found under this email.");
+                }
+                else
+                {
+                 
+                    _flashMessage.Danger("Unable to send message, due to a network error.");
+                }
+                return View("CreateMessage", model);
+            }
+            catch
+            {
+                _flashMessage.Danger("Unable to send message, due to unexpected error");
+                return View("CreateMessage", model);
+            }
+            
         }
 
-        public ActionResult SentMessages()
-        {
-            return View();
-        }
+       
 
-        // GET: MessageController/Details/5
+        // GET: MessageController/MessageDetails/5
         public async Task<IActionResult> MessageDetails(int id)
         {
             try
             {
                 //buscar mensagem com lista de status
-                var messageDto = await _apiCallService.GetAsync<MessageDto>($"api/Message/MessaDetais{id}");
+                var messageDto = await _apiCallService.GetAsync<MessageDto>($"api/Message/MessageDetails/{id}");
                 
                 if(messageDto == null)
                 {
@@ -96,36 +172,80 @@ namespace CondoManagementWebApp.Controllers
 
         // POST: MessageController/Edit/5
         [HttpPost]
-        public ActionResult ChangeMessageDetails(int id, IFormCollection collection)
+        public async Task<ActionResult> EditMessageStatus(MessageDto messageDto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    var apiCall = await _apiCallService.PostAsync<MessageDto,Response>("api/EditMessageStatus",  messageDto);
+
+                    if (apiCall.IsSuccess)
+                    {
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    _flashMessage.Danger($"{apiCall.Message}");
+                    return View("MessageDetails", messageDto);
+                }
+                catch
+                {
+                    _flashMessage.Danger($"Unable to change message status due to error");
+                    return View("MessageDetails", messageDto);
+                }
             }
-            catch
+            else
             {
-                return View();
+                _flashMessage.Danger($"Unable to change message status due to error");
+                return View("MessageDetails",  messageDto);  
             }
+           
         }
 
-        // GET: MessageController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: MessageController/Delete/5
+        // GET: MessageController/DeleteSentMessges/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<ActionResult> DeleteReceivedMessages(int id)
         {
+           
+
             try
             {
-                return RedirectToAction(nameof(Index));
+                var apiCall = await _apiCallService.PostAsync<int, Response>($"api/Message/DeleteReceivedMessages", id);
+
+                return RedirectToAction(nameof(IndexReceived));
             }
             catch
             {
-                return View();
+                return Json(new { success = false, message = "An HTTP error occurred. Please try again later." });
+            }
+        }
+
+        // POST: MessageController/DeleteSentMessages/5
+        [HttpPost]
+        public async Task<ActionResult> DeleteSentMessages(int id)
+        {
+            //try
+            //{
+            //    var apiCall = await _apiCallService.PostAsync<int, Response>($"api/Message/DeleteSentMessages", id);
+
+            //    return RedirectToAction(nameof(IndexSent));
+            //}
+            //catch
+            //{
+            //    return Json(new { success = false, message = "An HTTP error occurred. Please try again later." });
+            //}
+
+            try
+            {
+                
+                var apiCall = await _apiCallService.PostAsync<int, Response>($"api/Message/DeleteSentMessages", id);
+
+                // Retornar o resultado da API diretamente como um JSON para o AJAX processar.
+                return Json(new { success = apiCall.IsSuccess });
+            }
+            catch
+            {
+                return Json(new { success = false, message = "An HTTP error occurred. Please try again later." });
             }
         }
     }

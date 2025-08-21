@@ -1,0 +1,189 @@
+﻿@* @model IEnumerable<ClassLibrary.DtoModels.MessageDto>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">New Message</a>
+</p>
+<table class="table">
+    <thead>
+        @if (!Model.Any())
+        {
+            <tr>
+                <th>
+                    No messages
+                </th>
+            </tr>
+        }
+        else
+        {
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Id)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PostingDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.MessageTitle)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.SenderEmail)
+                </th>
+                <th></th>
+            </tr>
+        }
+
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            @if(item.ReceiverEmail == this.User.Identity.Name)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Id)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PostingDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.MessageTitle)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.SenderEmail)
+                    </td>
+                    <td>
+                        @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                        @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+
+                </tr>
+            }
+        }
+
+    </tbody>
+</table>
+ *@
+
+@model IEnumerable<ClassLibrary.DtoModels.MessageDto>
+
+@{
+    ViewData["Title"] = "Inbox";
+}
+
+<style>
+    .message-row:hover {
+        background-color: #e0e6f0;
+        transition: background-color 0.3s ease-in-out;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Messages Inbox</h1>
+    <div>
+        <a asp-controller="Message" asp-action="CreateMessage" class="btn btn-primary">New</a>
+        <a asp-controller="Message" asp-action="IndexSent" class="btn btn-secondary">Sent</a>
+    </div>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Sent from</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="message-row" data-message-id="@item.Id" style="cursor: pointer;">
+                    <td>@Html.DisplayFor(modelItem => item.MessageTitle)</td>
+                    <td>@item.PostingDate?.ToString("MM/dd/yyyy HH:mm")</td>
+                    <td>@Html.DisplayFor(modelItem => item.SenderEmail)</td>
+                    <td>
+                        <a href="#" class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No sent messages</p>
+}
+
+<!-- Delete Modal -->
+<div id="deleteDialog" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this message?</p>
+                <div id="delete-error-message" class="text-danger"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnNoDelete">Cancel</button>
+                <button type="button" class="btn btn-danger" id="btnYesDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Clica na linha para ir para os detalhes da mensagem
+            $(".message-row").click(function () {
+                var messageId = $(this).data("message-id");
+                window.location.href = "/Message/MessageDetails/" + messageId;
+            });
+
+            // Adiciona o ID da mensagem para a modal de deleção
+            var idToDelete = 0;
+            $('a[data-bs-toggle="modal"]').click(function (e) {
+                e.stopPropagation(); // Previne o evento de clique na linha
+                idToDelete = $(this).data('id');
+                $('#delete-error-message').text('').hide();
+            });
+
+            // Envia a requisição AJAX para deleção
+            $("#btnYesDelete").click(function () {
+                console.log('ID to delete:', idToDelete);
+                $.ajax({
+                    url: '/Message/DeleteReceivedMessages/' + idToDelete,
+                    type: 'POST',
+                    success: function (response) {
+                        if (response.success) {
+                            $("#deleteDialog").modal('hide');
+                            window.location.reload();
+                        } else {
+                            $('#delete-error-message').text(response.message).show();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $("#deleteDialog").modal('hide');
+                        console.error('AJAX Error:', status, error, xhr.responseText);
+                        alert('An unexpected error occurred. Please try again later.');
+                    }
+                });
+            });
+        });
+    </script>
+}

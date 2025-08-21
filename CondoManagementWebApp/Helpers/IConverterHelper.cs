@@ -1,30 +1,33 @@
 ﻿using ClassLibrary.DtoModels;
 using CondoManagementWebApp.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CondoManagementWebApp.Helpers
 {
     public interface IConverterHelper
     {
-        public LoginDto ToLoginDto(LoginViewModel model);
+        LoginDto ToLoginDto(LoginViewModel model);
 
-        public RegisterUserDto ToRegisterDto(RegisterUserViewModel model);
+        RegisterUserDto ToRegisterDto(RegisterUserViewModel model);
 
-        public ResetPasswordDto ToResetPasswordDto(ResetPasswordViewModel model); //userId token
+        ResetPasswordDto ToResetPasswordDto(ResetPasswordViewModel model); //userId token
 
-        public RegisterUserDto ToRegisterDto(CondoMemberDto condoMember);
+        RegisterUserDto ToRegisterDto(CondoMemberDto condoMember);
 
-        public ChangePasswordDto ToChangePasswordDto(ChangePasswordViewModel model);
+        ChangePasswordDto ToChangePasswordDto(ChangePasswordViewModel model);
 
-        public UserDto ToUserDto(ProfileViewModel model);
+        UserDto ToUserDto(ProfileViewModel model);
+            
+        ProfileViewModel ToProfileViewModel(UserDto userDto);
 
-        public ProfileViewModel ToProfileViewModel(UserDto userDto);
+        EditUserDetailsViewModel ToEditUserDetailsViewModel(UserDto userDto, string? companyName);
 
-        public EditUserDetailsViewModel ToEditUserDetailsViewModel(UserDto userDto, string? companyName);
+        EditUserDetailsDto ToEditUserDetailsDto(EditUserDetailsViewModel model, string? companyName);
 
-        public EditUserDetailsDto ToEditUserDetailsDto(EditUserDetailsViewModel model, string? companyName);
+        CompanyDto ToCompanyDto(CreateEditCompanyViewModel model);
 
-        public CompanyDto ToCompanyDto(CreateEditCompanyViewModel model);
+        CreateEditCompanyViewModel ToCreateEditCompanyViewModel(CompanyDto editedCompany);
 
-        public CreateEditCompanyViewModel ToCreateEditCompanyViewModel(CompanyDto editedCompany);
+        MessageDto ToMessageDto(CreateMessageViewModel model, DateTime date, string email, EnumDto status);
     }
 }

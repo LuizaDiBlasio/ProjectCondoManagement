@@ -61,49 +61,6 @@ else
     </div>
 </div>
 
-@* @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-
-    <script type="text/javascript">
-        $(document).ready(function () {
-            var idToDelete = 0;
-
-            // Use o seletor para o link que abre o modal de deleção
-            $('a[data-bs-target="#deleteDialog"]').click(function () {
-                idToDelete = $(this).data('id');
-            });
-
-            $("#btnYesDelete").click(function () {
-                     console.log('ID para deletar:', idToDelete);
-                     console.log('URL da requisição:', '/Company/RequestDelete/' + idToDelete);
-                $.ajax({
-                    url: '/Company/RequestDelete/' + idToDelete,
-                    type: 'DELETE',
-                    success: function (response) {
-                        $("#deleteDialog").modal('hide');
-                        if (response.success) {
-                            window.location.reload();
-                        } else {
-                            $('#delete-error-message').text(response.message).show();
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        $("#deleteDialog").modal('hide');
-                        console.error('AJAX Error:', status, error, xhr.responseText);
-                    }
-                });
-            });
-
-         
-
-            $("#btnNoDelete").click(function () {
-                $("#deleteDialog").modal('hide');
-            });
-        });
-    </script>
-} *@
 
 @section Scripts {
     @{
@@ -142,7 +99,7 @@ else
                         // Tratar erros de servidor (por exemplo, 500 Internal Server Error)
                         $("#deleteDialog").modal('hide');
                         console.error('AJAX Error:', status, error, xhr.responseText);
-                        alert('Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.');
+                        alert('Unexpected error, try again later.');
                     }
                 });
             });

@@ -1,5 +1,6 @@
 ﻿using ClassLibrary.DtoModels;
 using Humanizer;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.Enums;
 using ProjectCondoManagement.Data.Entites.UsersDb;
@@ -324,17 +325,20 @@ namespace ProjectCondoManagement.Helpers
             return documentDto;
         }
 
-        public MessageDto ToMessageDto(Message message)
+        public MessageDto ToMessageDto(Message message, List<SelectListItem>? statusList)
         {
             var messageDto = new MessageDto()
             {
                 Id = message.Id,
                 PostingDate = message.PostingDate,
-                MessageTitle = message.MessageTitle,    
+                MessageTitle = message.MessageTitle,
                 MessageContent = message.MessageContent,
                 SenderEmail = message.SenderEmail,
                 ReceiverEmail = message.ReceiverEmail,
-                Status = new EnumDto { Name = message.Status.ToString(), Value = (int) message.Status }
+                Status = new EnumDto { Name = message.Status.ToString(), Value = (int)message.Status },
+                StatusList = statusList,
+                DeletedBySender = message.DeletedBySender,
+                DeletedByReceiver = message.DeletedByReceiver
             };
 
             return messageDto;
@@ -345,7 +349,7 @@ namespace ProjectCondoManagement.Helpers
             var message = new Message()
             {
                 Id = isNew ? 0 : messageDto.Id,
-                PostingDate = messageDto.PostingDate,
+                PostingDate = messageDto.PostingDate.Value,
                 MessageTitle = messageDto.MessageTitle,
                 MessageContent = messageDto.MessageContent,
                 SenderEmail = messageDto.SenderEmail,

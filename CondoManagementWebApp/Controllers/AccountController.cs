@@ -961,54 +961,6 @@ namespace CondoManagementWebApp.Controllers
 
 
 
-        //[Authorize]
-        //public async Task<IActionResult> RequestEditUserDetails(EditUserDetailsViewModel model)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return View("EditUserDetails", model);
-        //    }
-        //    try
-        //    {
-        //        var editUserDetailsDto = _converterHelper.ToEditUserDetailsDto(model, model.CompanyName);
-
-            //        var editedUserDto = await _apiCallService.PostAsync<EditUserDetailsDto, UserDto>("api/Account/EditUserDetails", editUserDetailsDto);
-
-            //        if (editedUserDto != null)
-            //        {
-            //            if (editedUserDto.CompanyId != null)
-            //            {
-            //                var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{editedUserDto.CompanyId}");
-
-            //                if (company == null) // se correu mal
-            //                {
-            //                    _flashMessage.Danger("Unable to retrieve user's company");
-            //                    var model1 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
-            //                    return View("EditUserDetails", model1);
-            //                }
-
-            //                var editedUserDetailsViewModel = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, company.Name);
-
-            //                return View(editedUserDetailsViewModel);
-            //            }
-
-            //            var model2 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
-            //            return View("EditUserDetails", model2);
-            //        }
-
-            //        _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
-            //        var model3 = new EditUserDetailsViewModel();
-            //        return View("EditUserDetails", model3);
-            //    }
-            //    catch (Exception)
-            //    {
-            //        _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
-            //        var model4 = new EditUserDetailsViewModel();
-            //        return View("EditUserDetails", model4);
-            //    }
-
-            //}
-
 
 
             // <summary>

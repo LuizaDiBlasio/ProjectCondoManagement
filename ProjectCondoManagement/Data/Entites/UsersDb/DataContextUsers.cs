@@ -11,6 +11,8 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
 
         public DbSet<Company> Companies { get; set; }
 
-    
+        public DbSet<Message> Messages { get; set; }
+
+
     }
 }

@@ -16,7 +16,11 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
 
         public string SenderEmail { get; set; }
 
-        public string ReceiverEmail { get; set; }  
+        public string ReceiverEmail { get; set; }
+
+        public bool DeletedBySender { get; set; } 
+
+        public bool DeletedByReceiver { get; set; } 
 
         public MessageStatus Status { get; set; }
     }

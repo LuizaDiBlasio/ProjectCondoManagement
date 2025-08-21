@@ -1,7 +1,10 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Users;
 using ProjectCondoManagement.Helpers;
@@ -9,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Controllers
 {
+   
     [ApiController]
     [Route("api/[controller]")]
     public class MessageController : Controller
@@ -25,39 +29,63 @@ namespace ProjectCondoManagement.Controllers
             _converterHelper = converterHelper; 
         }
 
-
+        //[AllowAnonymous]
         // GET: MessageController
         [HttpGet("GetAllMessages")]
         public ActionResult<IEnumerable<MessageDto>> GetAllMessages()
         {
             var messages = _messageRepository.GetAll(_dataContextUsers);
 
-            var messagesDto = messages.Select(m => _converterHelper.ToMessageDto(m)).ToList();
+            // Se o repositório retornar null, converto para uma lista vazia
+            var messagesList = messages ?? Enumerable.Empty<Message>();
 
-            return messagesDto;
+            var messagesDto = messagesList.Select(m => _converterHelper.ToMessageDto(m, null)).ToList();
+
+      
+            return Ok(messagesDto);
+
         }
 
         // GET: MessageController/MessageDetails/5
-        [HttpGet("MessageDetails")]
-        public ActionResult MessageDetails(int id)
+        [HttpGet("MessageDetails/{id}")]
+        public async Task<ActionResult> MessageDetails(int id)
         {
-            return View();
+            var message = await _messageRepository.GetByIdAsync(id, _dataContextUsers);
+
+            if (message == null)
+            {
+                return NotFound(new Response () { IsSuccess = false, Message = "Message not found, unable to retrieve details"});  
+            }
+
+            var statusList = _messageRepository.GetMessageStatusList();
+
+            var messageDto = _converterHelper.ToMessageDto(message, statusList);    
+
+            return Ok(messageDto); 
 
         }
 
 
         // POST: MessageController/Edit/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult EditMessageStatus(int id, IFormCollection collection)
+        public ActionResult EditMessageStatus([FromBody] MessageDto messageDto)
         {
+            if (messageDto == null)
+            {
+                return BadRequest(new Response() { IsSuccess = false, Message = "Unable change message status" });
+            }
+
             try
             {
-                return RedirectToAction(nameof(Index));
+                var message = _converterHelper.ToMessage(messageDto, false);
+
+                _messageRepository.UpdateAsync(message, _dataContextUsers);
+
+                return Ok(new Response() { IsSuccess = true});
             }
             catch
             {
-                return View();
+                return BadRequest(new Response() { IsSuccess = false, Message = "Unable change message status" });
             }
         }
 
@@ -84,27 +112,67 @@ namespace ProjectCondoManagement.Controllers
                 return BadRequest(new Response() { IsSuccess = false, Message = "Unable to send message" });
             }
         }
-        
 
-        // GET: MessageController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
 
-        // POST: MessageController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+
+        // DELETE: MessageController/DeleteReceivedMessages
+        [HttpDelete("DeleteReceivedMessages")]
+        public async Task<ActionResult> DeleteReceivedMessages(int id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var message = await _messageRepository.GetByIdAsync(id, _dataContextUsers);
+
+                if (message == null)
+                {
+                    return NotFound(new Response { IsSuccess = false, Message = "Unable to delete, message not found" });
+                }
+
+                message.DeletedByReceiver = true;
+
+                await _messageRepository.UpdateAsync(message, _dataContextUsers);
+
+                return Ok(new Response { IsSuccess = true });
             }
             catch
             {
-                return View();
+                return BadRequest(new Response { IsSuccess = false, Message = "Unable to delete message" });
             }
         }
+
+        //DELETE: MessageController/DeleteSentMessages
+        [HttpPost("DeleteSentMessages")]
+
+        public async Task<ActionResult> DeleteSentMessages([FromBody]int id)
+        {
+            try
+            {
+                var message = await _messageRepository.GetByIdAsync(id, _dataContextUsers);
+
+                if (message == null)
+                {
+                    return NotFound(new Response { IsSuccess = false, Message = "Unable to delete, message not found" });
+                }
+
+                message.DeletedBySender = true;
+
+                await _messageRepository.UpdateAsync(message, _dataContextUsers);
+
+                return Ok(new Response { IsSuccess = true});
+            }
+            catch
+            {
+                return BadRequest(new Response { IsSuccess = false, Message = "Unable to delete message" });
+            }
+        }
+
+        //METODO AUXILIAR   
+        [HttpGet("GetMessageStatusList")]
+        public List<SelectListItem> GetMessageStatusList()
+        {
+            return _messageRepository.GetMessageStatusList();
+        }
+
+
     }
 }

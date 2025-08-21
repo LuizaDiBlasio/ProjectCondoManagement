@@ -1,7 +1,7 @@
 ﻿@model ClassLibrary.DtoModels.MessageDto
 
 @{
-    ViewData["Title"] = "Edit Message";
+    ViewData["Title"] = "MessageDetails";
 }
 
 <div class="content-body">
@@ -16,46 +16,55 @@
                     </div>
 
                     <div class="card-body">
-                        <form asp-action="Edit" asp-controller="Message" method="post">
+                        <form asp-action="EditMessageStatus" asp-controller="Message" method="post">
 
                             <input type="hidden" asp-for="Id" />
 
                             <div class="form-group mb-3">
                                 <label asp-for="PostingDate" class="form-label font-weight-bold"></label>
-                                <input asp-for="PostingDate" class="form-control" readonly />
+                                @if (Model.PostingDate.HasValue)
+                                {
+                                    <span>@Model.PostingDate.Value.ToString("MM/dd/yyyy HH:mm")</span>
+                                }
+                                else
+                                {
+                                    <span>Error retrieving date</span>
+                                }
                             </div>
 
                             <div class="form-group mb-3">
                                 <label asp-for="MessageTitle" class="form-label font-weight-bold"></label>
-                                <input asp-for="MessageTitle" class="form-control" readonly />
+                                @Html.DisplayFor(model => model.MessageTitle)
                             </div>
 
                             <div class="form-group mb-3">
                                 <label asp-for="MessageContent" class="form-label font-weight-bold"></label>
-                                <textarea asp-for="MessageContent" class="form-control" rows="8" readonly></textarea>
+                                @Html.DisplayFor(model => model.MessageContent)
                             </div>
 
                             <div class="form-group mb-3">
                                 <label asp-for="SenderEmail" class="form-label font-weight-bold"></label>
-                                <input asp-for="SenderEmail" class="form-control" readonly />
+                                @Html.DisplayFor(model => model.SenderEmail)
                             </div>
 
                             <div class="form-group mb-3">
                                 <label asp-for="ReceiverEmail" class="form-label font-weight-bold"></label>
-                                <input asp-for="ReceiverEmail" class="form-control" readonly />
+                                @Html.DisplayFor(model => model.ReceiverEmail)
                             </div>
 
-                            @* O campo Status com destaque em roxo *@
                             <div class="form-group mb-3">
                                 <label asp-for="Status" class="form-label font-weight-bold text-purple"></label>
                                 <select asp-for="Status.Value" asp-items="Model.StatusList" class="form-control custom-select bg-purple text-white"></select>
                             </div>
 
                             <div class="d-flex justify-content-between mt-4">
-                                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                                <a asp-controller="Message" asp-action="IndexReceived" class="btn btn-secondary">Inbox</a>
+                                <a asp-controller="Message" asp-action="IndexSent" class="btn btn-secondary">Sent Messages</a>
                                 <button type="submit" class="btn btn-primary">Save Changes</button>
                             </div>
                         </form>
+
+                        <flash dismissable="true" />
                     </div>
                 </div>
             </div>

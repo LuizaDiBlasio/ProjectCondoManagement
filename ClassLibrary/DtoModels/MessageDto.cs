@@ -15,7 +15,7 @@ namespace ClassLibrary.DtoModels
 
         [Display(Name = "Date")]
         [DisplayFormat(DataFormatString = "{MM/dd/yyyy}", ApplyFormatInEditMode = true)]
-        public DateTime PostingDate { get; set; }
+        public DateTime? PostingDate { get; set; }
 
 
         [Required]
@@ -32,18 +32,22 @@ namespace ClassLibrary.DtoModels
 
         
         [Display(Name = "To")]
-        public string SenderEmail { get; set; }
+        public string? SenderEmail { get; set; }
 
 
         [Required]
         [Display(Name = "From")]
-        public string ReceiverEmail { get; set; }
+        public string? ReceiverEmail { get; set; }
 
 
         [Display(Name = "Message Status")]
-        public EnumDto Status { get; set; } 
+        public EnumDto? Status { get; set; } 
 
 
-        public List<SelectListItem> StatusList { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem>? StatusList { get; set; }
+
+        public bool DeletedBySender { get; set; }
+
+        public bool DeletedByReceiver { get; set; } 
     }
 }

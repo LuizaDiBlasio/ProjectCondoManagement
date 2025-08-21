@@ -91,6 +91,8 @@ builder.Services.AddScoped<ICondominiumHelper, CondominiumHelper>();
 
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+
 builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
 
 builder.Services.AddScoped<ICondominiumRepository, CondominiumRepository>();

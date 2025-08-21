@@ -1,4 +1,5 @@
 ﻿using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 
@@ -44,9 +45,10 @@ namespace ProjectCondoManagement.Helpers
 
         public DocumentDto ToDocumentDto(Document document);
 
-        public MessageDto ToMessageDto(Message message);
+        public MessageDto ToMessageDto(Message message, List<SelectListItem> statusList);
 
         public Message ToMessage(MessageDto messageDto, bool isNew);
+
 
     }
 }
