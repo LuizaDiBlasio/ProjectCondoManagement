@@ -31,18 +31,17 @@ namespace ClassLibrary.DtoModels
 
 
         
-        [Display(Name = "To")]
+        [Display(Name = "From")]
         public string? SenderEmail { get; set; }
 
 
         [Required]
-        [Display(Name = "From")]
+        [Display(Name = "To")]
         public string? ReceiverEmail { get; set; }
 
 
         [Display(Name = "Message Status")]
         public EnumDto? Status { get; set; } 
-
 
         public List<SelectListItem>? StatusList { get; set; }
 

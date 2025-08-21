@@ -105,8 +105,11 @@ namespace CondoManagementWebApp.Controllers
                 }
 
                 //Popular propriedades de message dto fora do model
+
                 DateTime date = DateTime.Now;
+
                 string senderEmail = this.User.Identity.Name;
+
                 var status = new EnumDto() { Value = 1, Name = "Unresolved" };
 
                 var messageDto = _converterHelper.ToMessageDto(model, date, senderEmail, status);
@@ -182,15 +185,21 @@ namespace CondoManagementWebApp.Controllers
         [HttpPost]
         public async Task<ActionResult> EditMessageStatus(MessageDto messageDto)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 try
                 {
-                    var apiCall = await _apiCallService.PostAsync<MessageDto,Response>("api/EditMessageStatus",  messageDto);
+                    var messageDtoWithStatusName = await SelectStatusName(messageDto);
+
+                    var apiCall = await _apiCallService.PostAsync<MessageDto,Response>("api/Message/EditMessageStatus", messageDtoWithStatusName);
 
                     if (apiCall.IsSuccess)
                     {
-                        return RedirectToAction(nameof(Index));
+                        _flashMessage.Confirmation($"{apiCall.Message}");
+
+                        var editedMessage = await _apiCallService.GetAsync<MessageDto>($"api/Message/MessageDetails/{messageDto.Id}");
+
+                        return View("MessageDetails", editedMessage);
                     }
 
                     _flashMessage.Danger($"{apiCall.Message}");
@@ -209,6 +218,24 @@ namespace CondoManagementWebApp.Controllers
             }
            
         }
+
+        public async Task<MessageDto> SelectStatusName(MessageDto messageDto)
+        {
+            //Fazer seleção do Name do status (a select list só preenche o value)
+            var statusList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Message/GetMessageStatusList");
+
+            var selectedStatus = statusList.FirstOrDefault(s => s.Value == messageDto.Status.Value.ToString());
+
+            if (selectedStatus != null)
+            {
+                // Preencher Name do EnumDto antes de enviar para a API
+                messageDto.Status.Name = selectedStatus.Text;
+            }
+
+            return messageDto;
+        }
+
+
 
         // GET: MessageController/DeleteSentMessges/5
         [HttpPost]
@@ -232,17 +259,6 @@ namespace CondoManagementWebApp.Controllers
         [HttpPost]
         public async Task<ActionResult> DeleteSentMessages(int id)
         {
-            //try
-            //{
-            //    var apiCall = await _apiCallService.PostAsync<int, Response>($"api/Message/DeleteSentMessages", id);
-
-            //    return RedirectToAction(nameof(IndexSent));
-            //}
-            //catch
-            //{
-            //    return Json(new { success = false, message = "An HTTP error occurred. Please try again later." });
-            //}
-
             try
             {
                 

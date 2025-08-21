@@ -71,7 +71,7 @@ namespace ProjectCondoManagement.Controllers
 
 
         // POST: MessageController/Edit/5
-        [HttpPost]
+        [HttpPost("EditMessageStatus")]
         public ActionResult EditMessageStatus([FromBody] MessageDto messageDto)
         {
             if (messageDto == null)
@@ -85,7 +85,7 @@ namespace ProjectCondoManagement.Controllers
 
                 _messageRepository.UpdateAsync(message, _dataContextUsers);
 
-                return Ok(new Response() { IsSuccess = true});
+                return Ok(new Response() { IsSuccess = true, Message = "Status updated successfully" });
             }
             catch
             {

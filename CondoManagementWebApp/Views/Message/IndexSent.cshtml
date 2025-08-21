@@ -321,7 +321,7 @@ else
 <style>
     /* CSS para o efeito de hover na linha da tabela */
     .message-row:hover {
-        background-color: #e0e6f0;
+        background-color: /* #e0e6f0 */ blue !important;
         transition: background-color 0.3s ease-in-out;
     }
 </style>
@@ -388,14 +388,15 @@ else
 @section Scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-            // Clica na linha para ir para os detalhes da mensagem.
-            // A verificação abaixo garante que o evento de clique do link de deleção não afete o hover.
+            //Clica na linha para ir para os detalhes da mensagem.
+            //A verificação abaixo garante que o evento de clique do link de deleção não afete o hover.
             $(".message-row").click(function (e) {
                 if (!$(e.target).hasClass('delete-btn')) {
                     var messageId = $(this).data("message-id");
                     window.location.href = "/Message/MessageDetails/" + messageId;
                 }
             });
+
 
             // Adiciona o ID da mensagem para a modal de deleção e impede que o evento de clique na linha seja acionado.
             var idToDelete = 0;

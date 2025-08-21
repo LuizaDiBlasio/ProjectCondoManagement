@@ -9,13 +9,14 @@ namespace ProjectCondoManagement.Data.Repositories.Users
     {
         public List<SelectListItem> GetMessageStatusList()
         {
-            return Enum.GetValues(typeof(MessageStatus)) //indicar o tipo do enum
-                      .Cast<MessageStatus>() // converter ints do enum para lista IEnumerable<MessageStatus>
-                      .Select(status => new SelectListItem //converter para lista SelectListItem 
-                      {
-                          Value = status.ToString(),
-                          Text = status.ToString()
-                      }).ToList();
+                    return Enum.GetValues(typeof(MessageStatus)) //indicar o tipo do enum
+                            .Cast<MessageStatus>() // converter ints do enum para lista IEnumerable<MessageStatus>
+                             .Select(status => new SelectListItem //converter para lista SelectListItem 
+                             {
+                                 Value = ((int)status).ToString(),
+                                 Text = status.ToString()
+                             }).ToList();
+  
         }
     }
 }

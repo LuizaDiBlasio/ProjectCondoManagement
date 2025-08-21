@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "MessageDetails";
 }
-
+<flash dismissable="true" />
 <div class="content-body">
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -14,7 +14,7 @@
                             <h4 class="card-title welcome-text mb-0">Edit Message</h4>
                         </div>
                     </div>
-
+                  
                     <div class="card-body">
                         <form asp-action="EditMessageStatus" asp-controller="Message" method="post">
 
@@ -25,6 +25,7 @@
                                 @if (Model.PostingDate.HasValue)
                                 {
                                     <span>@Model.PostingDate.Value.ToString("MM/dd/yyyy HH:mm")</span>
+                                    <input type="hidden" asp-for="PostingDate" />
                                 }
                                 else
                                 {
@@ -34,22 +35,22 @@
 
                             <div class="form-group mb-3">
                                 <label asp-for="MessageTitle" class="form-label font-weight-bold"></label>
-                                @Html.DisplayFor(model => model.MessageTitle)
+                                <input type="text" asp-for="MessageTitle" class="form-control" readonly />
                             </div>
 
                             <div class="form-group mb-3">
                                 <label asp-for="MessageContent" class="form-label font-weight-bold"></label>
-                                @Html.DisplayFor(model => model.MessageContent)
+                                <input type="text" asp-for="MessageContent" class="form-control" readonly />
                             </div>
 
                             <div class="form-group mb-3">
                                 <label asp-for="SenderEmail" class="form-label font-weight-bold"></label>
-                                @Html.DisplayFor(model => model.SenderEmail)
+                                <input type="text" asp-for="SenderEmail" class="form-control" readonly />
                             </div>
 
                             <div class="form-group mb-3">
                                 <label asp-for="ReceiverEmail" class="form-label font-weight-bold"></label>
-                                @Html.DisplayFor(model => model.ReceiverEmail)
+                                <input type="text" asp-for="ReceiverEmail" class="form-control" readonly />
                             </div>
 
                             <div class="form-group mb-3">
@@ -58,13 +59,16 @@
                             </div>
 
                             <div class="d-flex justify-content-between mt-4">
-                                <a asp-controller="Message" asp-action="IndexReceived" class="btn btn-secondary">Inbox</a>
-                                <a asp-controller="Message" asp-action="IndexSent" class="btn btn-secondary">Sent Messages</a>
+                                <div class="d-flex gap-2">
+                                    <a asp-controller="Message" asp-action="IndexReceived" class="btn btn-outline-secondary">Inbox</a>
+                                    <a asp-controller="Message" asp-action="IndexSent" class="btn btn-outline-primary">Sent Messages</a>
+                                </div>
+
                                 <button type="submit" class="btn btn-primary">Save Changes</button>
                             </div>
                         </form>
 
-                        <flash dismissable="true" />
+                     
                     </div>
                 </div>
             </div>
