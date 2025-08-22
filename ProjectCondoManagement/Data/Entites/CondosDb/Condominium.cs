@@ -20,6 +20,8 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public string? ManagerUserId { get; set; }
 
+        public int? FinancialAccountId { get; set; } 
+
         [NotMapped]
         public User? ManagerUser { get; set; }
 

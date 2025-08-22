@@ -13,12 +13,20 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
     {
         private readonly IUserHelper _userHelper;
         private readonly IConverterHelper _converterHelper;
+        private readonly DataContextCondos _dataContextCondos;
 
         public CondominiumRepository(IUserHelper userHelper, IConverterHelper converterHelper) 
         {
             _userHelper = userHelper;
             _converterHelper = converterHelper;
         }
+
+        public async Task<Condominium> GetCondoManagerCondominium(string id)
+        {
+            return _dataContextCondos.Condominiums.FirstOrDefault(c => c.ManagerUserId == id);
+
+        }
+
         public async Task<Response> LinkManager(List<CondominiumDto> condominiums)
         {
             try

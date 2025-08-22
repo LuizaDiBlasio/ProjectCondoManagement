@@ -216,7 +216,8 @@ namespace ProjectCondoManagement.Helpers
                 ManagerUserId = condominiumDto.ManagerUserId,
                 Units = condominiumDto.Units?.Select(u => ToUnit(u,false)).ToList() ?? new List<Unit>(), 
                 Documents = condominiumDto.Documents?.Select(d => ToDocument(d,false)).ToList() ?? new List<Document>(),
-                Occurrences = condominiumDto.Occurrences?.Select(o => ToOccurrence(o,false)).ToList() ?? new List<Occurrence>()
+                Occurrences = condominiumDto.Occurrences?.Select(o => ToOccurrence(o,false)).ToList() ?? new List<Occurrence>(),
+                FinancialAccountId = condominiumDto.FinancialAccountId  
             };
 
             return condominium; 
@@ -234,7 +235,8 @@ namespace ProjectCondoManagement.Helpers
                 ManagerUserId = condominium.ManagerUserId,
                 Units = condominium.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),
                 Documents = condominium.Documents?.Select(d => ToDocumentDto(d)).ToList() ?? new List<DocumentDto>(),
-                Occurrences = condominium.Occurrences?.Select(o => ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>()
+                Occurrences = condominium.Occurrences?.Select(o => ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>(),
+                FinancialAccountId = condominium.FinancialAccountId,
             };
 
             return condominiumDto;
@@ -405,6 +407,7 @@ namespace ProjectCondoManagement.Helpers
                 Id = isNew ? 0 : expense.Id,
                 Amount = expense.Amount,
                 Detail = expense.Detail,
+                CondominiumDto = ToCondominiumDto(expense.Condominium),
                 ExpenseTypeDto = new EnumDto { Name = expense.ExpenseType.ToString(), Value = (int)expense.ExpenseType },
             };
            return expenseDto;   
@@ -442,6 +445,19 @@ namespace ProjectCondoManagement.Helpers
                 TransactionsAsPayerDto = financialAccount.TransactionsAsPayer?.Select(tp => ToTransactionDto(tp, false)).ToList() ?? new List<TransactionDto>()
             };
             return financialAccountDto; 
+        }
+
+        public Expense ToExpense(ExpenseDto expenseDto, bool isNew)
+        {
+            var expense = new Expense()
+            {
+                Id = isNew ? 0 : expenseDto.Id,
+                Amount = expenseDto.Amount,
+                ExpenseType = (ExpenseType)expenseDto.ExpenseTypeDto.Value,
+                Detail = expenseDto.Detail,
+            };
+
+            return expense; 
         }
 
     }

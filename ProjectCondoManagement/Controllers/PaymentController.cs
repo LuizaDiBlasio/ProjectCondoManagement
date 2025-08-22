@@ -1,15 +1,42 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
+using ProjectCondoManagement.Helpers;
 
 namespace ProjectCondoManagement.Controllers
 {
     public class PaymentController : Controller
     {
-        // GET: PaymensController
-        public ActionResult Index()
+
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly DataContextFinances _dataContextFinances;
+        private readonly IConverterHelper _converterHelper;
+
+        public PaymentController(IPaymentRepository paymentRepository, DataContextFinances dataContextFinances, IConverterHelper converterHelper)
         {
-            return View();
+            _paymentRepository = paymentRepository;
+            _dataContextFinances = dataContextFinances;
+            _converterHelper = converterHelper;
         }
+
+
+        // GET: PaymensController
+        [Microsoft.AspNetCore.Mvc.HttpGet("GetPaymentsFromCondoMember")]
+        public List<PaymentDto> GetPaymentsFromCondoMember([FromBody] string userEmail)
+        {
+            // get user payments
+            var allPayments = _paymentRepository.GetAll(_dataContextFinances);
+
+            var userPayments = allPayments.Where(p => p.UserEmail == userEmail).ToList();
+
+            //converter
+            var userPaymentsDto = userPayments.Select(p => _converterHelper.ToPaymentDto(p, false)).ToList() ?? new List<PaymentDto>();
+
+            return userPaymentsDto;
+        }
+
 
         // GET: PaymensController/Details/5
         public ActionResult Details(int id)

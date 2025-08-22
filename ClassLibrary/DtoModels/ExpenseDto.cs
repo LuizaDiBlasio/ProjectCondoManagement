@@ -15,6 +15,8 @@ namespace ClassLibrary.DtoModels
 
         public string Detail { get; set; }
 
+        public CondominiumDto CondominiumDto { get; set; }  
+
         public EnumDto ExpenseTypeDto { get; set; }
     }
 }

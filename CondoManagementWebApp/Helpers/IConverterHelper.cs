@@ -29,5 +29,7 @@ namespace CondoManagementWebApp.Helpers
         CreateEditCompanyViewModel ToCreateEditCompanyViewModel(CompanyDto editedCompany);
 
         MessageDto ToMessageDto(CreateMessageViewModel model, DateTime date, string email, EnumDto status);
+
+        ExpenseDto ToExpenseDto(CreateEditExpenseViewModel model);
     }
 }

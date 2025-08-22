@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
 using System;
 using System.Collections.Generic;
@@ -29,18 +31,22 @@ namespace ProjectCondoManagement.Controllers
         private readonly IConverterHelper _converterHelper;
         private readonly IUserHelper _userHelper;
         private readonly ICondominiumHelper _condominiumHelper;
+        private readonly IFinancialAccountRepository _financialAccountRepository;
 
         public CondominiumsController(DataContextCondos context,
                                       ICondominiumRepository condominiumRepository,
                                       IConverterHelper converterHelper,
                                       IUserHelper userHelper,
-                                      ICondominiumHelper condominiumHelper)
+                                      ICondominiumHelper condominiumHelper,
+                                      IFinancialAccountRepository financialAccounRepository)
         {
             _context = context;
             _condominiumRepository = condominiumRepository;
             _converterHelper = converterHelper;
             _userHelper = userHelper;
             _condominiumHelper = condominiumHelper;
+            _financialAccountRepository = financialAccounRepository;
+
         }
 
         // GET: api/Condominiums
@@ -168,8 +174,12 @@ namespace ProjectCondoManagement.Controllers
                     return BadRequest("Conversion failed. Invalid data.");
                 }
 
-     
                 
+                //Atribuir financial account
+                var financialAccount = await _financialAccountRepository.CreateFinancialAccountAsync();
+
+                condominium.FinancialAccountId = financialAccount.Id;
+
 
                 await _condominiumRepository.CreateAsync(condominium, _context);
 
@@ -204,6 +214,28 @@ namespace ProjectCondoManagement.Controllers
                     $"An error occurred: {ex.Message}");
             }
             return NoContent();
+        }
+
+        //Metodo auxiliar para expenses
+        public async Task<IActionResult> GetCondoManagerCondominiumDto([FromBody] string condoManagerEmail)
+        {
+            var user = await _userHelper.GetUserByEmailAsync(condoManagerEmail);
+
+            if (user == null)
+            {
+                return NotFound();  
+            }
+
+            var condoManagerCondo = await _condominiumRepository.GetCondoManagerCondominium(user.Id);
+
+            if(condoManagerCondo == null)
+            {
+                return NotFound();
+            }
+
+            var condoManagerCondoDto = _converterHelper.ToCondominiumDto(condoManagerCondo);
+
+            return Ok(condoManagerCondoDto);
         }
 
     }

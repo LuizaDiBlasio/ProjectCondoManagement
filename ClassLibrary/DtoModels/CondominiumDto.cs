@@ -24,6 +24,7 @@ namespace ClassLibrary.DtoModels
         [Display(Name = "Condo Manager")]
         public string? ManagerUserId { get; set; }
 
+        public int? FinancialAccountId { get; set; }     
 
         public UserDto? ManagerUser { get; set; }
 

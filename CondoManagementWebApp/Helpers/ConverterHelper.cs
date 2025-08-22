@@ -190,5 +190,19 @@ namespace CondoManagementWebApp.Helpers
             return messageDto;
         }
 
+        public ExpenseDto ToExpenseDto(CreateEditExpenseViewModel model)
+        {
+            var expenseDto = new ExpenseDto()
+            {
+                Id = model.Id,
+                Amount = model.Amount,
+                Detail = model.Detail,
+                CondominiumDto = model.CondominiumDto,
+                ExpenseTypeDto = model.ExpenseTypeDto,
+            };
+            return expenseDto;  
+        }
+
+
     }
 }

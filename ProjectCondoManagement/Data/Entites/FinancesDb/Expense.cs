@@ -1,4 +1,5 @@
 ﻿using ClassLibrary;
+using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.Enums;
 
 namespace ProjectCondoManagement.Data.Entites.FinancesDb
@@ -10,6 +11,8 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
         public decimal Amount { get; set; }
 
         public string Detail { get; set; }
+
+        public Condominium Condominium { get; set; }
 
         public ExpenseType ExpenseType { get; set; }
     }

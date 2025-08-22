@@ -1,10 +1,12 @@
-﻿using ClassLibrary.DtoModels;
-using Microsoft.AspNetCore.Http;
+﻿using ClassLibrary;
+using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
+using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
-using System.Web.Mvc;
+using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -13,100 +15,149 @@ namespace ProjectCondoManagement.Controllers
         private readonly IPaymentRepository _paymentRepository;
         private readonly DataContextFinances _dataContextFinances;
         private readonly IConverterHelper _converterHelper;
+        private readonly IUserHelper _userHelper;
+        private readonly ICondominiumRepository _condominiumRepository;
+        private readonly IExpenseRepository _expensesRepository;
 
-        public ExpenseController(IPaymentRepository paymentRepository, DataContextFinances dataContextFinances, IConverterHelper converterHelper)
+        public ExpenseController(IPaymentRepository paymentRepository, DataContextFinances dataContextFinances, IConverterHelper converterHelper, IUserHelper userHelper, ICondominiumRepository condominiumRepository,
+            IExpenseRepository expenseRepository)
         {
             _paymentRepository = paymentRepository;
             _dataContextFinances = dataContextFinances;
-            _converterHelper = converterHelper;    
+            _converterHelper = converterHelper;
+            _userHelper = userHelper;
+            _condominiumRepository = condominiumRepository;
+            _expensesRepository = expenseRepository;
         }
 
 
-        // GET: Expense
-        [Microsoft.AspNetCore.Mvc.HttpGet("GetExpensesFromUser")]
-        public List<ExpenseDto> GetExpensesFromUser([FromBody] string userEmail)
+        // GET: Expense/GetExpensesFromCondominium
+        [HttpGet("GetExpensesFromCondominium")]
+        public async Task<ActionResult<List<ExpenseDto>>> GetExpensesFromCondominium([FromBody] string condoManagerEmail)
         {
-            // get user payments
-            var allPayments = _paymentRepository.GetAll(_dataContextFinances);
+            var user = await _userHelper.GetUserByEmailAsync(condoManagerEmail);
 
-            var userPayments = allPayments.Where(p => p.UserEmail == userEmail).ToList();
+            if (user == null)
+            {
+                return NotFound();
+            }
 
-            //converter
-            var userPaymentsDto = userPayments.Select(p => _converterHelper.ToPaymentDto(p, false)).ToList() ?? new List<PaymentDto>();
+            var condoManagerCondo = await _condominiumRepository.GetCondoManagerCondominium(user.Id);
 
-            //buscar na lista de despesas de cada pagamento e adicionar as despesas à nova lista 
-            var userExpensesDto = userPaymentsDto.SelectMany(payment => payment.ExpensesDto).ToList();
+            if (condoManagerCondo == null)
+            {
+                return NotFound();
+            }
 
-            return userExpensesDto;    
-        }   
+            var condominiumExpenses = await _expensesRepository.GetExpensesFromCondominium(condoManagerCondo);
 
-        
+            if (condominiumExpenses == null)
+            {
+                return NotFound();
+            }
 
+            var condominiumExpensesDto = condominiumExpenses?.Select(e => _converterHelper.ToExpenseDto(e, false)) ?? new List<ExpenseDto>();
 
-        // GET: Expense/Details/5
-        public Microsoft.AspNetCore.Mvc.ActionResult Details(int id)
-        {
-            return View();
+            return Ok(condominiumExpensesDto);
+
         }
 
-        // GET: Expense/Create
-        public Microsoft.AspNetCore.Mvc.ActionResult Create()
+        //GET : Expense/GetExpense/5
+        [HttpGet("GetExepense/{id}")]
+        public async Task<ActionResult<ExpenseDto>> GetExpense(int id)
         {
-            return View();
+            var expense = await _expensesRepository.GetByIdAsync(id, _dataContextFinances);
+
+            if (expense == null)
+            {
+                return NotFound();  
+            }
+
+            var expenseDto = _converterHelper.ToExpenseDto(expense, false);
+
+            return Ok(expenseDto);  
+
         }
 
-        // POST: Expense/Create
-        [Microsoft.AspNetCore.Mvc.HttpPost]
-        public Microsoft.AspNetCore.Mvc.ActionResult Create(IFormCollection collection)
+
+
+        // POST: Expense/CreateExpense
+        [Microsoft.AspNetCore.Mvc.HttpPost("CreateExpense")]
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> CreateExpense([FromBody] ExpenseDto expenseDto)
         {
+            if (expenseDto == null)
+            {
+                return BadRequest();    
+            }
+
             try
             {
-                return RedirectToAction(nameof(Index));
+                var expense = _converterHelper.ToExpense(expenseDto, true);
+
+                await _expensesRepository.CreateAsync(expense, _dataContextFinances);
+
+                return Ok(new Response() { IsSuccess = true });
             }
             catch
             {
-                return View();
+                return BadRequest(new Response () { IsSuccess = false, Message = "Unable to enter expense due to error" });   
             }
         }
 
-        // GET: Expense/Edit/5
-        public Microsoft.AspNetCore.Mvc.ActionResult Edit(int id)
-        {
-            return View();
-        }
+      
 
         // POST: Expense/Edit/5
-        [Microsoft.AspNetCore.Mvc.HttpPost]
-        public Microsoft.AspNetCore.Mvc.ActionResult Edit(int id, IFormCollection collection)
+        [Microsoft.AspNetCore.Mvc.HttpPost("EditExpense")]
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Edit([FromBody] ExpenseDto expenseDto)
         {
+            if (expenseDto == null)
+            {
+                return NotFound(new Response { IsSuccess = false, Message = "Unable to modify, expensa not found" });
+            }
+
             try
             {
-                return RedirectToAction(nameof(Index));
+                var expense = _converterHelper.ToExpense(expenseDto, true);
+
+                await _expensesRepository.UpdateAsync(expense, _dataContextFinances);
+
+                return Ok(new Response() { IsSuccess = true });
             }
             catch
             {
-                return View();
+                return BadRequest(new Response() { IsSuccess = false, Message = "Unable to modify expense due to error" });
             }
         }
 
         // GET: Expense/Delete/5
-        public Microsoft.AspNetCore.Mvc.ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: Expense/Delete/5
-        [Microsoft.AspNetCore.Mvc.HttpPost]
-        public Microsoft.AspNetCore.Mvc.ActionResult Delete(int id, IFormCollection collection)
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Delete([FromBody] int id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var expense = await _expensesRepository.GetByIdAsync(id, _dataContextFinances);
+
+                if(expense == null)
+                {
+                    return NotFound(new Response { IsSuccess = false, Message = "Unable to delete, expensa not found"});
+                }
+
+                await _expensesRepository.DeleteAsync(expense, _dataContextFinances);
+
+                return Ok(new Response() {IsSuccess = true});
             }
             catch
             {
-                return View();
+                return BadRequest(new Response { IsSuccess = false, Message = "Unable to delete due to server error" });
             }
+        }
+
+        
+
+        //Medoto auxiliar
+
+        public List<SelectListItem> GetExpenseTypeList()
+        {
+            return _expensesRepository.GetExpenseTypeList();
         }
     }
 }

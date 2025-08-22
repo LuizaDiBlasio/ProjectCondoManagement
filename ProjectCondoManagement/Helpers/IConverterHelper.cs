@@ -58,5 +58,6 @@ namespace ProjectCondoManagement.Helpers
         TransactionDto ToTransactionDto(Transaction transaction, bool isNew);
 
         FinancialAccountDto ToFinancialAccountDto(FinancialAccount financialAccount, bool isNew);
+        Expense ToExpense(ExpenseDto expenseDto, bool v);
     }
 }
