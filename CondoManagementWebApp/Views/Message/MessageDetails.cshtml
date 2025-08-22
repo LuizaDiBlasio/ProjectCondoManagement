@@ -11,7 +11,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center w-100">
-                            <h4 class="card-title welcome-text mb-0">Edit Message</h4>
+                            <h4 class="card-title welcome-text mb-0">Resolve ticket</h4>
                         </div>
                     </div>
                   
@@ -34,6 +34,17 @@
                             </div>
 
                             <div class="form-group mb-3">
+                                <label asp-for="SenderEmail" class="form-label font-weight-bold"></label>
+                                <input type="text" asp-for="SenderEmail" class="form-control" readonly />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="ReceiverEmail" class="form-label font-weight-bold"></label>
+                                <input type="text" asp-for="ReceiverEmail" class="form-control" readonly />
+                            </div>
+
+
+                            <div class="form-group mb-3">
                                 <label asp-for="MessageTitle" class="form-label font-weight-bold"></label>
                                 <input type="text" asp-for="MessageTitle" class="form-control" readonly />
                             </div>
@@ -44,24 +55,17 @@
                             </div>
 
                             <div class="form-group mb-3">
-                                <label asp-for="SenderEmail" class="form-label font-weight-bold"></label>
-                                <input type="text" asp-for="SenderEmail" class="form-control" readonly />
-                            </div>
-
-                            <div class="form-group mb-3">
-                                <label asp-for="ReceiverEmail" class="form-label font-weight-bold"></label>
-                                <input type="text" asp-for="ReceiverEmail" class="form-control" readonly />
-                            </div>
-
-                            <div class="form-group mb-3">
                                 <label asp-for="Status" class="form-label font-weight-bold text-purple"></label>
-                                <select asp-for="Status.Value" asp-items="Model.StatusList" class="form-control custom-select bg-purple text-white"></select>
+                                <select asp-for="Status.Value" asp-items="Model.StatusList" class="form-control" style="width: auto;"></select>
                             </div>
+
+
+                            <br />
 
                             <div class="d-flex justify-content-between mt-4">
                                 <div class="d-flex gap-2">
-                                    <a asp-controller="Message" asp-action="IndexReceived" class="btn btn-outline-secondary">Inbox</a>
-                                    <a asp-controller="Message" asp-action="IndexSent" class="btn btn-outline-primary">Sent Messages</a>
+                                    <a asp-controller="Message" asp-action="IndexReceived" class="btn btn-secondary">Inbox</a>
+                                    <a asp-controller="Message" asp-action="IndexSent" class="btn btn-primary">Sent Messages</a>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -84,14 +88,15 @@
         .text-purple {
             color: #8A2BE2 !important;
         }
-
-        .bg-purple {
-            background-color: #8A2BE2 !important;
+        /* Garantindo que a seta apareça, usando o seletor mais específico */
+        .form-control {
+            -webkit-appearance: menulist;
+            -moz-appearance: menulist;
+            appearance: menulist;
         }
-
-            .bg-purple option {
-                background-color: white !important;
-                color: black !important;
-            }
+        /* Ajustando a cor do texto do select para ser legível */
+        select.form-control option {
+            color: black;
+        }
     </style>
-}
+    }

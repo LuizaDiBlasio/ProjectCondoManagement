@@ -1,78 +1,4 @@
-﻿@* @model IEnumerable<ClassLibrary.DtoModels.MessageDto>
-
-@{
-    ViewData["Title"] = "Index";
-}
-
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">New Message</a>
-</p>
-<table class="table">
-    <thead>
-        @if (!Model.Any())
-        {
-            <tr>
-                <th>
-                    No messages
-                </th>
-            </tr>
-        }
-        else
-        {
-            <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Id)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.PostingDate)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.MessageTitle)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.SenderEmail)
-                </th>
-                <th></th>
-            </tr>
-        }
-
-    </thead>
-    <tbody>
-        @foreach (var item in Model) {
-            @if(item.ReceiverEmail == this.User.Identity.Name)
-            {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Id)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.PostingDate)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.MessageTitle)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.SenderEmail)
-                    </td>
-                    <td>
-                        @Html.ActionLink("Details", "Details", new { id = item.Id }) |
-                        @Html.ActionLink("Delete", "Delete", new { id = item.Id })
-                    </td>
-                </tr>
-            }
-            else
-            {
-                <tr>
-
-                </tr>
-            }
-        }
-
-    </tbody>
-</table>
- *@
+﻿
 
 @model IEnumerable<ClassLibrary.DtoModels.MessageDto>
 
@@ -80,12 +6,6 @@
     ViewData["Title"] = "Inbox";
 }
 
-<style>
-    .message-row:hover {
-        background-color: #e0e6f0;
-        transition: background-color 0.3s ease-in-out;
-    }
-</style>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Messages Inbox</h1>
@@ -114,6 +34,7 @@
                     <td>@item.PostingDate?.ToString("MM/dd/yyyy HH:mm")</td>
                     <td>@Html.DisplayFor(modelItem => item.SenderEmail)</td>
                     <td>
+                        <a asp-controller="Message" asp-action="MessageDetails" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">Resolve</a>
                         <a href="#" class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@item.Id">Delete</a>
                     </td>
                 </tr>
@@ -149,13 +70,8 @@ else
 @section Scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-            // Clica na linha para ir para os detalhes da mensagem
-            $(".message-row").click(function () {
-                var messageId = $(this).data("message-id");
-                window.location.href = "/Message/MessageDetails/" + messageId;
-            });
 
-              // Adiciona o ID da mensagem para a modal de deleção e impede que o evento de clique na linha seja acionado.
+            // Adiciona o ID da mensagem para a modal de deleção e impede que o evento de clique na linha seja acionado.
             var idToDelete = 0;
             $('a.delete-btn').click(function (e) {
                 e.stopPropagation(); // Previne o evento de clique na linha
@@ -192,50 +108,3 @@ else
 }
 
 
-@* @section Scripts {
-    <script type="text/javascript">
-        $(document).ready(function () {
-            // Clica na linha para ir para os detalhes da mensagem.
-            // A verificação abaixo garante que o evento de clique do link de deleção não afete o hover.
-            $(".message-row").click(function (e) {
-                if (!$(e.target).hasClass('delete-btn')) {
-                    var messageId = $(this).data("message-id");
-                    window.location.href = "/Message/MessageDetails/" + messageId;
-                }
-            });
-
-            // Adiciona o ID da mensagem para a modal de deleção e impede que o evento de clique na linha seja acionado.
-            var idToDelete = 0;
-            $('a.delete-btn').click(function (e) {
-                e.stopPropagation(); // Previne o evento de clique na linha
-                idToDelete = $(this).data('id');
-                $('#delete-error-message').text('').hide();
-            });
-
-            // Envia a requisição AJAX para deleção
-            $("#btnYesDelete").click(function () {
-                console.log('ID to delete:', idToDelete);
-                $.ajax({
-                    url: '/Message/DeleteSentMessages/' + idToDelete,
-                    type: 'POST',
-                    success: function (response) {
-                        // A resposta agora vem do controller como JSON, então 'response.success' funcionará
-                        if (response.success) {
-                            // Esconde a modal, não mais "retorna para a modal"
-                            $("#deleteDialog").modal('hide');
-                            // Recarrega a página para refletir a mensagem deletada
-                            window.location.reload();
-                        } else {
-                            $('#delete-error-message').text(response.message).show();
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        $("#deleteDialog").modal('hide');
-                        console.error('AJAX Error:', status, error, xhr.responseText);
-                        alert('An unexpected error occurred. Please try again later.');
-                    }
-                });
-            });
-        });
-    </script>
-} *@
