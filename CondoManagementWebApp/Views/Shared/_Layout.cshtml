@@ -71,7 +71,83 @@
                 </div>
             </div>
         }
-        
+
+        @if (User.IsInRole("CondoManager"))
+        {
+            <div class="deznav">
+                <div class="deznav-scroll">
+                    <ul class="metismenu" id="menu">
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span class="nav-text">Finances</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
+                                <li><a asp-controller="Payment" asp-action="IndexPayments">Payments</a></li>
+                                <li><a asp-controller="Expenses" asp-action="IndexExpenses">Expenses</a></li>
+                            </ul>
+                        </li>
+                      
+                    </ul>
+                    <div class="copyright">
+                        <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
+                        <p>by YourTeam</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (User.IsInRole("CompanyAdmin"))
+        {
+            <div class="deznav">
+                <div class="deznav-scroll">
+                    <ul class="metismenu" id="menu">
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span class="nav-text">Finances</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
+                            </ul>
+                        </li>
+
+                    </ul>
+                    <div class="copyright">
+                        <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
+                        <p>by YourTeam</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (User.IsInRole("CondoMember"))
+        {
+            <div class="deznav">
+                <div class="deznav-scroll">
+                    <ul class="metismenu" id="menu">
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span class="nav-text">Finances</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
+                                <li><a asp-controller="Payment" asp-action="GetPayments">My Payments</a></li>
+                                <li><a asp-controller="FinancialAccount" asp-action="ActivateFinancialAccount">Expenses</a></li>
+                            </ul>
+                        </li>
+
+                    </ul>
+                    <div class="copyright">
+                        <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
+                        <p>by YourTeam</p>
+                    </div>
+                </div>
+            </div>
+        }
+
 
         <div class="header">
             <div class="header-content">
@@ -134,6 +210,7 @@
 
         <div class="content-body">
             <div class="container-fluid">
+                <flash dismissable="true" />
                 @RenderBody()
             </div>
         </div>

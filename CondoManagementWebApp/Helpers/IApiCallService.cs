@@ -5,14 +5,14 @@ namespace CondoManagementWebApp.Helpers
 {
     public interface IApiCallService
     {
-        public void AddAuthorizationHeader();
+        void AddAuthorizationHeader();
 
-        public Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest data);
+        Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest data);
 
-        public Task<T> GetAsync<T>(string requestUri);
+        Task<T> GetAsync<T>(string requestUri);
 
-        public Task<TResponse> GetByQueryAsync<TResponse>(string requestUri, string query);
+        Task<TResponse> GetByQueryAsync<TResponse>(string requestUri, string query);
 
-        public Task<HttpResponseMessage> DeleteAsync(string requestUri);
+        Task<HttpResponseMessage> DeleteAsync(string requestUri);
     }
 }

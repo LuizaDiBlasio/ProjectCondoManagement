@@ -3,6 +3,7 @@ using Humanizer;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.Enums;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using System.Threading.Tasks;
@@ -359,5 +360,90 @@ namespace ProjectCondoManagement.Helpers
 
             return message; 
         }
+
+        public PaymentDto ToPaymentDto(Payment payment, bool isNew)
+        {
+            var paymentDto = new PaymentDto()
+            {
+                Id = isNew ? 0 : payment.Id,
+                IssueDate = payment.IssueDate,
+                DueDate = payment.DueDate,  
+                PaymentMethod = payment.PaymentMethod,  
+                UserEmail = payment.UserEmail,  
+                IsPaid = payment.IsPaid,    
+                InvoiceDto = ToInvoiceDto(payment.Invoice, false),
+                ExpensesDto = payment.Expenses?.Select(e => ToExpenseDto(e, false)).ToList() ?? new List<ExpenseDto>(),
+                TransactionDto = ToTransactionDto(payment.Transaction, false),
+                
+            };  
+           
+            return paymentDto;
+        }
+
+
+        public InvoiceDto ToInvoiceDto(Invoice invoice, bool isNew)
+        {
+            var invoiceDto = new InvoiceDto()
+            {
+                Id = isNew ? 0 : invoice.Id,    
+                PaymentDate = invoice.PaymentDate,  
+                CondominiumId = invoice.CondominiumId,
+                AccountId = invoice.AccountId,
+                FinancialAccountDto = ToFinancialAccountDto(invoice.FinancialAccount, false),
+                UserEmail = invoice.UserEmail,
+                Payment = ToPaymentDto(invoice.Payment, false)
+            };
+            
+            return invoiceDto;
+        }
+
+
+        public ExpenseDto ToExpenseDto(Expense expense, bool isNew)
+        {
+            var expenseDto = new ExpenseDto()
+            {
+                Id = isNew ? 0 : expense.Id,
+                Amount = expense.Amount,
+                Detail = expense.Detail,
+                ExpenseTypeDto = new EnumDto { Name = expense.ExpenseType.ToString(), Value = (int)expense.ExpenseType },
+            };
+           return expenseDto;   
+        }
+
+        public TransactionDto ToTransactionDto(Transaction transaction, bool isNew)
+        {
+            var transactionDto = new TransactionDto()
+            {
+                Id = isNew ? 0 : transaction.Id,
+                DateAndTime = transaction.DateAndTime,
+                PayerAccountId = transaction.PayerAccountId,
+                AccountPayerDto = ToFinancialAccountDto(transaction.AccountPayer, false),   
+                BeneficiaryAccountId = transaction.BeneficiaryAccountId,
+                AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
+                CondominiumId = transaction.CondominiumId,
+                PaymentDto = ToPaymentDto(transaction.Payment, false),
+                
+            };
+            
+            return transactionDto;  
+        }
+
+        public FinancialAccountDto ToFinancialAccountDto(FinancialAccount financialAccount, bool isNew)
+        {
+            var financialAccountDto = new FinancialAccountDto()
+            {
+                Id = isNew ? 0 : financialAccount.Id,
+                InitialDeposit = financialAccount.InitialDeposit,
+                IsActive = financialAccount.IsActive,
+                CardNumber = financialAccount.CardNumber,
+                AssociatedBankAccount = financialAccount.AssociatedBankAccount,
+                BankName = financialAccount.BankName,
+                TransactionsAsBeneficiaryDto = financialAccount.TransactionsAsBeneficiary?.Select(tb => ToTransactionDto(tb, false)).ToList() ?? new List<TransactionDto>(),
+                TransactionsAsPayerDto = financialAccount.TransactionsAsPayer?.Select(tp => ToTransactionDto(tp, false)).ToList() ?? new List<TransactionDto>()
+            };
+            return financialAccountDto; 
+        }
+
     }
+    
 }

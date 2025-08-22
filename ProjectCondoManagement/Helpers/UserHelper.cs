@@ -50,13 +50,6 @@ namespace ProjectCondoManagement.Helpers
                 return null; //já existe o user --> resposta negativa (null)
             }
 
-            var financialAccount = new FinancialAccount()
-            {
-                InitialDeposit = 0 // depósito inicial vai ser sempre 0
-            };
-
-            await _financialAccountRepository.CreateAsync(financialAccount, _dataContextFinances); //add FinAcc na Bd
-
             user = new User
             {
                 FullName = registerDtoModel.FullName,
@@ -67,7 +60,7 @@ namespace ProjectCondoManagement.Helpers
                 ImageUrl = registerDtoModel.ImageUrl,
                 BirthDate = registerDtoModel.BirthDate,
                 CompanyId = registerDtoModel.CompanyId,
-                FinancialAccountId = financialAccount.Id
+                FinancialAccountId = null,
             };
 
             var result = await AddUserAsync(user, "123456"); //add user depois de criado
@@ -89,6 +82,20 @@ namespace ProjectCondoManagement.Helpers
                 case "CompanyAdmin":
                     await AddUserToRoleAsync(user, "CompanyAdmin");
                     break;
+            }
+
+            //se for condoMember adicionanr uma financial account
+
+            if(await IsUserInRoleAsync(user, "CondoMember"))
+            {
+                var financialAccount = new FinancialAccount()
+                {
+                    InitialDeposit = 0 // depósito inicial vai ser sempre 0
+                };
+
+                await _financialAccountRepository.CreateAsync(financialAccount, _dataContextFinances); //add FinAcc na Bd
+
+                user.FinancialAccountId = financialAccount.Id;  
             }
 
             //TODO Tirar o if e essa atribuição de bool quando publicar, manter só o método de ativação

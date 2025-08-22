@@ -12,7 +12,7 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public string PaymentMethod { get; set; }
 
-        public string UserId { get; set; }
+        public string UserEmail { get; set; }
 
         public bool IsPaid { get; set; }
 

@@ -16,9 +16,9 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public string? BankName { get; set; }    
 
-        public IEnumerable<Transaction> TransactionsAsPayer { get; set; }
+        public IEnumerable<Transaction>? TransactionsAsPayer { get; set; }
 
-        public IEnumerable<Transaction> TransactionsAsBeneficiary { get; set; }
+        public IEnumerable<Transaction>? TransactionsAsBeneficiary { get; set; }
 
     }
 }

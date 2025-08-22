@@ -1,6 +1,7 @@
 ﻿using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 
 namespace ProjectCondoManagement.Helpers
@@ -9,46 +10,53 @@ namespace ProjectCondoManagement.Helpers
     {
         CompanyDto? ToCompanyDto(Company company);
 
-        public CondoMember ToCondoMember(CondoMemberDto condoMemberDto);
+        CondoMember ToCondoMember(CondoMemberDto condoMemberDto);
 
-       public CondoMemberDto ToCondoMemberDto(CondoMember condoMember);
+       CondoMemberDto ToCondoMemberDto(CondoMember condoMember);
 
-       public CondoMemberDto ToCondoMemberDto(User user);
+       CondoMemberDto ToCondoMemberDto(User user);
 
-        public UserDto ToUserDto(User user);
-
-
-        public Task<User> ToEditedUser(EditUserDetailsDto editUserDetailsDto);
-
-        public Task<User> ToEditedProfile(UserDto userDto);
-
-        public Task<CondoMember> FromUserToCondoMember(User user);
+        UserDto ToUserDto(User user);
 
 
-        public User ToUser(UserDto userDto);
+        Task<User> ToEditedUser(EditUserDetailsDto editUserDetailsDto);
 
-        public Company ToCompany(CompanyDto companyDto, bool isNew);
+        Task<User> ToEditedProfile(UserDto userDto);
 
-        public CondominiumDto ToCondominiumDto(Condominium condominium);    
+        Task<CondoMember> FromUserToCondoMember(User user);
 
-        public Condominium ToCondominium(CondominiumDto condominiumDto, bool isNew);
+        User ToUser(UserDto userDto);
 
-        public OccurrenceDto ToOccurrenceDto(Occurrence occurrence);
+        Company ToCompany(CompanyDto companyDto, bool isNew);
 
-        public Occurrence ToOccurrence(OccurrenceDto occurrenceDto, bool isNew);
+        CondominiumDto ToCondominiumDto(Condominium condominium);    
 
-        public Unit ToUnit(UnitDto unitDto, bool isNew);
+        Condominium ToCondominium(CondominiumDto condominiumDto, bool isNew);
 
-        public UnitDto ToUnitDto(Unit unit);
+        OccurrenceDto ToOccurrenceDto(Occurrence occurrence);
 
-        public Document ToDocument(DocumentDto documentDto, bool isNew);
+        Occurrence ToOccurrence(OccurrenceDto occurrenceDto, bool isNew);
 
-        public DocumentDto ToDocumentDto(Document document);
+        Unit ToUnit(UnitDto unitDto, bool isNew);
 
-        public MessageDto ToMessageDto(Message message, List<SelectListItem> statusList);
+        UnitDto ToUnitDto(Unit unit);
 
-        public Message ToMessage(MessageDto messageDto, bool isNew);
+        Document ToDocument(DocumentDto documentDto, bool isNew);
 
+        DocumentDto ToDocumentDto(Document document);
 
+        MessageDto ToMessageDto(Message message, List<SelectListItem> statusList);
+
+        Message ToMessage(MessageDto messageDto, bool isNew);
+
+        PaymentDto ToPaymentDto(Payment payment, bool isNew);
+
+        InvoiceDto ToInvoiceDto(Invoice invoice, bool isNew);
+
+        ExpenseDto ToExpenseDto(Expense expense, bool isNew);
+
+        TransactionDto ToTransactionDto(Transaction transaction, bool isNew);
+
+        FinancialAccountDto ToFinancialAccountDto(FinancialAccount financialAccount, bool isNew);
     }
 }
