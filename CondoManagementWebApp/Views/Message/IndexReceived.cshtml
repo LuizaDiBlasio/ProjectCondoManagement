@@ -83,7 +83,7 @@ else
             $("#btnYesDelete").click(function () {
                 console.log('ID to delete:', idToDelete);
                 $.ajax({
-                    url: '/Message/DeleteSentMessages/' + idToDelete,
+                    url: '/Message/DeleteReceivedMessages/' + idToDelete,
                     type: 'POST',
                     success: function (response) {
                         // A resposta agora vem do controller como JSON, então 'response.success' funcionará
