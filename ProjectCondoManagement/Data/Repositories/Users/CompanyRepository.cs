@@ -33,7 +33,7 @@ namespace ProjectCondoManagement.Data.Repositories.Users
         {
             var allCondos = await contextCondos.Condominiums.ToListAsync();
 
-            var availableCondos = allCondos.Where(c => c.CompanyId == null)
+            var availableCondos = allCondos
                                             .Select(s => new SelectListItem
                                             {
                                                 Value = s.Id.ToString(),
@@ -45,7 +45,25 @@ namespace ProjectCondoManagement.Data.Repositories.Users
             return availableCondos;
         }
 
-        public async Task<List<SelectListItem>> GetCompanyAdminsSelectListAsync()
+
+        public async Task<List<SelectListItem>> GetCondosSelectListAsyncToCreate(DataContextCondos contextCondos)
+        {
+            var allCondos = await contextCondos.Condominiums.ToListAsync();
+
+            var availableCondos = allCondos.Where(c => c.CompanyId == 0) // ainda não selecionados
+                                            .Select(s => new SelectListItem
+                                            {
+                                                Value = s.Id.ToString(),
+                                                Text = s.CondoName
+                                            })
+                                            .OrderBy(s => s.Text).ToList();
+
+            // Apenas retorna a lista
+            return availableCondos;
+        }
+
+
+        public async Task<List<SelectListItem>> GetCompanyAdminsSelectListToEdit(int id)
         {
             var companyAdmins = await _userHelper.GetUsersByRoleAsync("CompanyAdmin");
 
@@ -65,9 +83,54 @@ namespace ProjectCondoManagement.Data.Repositories.Users
                 .OrderBy(s => s.Text)
                 .ToList();
 
+
+            //buscar o admin já selecionado para mostrar na seleção:
+
+            var company = await GetByIdAsync(id, _dataContextUsers);
+            if(company != null)
+            {
+                var adminSelecionado = companyAdmins.FirstOrDefault(ca => ca.Id == company.CompanyAdminId);
+                if (adminSelecionado != null)
+                {
+                    var adminSelecionadoItem = new SelectListItem()
+                    {
+                        Value = adminSelecionado.Id.ToString(),
+                        Text = adminSelecionado.FullName
+                    };
+
+                    adminsToSelect.Add(adminSelecionadoItem);
+                }
+            }
+           
             // Apenas retorna a lista
             return adminsToSelect;
         }
+
+
+        public async Task<List<SelectListItem>> GetCompanyAdminsSelectListAsync()
+        {
+            var companyAdmins = await _userHelper.GetUsersByRoleAsync("CompanyAdmin");
+
+            if (companyAdmins == null)
+            {
+                return null;
+            }
+
+            var availableAdmins = companyAdmins.Where(u => u.CompanyId == null);
+
+            var adminsToSelect = availableAdmins
+                .Select(a => new SelectListItem
+                {
+                    Value = a.Id.ToString(),
+                    Text = a.FullName
+                })
+                .OrderBy(s => s.Text)
+                .ToList();
+
+            // Apenas retorna a lista
+            return adminsToSelect;
+        }
+
 
         public async Task<bool> ExistingCompany(Company company)
         {

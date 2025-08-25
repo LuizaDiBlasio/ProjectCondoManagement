@@ -1,6 +1,7 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.UsersDb;
 
 namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
 {
@@ -11,5 +12,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
         Task<Response> LinkManager(List<CondominiumDto> condominiums);
 
         Task<List<Condominium>> GetCompanyCondominiums(List<int> condominiumsIds);
+
+        Task UpdateCondominiumsCompanyId(Company company);
     }
 }

@@ -35,9 +35,6 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
                                      .Where(c => condominiumsIds.Contains(c.Id))
                                      .ToListAsync();
 
-            var condosWithCondoManager = new List<Condominium>();
-
-
             return companyCondominiums;
         }
 
@@ -85,6 +82,42 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             }
 
 
+        }
+
+        public async Task UpdateCondominiumsCompanyId(Company company)
+        {
+            var newCondoIds = company.CondominiumIds ?? new List<int>();
+
+            //buscar condos da company
+            var currentCompanyCondos = 
+                 GetAll(_dataContextCondos)
+                .Where(c => c.CompanyId == company.Id)
+                .ToList();
+
+            //caso tenha que remover
+            var condosToRemove = currentCompanyCondos
+                    .Where(c => !newCondoIds.Contains(c.Id))
+                    .ToList();
+
+            // fazer update da remoção
+            foreach (var condo in condosToRemove)
+            {
+                condo.CompanyId = null;
+                await UpdateAsync(condo, _dataContextCondos);
+            }
+
+            //condos adicionados
+            var condosToAdd = 
+                    GetAll(_dataContextCondos)
+                    .Where(c => newCondoIds.Contains(c.Id) && c.CompanyId != company.Id)
+                    .ToList();
+
+            // Update adição
+            foreach (var condo in condosToAdd)
+            {
+                condo.CompanyId = company.Id;
+                await UpdateAsync(condo, _dataContextCondos);
+            }
         }
 
     }

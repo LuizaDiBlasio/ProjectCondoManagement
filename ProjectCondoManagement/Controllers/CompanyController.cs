@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
@@ -114,9 +115,6 @@ namespace ProjectCondoManagement.Controllers
                         return NotFound(new Response { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
                     }
 
-                    //atribuir admin à company dto
-                    
-                    companyDto.CompanyAdminId = companyAdminUser.Id;
                 }
 
 
@@ -151,6 +149,8 @@ namespace ProjectCondoManagement.Controllers
 
                 await _companyRepository.CreateAsync(company, _contextUsers);
 
+
+               
 
                 //atribuir company à condos 
 
@@ -225,15 +225,25 @@ namespace ProjectCondoManagement.Controllers
                     return BadRequest(new Response { IsSuccess = false, Message = "Unable to edit company, record not found." });
                 }
 
-                if (company.Condominiums.Any())
+                //atualizar companyId no user
+
+                if (company.CompanyAdminId != null)
                 {
-                    foreach (var condo in company.Condominiums)
+                    var companyAdminUser = await _userHelper.GetUserByIdAsync(company.CompanyAdminId);
+
+                    if (companyAdminUser == null)
                     {
-                        condo.CompanyId = company.Id;
-                        await _condominiumRepository.UpdateAsync(condo, _contextCondos);    
+                        return NotFound(new Response { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
                     }
+
+                    companyAdminUser.CompanyId = company.Id;
+
+                    await _userHelper.UpdateUserAsync(companyAdminUser);
                 }
-                
+
+                // Atualizar CompanyId de Condominiums
+
+                await _condominiumRepository.UpdateCondominiumsCompanyId(company);
 
                 await _companyRepository.UpdateAsync(company, _contextUsers);
 
@@ -245,6 +255,8 @@ namespace ProjectCondoManagement.Controllers
             }
         }
 
+
+      
 
         /// <summary>
          /// Deletes a company by its unique identifier.
@@ -258,17 +270,18 @@ namespace ProjectCondoManagement.Controllers
         [HttpDelete("DeleteCompany/{id}")]
         public async Task<IActionResult> DeleteCompany(int id)
         {
-            var company = await _companyRepository.GetByIdAsync(id, _contextUsers);
-
-            if (company == null)
-            {
-                return NotFound();
-            }
+           
 
             try
             {
-                
-                if (!company.Condominiums.Any() && company.CompanyAdminId == null)
+                var company = await _companyRepository.GetByIdAsync(id, _contextUsers);
+
+                if (company == null)
+                {
+                    return NotFound();
+                }
+
+                if ((company.CondominiumIds == null || !company.CondominiumIds.Any()) && company.CompanyAdminId == null)
                 {
                     await _companyRepository.DeleteAsync(company, _contextUsers);
                     return Ok();
@@ -284,11 +297,11 @@ namespace ProjectCondoManagement.Controllers
             }
 
         }
+  
 
+        //Metodos auxiliares
 
-
-
-        [HttpGet("LoadAdminsAndCondos")]
+        [HttpGet("LoadAdminsAndCondosLists")]
         public async Task<IActionResult> LoadAdminsAndCondosLists()
         {
             var condosList = await _companyRepository.GetCondosSelectListAsync(_contextCondos);
@@ -296,6 +309,28 @@ namespace ProjectCondoManagement.Controllers
             var adminsList = await _companyRepository.GetCompanyAdminsSelectListAsync();
 
             return Ok(new AdminsAndCondosDto { Admins = adminsList, Condos = condosList});
+        }
+
+
+        [HttpGet("LoadAdminsAndCondosToEdit/{id}")]
+        public async Task<IActionResult> LoadAdminsAndCondosToEdit(int id)
+        {
+            var condosList = await _companyRepository.GetCondosSelectListAsync(_contextCondos);
+
+            var adminsList = await _companyRepository.GetCompanyAdminsSelectListToEdit(id);
+
+            return Ok(new AdminsAndCondosDto { Admins = adminsList, Condos = condosList });
+        }
+
+
+        [HttpGet("LoadAdminsAndCondosToCreate")]
+        public async Task<IActionResult> LoadAdminsAndCondosToCreate()
+        {
+            var condosList = await _companyRepository.GetCondosSelectListAsyncToCreate(_contextCondos);
+
+            var adminsList = await _companyRepository.GetCompanyAdminsSelectListAsync();
+
+            return Ok(new AdminsAndCondosDto { Admins = adminsList, Condos = condosList });
         }
 
 
@@ -327,6 +362,10 @@ namespace ProjectCondoManagement.Controllers
 
             return Ok(companyCondominiumsDtos); 
         }
+
+
+        
+
 
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
@@ -15,7 +16,7 @@ namespace ClassLibrary.DtoModels
 
         public UserDto? CompanyAdmin { get; set; }
 
-        public string? CompanyAdminId { get; set; }    
+        public string? CompanyAdminId { get; set; }
 
         public IEnumerable<CondominiumDto>? CondominiumDtos { get; set; }
 

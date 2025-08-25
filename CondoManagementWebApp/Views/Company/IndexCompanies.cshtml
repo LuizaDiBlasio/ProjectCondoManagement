@@ -29,9 +29,9 @@ else
                     <td>@item.Email</td>
                     <td>@item.TaxIdDocument</td>
                     <td>
-                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-secondary" }) 
+                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-outline-secondary" }) 
 
-                        @Html.ActionLink("Details", "Details", new { id = item.Id }, new { @class = "btn btn-primary" }) 
+                        @Html.ActionLink("Details", "Details", new { id = item.Id }, new { @class = "btn btn-outline-primary" }) 
 
                         <a href="#" class="btn btn-danger " data-id="@item.Id" data-bs-toggle="modal" data-bs-target="#deleteDialog">Delete</a>
                     </td>

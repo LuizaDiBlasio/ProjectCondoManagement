@@ -92,7 +92,7 @@ namespace CondoManagementWebApp.Controllers
             try
             {
                 //Buscar selectList de condominiums 
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondos");
+                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosToCreate");
 
                 var model = new CreateEditCompanyViewModel()
                 {
@@ -148,17 +148,16 @@ namespace CondoManagementWebApp.Controllers
         public async  Task<Microsoft.AspNetCore.Mvc.ActionResult> Edit(int id)
         {
             try
-            {
-                //Buscar selectList de condominiums 
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosLists");
-
-                
+            {  
                 var companyDto = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{id}");
 
                 if (companyDto == null)
                 {
                     return View("NotFound");
                 }
+
+                //Buscar selectList de condominiums 
+                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>($"api/Company/LoadAdminsAndCondosToEdit/{id}");
 
                 //buscar condos que contenham a id desta company com CompanyId
 
@@ -212,7 +211,7 @@ namespace CondoManagementWebApp.Controllers
                 }
 
                 //Buscar selectList de condominiums 
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondos");
+                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosLists");
 
                 model.CondominiumsToSelect = selectLists.Condos;
                 model.CompanyAdminsToSelect = selectLists.Admins;

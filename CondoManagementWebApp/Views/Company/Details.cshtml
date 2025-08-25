@@ -124,7 +124,6 @@
                                                         <tr>
                                                             <th>Name</th>
                                                             <th>Address</th>
-                                                            <th>Condo Manager</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -133,16 +132,7 @@
                                                             <tr>
                                                                 <td>@Html.DisplayFor(modelItem => item.CondoName)</td>
                                                                 <td>@Html.DisplayFor(modelItem => item.Address)</td>
-                                                                <td>
-                                                                @if (item.ManagerUser != null)
-                                                                {
-                                                                    @Html.DisplayFor(modelItem => item.ManagerUser.FullName)
-                                                                }
-                                                                else
-                                                                {
-                                                                    <span>No condo manager assigned yet</span>
-                                                                }
-                                                                </td>
+                                                                
                                                             </tr>
                                                         }
                                                     </tbody>
