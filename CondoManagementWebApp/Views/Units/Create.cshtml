@@ -1,0 +1,59 @@
+﻿@model CondoManagementWebApp.Models.UnitDtoViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>UnitDto</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            @if(Model.MemberId != null)
+            {
+                <input type="hidden" name="MemberId" value="@Model.MemberId.Value" />
+            }
+            
+
+            @if (Model.CondoId != null)
+            {
+                <input type="hidden" name="CondominiumId" value="@Model.CondoId.Value" />
+            }
+            else
+            {
+                <div class="form-group">
+                    <label asp-for="CondominiumId" class="control-label"></label>
+                    <select asp-for="CondominiumId" asp-items="@Model.Condos" class="form-control"></select>
+                    <span asp-validation-for="CondominiumId" class="text-danger"></span>
+                </div>
+            }
+           
+            <div class="form-group">
+                <label asp-for="Floor" class="control-label"></label>
+                <input asp-for="Floor" class="form-control" />
+                <span asp-validation-for="Floor" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Bedrooms" class="control-label"></label>
+                <input asp-for="Bedrooms" class="form-control" />
+                <span asp-validation-for="Bedrooms" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Door" class="control-label"></label>
+                <input asp-for="Door" class="form-control" />
+                <span asp-validation-for="Door" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-success" />
+                <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+

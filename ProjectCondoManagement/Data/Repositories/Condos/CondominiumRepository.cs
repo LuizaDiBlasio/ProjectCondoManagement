@@ -19,14 +19,17 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             _userHelper = userHelper;
             _converterHelper = converterHelper;
         }
-        public async Task<Response> LinkManager(List<CondominiumDto> condominiums)
+
+  
+
+        public async Task<Response<object>> LinkManager(List<CondominiumDto> condominiums)
         {
             try
             {
                 IEnumerable<User> managers = await  _userHelper.GetUsersByRoleAsync("CondoManager");
                 if (managers == null || !managers.Any())
                 {
-                    return new Response
+                    return new Response<object>
                     {
                         IsSuccess = false,
                         Message = "No managers found"
@@ -45,7 +48,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
                     }
                 }
 
-                return new Response
+                return new Response<object>
                 {
                     IsSuccess = true,
                     Message = "Images linked successfully"
@@ -54,7 +57,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             catch (Exception ex)
             {
 
-                return new Response
+                return new Response<object>
                 {
                     IsSuccess = false,
                     Message = $"Error linking images: {ex.Message}"

@@ -103,7 +103,7 @@ namespace CondoManagementWebApp.Controllers
             {
                 var companyDto = _converterHelper.ToCompanyDto( model);
 
-                var apiCall = await _apiCallService.PostAsync<CompanyDto, Response>("api/Company/PostCompany",companyDto);
+                var apiCall = await _apiCallService.PostAsync<CompanyDto, Response<object>>("api/Company/PostCompany",companyDto);
 
                 if (apiCall.IsSuccess)
                 {
@@ -166,7 +166,7 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var apiCall = await _apiCallService.PostAsync<CompanyDto, Response>($"api/Company/EditCompany", companyDto);
+                var apiCall = await _apiCallService.PostAsync<CompanyDto, Response<object>>($"api/Company/EditCompany", companyDto);
 
                 if (!apiCall.IsSuccess)
                 {
@@ -207,7 +207,7 @@ namespace CondoManagementWebApp.Controllers
                     return Json(new { success = true });
                 }
 
-                var responseBody = await apiCall.Content.ReadFromJsonAsync<Response>();
+                var responseBody = await apiCall.Content.ReadFromJsonAsync<Response<object>>();
 
                 // Retorna o JSON com a mensagem de erro da API
                 return Json(new { success = false, message = responseBody?.Message ?? "Unable to delete company due to error" });

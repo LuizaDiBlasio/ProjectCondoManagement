@@ -72,7 +72,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (user.IsActive == false)
             {
-                return Unauthorized(new Response { Message = "User is not active in the system, please contact admin" });
+                return Unauthorized(new Response<object> { Message = "User is not active in the system, please contact admin" });
             }
 
             var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login 
@@ -82,24 +82,33 @@ namespace ProjectCondoManagement.Controllers
             if (result.RequiresTwoFactor) //se login for bem sucedido
             {
                 var token = await _userHelper.GenerateTwoFactorTokenAsync(user, "Phone");
-
-                var response = await _smsHelper.SendSmsAsync("+351936752044", $"Your authentication code is: {token}");
-
-                if (response.IsSuccess)
+                try
                 {
-                    return Ok(new Response
+
+                    var response = await _smsHelper.SendSmsAsync("+351936752044", $"Your authentication code is: {token}");
+                    if (response.IsSuccess)
                     {
-                        Token = null,
-                        Expiration = null,
-                        Requires2FA = true,
-                        Role = null, // Não tem o role ainda aqui, precisa do 2FA.
-                        IsSuccess = true
-                    });
+                        return Ok(new  Response<object>
+                        {
+                            Token = null,
+                            Expiration = null,
+                            Requires2FA = true,
+                            Role = null, // Não tem o role ainda aqui, precisa do 2FA.
+                            IsSuccess = true
+                        });
+                    }
+                    else
+                    {
+                        return StatusCode(500, new { Message = "It was not possible to send SMS verification code" });
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    return StatusCode(500, new { Message = "It was not possible to send SMS verification code" });
+
+                    throw;
                 }
+
+                
             }
             else
             {
@@ -146,7 +155,7 @@ namespace ProjectCondoManagement.Controllers
                     var userRole = roles.First();
                     var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
 
-                    var results = new Response()
+                    var results = new Response<object>()
                     {
                         Token = tokenJwt,
                         Expiration = DateTime.UtcNow.AddDays(15),
@@ -178,7 +187,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (user == null)
             {
-                return StatusCode(404, new Response { Message = "User not found", IsSuccess = false });
+                return StatusCode(404, new Response<object> { Message = "User not found", IsSuccess = false });
             }
 
             string myToken = await _userHelper.GeneratePasswordResetTokenAsync(user); //gerar o token
@@ -186,7 +195,7 @@ namespace ProjectCondoManagement.Controllers
             // gera um link de confirmção para o email
             string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/RecoverPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
-            Response response = _mailHelper.SendEmail(email, "Retrieve your password", $"<h1>Retrieve your password</h1>" +
+            Response<object> response = _mailHelper.SendEmail(email, "Retrieve your password", $"<h1>Retrieve your password</h1>" +
            $"<br><br><a href = \"{tokenLink}\">Click here to reset your password</a>"); //Contruir email e enviá-lo com o link
 
             if (response.IsSuccess) //se conseguiu enviar o email
@@ -224,7 +233,7 @@ namespace ProjectCondoManagement.Controllers
             // gera um link de confirmção para o email
             string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/ResetPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
-            Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
+            Response<object> response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
            $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link
 
             if (response.IsSuccess) //se conseguiu enviar o email
@@ -233,7 +242,7 @@ namespace ProjectCondoManagement.Controllers
             }
 
             //se não conseguiu enviar email:
-            return StatusCode(500, new Response { IsSuccess = false, Message = "Internal server error: User not registered" });
+            return StatusCode(500, new Response<object> { IsSuccess = false, Message = "Internal server error: User not registered" });
         }
 
 
@@ -254,7 +263,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (user != null) 
             {
-                return StatusCode(409, new Response { Message = "User already exists, try registering wih new credentials", IsSuccess = false });
+                return StatusCode(409, new Response<object> { Message = "User already exists, try registering wih new credentials", IsSuccess = false });
             }
             else //criar user caso não exista
             {
@@ -287,16 +296,16 @@ namespace ProjectCondoManagement.Controllers
                 // gera um link de confirmção para o email
                 string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/ResetPassword?userId={newUser.Id}&tokenEmail={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
-                Response response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
+                Response<object> response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
                $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password. </a>"); //Contruir email e enviá-lo com o link 
 
                 if (response.IsSuccess) //se conseguiu enviar o email
                 {
-                    return StatusCode(200, new Response { Message = "User registered, a confirmation email has been sent", IsSuccess = true });
+                    return StatusCode(200, new Response<object> { Message = "User registered, a confirmation email has been sent", IsSuccess = true });
                 }
 
                 //se não conseguiu enviar email:
-                return StatusCode(500, new Response { Message = "User couldn't be logged", IsSuccess = false });
+                return StatusCode(500, new Response<object> { Message = "User couldn't be logged", IsSuccess = false });
             }   
         }
 
@@ -317,20 +326,20 @@ namespace ProjectCondoManagement.Controllers
 
             if (user == null)
             {
-                return StatusCode(404, new Response { Message = "User not found", IsSuccess = false });
+                return StatusCode(404, new Response<object> { Message = "User not found", IsSuccess = false });
             }
 
             var response = await _userHelper.ConfirmEmailAsync(user, resetPasswordDto.Token); //resposta do email, ver se user e token dão match
 
             if (!response.Succeeded)
             {
-                return StatusCode(404, new Response { Message = "User not found", IsSuccess = false });
+                return StatusCode(404, new Response<object> { Message = "User not found", IsSuccess = false });
             }
 
             //gerar token
             var passwordToken = await _userHelper.GeneratePasswordResetTokenAsync(user);
 
-            return StatusCode(200, new Response { Token = passwordToken, IsSuccess = true });
+            return StatusCode(200, new Response<object> { Token = passwordToken, IsSuccess = true });
         }
 
 
@@ -349,18 +358,18 @@ namespace ProjectCondoManagement.Controllers
 
             if (user == null)
             {
-                return StatusCode(404, new Response { Message = "User not found", IsSuccess = false });
+                return StatusCode(404, new Response<object> { Message = "User not found", IsSuccess = false });
             }
 
             var resetPassword = await _userHelper.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.Password);
 
             if (resetPassword.Succeeded)
             {
-                return StatusCode(200, new Response { Message = "Password reset successfully, you can login now", IsSuccess = true });
+                return StatusCode(200, new Response<object> { Message = "Password reset successfully, you can login now", IsSuccess = true });
             }
             else
             {
-                return StatusCode(400, new Response { Message = "An unexpected error occurred while resetting password, please try again", IsSuccess = false });
+                return StatusCode(400, new Response<object> { Message = "An unexpected error occurred while resetting password, please try again", IsSuccess = false });
             }   
         }
 
@@ -386,16 +395,16 @@ namespace ProjectCondoManagement.Controllers
 
                 if (result.Succeeded)
                 {
-                    return StatusCode(200, new Response() { IsSuccess = true, Message = "Your password has been changed."});
+                    return StatusCode(200, new Response<object>() { IsSuccess = true, Message = "Your password has been changed."});
                 }
                 else
                 {
-                    return StatusCode(400, new Response() { IsSuccess = false, Message = "Unable to change password" });
+                    return StatusCode(400, new Response<object>() { IsSuccess = false, Message = "Unable to change password" });
                 }
             }
             else //se for nulo
             {
-                return StatusCode(404, new Response() { IsSuccess = false, Message = "Unable to change password" });
+                return StatusCode(404, new Response<object>() { IsSuccess = false, Message = "Unable to change password" });
             }
         }
 
@@ -541,7 +550,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (editedUser == null)
             {
-                return NotFound(new Response { IsSuccess = false, Message = "Unable to update, user not found in the system"});
+                return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to update, user not found in the system"});
             }
 
             await _userHelper.UpdateUserAsync(editedUser); 
@@ -552,15 +561,15 @@ namespace ProjectCondoManagement.Controllers
 
                 if (condomember == null)
                 {
-                    return NotFound(new Response { IsSuccess = false, Message = "Unable to update, user not found in the system" });
+                    return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to update, user not found in the system" });
                 }
 
                 await _condoMemberRepository.UpdateAsync(condomember, _dataContextCondos);
 
-                return Ok(new Response { IsSuccess = true });
+                return Ok(new Response<object> { IsSuccess = true });
             }
 
-            return Ok(new Response { IsSuccess = true});
+            return Ok(new Response<object> { IsSuccess = true});
         }
 
 

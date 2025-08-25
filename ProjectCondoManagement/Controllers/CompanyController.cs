@@ -91,7 +91,7 @@ namespace ProjectCondoManagement.Controllers
         {
             if (companyDto == null)
             {
-                return BadRequest(new Response { IsSuccess = false, Message = "System error" });
+                return BadRequest(new Response<object> { IsSuccess = false, Message = "System error" });
             }
 
 
@@ -103,7 +103,7 @@ namespace ProjectCondoManagement.Controllers
 
                     if (companyAdminUserDto == null)
                     {
-                        return NotFound(new Response { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
+                        return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
                     }
 
                     //atribuir admin à company dto
@@ -117,12 +117,12 @@ namespace ProjectCondoManagement.Controllers
 
                 if (company == null)
                 {
-                    return BadRequest(new Response{ IsSuccess = false, Message = "Conversion failed. Invalid data." });
+                    return BadRequest(new Response<object> { IsSuccess = false, Message = "Conversion failed. Invalid data." });
                 }
 
                 if (await _companyRepository.ExistingCompany(company))
                 {
-                    return Conflict(new Response {IsSuccess = false, Message ="Company already registered"});
+                    return Conflict(new Response<object> { IsSuccess = false, Message ="Company already registered"});
                 }
 
 
@@ -142,7 +142,7 @@ namespace ProjectCondoManagement.Controllers
 
                 await _companyRepository.CreateAsync(company, _contextUsers);
 
-                return Ok(new Response { IsSuccess = true});
+                return Ok(new Response<object> { IsSuccess = true});
             }
             catch (Exception ex)
             {
@@ -180,16 +180,16 @@ namespace ProjectCondoManagement.Controllers
 
                 if (company == null)
                 {
-                    return BadRequest(new Response { IsSuccess = false, Message = "Unable to edit company, record not found." });
+                    return BadRequest(new Response<object> { IsSuccess = false, Message = "Unable to edit company, record not found." });
                 }
 
                 await _companyRepository.UpdateAsync(company, _contextUsers);
 
-                return Ok(new Response { IsSuccess = true, Message = "Company details updated successfully!" });
+                return Ok(new Response<object> { IsSuccess = true, Message = "Company details updated successfully!" });
             }
             catch (Exception)
             {
-                return BadRequest(new Response { IsSuccess = false, Message = "Unable to edit company due to internal error" });
+                return BadRequest(new Response<object> { IsSuccess = false, Message = "Unable to edit company due to internal error" });
             }
         }
 
@@ -210,7 +210,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (company == null)
             {
-                return NotFound(new Response { IsSuccess = false, Message = "Unable to delete company, record not found." });
+                return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to delete company, record not found." });
             }
 
             try
@@ -222,7 +222,7 @@ namespace ProjectCondoManagement.Controllers
                     return Ok();
                 }
 
-                return Conflict(new Response { IsSuccess = false, Message = "Unable to delete company due to conflict: company still associated with users or condominiuns." });
+                return Conflict(new Response<object> { IsSuccess = false, Message = "Unable to delete company due to conflict: company still associated with users or condominiuns." });
                 
                   
             }

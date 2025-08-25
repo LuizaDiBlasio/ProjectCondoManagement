@@ -9,10 +9,10 @@ using ProjectCondoManagement.Data.Entites.UsersDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.UsersDb
+namespace ProjectCondoManagement.Migrations.DataContextUsersMigrations
 {
     [DbContext(typeof(DataContextUsers))]
-    [Migration("20250818151050_InitCreate")]
+    [Migration("20250820110205_InitCreate")]
     partial class InitCreate
     {
         /// <inheritdoc />

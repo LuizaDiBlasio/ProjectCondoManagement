@@ -95,6 +95,9 @@ builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
 
 builder.Services.AddScoped<ICondominiumRepository, CondominiumRepository>();
 
+builder.Services.AddScoped<IUnitRepository, UnitRepository>();
+
+
 builder.Services.AddHttpClient();
 
 builder.Services.AddAuthorization(options =>

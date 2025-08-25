@@ -31,15 +31,15 @@ namespace ProjectCondoManagement.Helpers
                 Address = condoMemberDto.Address,
                 BirthDate = condoMemberDto.BirthDate,
                 PhoneNumber = condoMemberDto.PhoneNumber,
-                ImageUrl = condoMemberDto.ImageUrl,
+                ImageUrl = condoMemberDto.ImageUrl
             };
 
             return condoMember;
         }
 
-        public CondoMemberDto ToCondoMemberDto(CondoMember condoMember)
+        public CondoMemberDto ToCondoMemberDto(CondoMember condoMember, bool includeUnits = true)
         {
-            var condoMemberDto = new CondoMemberDto
+            var dto = new CondoMemberDto
             {
                 Id = condoMember.Id,
                 FullName = condoMember.FullName,
@@ -50,7 +50,14 @@ namespace ProjectCondoManagement.Helpers
                 ImageUrl = condoMember.ImageUrl
             };
 
-            return condoMemberDto;
+            if (includeUnits)
+            {
+                dto.Units = condoMember.Units?
+                    .Select(u => ToUnitDto(u, includeCondoMembers: false))
+                    .ToList() ?? new List<UnitDto>();
+            }
+
+            return dto;
         }
 
         public CondoMemberDto ToCondoMemberDto(User user)
@@ -229,9 +236,6 @@ namespace ProjectCondoManagement.Helpers
                 CompanyId = condominium.CompanyId.Value,
                 Address = condominium.Address,
                 ManagerUserId = condominium.ManagerUserId,
-                Units = condominium.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),
-                Documents = condominium.Documents?.Select(d => ToDocumentDto(d)).ToList() ?? new List<DocumentDto>(),
-                Occurrences = condominium.Occurrences?.Select(o => ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>()
             };
 
             return condominiumDto;
@@ -270,29 +274,35 @@ namespace ProjectCondoManagement.Helpers
             var unit = new Unit()
             {
                 Id = isNew ? 0 : unitDto.Id,
-                Condominium = ToCondominium(unitDto.CondominiumDto, false),
+                CondominiumId = unitDto.CondominiumId,
                 Floor = unitDto.Floor,
                 Door = unitDto.Door,
-                Occurrences = unitDto.OccurrenceDtos?.Select(o => ToOccurrence(o, false)).ToList() ?? new List<Occurrence>(),
-                CondoMembers = unitDto.CondoMemberDtos?.Select(c => ToCondoMember(c)).ToList() ?? new List<CondoMember>()
+                Bedrooms = unitDto.Bedrooms
             };
 
             return unit;
         }
 
-        public UnitDto ToUnitDto(Unit unit)
+        public UnitDto ToUnitDto(Unit unit, bool includeCondoMembers = true)
         {
-            var unitDto = new UnitDto()
+            var dto = new UnitDto
             {
                 Id = unit.Id,
-                CondominiumDto = ToCondominiumDto(unit.Condominium),
+                Bedrooms = unit.Bedrooms,
+                CondominiumId = unit.CondominiumId,
                 Floor = unit.Floor,
                 Door = unit.Door,
-                OccurrenceDtos = unit.Occurrences?.Select(o => ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>(),
-                CondoMemberDtos = unit.CondoMembers?.Select(c => ToCondoMemberDto(c)).ToList() ?? new List<CondoMemberDto>()
+                CondominiumDto = ToCondominiumDto(unit.Condominium)
             };
 
-            return unitDto;
+            if (includeCondoMembers)
+            {
+                dto.CondoMemberDtos = unit.CondoMembers?
+                    .Select(cm => ToCondoMemberDto(cm, includeUnits: false)) // ⚠️ corta aqui
+                    .ToList() ?? new List<CondoMemberDto>();
+            }
+
+            return dto;
         }
 
         public Document ToDocument(DocumentDto documentDto, bool isNew)

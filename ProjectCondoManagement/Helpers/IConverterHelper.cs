@@ -10,7 +10,7 @@ namespace ProjectCondoManagement.Helpers
 
         public CondoMember ToCondoMember(CondoMemberDto condoMemberDto);
 
-       public CondoMemberDto ToCondoMemberDto(CondoMember condoMember);
+        public CondoMemberDto ToCondoMemberDto(CondoMember condoMember, bool includeUnits = true);
 
        public CondoMemberDto ToCondoMemberDto(User user);
 
@@ -36,7 +36,7 @@ namespace ProjectCondoManagement.Helpers
 
         public Unit ToUnit(UnitDto unitDto, bool isNew);
 
-        public UnitDto ToUnitDto(Unit unit);
+        public UnitDto ToUnitDto(Unit unit, bool includeCondoMembers = true);
 
         public Document ToDocument(DocumentDto documentDto, bool isNew);
 

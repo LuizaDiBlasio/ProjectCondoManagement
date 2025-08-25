@@ -17,6 +17,10 @@
 
 </head>
 <body>
+
+    
+
+
     <div id="preloader">
         <div class="sk-three-bounce">
             <div class="sk-child sk-bounce1"></div>
@@ -29,8 +33,8 @@
         <div class="nav-header">
             <a href="/" class="brand-logo">
                 <img class="logo-abbr" src="~/images/logo.png" alt="Logo" />
-                <img class="logo-compact" src="~/images/logo-text.png" alt="Logo Text" />
-                <img class="brand-title" src="~/images/logo-text.png" alt="Brand Title" />
+               @*  <img class="logo-compact" src="~/images/logo-text.png" alt="Logo Text" />
+                <img class="brand-title" src="~/images/logo-text.png" alt="Brand Title" /> *@
             </a>
             <div class="nav-control">
                 <div class="hamburger">
@@ -98,6 +102,7 @@
                         </a>
                         <ul aria-expanded="false">
                             <li><a asp-controller="Condominium" asp-action="Index">Condominiums</a></li>
+                            <li><a asp-controller="Units" asp-action="Index">Units</a></li>
                             <li><a asp-controller="CondoMember" asp-action="Index">Condo Members</a></li>                            
                         </ul>
                     </li>
@@ -170,6 +175,7 @@
 
         <div class="content-body">
             <div class="container-fluid">
+                <flash dismissable="true" />
                 @RenderBody()
             </div>
         </div>

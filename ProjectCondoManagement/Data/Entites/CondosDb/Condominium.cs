@@ -9,8 +9,6 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
     {
         public int Id { get; set; }
 
-        public string Name { get; set; }    
-
         public int? CompanyId { get; set; }
 
         [NotMapped]
@@ -24,8 +22,6 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         [NotMapped]
         public User? ManagerUser { get; set; }
-
-        public IEnumerable<CondoMember>? CondoMembers { get; set; }
 
         public IEnumerable<Unit>? Units { get; set; }
 

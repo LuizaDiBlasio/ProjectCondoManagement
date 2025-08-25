@@ -26,5 +26,6 @@ namespace CondoManagementWebApp.Helpers
         public CompanyDto ToCompanyDto(CreateEditCompanyViewModel model);
 
         public CreateEditCompanyViewModel ToCreateEditCompanyViewModel(CompanyDto editedCompany);
+        UnitDto ToUnitDto(UnitDtoViewModel model);
     }
 }

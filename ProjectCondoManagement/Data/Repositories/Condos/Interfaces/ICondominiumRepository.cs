@@ -6,6 +6,6 @@ namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
 {
     public interface ICondominiumRepository : IGenericRepository<Condominium, DataContextCondos>
     {
-        Task<Response> LinkManager(List<CondominiumDto> condominiums);
+        Task<Response<object>> LinkManager(List<CondominiumDto> condominiums);
     }
 }

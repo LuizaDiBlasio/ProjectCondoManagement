@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 
@@ -11,9 +12,11 @@ using ProjectCondoManagement.Data.Entites.CondosDb;
 namespace ProjectCondoManagement.Migrations.CondosDb
 {
     [DbContext(typeof(DataContextCondos))]
-    partial class DataContextCondosModelSnapshot : ModelSnapshot
+    [Migration("20250820131848_CondominiumAndUnitAreNullable")]
+    partial class CondominiumAndUnitAreNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,6 +85,12 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("CondominiumId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConduminiumId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -104,6 +113,8 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CondominiumId");
 
                     b.ToTable("CondoMembers");
                 });
@@ -240,9 +251,6 @@ namespace ProjectCondoManagement.Migrations.CondosDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Bedrooms")
-                        .HasColumnType("int");
-
                     b.Property<int>("CondominiumId")
                         .HasColumnType("int");
 
@@ -357,6 +365,15 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.CondoMember", b =>
+                {
+                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Condominium", "Condominium")
+                        .WithMany("CondoMembers")
+                        .HasForeignKey("CondominiumId");
+
+                    b.Navigation("Condominium");
+                });
+
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Document", b =>
                 {
                     b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Condominium", null)
@@ -433,6 +450,8 @@ namespace ProjectCondoManagement.Migrations.CondosDb
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Condominium", b =>
                 {
+                    b.Navigation("CondoMembers");
+
                     b.Navigation("Documents");
 
                     b.Navigation("Meetings");

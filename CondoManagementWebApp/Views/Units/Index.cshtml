@@ -1,0 +1,117 @@
+﻿@model IEnumerable<ClassLibrary.DtoModels.UnitDto>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>
+    Units
+    @if (ViewBag.CondominiumId != null)
+    {
+        @: from @Model.FirstOrDefault()?.CondominiumDto?.CondoName
+    }
+</h1>
+
+<p>
+    @if (ViewBag.CondominiumId != null)
+    {
+        <a asp-action="Create" class="btn btn-success" asp-route-id="@ViewBag.CondominiumId">Add Unit</a>
+        <a asp-controller="Condominium" asp-action="Index"  class="btn btn-outline-primary">Back to Condominiums</a>
+ 
+    }
+   
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            @if (ViewBag.CondominiumId == null)
+            {
+             <th>
+                @Html.DisplayNameFor(model => model.CondominiumDto)
+             </th>
+            }
+
+            <th>
+                @Html.DisplayNameFor(model => model.Floor)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Door)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Bedrooms)
+            </th>
+
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            @if (ViewBag.CondominiumId == null)
+            {
+                <th>
+                        @Html.DisplayFor(modelItem => item.CondominiumDto.CondoName)
+                </th>
+            }
+            <td>
+                @Html.DisplayFor(modelItem => item.Floor)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Door)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Bedrooms)
+            </td>
+            <td>
+                    <a class="btn btn-secondary" asp-action="AssignMember" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId">Manage Members</a>
+                <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId">Edit</a>
+                <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId">Details</a>
+                <a class="btn btn-danger" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@item.Id">Delete</a>
+                
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+<div id="deleteDialog" class="modal fade">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Unit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this unit?</p>
+                <form id="deleteForm" method="post" asp-action="Delete">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="unitIdToDelete" name="id" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger" form="deleteForm">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('a[data-bs-target="#deleteDialog"]').click(function () {
+                var id = $(this).data('id');
+                $('#unitIdToDelete').val(id);
+            });
+        });
+    </script>
+}

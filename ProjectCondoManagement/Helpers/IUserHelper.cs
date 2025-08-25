@@ -39,7 +39,7 @@ namespace ProjectCondoManagement.Helpers
 
         Task CreateRolesAsync(); //cria roles
 
-        Task<Response> DeactivateUserAsync(User user);
+        Task<Response<object>> DeactivateUserAsync(User user);
 
         Task<SignInResult> ValidatePasswordAsync(User user, string password); //não faz login, só valida a password para acesso à API
 

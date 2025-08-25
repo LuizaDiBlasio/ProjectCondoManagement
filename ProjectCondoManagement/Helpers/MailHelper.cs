@@ -24,7 +24,7 @@ namespace ProjectCondoManagement.Helpers
         /// If successful,"Response.IsSuccess" will be "true".
         /// If an error occurs, "Response.IsSuccess" will be "false" and "Response.Message" will contain the exception details.
         /// </returns>
-        public Response SendEmail(string to, string subject, string body)
+        public Response<object> SendEmail(string to, string subject, string body)
         {
             //buscar dados
             var nameFrom = _configuration["Mail:NameFrom"];
@@ -58,7 +58,7 @@ namespace ProjectCondoManagement.Helpers
             }
             catch (Exception ex)
             {
-                return new Response
+                return new Response<object>
                 {
                     IsSuccess = false,
                     Message = ex.ToString()
@@ -67,7 +67,7 @@ namespace ProjectCondoManagement.Helpers
             }
 
             //se executar o try, correu bem
-            return new Response
+            return new Response<object>
             {
                 IsSuccess = true
             };
