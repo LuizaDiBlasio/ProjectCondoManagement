@@ -77,6 +77,10 @@ builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
 
 builder.Services.AddScoped<ISmsHelper, SmsHelper>();
 
+builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+
 builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
 
 builder.Services.AddScoped<ICondominiumRepository, CondominiumRepository>();    
@@ -90,6 +94,8 @@ builder.Services.AddScoped<IMailHelper, MailHelper>();
 builder.Services.AddScoped<ICondominiumHelper, CondominiumHelper>();
 
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
 builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
 

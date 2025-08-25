@@ -127,6 +127,9 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("FinancialAccountId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ManagerUserId")
                         .HasColumnType("nvarchar(max)");
 

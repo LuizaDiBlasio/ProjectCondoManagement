@@ -1,0 +1,109 @@
+﻿
+
+@model IEnumerable<ClassLibrary.DtoModels.MessageDto>
+
+@{
+    ViewData["Title"] = "Sent Messages";
+}
+
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Sent Messages</h1>
+    <div>
+        <a asp-controller="Message" asp-action="CreateMessage" class="btn btn-primary">New</a>
+        <a asp-controller="Message" asp-action="IndexReceived" class="btn btn-secondary">Inbox</a>
+    </div>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Sent to</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @* Itera sobre as mensagens enviadas *@
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.MessageTitle)</td>
+                    <td>@item.PostingDate?.ToString("MM/dd/yyyy HH:mm")</td>
+                    <td>@Html.DisplayFor(modelItem => item.ReceiverEmail)</td>
+                    <td>
+                        <a asp-controller="Message" asp-action="MessageDetails" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">Resolve</a>
+                        <a href="#" class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No sent messages</p>
+}
+
+<!-- Modal de Confirmação de Exclusão -->
+<div id="deleteDialog" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this message?</p>
+                <div id="delete-error-message" class="text-danger"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnNoDelete">Cancel</button>
+                <button type="button" class="btn btn-danger" id="btnYesDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+           
+            // Adiciona o ID da mensagem para a modal de deleção
+            var idToDelete = 0;
+            $('a.delete-btn').click(function (e) {
+                e.stopPropagation(); // Impede o evento de clique da linha de ser disparado
+                idToDelete = $(this).data('id');
+                // Limpa a mensagem de erro ao abrir a modal
+                $('#delete-error-message').text('').hide();
+            });
+
+            // Envia a requisição AJAX para deleção quando o botão "Delete" da modal é clicado
+            $("#btnYesDelete").click(function () {
+                console.log('ID to delete:', idToDelete);
+                $.ajax({
+                    url: '/Message/DeleteSentMessages/' + idToDelete,
+                    type: 'POST',
+                    success: function (response) {
+                        if (response.success) {
+                            $("#deleteDialog").modal('hide');
+                            window.location.reload(); // Recarrega a página após a exclusão bem-sucedida
+                        } else {
+                            // Exibe a mensagem de erro se a exclusão falhar
+                            $('#delete-error-message').text(response.message).show();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $("#deleteDialog").modal('hide');
+                        console.error('AJAX Error:', status, error, xhr.responseText);
+                        // Idealmente, você usaria uma modal de erro em vez de um alert
+                        alert('An unexpected error occurred. Please try again later.');
+                    }
+                });
+            });
+        });
+    </script>
+}

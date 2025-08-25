@@ -1,5 +1,6 @@
 ﻿using ClassLibrary.DtoModels;
 using CondoManagementWebApp.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace CondoManagementWebApp.Helpers
@@ -172,6 +173,35 @@ namespace CondoManagementWebApp.Helpers
 
             return model;   
         }
+
+        public MessageDto ToMessageDto(CreateMessageViewModel model, DateTime date, string email, EnumDto status)
+        {
+            var messageDto = new MessageDto()
+            {
+                Id = model.Id,
+                MessageTitle = model.MessageTitle,
+                MessageContent = model.MessageContent,
+                ReceiverEmail = model.ReceiverEmail,
+                PostingDate = date,
+                SenderEmail = email,
+                Status = status
+            };
+
+            return messageDto;
+        }
+
+        public ExpenseDto ToExpenseDto(CreateEditExpenseViewModel model)
+        {
+            var expenseDto = new ExpenseDto()
+            {
+                Id = model.Id,
+                Amount = model.Amount,
+                Detail = model.Detail,
+                ExpenseTypeDto = model.ExpenseTypeDto,
+            };
+            return expenseDto;  
+        }
+
 
         public UnitDto ToUnitDto(UnitDtoViewModel model)
         {

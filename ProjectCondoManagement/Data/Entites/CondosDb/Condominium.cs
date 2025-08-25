@@ -7,7 +7,7 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 {
     public class Condominium : IEntity
     {
-        public int Id { get; set; }
+        public int Id { get; set; }  
 
         public int? CompanyId { get; set; }
 
@@ -19,6 +19,8 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
         public string CondoName { get; set; }
 
         public string? ManagerUserId { get; set; }
+
+        public int? FinancialAccountId { get; set; } 
 
         [NotMapped]
         public User? ManagerUser { get; set; }

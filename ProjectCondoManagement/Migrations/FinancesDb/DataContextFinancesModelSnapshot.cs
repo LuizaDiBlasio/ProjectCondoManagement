@@ -33,6 +33,9 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("CondominiumId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Detail")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -58,8 +61,20 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AssociatedBankAccount")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BankName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CardNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("InitialDeposit")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -83,7 +98,7 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("UserEmail")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -115,7 +130,7 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("UserEmail")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -162,12 +177,13 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.FinancialAccount", "FinancialAccount")
                         .WithMany()
                         .HasForeignKey("FinancialAccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.Payment", "Payment")
                         .WithOne("Invoice")
-                        .HasForeignKey("ProjectCondoManagement.Data.Entites.FinancesDb.Invoice", "Id");
+                        .HasForeignKey("ProjectCondoManagement.Data.Entites.FinancesDb.Invoice", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("FinancialAccount");
 

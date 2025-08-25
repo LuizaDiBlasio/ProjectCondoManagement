@@ -30,7 +30,8 @@ namespace ProjectCondoManagement.Helpers
                 var messageResource = await MessageResource.CreateAsync(
                     to: new PhoneNumber(phoneNumber),
                     from: new PhoneNumber(twilioPhoneNumber),
-                    body: message
+                    body: message,
+                    riskCheck: MessageResource.RiskCheckEnum.Disable
                 );
 
                 //verificar status da mensagem

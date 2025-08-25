@@ -19,9 +19,9 @@ namespace ClassLibrary.DtoModels
 
         public string Email { get; set; }   
 
-        public DateTime? BirthDate { get; set; } 
+        public DateTime? BirthDate { get; set; }
 
-        public int? CompanyId { get; set; } 
+        public int? CompanyId { get; set; }
 
         public int? FinancialAccountId { get; set; } 
 

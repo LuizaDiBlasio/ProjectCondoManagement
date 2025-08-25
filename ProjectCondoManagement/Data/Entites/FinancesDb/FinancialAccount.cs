@@ -8,9 +8,17 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public decimal InitialDeposit { get; set; }
 
-        public IEnumerable<Transaction> TransactionsAsPayer { get; set; }
+        public bool IsActive { get; set; } = false;
 
-        public IEnumerable<Transaction> TransactionsAsBeneficiary { get; set; }
+        public string? CardNumber { get; set; }  
+
+        public string? AssociatedBankAccount { get; set; }   
+
+        public string? BankName { get; set; }    
+
+        public IEnumerable<Transaction>? TransactionsAsPayer { get; set; }
+
+        public IEnumerable<Transaction>? TransactionsAsBeneficiary { get; set; }
 
     }
 }

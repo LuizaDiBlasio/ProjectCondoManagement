@@ -55,7 +55,6 @@
                             <ul aria-expanded="false">
                                 <li><a asp-controller="Company" asp-action="IndexCompanies">All Companies</a></li>
                                 <li><a asp-controller="Company" asp-action="Create">Add Company</a></li>
-                                <li><a asp-controller="Message" asp-action="GetCompaniesMessages">Messages</a></li>
                             </ul>
                         </li>
                         <li>
@@ -65,7 +64,7 @@
                             </a>
                             <ul aria-expanded="false">
                                 <li><a asp-controller="Account" asp-action="Register">Register Users</a></li>
-                                <li><a asp-controller="Message" asp-action="GetUsersMessages">Messages</a></li>
+                                <li><a asp-controller="Account" asp-action="SysAdminDashboard">Manage Users</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -76,8 +75,83 @@
                 </div>
             </div>
         }
-        
 
+        @if (User.IsInRole("CondoManager"))
+        {
+            <div class="deznav">
+                <div class="deznav-scroll">
+                    <ul class="metismenu" id="menu">
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span class="nav-text">Finances</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
+                                <li><a asp-controller="Payment" asp-action="IndexPayments">Payments</a></li>
+                                <li><a asp-controller="Expense" asp-action="IndexExpenses">Expenses</a></li>
+                                <li><a asp-controller="FinancialAccount" asp-action="ActivateFinancialAccount">Activate account</a></li>
+                            </ul>
+                        </li>
+                      
+                    </ul>
+                    <div class="copyright">
+                        <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
+                        <p>by YourTeam</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (User.IsInRole("CompanyAdmin"))
+        {
+            <div class="deznav">
+                <div class="deznav-scroll">
+                    <ul class="metismenu" id="menu">
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span class="nav-text">Finances</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
+                            </ul>
+                        </li>
+
+                    </ul>
+                    <div class="copyright">
+                        <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
+                        <p>by YourTeam</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (User.IsInRole("CondoMember"))
+        {
+            <div class="deznav">
+                <div class="deznav-scroll">
+                    <ul class="metismenu" id="menu">
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span class="nav-text">Finances</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
+                                <li><a asp-controller="Payment" asp-action="GetPayments">My Payments</a></li>
+                                <li><a asp-controller="FinancialAccount" asp-action="ActivateFinancialAccount">Expenses</a></li>
+                            </ul>
+                        </li>
+
+                    </ul>
+                    <div class="copyright">
+                        <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
+                        <p>by YourTeam</p>
+                    </div>
+                </div>
+            </div>
+        }
 
         <div class="deznav">
             <div class="deznav-scroll">
@@ -146,7 +220,7 @@
                                             <i class="fa-solid fa-key text-light-blue me-2"></i>
                                             <span class="ms-2">Change Password</span>
                                         </a>
-                                        <a asp-controller="Message" asp-action="Inbox" class="dropdown-item ai-icon">
+                                        <a asp-controller="Message" asp-action="IndexReceived" class="dropdown-item ai-icon">
                                             <svg id="icon-inbox" class="text-success" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                                             <span class="ms-2">Inbox</span>
                                         </a>

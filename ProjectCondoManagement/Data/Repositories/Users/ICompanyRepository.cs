@@ -3,12 +3,12 @@ using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Data.Repositories.Users
 {
     public interface ICompanyRepository : IGenericRepository<Company, DataContextUsers>
     {
-        Task<Company> GetCompanyWithcCondosAndAdmin(int id, DataContextUsers contextUsers);
 
         Task<List<SelectListItem>> GetCondosSelectListAsync(DataContextCondos contextCondos);
 
@@ -17,5 +17,9 @@ namespace ProjectCondoManagement.Data.Repositories.Users
         Task<bool> ExistingCompany(Company company);
 
         Task<SelectedAdminAndCondosDto> SelectedAdminAndCondos(CompanyDto companyDto);
+
+        Task<List<SelectListItem>> GetCondosSelectListAsyncToCreate(DataContextCondos contextCondos);
+
+        Task<List<SelectListItem>> GetCompanyAdminsSelectListToEdit(int id);
     }
 }

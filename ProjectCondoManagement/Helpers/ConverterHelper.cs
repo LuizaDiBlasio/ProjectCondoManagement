@@ -1,6 +1,9 @@
 ﻿using ClassLibrary.DtoModels;
 using Humanizer;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.Enums;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using System.Threading.Tasks;
@@ -180,12 +183,13 @@ namespace ProjectCondoManagement.Helpers
                 Id = company.Id,
                 Name = company.Name,
                 CondominiumDtos = company.Condominiums?.Select(c => ToCondominiumDto(c)).ToList() ?? new List<CondominiumDto>(),
-                CompanyAdmin = ToUserDto(company.CompanyAdmin),
                 Email = company.Email,
                 Address = company.Address,
                 PhoneNumber = company.PhoneNumber,
                 TaxIdDocument = company.TaxIdDocument,
-                FinancialAccountId = company.FinancialAccountId
+                FinancialAccountId = company.FinancialAccountId,
+                SelectedCondominiumIds = company.CondominiumIds?.ToList()?? new List<int>(),
+                CompanyAdminId = company.CompanyAdminId,    
             };
 
             return companyDto;
@@ -198,12 +202,13 @@ namespace ProjectCondoManagement.Helpers
                 Id = isNew ? 0 : companyDto.Id,
                 Name = companyDto.Name,
                 Condominiums = companyDto.CondominiumDtos?.Select(c => ToCondominium(c, false)).ToList() ?? new List<Condominium>(),
-                CompanyAdmin = companyDto.CompanyAdmin == null ? null : ToUser(companyDto.CompanyAdmin),
+                CondominiumIds = companyDto.SelectedCondominiumIds,
                 Email = companyDto.Email,
                 Address = companyDto.Address,
                 PhoneNumber = companyDto.PhoneNumber,
                 TaxIdDocument = companyDto.TaxIdDocument,
-                FinancialAccountId = companyDto.FinancialAccountId
+                FinancialAccountId = companyDto.FinancialAccountId,  
+                CompanyAdminId = companyDto.CompanyAdminId,
             };
 
             return company;
@@ -218,9 +223,10 @@ namespace ProjectCondoManagement.Helpers
                 CompanyId = condominiumDto.CompanyId,
                 Address = condominiumDto.Address,
                 ManagerUserId = condominiumDto.ManagerUserId,
-                Units = condominiumDto.Units?.Select(u => ToUnit(u, false)).ToList() ?? new List<Unit>(),
-                Documents = condominiumDto.Documents?.Select(d => ToDocument(d, false)).ToList() ?? new List<Document>(),
-                Occurrences = condominiumDto.Occurrences?.Select(o => ToOccurrence(o, false)).ToList() ?? new List<Occurrence>()
+                Units = condominiumDto.Units?.Select(u => ToUnit(u,false)).ToList() ?? new List<Unit>(), 
+                Documents = condominiumDto.Documents?.Select(d => ToDocument(d,false)).ToList() ?? new List<Document>(),
+                Occurrences = condominiumDto.Occurrences?.Select(o => ToOccurrence(o,false)).ToList() ?? new List<Occurrence>(),
+                FinancialAccountId = condominiumDto.FinancialAccountId  
             };
 
             return condominium;
@@ -333,7 +339,7 @@ namespace ProjectCondoManagement.Helpers
             return documentDto;
         }
 
-        public MessageDto ToMessageDto(Message message)
+        public MessageDto ToMessageDto(Message message, List<SelectListItem>? statusList)
         {
             var messageDto = new MessageDto()
             {
@@ -343,10 +349,129 @@ namespace ProjectCondoManagement.Helpers
                 MessageContent = message.MessageContent,
                 SenderEmail = message.SenderEmail,
                 ReceiverEmail = message.ReceiverEmail,
-                Status = new EnumDto { Name = message.Status.ToString(), Value = (int)message.Status }
+                Status = new EnumDto { Name = message.Status.ToString(), Value = (int)message.Status },
+                StatusList = statusList,
+                DeletedBySender = message.DeletedBySender,
+                DeletedByReceiver = message.DeletedByReceiver
             };
 
             return messageDto;
         }
+
+        public Message ToMessage(MessageDto messageDto, bool isNew)
+        {
+            var message = new Message()
+            {
+                Id = isNew ? 0 : messageDto.Id,
+                PostingDate = messageDto.PostingDate.Value,
+                MessageTitle = messageDto.MessageTitle,
+                MessageContent = messageDto.MessageContent,
+                SenderEmail = messageDto.SenderEmail,
+                ReceiverEmail = messageDto.ReceiverEmail,
+                Status = (MessageStatus)messageDto.Status.Value,
+            };
+
+            return message; 
+        }
+
+        public PaymentDto ToPaymentDto(Payment payment, bool isNew)
+        {
+            var paymentDto = new PaymentDto()
+            {
+                Id = isNew ? 0 : payment.Id,
+                IssueDate = payment.IssueDate,
+                DueDate = payment.DueDate,  
+                PaymentMethod = payment.PaymentMethod,  
+                UserEmail = payment.UserEmail,  
+                IsPaid = payment.IsPaid,    
+                InvoiceDto = ToInvoiceDto(payment.Invoice, false),
+                ExpensesDto = payment.Expenses?.Select(e => ToExpenseDto(e, false)).ToList() ?? new List<ExpenseDto>(),
+                TransactionDto = ToTransactionDto(payment.Transaction, false),
+                
+            };  
+           
+            return paymentDto;
+        }
+
+
+        public InvoiceDto ToInvoiceDto(Invoice invoice, bool isNew)
+        {
+            var invoiceDto = new InvoiceDto()
+            {
+                Id = isNew ? 0 : invoice.Id,    
+                PaymentDate = invoice.PaymentDate,  
+                CondominiumId = invoice.CondominiumId,
+                AccountId = invoice.AccountId,
+                FinancialAccountDto = ToFinancialAccountDto(invoice.FinancialAccount, false),
+                UserEmail = invoice.UserEmail,
+                Payment = ToPaymentDto(invoice.Payment, false)
+            };
+            
+            return invoiceDto;
+        }
+
+
+        public ExpenseDto ToExpenseDto(Expense expense, bool isNew)
+        {
+            var expenseDto = new ExpenseDto()
+            {
+                Id = isNew ? 0 : expense.Id,
+                Amount = expense.Amount,
+                Detail = expense.Detail,
+                CondominiumId = expense.CondominiumId,
+                ExpenseTypeDto = new EnumDto { Name = expense.ExpenseType.ToString(), Value = (int)expense.ExpenseType },
+            };
+           return expenseDto;   
+        }
+
+        public TransactionDto ToTransactionDto(Transaction transaction, bool isNew)
+        {
+            var transactionDto = new TransactionDto()
+            {
+                Id = isNew ? 0 : transaction.Id,
+                DateAndTime = transaction.DateAndTime,
+                PayerAccountId = transaction.PayerAccountId,
+                AccountPayerDto = ToFinancialAccountDto(transaction.AccountPayer, false),   
+                BeneficiaryAccountId = transaction.BeneficiaryAccountId,
+                AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
+                CondominiumId = transaction.CondominiumId,
+                PaymentDto = ToPaymentDto(transaction.Payment, false),
+                
+            };
+            
+            return transactionDto;  
+        }
+
+        public FinancialAccountDto ToFinancialAccountDto(FinancialAccount financialAccount, bool isNew)
+        {
+            var financialAccountDto = new FinancialAccountDto()
+            {
+                Id = isNew ? 0 : financialAccount.Id,
+                InitialDeposit = financialAccount.InitialDeposit,
+                IsActive = financialAccount.IsActive,
+                CardNumber = financialAccount.CardNumber,
+                AssociatedBankAccount = financialAccount.AssociatedBankAccount,
+                BankName = financialAccount.BankName,
+                TransactionsAsBeneficiaryDto = financialAccount.TransactionsAsBeneficiary?.Select(tb => ToTransactionDto(tb, false)).ToList() ?? new List<TransactionDto>(),
+                TransactionsAsPayerDto = financialAccount.TransactionsAsPayer?.Select(tp => ToTransactionDto(tp, false)).ToList() ?? new List<TransactionDto>()
+            };
+            return financialAccountDto; 
+        }
+
+        public Expense ToExpense(ExpenseDto expenseDto, bool isNew)
+        {
+            var expense = new Expense()
+            {
+                Id = isNew ? 0 : expenseDto.Id,
+                Amount = expenseDto.Amount,
+                ExpenseType = (ExpenseType)expenseDto.ExpenseTypeDto.Value,
+                Detail = expenseDto.Detail,
+                CondominiumId = expenseDto.CondominiumId
+            };
+
+            return expense; 
+        }
+
     }
+    
 }

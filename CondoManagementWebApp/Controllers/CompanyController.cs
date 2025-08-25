@@ -5,6 +5,7 @@ using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Net;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Vereyon.Web;
@@ -49,6 +50,9 @@ namespace CondoManagementWebApp.Controllers
         {
             try
             {
+
+                var model = new CompanyDetailsViewModel();
+
                 var companyDto = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{id}");
 
                 if (companyDto == null)
@@ -56,7 +60,23 @@ namespace CondoManagementWebApp.Controllers
                     return View("NotFound");
                 }
 
-                return View(companyDto);    
+                model.CompanyDto = companyDto;
+
+                if(companyDto.CompanyAdminId != null)
+                {
+                    var companyAdmin = await _apiCallService.GetAsync<UserDto>($"api/Company/GetCompanyAdmin/{companyDto.CompanyAdminId}");
+
+                    model.CompanyAdmin = companyAdmin;
+                }
+
+                if(companyDto.CondominiumDtos != null)
+                {
+                    var companyCondominiums = await _apiCallService.PostAsync<CompanyDto, List<CondominiumDto>>("api/Company/GetCompanyCondominiums", companyDto);
+
+                    model.CondominiumDtos = companyCondominiums;
+                }
+
+                return View(model);    
             }
             catch
             {
@@ -72,7 +92,7 @@ namespace CondoManagementWebApp.Controllers
             try
             {
                 //Buscar selectList de condominiums 
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondos");
+                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosToCreate");
 
                 var model = new CreateEditCompanyViewModel()
                 {
@@ -128,15 +148,30 @@ namespace CondoManagementWebApp.Controllers
         public async  Task<Microsoft.AspNetCore.Mvc.ActionResult> Edit(int id)
         {
             try
-            {
-                //Buscar selectList de condominiums 
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondos");
-
+            {  
                 var companyDto = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{id}");
 
-                if(companyDto == null)
+                if (companyDto == null)
                 {
                     return View("NotFound");
+                }
+
+                //Buscar selectList de condominiums 
+                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>($"api/Company/LoadAdminsAndCondosToEdit/{id}");
+
+                //buscar condos que contenham a id desta company com CompanyId
+
+                var condos = await _apiCallService.GetAsync<IEnumerable<CondominiumDto>>("api/Condominiums");
+
+                if (condos.Any())
+                {
+                    foreach (var condo in condos)
+                    {
+                        if(condo.CompanyId == companyDto.Id)
+                        {
+                            companyDto.SelectedCondominiumIds.Add(condo.Id);
+                        }
+                    }
                 }
 
                 var model = _converterHelper.ToCreateEditCompanyViewModel(companyDto);
@@ -176,7 +211,7 @@ namespace CondoManagementWebApp.Controllers
                 }
 
                 //Buscar selectList de condominiums 
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondos");
+                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosLists");
 
                 model.CondominiumsToSelect = selectLists.Condos;
                 model.CompanyAdminsToSelect = selectLists.Admins;
@@ -194,7 +229,7 @@ namespace CondoManagementWebApp.Controllers
 
 
         // POST: Company/RequestDelete/5
-        [Microsoft.AspNetCore.Mvc.HttpPost("Company/RequestDelete/{id}")] 
+        [Microsoft.AspNetCore.Mvc.HttpDelete("Company/RequestDelete/{id}")] 
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> RequestDelete(int id)
         {
             try
@@ -213,9 +248,22 @@ namespace CondoManagementWebApp.Controllers
                 return Json(new { success = false, message = responseBody?.Message ?? "Unable to delete company due to error" });
 
             }
-            catch
+            catch(HttpRequestException ex) //buscar o tipo de exceção para ver se tem conflito
             {
-                return Json(new { success = false, message = "Unable to delete company due to error" });
+                if (ex.StatusCode == HttpStatusCode.Conflict)
+                {
+                    return Json(new { success = false, message = "Unable to delete company due to conflict, company associated with users or condos" });
+                }
+                else
+                {
+                    
+                    return Json(new { success = false, message = "An HTTP error occurred. Please try again later." });
+                }
+            }
+            catch (Exception)
+            {
+                // Para outros tipos de exceções inesperadas
+                return Json(new { success = false, message = "An unexpected error occurred. Please try again later." });
             }
         }
     }

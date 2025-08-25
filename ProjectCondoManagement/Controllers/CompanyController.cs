@@ -1,13 +1,17 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Users;
 using ProjectCondoManagement.Helpers;
@@ -16,6 +20,7 @@ namespace ProjectCondoManagement.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CompanyController : ControllerBase
     {
         private readonly ICompanyRepository _companyRepository;
@@ -25,10 +30,11 @@ namespace ProjectCondoManagement.Controllers
         private readonly IFinancialAccountRepository _financialAccountRepository;
         private readonly DataContextFinances _contextFinances;
         private readonly IUserHelper _userHelper;
+        private readonly ICondominiumRepository _condominiumRepository; 
 
         public CompanyController(ICompanyRepository companyRepository, DataContextUsers contextUsers, IConverterHelper converterHelper, 
             DataContextCondos contextCondos, IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances,
-            IUserHelper userHelper)
+            IUserHelper userHelper, ICondominiumRepository condominiumRepository)
         {
             _companyRepository = companyRepository;
             _contextUsers = contextUsers;
@@ -37,6 +43,7 @@ namespace ProjectCondoManagement.Controllers
             _financialAccountRepository = financialAccountRepository;
             _contextFinances = dataContextFinances;
             _userHelper = userHelper;
+            _condominiumRepository = condominiumRepository;
         }
 
         /// <summary>
@@ -64,7 +71,7 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet("GetCompany/{id}")]
         public async Task<CompanyDto?> GetCompany(int id)
         {
-            var company = await _companyRepository.GetCompanyWithcCondosAndAdmin(id, _contextUsers);
+            var company = await _companyRepository.GetByIdAsync(id, _contextUsers);
 
             if (company == null)
             {
@@ -99,17 +106,17 @@ namespace ProjectCondoManagement.Controllers
             {
                 if (companyDto.CompanyAdminId != null)
                 {
-                    var companyAdminUserDto = _converterHelper.ToUserDto(await _userHelper.GetUserByIdAsync(companyDto.CompanyAdminId));
+                    //atribuir  user companyAdmin à company
 
-                    if (companyAdminUserDto == null)
+                    var companyAdminUser = await _userHelper.GetUserByIdAsync(companyDto.CompanyAdminId);
+
+                    if (companyAdminUser == null)
                     {
                         return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
                     }
 
-                    //atribuir admin à company dto
-
-                    companyDto.CompanyAdmin = companyAdminUserDto;  
                 }
+
 
                 //converter para company
 
@@ -142,6 +149,42 @@ namespace ProjectCondoManagement.Controllers
 
                 await _companyRepository.CreateAsync(company, _contextUsers);
 
+
+               
+
+                //atribuir company à condos 
+
+                if (company.CondominiumIds != null && company.CondominiumIds.Any())
+                {
+                    var companyCondos = await _condominiumRepository.GetCompanyCondominiums(company.CondominiumIds);
+
+                    if (companyCondos.Any())
+                    {
+                        foreach (var condo in companyCondos)
+                        {
+                            condo.CompanyId = company.Id;
+                        }
+                    }
+                }
+
+
+                //atribuir company ao user company admin
+
+                if (company.CompanyAdminId != null)
+                {
+                    var companyAdminUser = await _userHelper.GetUserByIdAsync(company.CompanyAdminId);
+
+                    if (companyAdminUser == null)
+                    {
+                        return NotFound(new Response { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
+                    }
+
+                    companyAdminUser.CompanyId = company.Id;
+
+                    await _userHelper.UpdateUserAsync(companyAdminUser);
+                }
+
+                return Ok(new Response { IsSuccess = true});
                 return Ok(new Response<object> { IsSuccess = true});
             }
             catch (Exception ex)
@@ -183,6 +226,26 @@ namespace ProjectCondoManagement.Controllers
                     return BadRequest(new Response<object> { IsSuccess = false, Message = "Unable to edit company, record not found." });
                 }
 
+                //atualizar companyId no user
+
+                if (company.CompanyAdminId != null)
+                {
+                    var companyAdminUser = await _userHelper.GetUserByIdAsync(company.CompanyAdminId);
+
+                    if (companyAdminUser == null)
+                    {
+                        return NotFound(new Response { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
+                    }
+
+                    companyAdminUser.CompanyId = company.Id;
+
+                    await _userHelper.UpdateUserAsync(companyAdminUser);
+                }
+
+                // Atualizar CompanyId de Condominiums
+
+                await _condominiumRepository.UpdateCondominiumsCompanyId(company);
+
                 await _companyRepository.UpdateAsync(company, _contextUsers);
 
                 return Ok(new Response<object> { IsSuccess = true, Message = "Company details updated successfully!" });
@@ -193,6 +256,8 @@ namespace ProjectCondoManagement.Controllers
             }
         }
 
+
+      
 
         /// <summary>
          /// Deletes a company by its unique identifier.
@@ -206,23 +271,24 @@ namespace ProjectCondoManagement.Controllers
         [HttpDelete("DeleteCompany/{id}")]
         public async Task<IActionResult> DeleteCompany(int id)
         {
-            var company = await _companyRepository.GetCompanyWithcCondosAndAdmin(id, _contextUsers);
-
-            if (company == null)
-            {
-                return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to delete company, record not found." });
-            }
+           
 
             try
             {
-                
-                if (!company.Condominiums.Any() && company.CompanyAdmin == null)
+                var company = await _companyRepository.GetByIdAsync(id, _contextUsers);
+
+                if (company == null)
+                {
+                    return NotFound();
+                }
+
+                if ((company.CondominiumIds == null || !company.CondominiumIds.Any()) && company.CompanyAdminId == null)
                 {
                     await _companyRepository.DeleteAsync(company, _contextUsers);
                     return Ok();
                 }
 
-                return Conflict(new Response<object> { IsSuccess = false, Message = "Unable to delete company due to conflict: company still associated with users or condominiuns." });
+                return Conflict();
                 
                   
             }
@@ -232,10 +298,12 @@ namespace ProjectCondoManagement.Controllers
             }
 
         }
+  
 
+        //Metodos auxiliares
 
-        [HttpGet("LoadAdminsAndCondos")]
-        public async Task<IActionResult> LoadAdminsAndCondos()
+        [HttpGet("LoadAdminsAndCondosLists")]
+        public async Task<IActionResult> LoadAdminsAndCondosLists()
         {
             var condosList = await _companyRepository.GetCondosSelectListAsync(_contextCondos);
 
@@ -243,6 +311,62 @@ namespace ProjectCondoManagement.Controllers
 
             return Ok(new AdminsAndCondosDto { Admins = adminsList, Condos = condosList});
         }
+
+
+        [HttpGet("LoadAdminsAndCondosToEdit/{id}")]
+        public async Task<IActionResult> LoadAdminsAndCondosToEdit(int id)
+        {
+            var condosList = await _companyRepository.GetCondosSelectListAsync(_contextCondos);
+
+            var adminsList = await _companyRepository.GetCompanyAdminsSelectListToEdit(id);
+
+            return Ok(new AdminsAndCondosDto { Admins = adminsList, Condos = condosList });
+        }
+
+
+        [HttpGet("LoadAdminsAndCondosToCreate")]
+        public async Task<IActionResult> LoadAdminsAndCondosToCreate()
+        {
+            var condosList = await _companyRepository.GetCondosSelectListAsyncToCreate(_contextCondos);
+
+            var adminsList = await _companyRepository.GetCompanyAdminsSelectListAsync();
+
+            return Ok(new AdminsAndCondosDto { Admins = adminsList, Condos = condosList });
+        }
+
+
+
+        [HttpGet("GetCompanyAdmin/{id}")]
+        public async Task<IActionResult> GetCompanyAdmin(string id)
+        {
+            var companyAdminUser = await _userHelper.GetUserByIdAsync(id);
+
+            if (companyAdminUser == null)
+            {
+                return Ok(null);  
+            }
+
+            var companyAdminUserDto = _converterHelper.ToUserDto(companyAdminUser);
+
+            return Ok(companyAdminUserDto);
+        }
+
+
+        [HttpPost("GetCompanyCondominiums")]
+
+        public async Task<IActionResult> GetCompanyCondominiums([FromBody] CompanyDto companyDto)
+        {
+            var companyCondominiums = await _condominiumRepository.GetCompanyCondominiums(companyDto.SelectedCondominiumIds);
+
+            var companyCondominiumsDtos = companyCondominiums?.Select(c => _converterHelper.ToCondominiumDto(c)).ToList() ?? new List<CondominiumDto>();
+
+
+            return Ok(companyCondominiumsDtos); 
+        }
+
+
+        
+
 
     }
 }

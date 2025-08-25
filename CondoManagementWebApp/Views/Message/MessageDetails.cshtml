@@ -1,0 +1,102 @@
+﻿@model ClassLibrary.DtoModels.MessageDto
+
+@{
+    ViewData["Title"] = "MessageDetails";
+}
+<flash dismissable="true" />
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-8 col-xxl-8">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <h4 class="card-title welcome-text mb-0">Resolve ticket</h4>
+                        </div>
+                    </div>
+                  
+                    <div class="card-body">
+                        <form asp-action="EditMessageStatus" asp-controller="Message" method="post">
+
+                            <input type="hidden" asp-for="Id" />
+
+                            <div class="form-group mb-3">
+                                <label asp-for="PostingDate" class="form-label font-weight-bold"></label>
+                                @if (Model.PostingDate.HasValue)
+                                {
+                                    <span>@Model.PostingDate.Value.ToString("MM/dd/yyyy HH:mm")</span>
+                                    <input type="hidden" asp-for="PostingDate" />
+                                }
+                                else
+                                {
+                                    <span>Error retrieving date</span>
+                                }
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="SenderEmail" class="form-label font-weight-bold"></label>
+                                <input type="text" asp-for="SenderEmail" class="form-control" readonly />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="ReceiverEmail" class="form-label font-weight-bold"></label>
+                                <input type="text" asp-for="ReceiverEmail" class="form-control" readonly />
+                            </div>
+
+
+                            <div class="form-group mb-3">
+                                <label asp-for="MessageTitle" class="form-label font-weight-bold"></label>
+                                <input type="text" asp-for="MessageTitle" class="form-control" readonly />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="MessageContent" class="form-label font-weight-bold"></label>
+                                <input type="text" asp-for="MessageContent" class="form-control" readonly />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="Status" class="form-label font-weight-bold text-purple"></label>
+                                <select asp-for="Status.Value" asp-items="Model.StatusList" class="form-control" style="width: auto;"></select>
+                            </div>
+
+
+                            <br />
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <div class="d-flex gap-2">
+                                    <a asp-controller="Message" asp-action="IndexReceived" class="btn btn-secondary">Inbox</a>
+                                    <a asp-controller="Message" asp-action="IndexSent" class="btn btn-primary">Sent Messages</a>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+
+                     
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <style>
+        .text-purple {
+            color: #8A2BE2 !important;
+        }
+        /* Garantindo que a seta apareça, usando o seletor mais específico */
+        .form-control {
+            -webkit-appearance: menulist;
+            -moz-appearance: menulist;
+            appearance: menulist;
+        }
+        /* Ajustando a cor do texto do select para ser legível */
+        select.form-control option {
+            color: black;
+        }
+    </style>
+    }

@@ -68,7 +68,7 @@
 								<div class="col-12">
 									<div class="form-group mb-4">
 										<label asp-for="SelectedCompanyAdminId" class="form-label font-weight-bold"></label>
-										<select asp-for="SelectedCompanyAdminId" asp-items="Model.CompanyAdminsToSelect" class="form-control">
+										<select asp-for="SelectedCompanyAdminId" asp-items="Model.CompanyAdminsToSelect" class="form-control custom-select">
 											@if (Model.CompanyAdminsToSelect != null && Model.CompanyAdminsToSelect.Any())
 											{
 												<option value="">-- Select Company Admin --</option>

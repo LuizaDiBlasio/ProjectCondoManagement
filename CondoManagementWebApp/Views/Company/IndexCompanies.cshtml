@@ -29,9 +29,9 @@ else
                     <td>@item.Email</td>
                     <td>@item.TaxIdDocument</td>
                     <td>
-                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-secondary" }) 
+                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-outline-secondary" }) 
 
-                        @Html.ActionLink("Details", "Details", new { id = item.Id }, new { @class = "btn btn-primary" }) 
+                        @Html.ActionLink("Details", "Details", new { id = item.Id }, new { @class = "btn btn-outline-primary" }) 
 
                         <a href="#" class="btn btn-danger " data-id="@item.Id" data-bs-toggle="modal" data-bs-target="#deleteDialog">Delete</a>
                     </td>
@@ -61,6 +61,7 @@ else
     </div>
 </div>
 
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
@@ -73,28 +74,36 @@ else
             // Use o seletor para o link que abre o modal de deleção
             $('a[data-bs-target="#deleteDialog"]').click(function () {
                 idToDelete = $(this).data('id');
+                // Limpe a mensagem de erro anterior quando o modal é reaberto
+                $('#delete-error-message').text('').hide();
             });
 
             $("#btnYesDelete").click(function () {
-                     console.log('ID para deletar:', idToDelete);
-                     console.log('URL da requisição:', '/Company/RequestDelete/' + idToDelete);
+                console.log('ID para deletar:', idToDelete);
+                console.log('URL da requisição:', '/Company/RequestDelete/' + idToDelete);
+
                 $.ajax({
                     url: '/Company/RequestDelete/' + idToDelete,
-                    type: 'POST',
+                    type: 'DELETE',
                     success: function (response) {
-                        $("#deleteDialog").modal('hide');
+                        // Verifique se a operação foi um sucesso
                         if (response.success) {
+                            $("#deleteDialog").modal('hide'); // Fecha a modal APENAS no sucesso
                             window.location.reload();
                         } else {
+                            // Se for um erro, exibe a mensagem, mas NÃO fecha a modal
                             $('#delete-error-message').text(response.message).show();
                         }
                     },
                     error: function (xhr, status, error) {
+                        // Tratar erros de servidor (por exemplo, 500 Internal Server Error)
                         $("#deleteDialog").modal('hide');
                         console.error('AJAX Error:', status, error, xhr.responseText);
+                        alert('Unexpected error, try again later.');
                     }
                 });
             });
+
             $("#btnNoDelete").click(function () {
                 $("#deleteDialog").modal('hide');
             });

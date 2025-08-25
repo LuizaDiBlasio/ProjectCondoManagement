@@ -1,9 +1,10 @@
-﻿using ProjectCondoManagement.Data.Entites.Enums;
+﻿using ClassLibrary;
+using ProjectCondoManagement.Data.Entites.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace ProjectCondoManagement.Data.Entites.UsersDb
 {
-    public class Message
+    public class Message : IEntity
     {
         public int Id { get; set; }
 
@@ -11,13 +12,15 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
 
         public string MessageTitle { get; set; }
 
-
         public string MessageContent { get; set; }
-
 
         public string SenderEmail { get; set; }
 
-        public string ReceiverEmail { get; set; }  
+        public string ReceiverEmail { get; set; }
+
+        public bool DeletedBySender { get; set; } 
+
+        public bool DeletedByReceiver { get; set; } 
 
         public MessageStatus Status { get; set; }
     }
