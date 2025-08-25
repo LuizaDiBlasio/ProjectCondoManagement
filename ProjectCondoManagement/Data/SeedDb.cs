@@ -7,6 +7,7 @@ using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ProjectCondoManagement.Data
 {
@@ -28,7 +29,7 @@ namespace ProjectCondoManagement.Data
         {
             _contextCondos = contextCondos;
             _contextFinances = dataContextFinances;
-            _contextUsers = contextUsers;   
+            _contextUsers = contextUsers;
             _userHelper = userHelper;
             _condominiumRepository = condominiumRepository;
         }
@@ -53,7 +54,7 @@ namespace ProjectCondoManagement.Data
 
 
 
-
+            //__________________________________________________________________________________________________________________
 
             //TODO: TESTE DE CONDOMINIO APAGAR.
             var user2 = await _userHelper.GetUserByEmailAsync("fredericoaugusto@gmail.com"); //ver se user já existe 
@@ -69,7 +70,7 @@ namespace ProjectCondoManagement.Data
                         Address = "Rua Laranja, 123",
                         PhoneNumber = "123456789",
                         Email = "fredericoaugusto@gmail.com",
-                        TaxIdDocument = "123456789", 
+                        TaxIdDocument = "123456789",
                     };
                 }
                 user2 = new User // cria utilizador admin
@@ -101,7 +102,7 @@ namespace ProjectCondoManagement.Data
 
             var condominium = await _condominiumRepository.GetByIdAsync(2, _contextCondos);
 
-            if(condominium == null)
+            if (condominium == null)
             {
                 var condominium1 = new Condominium
                 {
@@ -115,74 +116,180 @@ namespace ProjectCondoManagement.Data
                     Documents = null,
                     Meetings = null,
                     Occurrences = null,
-                    CompanyId = 0
+                    CompanyId = null
                 };
                 var create = await _contextCondos.Condominiums.AddAsync(condominium1);
                 await _contextCondos.SaveChangesAsync();
             }
 
+            //Criar CondoManager para NikitinhaVila 
+            var userNikitinha = await _userHelper.GetUserByEmailAsync("nikitinha@yopmail.com");
 
-            var condominium2 = await _condominiumRepository.GetByIdAsync(2, _contextCondos);
+            if (userNikitinha == null)
+            {
+                userNikitinha = new User // cria utilizador admin
+                {
+                    FullName = "Nikitinha",
+                    Email = "nikitinha@yopmail.com",
+                    UserName = "nikitinha@yopmail.com",
+                    PhoneNumber = "12345678",
+                    Address = "Rua Laranja",
+                    BirthDate = new DateTime(1997, 05, 10),
+
+
+                    IsActive = true,
+                    EmailConfirmed = true
+                };
+
+                var activate2FA = await _userHelper.EnableTwoFactorAuthenticationAsync(userNikitinha, true);
+
+                var result2 = await _userHelper.AddUserAsync(userNikitinha, "123456"); //criar utilizador, mandar utilizador e password
+
+                if (result2 != IdentityResult.Success) //se o resultado não for bem sucedido (usa propriedade da classe Identity) 
+                {
+                    throw new InvalidOperationException("Coud not create the user in seeder"); //pára o programa
+                }
+                await _userHelper.CheckRoleAsync("CondoManager");
+                await _userHelper.AddUserToRoleAsync(userNikitinha, "CondoManager"); //adiciona role ao user
+            }
+
+
+            var condominium2 = await _condominiumRepository.GetByIdAsync(2025, _contextCondos);
 
             if (condominium2 == null)
             {
 
-                var condominium3 = new Condominium
+                condominium2 = new Condominium
                 {
                     CondoName = "NikitinhaVilla",
                     Company = null,
                     Address = "Nikilandia, 5",
-                    ManagerUserId = null,
-                    ManagerUser = null,
                     CondoMembers = null,
+                    ManagerUser = userNikitinha,
+                    ManagerUserId = userNikitinha.Id,
                     Units = null,
                     Documents = null,
                     Meetings = null,
                     Occurrences = null,
-                    CompanyId = 0
+                    CompanyId = null,
                 };
                 var create2 = await _contextCondos.Condominiums.AddAsync(condominium2);
                 await _contextCondos.SaveChangesAsync();
 
             }
 
+            var condominium3 = await _condominiumRepository.GetByIdAsync(2026, _contextCondos);
 
-            await _userHelper.CheckRoleAsync("Admin"); //verificar se já existe um role de admin, se não existir cria
-
-            var user = await _userHelper.GetUserByEmailAsync("luizabandeira90@gmail.com"); //ver se user já existe 
-
-            if (user == null) // caso não encontre o utilizador 
+            if (condominium3 == null)
             {
-                user = new User // cria utilizador admin
+
+                condominium3 = new Condominium
                 {
-                    FullName = "Luiza Bandeira",
-                    Email = "luizabandeira90@gmail.com",
-                    UserName = "luizabandeira90@gmail.com",
-                    PhoneNumber = "12345678",
-                    Address = "Fonte da Saudade",
-                    BirthDate = new DateTime(1990, 04, 06),
-                    IsActive = true,
-                    EmailConfirmed = true,
-                    FinancialAccountId = null
+                    CondoName = "FeliniVilla",
+                    Company = null,
+                    Address = "Felinilandia, 5",
+                    CondoMembers = null,
+                    ManagerUser = null,
+                    ManagerUserId = null,
+                    Units = null,
+                    Documents = null,
+                    Meetings = null,
+                    Occurrences = null,
+                    CompanyId = null,
                 };
+                var create3 = await _contextCondos.Condominiums.AddAsync(condominium3);
+                await _contextCondos.SaveChangesAsync();
 
-                var result = await _userHelper.AddUserAsync(user, "123456"); //criar utilizador, mandar utilizador e password
 
-                if (result != IdentityResult.Success) //se o resultado não for bem sucedido (usa propriedade da classe Identity) 
+                var condominium4 = await _condominiumRepository.GetByIdAsync(2027, _contextCondos);
+
+                if (condominium4 == null)
                 {
-                    throw new InvalidOperationException("Coud not create the user in seeder"); //pára o programa
+
+                    condominium4 = new Condominium
+                    {
+                        CondoName = "BobotiVilla",
+                        Company = null,
+                        Address = "Bobotilandia, 5",
+                        CondoMembers = null,
+                        ManagerUser = null,
+                        ManagerUserId = null,
+                        Units = null,
+                        Documents = null,
+                        Meetings = null,
+                        Occurrences = null,
+                        CompanyId = null
+                    };
+                    var create4 = await _contextCondos.Condominiums.AddAsync(condominium4);
+                    await _contextCondos.SaveChangesAsync();
+
                 }
 
-                var activation2FA = await _userHelper.EnableTwoFactorAuthenticationAsync(user, true); // habilitar 2fa
+                var condominium5 = await _condominiumRepository.GetByIdAsync(2028, _contextCondos);
 
-                await _userHelper.AddUserToRoleAsync(user, "SysAdmin"); //adiciona role ao user
-            }
+                if (condominium5 == null)
+                {
 
-            var isInRole = await _userHelper.IsUserInRoleAsync(user, "SysAdmin"); //verifica se role foi designado para user existente
+                    condominium5 = new Condominium
+                    {
+                        CondoName = "GudetamaVilla",
+                        Company = null,
+                        Address = "Gudetamalandia, 5",
+                        CondoMembers = null,
+                        ManagerUser = null,
+                        ManagerUserId = null,
+                        Units = null,
+                        Documents = null,
+                        Meetings = null,
+                        Occurrences = null,
+                        CompanyId = null
+                    };
+                    var create5 = await _contextCondos.Condominiums.AddAsync(condominium4);
+                    await _contextCondos.SaveChangesAsync();
 
-            if (!isInRole) //se não estiver no role, colocar
-            {
-                await _userHelper.AddUserToRoleAsync(user, "SysAdmin"); //adiciona role ao user
+                }
+
+                //______________________________________________________________________________________________________________________________
+
+
+
+                await _userHelper.CheckRoleAsync("Admin"); //verificar se já existe um role de admin, se não existir cria
+
+                var user = await _userHelper.GetUserByEmailAsync("luizabandeira90@gmail.com"); //ver se user já existe 
+
+                if (user == null) // caso não encontre o utilizador 
+                {
+                    user = new User // cria utilizador admin
+                    {
+                        FullName = "Luiza Bandeira",
+                        Email = "luizabandeira90@gmail.com",
+                        UserName = "luizabandeira90@gmail.com",
+                        PhoneNumber = "12345678",
+                        Address = "Fonte da Saudade",
+                        BirthDate = new DateTime(1990, 04, 06),
+                        IsActive = true,
+                        EmailConfirmed = true,
+                        FinancialAccountId = null
+                    };
+
+                    var result = await _userHelper.AddUserAsync(user, "123456"); //criar utilizador, mandar utilizador e password
+
+                    if (result != IdentityResult.Success) //se o resultado não for bem sucedido (usa propriedade da classe Identity) 
+                    {
+                        throw new InvalidOperationException("Coud not create the user in seeder"); //pára o programa
+                    }
+
+                    var activation2FA = await _userHelper.EnableTwoFactorAuthenticationAsync(user, true); // habilitar 2fa
+
+                    await _userHelper.AddUserToRoleAsync(user, "SysAdmin"); //adiciona role ao user
+                }
+
+                var isInRole = await _userHelper.IsUserInRoleAsync(user, "SysAdmin"); //verifica se role foi designado para user existente
+
+                if (!isInRole) //se não estiver no role, colocar
+                {
+                    await _userHelper.AddUserToRoleAsync(user, "SysAdmin"); //adiciona role ao user
+                }
             }
         }
     }

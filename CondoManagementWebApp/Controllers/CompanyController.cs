@@ -50,6 +50,9 @@ namespace CondoManagementWebApp.Controllers
         {
             try
             {
+
+                var model = new CompanyDetailsViewModel();
+
                 var companyDto = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{id}");
 
                 if (companyDto == null)
@@ -57,7 +60,23 @@ namespace CondoManagementWebApp.Controllers
                     return View("NotFound");
                 }
 
-                return View(companyDto);    
+                model.CompanyDto = companyDto;
+
+                if(companyDto.CompanyAdminId != null)
+                {
+                    var companyAdmin = await _apiCallService.GetAsync<UserDto>($"api/Company/GetCompanyAdmin/{companyDto.CompanyAdminId}");
+
+                    model.CompanyAdmin = companyAdmin;
+                }
+
+                if(companyDto.CondominiumDtos != null)
+                {
+                    var companyCondominiums = await _apiCallService.PostAsync<CompanyDto, List<CondominiumDto>>("api/Company/GetCompanyCondominiums", companyDto);
+
+                    model.CondominiumDtos = companyCondominiums;
+                }
+
+                return View(model);    
             }
             catch
             {
@@ -131,7 +150,7 @@ namespace CondoManagementWebApp.Controllers
             try
             {
                 //Buscar selectList de condominiums 
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondos");
+                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosLists");
 
                 
                 var companyDto = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{id}");

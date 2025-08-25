@@ -2,28 +2,18 @@
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
-using ProjectCondoManagement.Data.Entites.FinancesDb;
-using ProjectCondoManagement.Data.Entites.UsersDb;
-using ProjectCondoManagement.Data.Repositories.Condos;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    //[Authorize(Roles = "Admin")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CondominiumsController : ControllerBase
     {
         private readonly DataContextCondos _context;
@@ -59,8 +49,8 @@ namespace ProjectCondoManagement.Controllers
                 return new List<CondominiumDto>();
             }
 
-            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c)).ToList();                   
-            
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c)).ToList();
+
             if (condominiumsDtos == null)
             {
                 return new List<CondominiumDto>();
@@ -145,15 +135,15 @@ namespace ProjectCondoManagement.Controllers
             if (condominiumDto == null)
             {
                 return BadRequest("Request body is null.");
-            } 
+            }
 
             try
-            {               
+            {
 
                 var email = this.User.Identity?.Name;
 
                 var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
-                                              
+
                 if (user == null)
                 {
                     return BadRequest("User not found.");
@@ -174,7 +164,7 @@ namespace ProjectCondoManagement.Controllers
                     return BadRequest("Conversion failed. Invalid data.");
                 }
 
-                
+
                 //Atribuir financial account
                 var financialAccount = await _financialAccountRepository.CreateFinancialAccountAsync();
 
@@ -205,7 +195,7 @@ namespace ProjectCondoManagement.Controllers
 
             try
             {
-               await _condominiumRepository.DeleteAsync(condominium, _context);
+                await _condominiumRepository.DeleteAsync(condominium, _context);
             }
             catch (Exception ex)
             {
@@ -217,18 +207,19 @@ namespace ProjectCondoManagement.Controllers
         }
 
         //Metodo auxiliar para expenses
+        [HttpPost("GetCondoManagerCondominiumDto")]
         public async Task<IActionResult> GetCondoManagerCondominiumDto([FromBody] string condoManagerEmail)
         {
             var user = await _userHelper.GetUserByEmailAsync(condoManagerEmail);
 
             if (user == null)
             {
-                return NotFound();  
+                return NotFound();
             }
 
             var condoManagerCondo = await _condominiumRepository.GetCondoManagerCondominium(user.Id);
 
-            if(condoManagerCondo == null)
+            if (condoManagerCondo == null)
             {
                 return NotFound();
             }

@@ -247,7 +247,7 @@ namespace CondoManagementWebApp.Controllers
             {
                 var apiCall = await _apiCallService.PostAsync<int, Response>($"api/Message/DeleteReceivedMessages", id);
 
-                return RedirectToAction(nameof(IndexReceived));
+                return Json(new { success = apiCall.IsSuccess });
             }
             catch
             {

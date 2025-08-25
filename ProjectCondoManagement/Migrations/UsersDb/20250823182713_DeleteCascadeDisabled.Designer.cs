@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 
@@ -11,9 +12,11 @@ using ProjectCondoManagement.Data.Entites.UsersDb;
 namespace ProjectCondoManagement.Migrations.UsersDb
 {
     [DbContext(typeof(DataContextUsers))]
-    partial class DataContextUsersModelSnapshot : ModelSnapshot
+    [Migration("20250823182713_DeleteCascadeDisabled")]
+    partial class DeleteCascadeDisabled
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,12 +170,6 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CompanyAdminId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CondominiumIds")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -319,7 +316,9 @@ namespace ProjectCondoManagement.Migrations.UsersDb
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId");
+                    b.HasIndex("CompanyId")
+                        .IsUnique()
+                        .HasFilter("[CompanyId] IS NOT NULL");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -386,11 +385,15 @@ namespace ProjectCondoManagement.Migrations.UsersDb
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.User", b =>
                 {
                     b.HasOne("ProjectCondoManagement.Data.Entites.UsersDb.Company", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithOne("CompanyAdmin")
+                        .HasForeignKey("ProjectCondoManagement.Data.Entites.UsersDb.User", "CompanyId");
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.Company", b =>
+                {
+                    b.Navigation("CompanyAdmin");
                 });
 #pragma warning restore 612, 618
         }

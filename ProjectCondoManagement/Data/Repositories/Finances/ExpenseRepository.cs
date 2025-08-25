@@ -10,11 +10,16 @@ namespace ProjectCondoManagement.Data.Repositories.Finances
 {
     public class ExpenseRepository : GenericRepository<Expense, DataContextFinances>, IExpenseRepository
     {
-        private readonly DataContextFinances _dataContextFinances;  
+        private readonly DataContextFinances _dataContextFinances;
+
+        public ExpenseRepository(DataContextFinances dataContextFinances)
+        {
+            _dataContextFinances = dataContextFinances;
+        }
         public async Task<List<Expense>> GetExpensesFromCondominium(Condominium condoManagerCondo)
         {
             return await _dataContextFinances.Expenses
-                        .Where(e => e.Condominium.Id == condoManagerCondo.Id)
+                        .Where(e => e.CondominiumId == condoManagerCondo.Id)
                         .ToListAsync();
         }
 

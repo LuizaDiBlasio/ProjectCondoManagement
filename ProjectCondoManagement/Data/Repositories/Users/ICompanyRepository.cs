@@ -8,7 +8,6 @@ namespace ProjectCondoManagement.Data.Repositories.Users
 {
     public interface ICompanyRepository : IGenericRepository<Company, DataContextUsers>
     {
-        Task<Company> GetCompanyWithcCondosAndAdmin(int id, DataContextUsers contextUsers);
 
         Task<List<SelectListItem>> GetCondosSelectListAsync(DataContextCondos contextCondos);
 

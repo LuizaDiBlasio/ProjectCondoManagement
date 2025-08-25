@@ -2,23 +2,17 @@ using ClassLibrary;
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Razor.Language.Intermediate;
-using Microsoft.CodeAnalysis.Host.Mef;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
-using static System.Net.WebRequestMethods;
 
 namespace ProjectCondoManagement.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    
+
     public class AccountController : ControllerBase
     {
         private readonly IUserHelper _userHelper;
@@ -30,9 +24,9 @@ namespace ProjectCondoManagement.Controllers
         private readonly DataContextCondos _dataContextCondos;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly ISmsHelper _smsHelper;
-        
 
-      
+
+
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
                                IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService, ICondoMemberRepository condoMemberRepository
@@ -191,11 +185,11 @@ namespace ProjectCondoManagement.Controllers
 
             if (response.IsSuccess) //se conseguiu enviar o email
             {
-                return StatusCode(200, new {  Message = "A link to retrieve password has been sent to your email" });
+                return StatusCode(200, new { Message = "A link to retrieve password has been sent to your email" });
             }
 
             //se não conseguiu enviar email:
-            return StatusCode(500, new  { Message = "Unable to retrieve password, please contact admin" });
+            return StatusCode(500, new { Message = "Unable to retrieve password, please contact admin" });
 
         }
 
@@ -252,7 +246,7 @@ namespace ProjectCondoManagement.Controllers
         {
             var user = await _userHelper.GetUserByEmailAsync(registerDtoModel.Email); //buscar user  
 
-            if (user != null) 
+            if (user != null)
             {
                 return StatusCode(409, new Response { Message = "User already exists, try registering wih new credentials", IsSuccess = false });
             }
@@ -297,7 +291,7 @@ namespace ProjectCondoManagement.Controllers
 
                 //se não conseguiu enviar email:
                 return StatusCode(500, new Response { Message = "User couldn't be logged", IsSuccess = false });
-            }   
+            }
         }
 
 
@@ -361,7 +355,7 @@ namespace ProjectCondoManagement.Controllers
             else
             {
                 return StatusCode(400, new Response { Message = "An unexpected error occurred while resetting password, please try again", IsSuccess = false });
-            }   
+            }
         }
 
 
@@ -386,7 +380,7 @@ namespace ProjectCondoManagement.Controllers
 
                 if (result.Succeeded)
                 {
-                    return StatusCode(200, new Response() { IsSuccess = true, Message = "Your password has been changed."});
+                    return StatusCode(200, new Response() { IsSuccess = true, Message = "Your password has been changed." });
                 }
                 else
                 {
@@ -417,13 +411,13 @@ namespace ProjectCondoManagement.Controllers
             var user = await _userHelper.GetUserByEmailAsync(email);
 
             if (user == null)
-            {    
+            {
                 return NotFound(null);
             }
 
             var userDto = _converterHelper.ToUserDto(user);
 
-            return Ok(userDto);    
+            return Ok(userDto);
         }
 
 
@@ -441,16 +435,16 @@ namespace ProjectCondoManagement.Controllers
         public async Task<IActionResult> EditProfile([FromBody] UserDto userDto)
         {
             var user = await _converterHelper.ToEditedProfile(userDto);
-            
+
             if (user == null)
             {
-                return NotFound(null);  
+                return NotFound(null);
             }
 
             var response = await _userHelper.UpdateUserAsync(user);
 
-           
-            if(response.Succeeded)
+
+            if (response.Succeeded)
             {
                 var editedUser = await _userHelper.GetUserByEmailAsync(userDto.Email);
 
@@ -467,7 +461,7 @@ namespace ProjectCondoManagement.Controllers
 
                     await _condoMemberRepository.UpdateAsync(condomember, _dataContextCondos);
 
-                    return Ok(editedUserDto);    
+                    return Ok(editedUserDto);
                 }
 
                 return Ok(editedUserDto);
@@ -541,10 +535,10 @@ namespace ProjectCondoManagement.Controllers
 
             if (editedUser == null)
             {
-                return NotFound(new Response { IsSuccess = false, Message = "Unable to update, user not found in the system"});
+                return NotFound(new Response { IsSuccess = false, Message = "Unable to update, user not found in the system" });
             }
 
-            await _userHelper.UpdateUserAsync(editedUser); 
+            await _userHelper.UpdateUserAsync(editedUser);
 
             if (await _userHelper.IsUserInRoleAsync(editedUser, "CondoMember"))
             {
@@ -560,7 +554,7 @@ namespace ProjectCondoManagement.Controllers
                 return Ok(new Response { IsSuccess = true });
             }
 
-            return Ok(new Response { IsSuccess = true});
+            return Ok(new Response { IsSuccess = true });
         }
 
 
@@ -581,7 +575,7 @@ namespace ProjectCondoManagement.Controllers
 
         }
 
-    
+
         [HttpGet("GetManagers")]
         public async Task<IActionResult> GetManagers()
         {

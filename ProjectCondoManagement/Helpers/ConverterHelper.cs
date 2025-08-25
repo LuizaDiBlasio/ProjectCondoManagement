@@ -176,12 +176,13 @@ namespace ProjectCondoManagement.Helpers
                 Id = company.Id,    
                 Name = company.Name,
                 CondominiumDtos = company.Condominiums?.Select(c => ToCondominiumDto(c)).ToList() ?? new List<CondominiumDto>(),
-                CompanyAdmin = ToUserDto(company.CompanyAdmin),
                 Email = company.Email,
                 Address = company.Address,
                 PhoneNumber = company.PhoneNumber,
                 TaxIdDocument = company.TaxIdDocument,
-                FinancialAccountId = company.FinancialAccountId
+                FinancialAccountId = company.FinancialAccountId,
+                SelectedCondominiumIds = company.CondominiumIds?.ToList()?? new List<int>(),
+                CompanyAdminId = company.CompanyAdminId,    
             };
 
             return companyDto;
@@ -194,12 +195,13 @@ namespace ProjectCondoManagement.Helpers
                 Id = isNew ? 0 : companyDto.Id,
                 Name = companyDto.Name,
                 Condominiums = companyDto.CondominiumDtos?.Select(c => ToCondominium(c, false)).ToList() ?? new List<Condominium>(),
-                CompanyAdmin = companyDto.CompanyAdmin == null? null : ToUser(companyDto.CompanyAdmin),
+                CondominiumIds = companyDto.SelectedCondominiumIds,
                 Email = companyDto.Email,
                 Address = companyDto.Address,
                 PhoneNumber = companyDto.PhoneNumber,
                 TaxIdDocument = companyDto.TaxIdDocument,
-                FinancialAccountId = companyDto.FinancialAccountId  
+                FinancialAccountId = companyDto.FinancialAccountId,  
+                CompanyAdminId = companyDto.CompanyAdminId,
             };
 
             return company; 
@@ -230,7 +232,7 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = condominium.Id,
                 CondoName = condominium.CondoName,    
-                CompanyId = condominium.CompanyId.Value,
+                CompanyId = condominium.CompanyId,
                 Address = condominium.Address,
                 ManagerUserId = condominium.ManagerUserId,
                 Units = condominium.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),
@@ -407,7 +409,7 @@ namespace ProjectCondoManagement.Helpers
                 Id = isNew ? 0 : expense.Id,
                 Amount = expense.Amount,
                 Detail = expense.Detail,
-                CondominiumDto = ToCondominiumDto(expense.Condominium),
+                CondominiumId = expense.CondominiumId,
                 ExpenseTypeDto = new EnumDto { Name = expense.ExpenseType.ToString(), Value = (int)expense.ExpenseType },
             };
            return expenseDto;   
@@ -455,6 +457,7 @@ namespace ProjectCondoManagement.Helpers
                 Amount = expenseDto.Amount,
                 ExpenseType = (ExpenseType)expenseDto.ExpenseTypeDto.Value,
                 Detail = expenseDto.Detail,
+                CondominiumId = expenseDto.CondominiumId
             };
 
             return expense; 

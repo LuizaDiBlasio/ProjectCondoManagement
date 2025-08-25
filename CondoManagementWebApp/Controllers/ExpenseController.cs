@@ -2,10 +2,8 @@
 using ClassLibrary.DtoModels;
 using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Threading.Tasks;
 using Vereyon.Web;
 
 namespace CondoManagementWebApp.Controllers
@@ -19,27 +17,33 @@ namespace CondoManagementWebApp.Controllers
 
         public ExpenseController(IApiCallService apiCallService, IFlashMessage flashMessage, IConverterHelper converterHelper)
         {
-             _apiCallService = apiCallService;
+            _apiCallService = apiCallService;
             _flashMessage = flashMessage;
+            _converterHelper = converterHelper;
 
         }
 
 
+        
+
+
         //GET: ExpenseController
-        public async Task<ActionResult<List<ExpenseDto>>> IndexExpenses()
+        public async Task<IActionResult> IndexExpenses()
         {
+
             try
-            {      
+            {
+                var condominiumDto = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
+
                 var condoExpenses = await _apiCallService.GetByQueryAsync<IEnumerable<ExpenseDto>>("api/Expense/GetExpensesFromCondominium", this.User.Identity.Name);
 
-                if (condoExpenses == null)
+                var model = new IndexExpensesViewModel()
                 {
-                    var noExpenses = new List<ExpenseDto>();    
-                    return View(noExpenses);  
-                }
+                    ExpensesDto = condoExpenses,
+                    CondominiumName = condominiumDto.CondoName,
+                };
+                return View(model);
 
-                return View(condoExpenses);
-                
             }
             catch (Exception)
             {
@@ -48,23 +52,19 @@ namespace CondoManagementWebApp.Controllers
         }
 
 
-
         // GET: ExpenseController/Create
         public async Task<IActionResult> CreateExpense()
         {
             var expenseTypeList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
 
-            var condominiumDto = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominium/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-
-            if (expenseTypeList.Any() && condominiumDto != null)
+            if (expenseTypeList.Any() )
             {
                 var model = new CreateEditExpenseViewModel()
                 {
-                    CondominiumDto = condominiumDto,
-                    ExpenseTypeDtoList = expenseTypeList    
+                    ExpenseTypeDtoList = expenseTypeList
                 };
 
-                return View(model); 
+                return View(model);
             }
             return View("Error");
         }
@@ -76,13 +76,18 @@ namespace CondoManagementWebApp.Controllers
         {
             if (!ModelState.IsValid)
             {
+                model.ExpenseTypeDtoList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
                 _flashMessage.Danger("Unable to enter expense");
-                return View(model); 
+                return View(model);
             }
 
             try
             {
                 var expenseDto = _converterHelper.ToExpenseDto(model);
+
+                var condominiumDto = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
+
+                expenseDto.CondominiumId = condominiumDto.Id; 
 
                 var expenseDtolWithExpenseTypeName = await SelectTypeName(expenseDto);
 
@@ -93,11 +98,13 @@ namespace CondoManagementWebApp.Controllers
                     return RedirectToAction(nameof(IndexExpenses));
                 }
 
+                model.ExpenseTypeDtoList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
                 _flashMessage.Danger(apiCall.Message);
                 return View("CreateExpense", model);
             }
             catch
             {
+                model.ExpenseTypeDtoList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
                 _flashMessage.Danger("Unable to enter expense");
                 return View("CreateExpense", model);
             }
@@ -108,12 +115,10 @@ namespace CondoManagementWebApp.Controllers
         {
             var expenseTypeList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
 
-            var condominiumDto = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominium/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-
-            if (expenseTypeList.Any() && condominiumDto != null)
+            if (expenseTypeList.Any() )
             {
-                var expenseDto = await _apiCallService.GetAsync<ExpenseDto>($"api/Expense/GetExepense/{id}");
-                if(expenseDto == null)
+                var expenseDto = await _apiCallService.GetAsync<ExpenseDto>($"api/Expense/GetExpense/{id}");
+                if (expenseDto == null)
                 {
                     return View("Error");
                 }
@@ -122,9 +127,9 @@ namespace CondoManagementWebApp.Controllers
                 {
                     Id = expenseDto.Id,
                     Amount = expenseDto.Amount,
-                    Detail = expenseDto.Detail, 
-                    CondominiumDto = condominiumDto,
-                    ExpenseTypeDtoList = expenseTypeList
+                    Detail = expenseDto.Detail,
+                    ExpenseTypeDtoList = expenseTypeList,
+                    ExpenseTypeDto =  expenseDto.ExpenseTypeDto
                 };
 
                 return View(model);
@@ -134,10 +139,11 @@ namespace CondoManagementWebApp.Controllers
 
         // POST: ExpenseController/Edit/5
         [HttpPost]
-        public async Task<ActionResult> RequestEdit(CreateEditExpenseViewModel model)
+        public async Task<ActionResult> RequestEditExpense(CreateEditExpenseViewModel model)
         {
             if (!ModelState.IsValid)
             {
+                model.ExpenseTypeDtoList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
                 _flashMessage.Danger("Unable to modify expense");
                 return View(model);
             }
@@ -148,6 +154,16 @@ namespace CondoManagementWebApp.Controllers
 
                 var expenseDtolWithExpenseTypeName = await SelectTypeName(expenseDto);
 
+                var condominiumDto = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
+                if (condominiumDto == null)
+                {
+                    model.ExpenseTypeDtoList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
+                    _flashMessage.Danger("Unable to modify expense");
+                    return View(model);
+                }
+
+                expenseDto.CondominiumId = condominiumDto.Id;
+
                 var apiCall = await _apiCallService.PostAsync<ExpenseDto, Response>("api/Expense/EditExpense", expenseDto);
 
                 if (apiCall.IsSuccess)
@@ -155,11 +171,13 @@ namespace CondoManagementWebApp.Controllers
                     return RedirectToAction(nameof(IndexExpenses));
                 }
 
+                model.ExpenseTypeDtoList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
                 _flashMessage.Danger(apiCall.Message);
                 return View("CreateExpense", model);
             }
             catch
             {
+                model.ExpenseTypeDtoList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
                 _flashMessage.Danger("Unable to modify expense");
                 return View("CreateExpense", model);
             }
@@ -180,16 +198,25 @@ namespace CondoManagementWebApp.Controllers
                 }
 
                 _flashMessage.Danger(apiCall.Message);
-                return View("IndexExpenses");
+
+                //recarregar lista e nome do condominio
+                var model = LoadIndexExpensesView();
+
+                return View("IndexExpenses", model);
             }
             catch
             {
                 _flashMessage.Danger("Unable to delete");
-                return View("IndexExpenses");
+
+                //recarregar lista e nome do condominio
+                var model = LoadIndexExpensesView();
+
+                return View("IndexExpenses", model);
             }
         }
 
-        //Metodo auxiliar
+        //Metodos auxiliares
+
         public async Task<ExpenseDto> SelectTypeName(ExpenseDto expenseDto)
         {
             //Fazer seleção do Name do status (a select list só preenche o value)
@@ -204,6 +231,20 @@ namespace CondoManagementWebApp.Controllers
             }
 
             return expenseDto;
+        }
+
+        public async Task<IndexExpensesViewModel> LoadIndexExpensesView()
+        {
+            var condominiumDto = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
+
+            var condoExpenses = await _apiCallService.GetByQueryAsync<IEnumerable<ExpenseDto>>("api/Expense/GetExpensesFromCondominium", this.User.Identity.Name);
+
+            var model = new IndexExpensesViewModel()
+            {
+                ExpensesDto = condoExpenses,
+                CondominiumName = condominiumDto.CondoName,
+            };
+            return model;
         }
     }
 }

@@ -15,10 +15,11 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
         private readonly IConverterHelper _converterHelper;
         private readonly DataContextCondos _dataContextCondos;
 
-        public CondominiumRepository(IUserHelper userHelper, IConverterHelper converterHelper) 
+        public CondominiumRepository(IUserHelper userHelper, IConverterHelper converterHelper, DataContextCondos dataContextCondos) 
         {
             _userHelper = userHelper;
             _converterHelper = converterHelper;
+            _dataContextCondos = dataContextCondos; 
         }
 
         public async Task<Condominium> GetCondoManagerCondominium(string id)
@@ -26,6 +27,20 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             return _dataContextCondos.Condominiums.FirstOrDefault(c => c.ManagerUserId == id);
 
         }
+
+
+        public async Task<List<Condominium>> GetCompanyCondominiums(List<int> condominiumsIds)
+        {
+            var companyCondominiums = await _dataContextCondos.Condominiums
+                                     .Where(c => condominiumsIds.Contains(c.Id))
+                                     .ToListAsync();
+
+            var condosWithCondoManager = new List<Condominium>();
+
+
+            return companyCondominiums;
+        }
+
 
         public async Task<Response> LinkManager(List<CondominiumDto> condominiums)
         {

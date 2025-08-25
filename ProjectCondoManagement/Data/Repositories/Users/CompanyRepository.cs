@@ -27,41 +27,22 @@ namespace ProjectCondoManagement.Data.Repositories.Users
             _converterHelper = converterHelper;
         }
 
-        public async Task<Company> GetCompanyWithcCondosAndAdmin(int id, DataContextUsers contextUsers)
-        {
-            //buscar company
-            var company= await contextUsers.Companies.
-                Where(c => c.Id == id)
-                .Include(c => c.CompanyAdmin)
-                .FirstOrDefaultAsync();
-
-            //buscar condos da company
-           
-            var  companyCondos = await _contextCondos.Condominiums.
-                Where(c => c.CompanyId == id).ToListAsync();    
-            
-            if(company != null)
-            {
-                company.Condominiums = companyCondos;
-                return company;
-            }
-
-            return null;
-        }
+        
 
         public async Task<List<SelectListItem>> GetCondosSelectListAsync(DataContextCondos contextCondos)
         {
-            var condosToSelect = await contextCondos.Condominiums
-                .Select(s => new SelectListItem
-                {
-                    Value = s.Id.ToString(),
-                    Text = s.CondoName
-                })
-                .OrderBy(s => s.Text)
-                .ToListAsync();
+            var allCondos = await contextCondos.Condominiums.ToListAsync();
+
+            var availableCondos = allCondos.Where(c => c.CompanyId == null)
+                                            .Select(s => new SelectListItem
+                                            {
+                                                Value = s.Id.ToString(),
+                                                Text = s.CondoName
+                                            })
+                                            .OrderBy(s => s.Text).ToList();
 
             // Apenas retorna a lista
-            return condosToSelect;
+            return availableCondos;
         }
 
         public async Task<List<SelectListItem>> GetCompanyAdminsSelectListAsync()
@@ -73,7 +54,9 @@ namespace ProjectCondoManagement.Data.Repositories.Users
                 return null;
             }
 
-            var adminsToSelect = companyAdmins
+            var availableAdmins = companyAdmins.Where(u => u.CompanyId == null);
+
+            var adminsToSelect = availableAdmins
                 .Select(a => new SelectListItem
                 {
                     Value = a.Id.ToString(),

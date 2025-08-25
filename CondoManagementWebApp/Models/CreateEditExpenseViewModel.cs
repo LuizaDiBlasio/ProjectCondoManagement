@@ -11,20 +11,19 @@ namespace CondoManagementWebApp.Models
 
 
         [Required]
-       
         public decimal Amount { get; set; }
 
 
         [Required]
+        [StringLength(50)]
         public string Detail { get; set; }
 
 
-        [Required]  
-        public CondominiumDto CondominiumDto { get; set; }
-
         [Required]
+        [Display(Name = "Type")]
         public EnumDto ExpenseTypeDto { get; set; }
 
-        public List<SelectListItem> ExpenseTypeDtoList { get; set; }
+
+        public List<SelectListItem>? ExpenseTypeDtoList { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿@model ClassLibrary.DtoModels.CompanyDto
+﻿@model CondoManagementWebApp.Models.CompanyDetailsViewModel
 @{
     ViewData["Title"] = "Company Details";
     Layout = "~/Views/Shared/_Layout.cshtml"; // Certifique-se de que este layout está correto
@@ -30,32 +30,32 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.Id)</label>
-                                <p>@Html.DisplayFor(model => model.Id)</p>
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyDto.Id)</label>
+                                <p>@Html.DisplayFor(model => model.CompanyDto.Id)</p>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.Name)</label>
-                                <p>@Html.DisplayFor(model => model.Name)</p>
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyDto.Name)</label>
+                                <p>@Html.DisplayFor(model => model.CompanyDto.Name)</p>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.Email)</label>
-                                <p>@Html.DisplayFor(model => model.Email)</p>
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyDto.Email)</label>
+                                <p>@Html.DisplayFor(model => model.CompanyDto.Email)</p>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.Address)</label>
-                                <p>@Html.DisplayFor(model => model.Address)</p>
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyDto.Address)</label>
+                                <p>@Html.DisplayFor(model => model.CompanyDto.Address)</p>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.PhoneNumber)</label>
-                                <p>@Html.DisplayFor(model => model.PhoneNumber)</p>
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyDto.PhoneNumber)</label>
+                                <p>@Html.DisplayFor(model => model.CompanyDto.PhoneNumber)</p>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.FinancialAccountId)</label>
-                                <p>@Html.DisplayFor(model => model.FinancialAccountId)  </p>
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyDto.FinancialAccountId)</label>
+                                <p>@Html.DisplayFor(model => model.CompanyDto.FinancialAccountId)  </p>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.TaxIdDocument)</label>
-                                <p>@Html.DisplayFor(model => model.TaxIdDocument)</p>
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyDto.TaxIdDocument)</label>
+                                <p>@Html.DisplayFor(model => model.CompanyDto.TaxIdDocument)</p>
                             </div>
                         </div>
                     </div>
@@ -158,7 +158,7 @@
         </div>
 
         <div class="d-flex justify-content-start mt-3">
-            @Html.ActionLink("Edit", "Edit", new { id = Model.Id }, new { @class = "btn btn-primary me-2" })
+            @Html.ActionLink("Edit", "Edit", new { id = Model.CompanyDto.Id }, new { @class = "btn btn-primary me-2" })
             <a asp-action="IndexCompanies" class="btn btn-outline-secondary">Back to List</a>
         </div>
     </div>

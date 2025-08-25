@@ -197,7 +197,6 @@ namespace CondoManagementWebApp.Helpers
                 Id = model.Id,
                 Amount = model.Amount,
                 Detail = model.Detail,
-                CondominiumDto = model.CondominiumDto,
                 ExpenseTypeDto = model.ExpenseTypeDto,
             };
             return expenseDto;  

@@ -122,8 +122,8 @@ namespace ProjectCondoManagement.Controllers
 
 
         // DELETE: MessageController/DeleteReceivedMessages
-        [HttpDelete("DeleteReceivedMessages")]
-        public async Task<ActionResult> DeleteReceivedMessages(int id)
+        [HttpPost("DeleteReceivedMessages")]
+        public async Task<ActionResult> DeleteReceivedMessages([FromBody]int id)
         {
             try
             {

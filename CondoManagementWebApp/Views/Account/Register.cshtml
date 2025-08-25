@@ -1,13 +1,15 @@
-﻿@model CondoManagementWebApp.Models.RegisterUserViewModel
+﻿
+
+@model CondoManagementWebApp.Models.RegisterUserViewModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Register User";
     Layout = "~/Views/Shared/_Layout.cshtml"; // Define o layout a ser usado
 }
 
 <div class="fix-wrapper">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-5 col-md-6">
+            <div class="col-lg-8 col-md-10">
                 <div class="card mb-0 h-auto">
                     <div class="card-body">
                         <div class="text-center mb-3">
@@ -15,58 +17,57 @@
                         </div>
                         <h4 class="text-center mb-4">Register your account</h4>
 
+                        <hr class="mt-4 mb-5" style="border-top: 1px solid #e0e0e0; opacity: 0.8;" />
+
                         <div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
 
                         <form asp-controller="Account" asp-action="RequestRegister" method="post" enctype="multipart/form-data">
 
-                            <div class="form-group mb-4">
-                                <label class="form-label" asp-for="FullName">Full Name</label>
-                                <input asp-for="FullName" class="form-control" placeholder="Enter full name">
-                                <span asp-validation-for="FullName" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group mb-4">
-                                <label class="form-label" asp-for="Email">Email</label>
-                                <input asp-for="Email" class="form-control" placeholder="hello@example.com">
-                                <span asp-validation-for="Email" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group mb-4">
-                                <label class="form-label" asp-for="Address">Address</label>
-                                <input asp-for="Address" class="form-control" placeholder="Enter address">
-                                <span asp-validation-for="Address" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group mb-4">
-                                <label class="form-label" asp-for="PhoneNumber">Phone Number</label>
-                                <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number">
-                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group mb-4">
-                                <label asp-for="BirthDate" class="control-label"></label>
-                                <div>
-                                    <input type="text" id="birthDateInput" asp-for="BirthDate" class="form-control" />
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-4">
+                                        <label class="form-label" asp-for="FullName"></label>
+                                        <input asp-for="FullName" class="form-control" placeholder="Enter full name">
+                                        <span asp-validation-for="FullName" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label class="form-label" asp-for="Email"></label>
+                                        <input asp-for="Email" class="form-control" placeholder="hello@example.com">
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label class="form-label" asp-for="Address"></label>
+                                        <input asp-for="Address" class="form-control" placeholder="Enter address">
+                                        <span asp-validation-for="Address" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label class="form-label" asp-for="PhoneNumber"></label>
+                                        <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number">
+                                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                    </div>
+                                </div> <div class="col-md-6">
+                                    <div class="form-group mb-4">
+                                        <label class="form-label" asp-for="BirthDate"></label>
+                                        <input type="text" id="birthDateInput" asp-for="BirthDate" class="form-control" placeholder="Select a date" />
+                                        <span asp-validation-for="BirthDate" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label class="form-label" asp-for="SelectedRole">User role</label>
+                                        <select asp-for="SelectedRole" asp-items="Model.AvailableRoles" class="form-control" id="SelectedRole"></select>
+                                        <span asp-validation-for="SelectedRole" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label class="form-label" asp-for="ImageFile"></label>
+                                        <input asp-for="ImageFile" class="form-control" type="file" />
+                                        <span asp-validation-for="ImageFile" class="text-danger"></span>
+                                    </div>
                                 </div>
-                                <span asp-validation-for="BirthDate" class="text-warning"></span>
                             </div>
-
-                            <div class="form-group mb-4">
-                                <label asp-for="SelectedRole" class="form-label">User role</label>
-                                <select asp-for="SelectedRole" asp-items="Model.AvailableRoles" class="form-control" id="SelectedRole"></select>
-                                <span asp-validation-for="SelectedRole" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group mb-4">
-                                <label asp-for="ImageFile" class="form-label">Profile picture</label>
-                                <input asp-for="ImageFile" class="form-control" type="file" />
-                                <span asp-validation-for="ImageFile" class="text-danger"></span>
-                            </div>
-
                             <div class="form-group mt-3 d-flex justify-content-between align-items-center">
-                                <button type="submit" class="btn btn-primary">Register User</button>
                                 <a asp-action="SysAdminDashboard" asp-controller="Account" class="btn btn-outline-secondary">Back to DashBoard</a>
+                                <button type="submit" class="btn btn-primary">Register User</button>
                             </div>
+                            
                         </form>
 
                         <flash dismissable="true" />
@@ -84,15 +85,13 @@
 
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
-            // Inicializa o DatePicker para StartDate
+            // Inicializa o DatePicker para BirthDate
             var birthDatePicker = new ej.calendars.DatePicker({
                 format: 'MM/dd/yyyy',
                 placeholder: 'Select a date',
-                 max: new Date()
+                max: new Date()
             });
-            birthDatePicker.appendTo('#birthDateInput'); //ligação ao elemento de StartDate
-
-
+            birthDatePicker.appendTo('#birthDateInput');
         });
     </script>
 }

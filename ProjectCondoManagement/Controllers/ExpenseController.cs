@@ -1,28 +1,33 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
+using ProjectCondoManagement.Data.Repositories.Condos;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace ProjectCondoManagement.Controllers
 {
+    [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
+    [ApiController]
+    [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ExpenseController : Microsoft.AspNetCore.Mvc.Controller
     {
-        private readonly IPaymentRepository _paymentRepository;
+      
         private readonly DataContextFinances _dataContextFinances;
         private readonly IConverterHelper _converterHelper;
         private readonly IUserHelper _userHelper;
         private readonly ICondominiumRepository _condominiumRepository;
         private readonly IExpenseRepository _expensesRepository;
 
-        public ExpenseController(IPaymentRepository paymentRepository, DataContextFinances dataContextFinances, IConverterHelper converterHelper, IUserHelper userHelper, ICondominiumRepository condominiumRepository,
+        public ExpenseController(DataContextFinances dataContextFinances, IConverterHelper converterHelper, IUserHelper userHelper, ICondominiumRepository condominiumRepository,
             IExpenseRepository expenseRepository)
         {
-            _paymentRepository = paymentRepository;
             _dataContextFinances = dataContextFinances;
             _converterHelper = converterHelper;
             _userHelper = userHelper;
@@ -32,10 +37,12 @@ namespace ProjectCondoManagement.Controllers
 
 
         // GET: Expense/GetExpensesFromCondominium
-        [HttpGet("GetExpensesFromCondominium")]
-        public async Task<ActionResult<List<ExpenseDto>>> GetExpensesFromCondominium([FromBody] string condoManagerEmail)
+        [Microsoft.AspNetCore.Mvc.HttpPost("GetExpensesFromCondominium")]
+        public async Task<ActionResult<List<ExpenseDto>>> GetExpensesFromCondominium([FromBody] JsonElement condoManagerEmail)
         {
-            var user = await _userHelper.GetUserByEmailAsync(condoManagerEmail);
+            var email = condoManagerEmail.GetString();
+
+            var user = await _userHelper.GetUserByEmailAsync(email);
 
             if (user == null)
             {
@@ -63,19 +70,19 @@ namespace ProjectCondoManagement.Controllers
         }
 
         //GET : Expense/GetExpense/5
-        [HttpGet("GetExepense/{id}")]
+        [Microsoft.AspNetCore.Mvc.HttpGet("GetExpense/{id}")]
         public async Task<ActionResult<ExpenseDto>> GetExpense(int id)
         {
             var expense = await _expensesRepository.GetByIdAsync(id, _dataContextFinances);
 
             if (expense == null)
             {
-                return NotFound();  
+                return NotFound();
             }
 
             var expenseDto = _converterHelper.ToExpenseDto(expense, false);
 
-            return Ok(expenseDto);  
+            return Ok(expenseDto);
 
         }
 
@@ -87,11 +94,12 @@ namespace ProjectCondoManagement.Controllers
         {
             if (expenseDto == null)
             {
-                return BadRequest();    
+                return BadRequest();
             }
 
             try
             {
+
                 var expense = _converterHelper.ToExpense(expenseDto, true);
 
                 await _expensesRepository.CreateAsync(expense, _dataContextFinances);
@@ -100,15 +108,15 @@ namespace ProjectCondoManagement.Controllers
             }
             catch
             {
-                return BadRequest(new Response () { IsSuccess = false, Message = "Unable to enter expense due to error" });   
+                return BadRequest(new Response() { IsSuccess = false, Message = "Unable to enter expense due to error" });
             }
         }
 
-      
+
 
         // POST: Expense/Edit/5
         [Microsoft.AspNetCore.Mvc.HttpPost("EditExpense")]
-        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Edit([FromBody] ExpenseDto expenseDto)
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> EditExpense([FromBody] ExpenseDto expenseDto)
         {
             if (expenseDto == null)
             {
@@ -117,7 +125,7 @@ namespace ProjectCondoManagement.Controllers
 
             try
             {
-                var expense = _converterHelper.ToExpense(expenseDto, true);
+                var expense = _converterHelper.ToExpense(expenseDto, false);
 
                 await _expensesRepository.UpdateAsync(expense, _dataContextFinances);
 
@@ -130,20 +138,21 @@ namespace ProjectCondoManagement.Controllers
         }
 
         // GET: Expense/Delete/5
+        [HttpPost("Delete")]
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Delete([FromBody] int id)
         {
             try
             {
                 var expense = await _expensesRepository.GetByIdAsync(id, _dataContextFinances);
 
-                if(expense == null)
+                if (expense == null)
                 {
-                    return NotFound(new Response { IsSuccess = false, Message = "Unable to delete, expensa not found"});
+                    return NotFound(new Response { IsSuccess = false, Message = "Unable to delete, expensa not found" });
                 }
 
                 await _expensesRepository.DeleteAsync(expense, _dataContextFinances);
 
-                return Ok(new Response() {IsSuccess = true});
+                return Ok(new Response() { IsSuccess = true });
             }
             catch
             {
@@ -151,13 +160,15 @@ namespace ProjectCondoManagement.Controllers
             }
         }
 
-        
+
+
 
         //Medoto auxiliar
-
-        public List<SelectListItem> GetExpenseTypeList()
+        [HttpGet("GetExpenseTypeList")]
+        public List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> GetExpenseTypeList()
         {
             return _expensesRepository.GetExpenseTypeList();
         }
+                
     }
 }

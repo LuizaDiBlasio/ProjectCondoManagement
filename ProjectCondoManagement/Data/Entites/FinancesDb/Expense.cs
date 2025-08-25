@@ -1,6 +1,8 @@
 ﻿using ClassLibrary;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.Enums;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProjectCondoManagement.Data.Entites.FinancesDb
 {
@@ -12,7 +14,7 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public string Detail { get; set; }
 
-        public Condominium Condominium { get; set; }
+        public int CondominiumId {  get; set; } 
 
         public ExpenseType ExpenseType { get; set; }
     }

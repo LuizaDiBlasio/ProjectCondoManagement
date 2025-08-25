@@ -702,7 +702,7 @@ namespace CondoManagementWebApp.Controllers
                     model.CondoMembers = usersCondoMembers;
                 }
 
-                var usersCondoManagers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoManagers");
+                var usersCondoManagers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoManager");
 
                 if (usersCondoManagers.Any())
                 {

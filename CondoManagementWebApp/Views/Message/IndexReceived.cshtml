@@ -71,34 +71,34 @@ else
     <script type="text/javascript">
         $(document).ready(function () {
 
-            // Adiciona o ID da mensagem para a modal de deleção e impede que o evento de clique na linha seja acionado.
+            // Adiciona o ID da mensagem para a modal de deleção
             var idToDelete = 0;
             $('a.delete-btn').click(function (e) {
-                e.stopPropagation(); // Previne o evento de clique na linha
+                e.stopPropagation(); // Impede o evento de clique da linha de ser disparado
                 idToDelete = $(this).data('id');
+                // Limpa a mensagem de erro ao abrir a modal
                 $('#delete-error-message').text('').hide();
             });
 
-            // Envia a requisição AJAX para deleção
+            // Envia a requisição AJAX para deleção quando o botão "Delete" da modal é clicado
             $("#btnYesDelete").click(function () {
                 console.log('ID to delete:', idToDelete);
                 $.ajax({
                     url: '/Message/DeleteReceivedMessages/' + idToDelete,
                     type: 'POST',
                     success: function (response) {
-                        // A resposta agora vem do controller como JSON, então 'response.success' funcionará
                         if (response.success) {
-                            // Esconde a modal, não mais "retorna para a modal"
                             $("#deleteDialog").modal('hide');
-                            // Recarrega a página para refletir a mensagem deletada
-                            window.location.reload();
+                            window.location.reload(); // Recarrega a página após a exclusão bem-sucedida
                         } else {
+                            // Exibe a mensagem de erro se a exclusão falhar
                             $('#delete-error-message').text(response.message).show();
                         }
                     },
                     error: function (xhr, status, error) {
                         $("#deleteDialog").modal('hide');
                         console.error('AJAX Error:', status, error, xhr.responseText);
+                        // Idealmente, você usaria uma modal de erro em vez de um alert
                         alert('An unexpected error occurred. Please try again later.');
                     }
                 });

@@ -24,6 +24,17 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
         {
             base.OnModelCreating(modelBuilder);
 
+            //desabilitar cascata
+            var cascadeFKs = modelBuilder.Model
+                .GetEntityTypes() //buscar todas as entidades
+                .SelectMany(t => t.GetForeignKeys()) //selecionar todas as chaves estrangeiras 
+                .Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade); // que tenham comportamento em cascata (relações com outras tabelas)
+
+            foreach (var fk in cascadeFKs)
+            {
+                fk.DeleteBehavior = DeleteBehavior.Restrict; // restringe comportamento ao deletar, se houver entidades filhas, não deleta. Deve ser deletado por código individualmente.
+            }
+
             // Mapeamento do relacionamento 1:1 entre Payment e Invoice
             modelBuilder.Entity<Payment>()
                 .HasOne(p => p.Invoice)
