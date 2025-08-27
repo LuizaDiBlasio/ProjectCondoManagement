@@ -31,5 +31,9 @@ namespace CondoManagementWebApp.Helpers
         MessageDto ToMessageDto(CreateMessageViewModel model, DateTime date, string email, EnumDto status);
 
         ExpenseDto ToExpenseDto(CreateEditExpenseViewModel model);
+
+        PaymentDto FromOneTimeToPaymentDto(CreateOneTimePaymentViewModel model);
+
+        PaymentDto FromRecurringToPaymentDto(CreateRecurringPaymentViewModel model);
     }
 }

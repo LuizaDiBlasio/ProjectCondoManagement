@@ -10,19 +10,28 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public DateTime DueDate { get; set; }
 
-        public string PaymentMethod { get; set; }
+        public string? PaymentMethod { get; set; }
 
-        public string UserEmail { get; set; }
+        public int PayerFinancialAccountId { get; set; } 
 
-        public bool IsPaid { get; set; }
+        public int CondominiumId {  get; set; }
+
+        public bool IsPaid { get; set; } = false;
+
+        public int? InvoiceId { get; set; } 
 
         public Invoice? Invoice { get; set; }
 
-        public IEnumerable<Expense> Expenses { get; set; }
+        public List<Expense> Expenses { get; set; } = new List<Expense>();   
+
+        public Expense? OneTimeExpense { get; set; }
 
         public decimal TotalAmount => Expenses.Sum(e => e.Amount);
 
+        public int? TransactionId { get; set; }  
+
         public Transaction? Transaction { get; set; }
+
 
     }
 }

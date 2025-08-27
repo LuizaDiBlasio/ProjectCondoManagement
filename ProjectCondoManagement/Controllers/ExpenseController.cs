@@ -2,14 +2,13 @@
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ProjectCondoManagement.Data.Entites.CondosDb;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
-using ProjectCondoManagement.Data.Repositories.Condos;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
 using System.Text.Json;
+
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -18,21 +17,23 @@ namespace ProjectCondoManagement.Controllers
     [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ExpenseController : Microsoft.AspNetCore.Mvc.Controller
     {
-      
+
         private readonly DataContextFinances _dataContextFinances;
         private readonly IConverterHelper _converterHelper;
         private readonly IUserHelper _userHelper;
         private readonly ICondominiumRepository _condominiumRepository;
         private readonly IExpenseRepository _expensesRepository;
+        private readonly IPaymentRepository _paymentsRepository;
 
         public ExpenseController(DataContextFinances dataContextFinances, IConverterHelper converterHelper, IUserHelper userHelper, ICondominiumRepository condominiumRepository,
-            IExpenseRepository expenseRepository)
+            IExpenseRepository expenseRepository, IPaymentRepository paymentsRepository)
         {
             _dataContextFinances = dataContextFinances;
             _converterHelper = converterHelper;
             _userHelper = userHelper;
             _condominiumRepository = condominiumRepository;
             _expensesRepository = expenseRepository;
+            _paymentsRepository = paymentsRepository;
         }
 
 
@@ -138,7 +139,7 @@ namespace ProjectCondoManagement.Controllers
         }
 
         // GET: Expense/Delete/5
-        [HttpPost("Delete")]
+        [Microsoft.AspNetCore.Mvc.HttpPost("Delete")]
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Delete([FromBody] int id)
         {
             try
@@ -149,6 +150,19 @@ namespace ProjectCondoManagement.Controllers
                 {
                     return NotFound(new Response { IsSuccess = false, Message = "Unable to delete, expensa not found" });
                 }
+
+                //despesa não pode fazer parte de nenhum pagamento 
+
+                var allPayments = _paymentsRepository.GetAll(_dataContextFinances);
+                if (allPayments != null)
+                {
+                    if (allPayments.Any(p => p.Expenses.Any(e => e.Id == id))) //caso haja pagamentos, ver se existe alguma despesa com esse id
+                    {
+                        return Conflict(new Response { IsSuccess = false, Message = "Unable to delete, expense included in issued payments" });
+                    }
+
+                }
+
 
                 await _expensesRepository.DeleteAsync(expense, _dataContextFinances);
 
@@ -163,12 +177,20 @@ namespace ProjectCondoManagement.Controllers
 
 
 
-        //Medoto auxiliar
-        [HttpGet("GetExpenseTypeList")]
+        //Medotos auxiliares
+
+        [Microsoft.AspNetCore.Mvc.HttpGet("GetExpenseTypeList")]
         public List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> GetExpenseTypeList()
         {
             return _expensesRepository.GetExpenseTypeList();
         }
-                
+
+
+        [Microsoft.AspNetCore.Mvc.HttpGet("GetExpensesList/{id}")]
+        public async Task<List<SelectListItem>> GetExpensesList(int id)
+        {
+            return await _expensesRepository.GetExpensesList(id);
+        }
+
     }
 }

@@ -9,6 +9,8 @@ namespace ProjectCondoManagement.Data.Repositories.Finances.Interfaces
     {
         Task<List<Expense>> GetExpensesFromCondominium(Condominium condoManagerCondo);
 
-        public List<SelectListItem> GetExpenseTypeList();
+        List<SelectListItem> GetExpenseTypeList();
+
+        Task<List<SelectListItem>> GetExpensesList(int condoId);
     }
 }

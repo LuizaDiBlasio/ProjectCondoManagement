@@ -962,11 +962,11 @@ namespace CondoManagementWebApp.Controllers
 
 
 
+        // <summary>
+        /// Displays the "Not Authorized" view when a user tries to access a restricted area.
+        /// </summary>
+        /// <returns>The "Not Authorized" view.</returns>
 
-            // <summary>
-            /// Displays the "Not Authorized" view when a user tries to access a restricted area.
-            /// </summary>
-            /// <returns>The "Not Authorized" view.</returns>
         public IActionResult NotAuthorized()
         {
             return View();

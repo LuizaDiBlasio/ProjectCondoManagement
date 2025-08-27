@@ -202,6 +202,32 @@ namespace CondoManagementWebApp.Helpers
             return expenseDto;  
         }
 
+        public PaymentDto FromOneTimeToPaymentDto(CreateOneTimePaymentViewModel model)
+        {
+            var paymentDto = new PaymentDto()
+            {
+                IssueDate = model.IssueDate,
+                DueDate = model.DueDate,
+                PayerFinancialAccountId = model.PayerFinancialAccountId,
+                CondominiumId = model.CondominiumId,
+                OneTimeExpenseDto = model.OneTimeExpense,
+            };
+            return paymentDto;
+        }
+
+        public PaymentDto FromRecurringToPaymentDto(CreateRecurringPaymentViewModel model)
+        {
+            var paymentDto = new PaymentDto()
+            {
+                IssueDate = model.IssueDate,
+                DueDate = model.DueDate,
+                PayerFinancialAccountId = model.PayerFinancialAccountId,
+                CondominiumId = model.CondominiumId,
+                ExpensesDto = model.ExpensesDto,
+            };
+            return paymentDto;  
+        }
+
 
     }
 }

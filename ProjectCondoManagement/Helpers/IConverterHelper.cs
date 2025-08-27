@@ -18,7 +18,6 @@ namespace ProjectCondoManagement.Helpers
 
         UserDto ToUserDto(User user);
 
-
         Task<User> ToEditedUser(EditUserDetailsDto editUserDetailsDto);
 
         Task<User> ToEditedProfile(UserDto userDto);
@@ -58,6 +57,13 @@ namespace ProjectCondoManagement.Helpers
         TransactionDto ToTransactionDto(Transaction transaction, bool isNew);
 
         FinancialAccountDto ToFinancialAccountDto(FinancialAccount financialAccount, bool isNew);
-        Expense ToExpense(ExpenseDto expenseDto, bool v);
+
+        Expense ToExpense(ExpenseDto expenseDto, bool isNew);
+
+        Payment ToPayment(PaymentDto paymentDto, bool isNew);
+
+        Transaction ToTransaction(TransactionDto transactionDto, bool isNew);
+
+        public FinancialAccount ToFinancialAccount(FinancialAccountDto financialAccountDto, bool isNew);
     }
 }

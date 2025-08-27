@@ -5,6 +5,7 @@ using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.Enums;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
+using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Data.Repositories.Finances
 {
@@ -33,6 +34,17 @@ namespace ProjectCondoManagement.Data.Repositories.Finances
                          Text = status.ToString()
                      }).ToList();
 
+        }
+
+        public async Task<List<SelectListItem>> GetExpensesList(int condoId)
+        {
+           var condoExpenses =  await _dataContextFinances.Expenses.Where(e => e.CondominiumId == condoId).ToListAsync();
+
+            return condoExpenses.Select(ce => new SelectListItem
+            {
+               Value = ce.Id.ToString(),
+               Text = ce.ToString() 
+            }).ToList();
         }
     }
 }

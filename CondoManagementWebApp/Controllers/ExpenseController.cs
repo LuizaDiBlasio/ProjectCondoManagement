@@ -55,18 +55,30 @@ namespace CondoManagementWebApp.Controllers
         // GET: ExpenseController/Create
         public async Task<IActionResult> CreateExpense()
         {
-            var expenseTypeList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
-
-            if (expenseTypeList.Any() )
+            try
             {
-                var model = new CreateEditExpenseViewModel()
-                {
-                    ExpenseTypeDtoList = expenseTypeList
-                };
+                var expenseTypeList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
 
-                return View(model);
+                if (expenseTypeList.Any())
+                {
+                    var model = new CreateEditExpenseViewModel()
+                    {
+                        ExpenseTypeDtoList = expenseTypeList
+                    };
+
+                    return View(model);
+                }
+
+                _flashMessage.Danger("Not possible to retrieve expenses type due to error");
+                return View(new CreateEditExpenseViewModel());
+
             }
-            return View("Error");
+            catch
+            {
+                return View("Error");
+            }
+            
+           
         }
 
 
@@ -246,5 +258,7 @@ namespace CondoManagementWebApp.Controllers
             };
             return model;
         }
+
+        
     }
 }

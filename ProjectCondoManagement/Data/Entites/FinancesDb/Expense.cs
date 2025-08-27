@@ -17,5 +17,10 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
         public int CondominiumId {  get; set; } 
 
         public ExpenseType ExpenseType { get; set; }
+
+        public override string ToString()
+        {
+            return $"{ExpenseType} - {Detail} - {Amount}";
+        }
     }
 }

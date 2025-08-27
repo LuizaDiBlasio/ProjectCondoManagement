@@ -17,7 +17,7 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public FinancialAccount AccountBeneficiary { get; set; }
 
-        public int CondominiumId { get; set; }
+        public int PaymentId { get; set; }
 
         public Payment Payment { get; set; }
     }

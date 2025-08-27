@@ -81,6 +81,10 @@ builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();    
+
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+
 builder.Services.AddScoped<ICondoMemberRepository, CondoMemberRepository>();
 
 builder.Services.AddScoped<ICondominiumRepository, CondominiumRepository>();    

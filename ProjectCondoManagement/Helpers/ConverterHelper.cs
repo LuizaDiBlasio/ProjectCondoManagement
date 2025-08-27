@@ -373,11 +373,12 @@ namespace ProjectCondoManagement.Helpers
                 IssueDate = payment.IssueDate,
                 DueDate = payment.DueDate,  
                 PaymentMethod = payment.PaymentMethod,  
-                UserEmail = payment.UserEmail,  
+                CondominiumId = payment.CondominiumId,
                 IsPaid = payment.IsPaid,    
-                InvoiceDto = ToInvoiceDto(payment.Invoice, false),
+                InvoiceDto = payment.Invoice == null? null : ToInvoiceDto(payment.Invoice, false),
                 ExpensesDto = payment.Expenses?.Select(e => ToExpenseDto(e, false)).ToList() ?? new List<ExpenseDto>(),
-                TransactionDto = ToTransactionDto(payment.Transaction, false),
+                OneTimeExpenseDto = payment.OneTimeExpense == null ? null : ToExpenseDto(payment.OneTimeExpense, false),
+                TransactionDto = payment.Transaction == null ? null : ToTransactionDto(payment.Transaction, false),
                 
             };  
            
@@ -394,7 +395,6 @@ namespace ProjectCondoManagement.Helpers
                 CondominiumId = invoice.CondominiumId,
                 AccountId = invoice.AccountId,
                 FinancialAccountDto = ToFinancialAccountDto(invoice.FinancialAccount, false),
-                UserEmail = invoice.UserEmail,
                 Payment = ToPaymentDto(invoice.Payment, false)
             };
             
@@ -425,7 +425,6 @@ namespace ProjectCondoManagement.Helpers
                 AccountPayerDto = ToFinancialAccountDto(transaction.AccountPayer, false),   
                 BeneficiaryAccountId = transaction.BeneficiaryAccountId,
                 AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
-                CondominiumId = transaction.CondominiumId,
                 PaymentDto = ToPaymentDto(transaction.Payment, false),
                 
             };
@@ -463,6 +462,54 @@ namespace ProjectCondoManagement.Helpers
             return expense; 
         }
 
+        public Payment ToPayment(PaymentDto paymentDto, bool isNew)
+        {
+            var payment = new Payment()
+            {
+                Id = isNew ? 0 : paymentDto.Id,
+                IssueDate = paymentDto.IssueDate,
+                DueDate = paymentDto.DueDate,
+                PaymentMethod = isNew ? null : paymentDto.PaymentMethod,
+                PayerFinancialAccountId = paymentDto.PayerFinancialAccountId,
+                IsPaid = isNew ? false : paymentDto.IsPaid,
+                CondominiumId = paymentDto.CondominiumId,
+                OneTimeExpense = paymentDto.OneTimeExpenseDto == null ? null : isNew ? ToExpense(paymentDto.OneTimeExpenseDto, true) : ToExpense(paymentDto.OneTimeExpenseDto, false),
+                Expenses = paymentDto.ExpensesDto?.Select(e => ToExpense(e, false)).ToList() ?? new List<Expense>(),
+                Transaction = isNew ? null : paymentDto.TransactionDto != null ? ToTransaction(paymentDto.TransactionDto, false) : null,
+                TransactionId = isNew ? null : paymentDto.TransactionDto == null ? null : paymentDto.TransactionDto.Id,
+                InvoiceId = paymentDto.InvoiceId,
+            };
+
+            return payment; 
+        }
+
+        public Transaction ToTransaction(TransactionDto transactionDto, bool isNew)
+        {
+            var transaction = new Transaction()
+            {
+                Id = isNew ? 0 : transactionDto.Id,
+                DateAndTime = transactionDto.DateAndTime,
+                PayerAccountId = transactionDto.PayerAccountId,
+                BeneficiaryAccountId = transactionDto.BeneficiaryAccountId,
+                PaymentId = transactionDto.PaymentId,
+            };
+
+            return transaction; 
+        }
+
+        public FinancialAccount ToFinancialAccount(FinancialAccountDto financialAccountDto, bool isNew)
+        {
+            var financialAccount = new FinancialAccount()
+            {
+                Id = isNew ? 0 : financialAccountDto.Id,
+                InitialDeposit = financialAccountDto.InitialDeposit,
+                IsActive = financialAccountDto.IsActive,
+                CardNumber = financialAccountDto.CardNumber,
+                AssociatedBankAccount= financialAccountDto.AssociatedBankAccount,   
+                BankName = financialAccountDto.BankName,
+            };
+            return financialAccount;
+        }
     }
     
 }

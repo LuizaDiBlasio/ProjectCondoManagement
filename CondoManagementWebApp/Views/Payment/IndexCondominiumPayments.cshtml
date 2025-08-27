@@ -1,0 +1,119 @@
+﻿@model IEnumerable<ClassLibrary.DtoModels.PaymentDto>
+
+@{
+    ViewData["Title"] = "IndexCondominiumPayments";
+}
+
+<h1>Condominium Payments</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IssueDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DueDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PaymentMethod)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PayerUserEmail)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PayerCondominiumId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CondominiumId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsPaid)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalAmount)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IssueDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DueDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PaymentMethod)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PayerUserEmail)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PayerCondominiumId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CondominiumId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsPaid)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TotalAmount)
+            </td>
+            <td>
+                    @Html.ActionLink("Pay", "MakePayment", new { id = item.Id })
+                    @Html.ActionLink("Details", "Details", new { id = item.Id })
+                    <a href="#" class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@item.Id">Cancel Payment</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<h1>Schedule payments</h1>
+
+<p>
+    <a asp-action="CreateOneTimePayment">One time payment</a>
+    <a asp-action="CreateRecurrentPayment">Recurrent payment</a>
+</p>
+
+<div id="deleteDialog" class="modal fade">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to cancel this payment?</p>
+                <form id="deleteForm" method="post" asp-action="RequestDelete">
+                    <input type="hidden" id="paymentIdToDelete" name="id" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">No</button>
+                <button type="submit" class="btn btn-danger" form="deleteForm">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('a[data-bs-target="#deleteDialog"]').click(function () {
+                var id = $(this).data('id');
+                $('#paymentIdToDelete').val(id);
+            });
+        });
+    </script>
+}

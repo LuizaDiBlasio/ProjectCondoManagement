@@ -9,6 +9,7 @@
         Taxes = 8,
         Mantainance = 16,
         Payrolls = 32,
-        Surveillance = 64
+        Surveillance = 64, 
+        Other = 128
     }
 }
