@@ -12,7 +12,7 @@ namespace ProjectCondoManagement.Helpers
 
         CondoMember ToCondoMember(CondoMemberDto condoMemberDto);
 
-        public CondoMemberDto ToCondoMemberDto(CondoMember condoMember, bool includeUnits = true);
+        CondoMemberDto ToCondoMemberDto(CondoMember condoMember, bool includeUnits = true);
 
        CondoMemberDto ToCondoMemberDto(User user);
 
@@ -39,8 +39,6 @@ namespace ProjectCondoManagement.Helpers
 
         Unit ToUnit(UnitDto unitDto, bool isNew);
 
-        UnitDto ToUnitDto(Unit unit);
-
         Document ToDocument(DocumentDto documentDto, bool isNew);
 
         DocumentDto ToDocumentDto(Document document);
@@ -50,7 +48,7 @@ namespace ProjectCondoManagement.Helpers
         Message ToMessage(MessageDto messageDto, bool isNew);
 
         PaymentDto ToPaymentDto(Payment payment, bool isNew);
-        public UnitDto ToUnitDto(Unit unit, bool includeCondoMembers = true);
+        UnitDto ToUnitDto(Unit unit, bool includeCondoMembers = true);
 
         InvoiceDto ToInvoiceDto(Invoice invoice, bool isNew);
 

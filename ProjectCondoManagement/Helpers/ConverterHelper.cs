@@ -239,9 +239,11 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = condominium.Id,
                 CondoName = condominium.CondoName,
-                CompanyId = condominium.CompanyId.Value,
+                CompanyId = condominium.CompanyId,
                 Address = condominium.Address,
-                ManagerUserId = condominium.ManagerUserId,
+                FinancialAccountId = condominium.FinancialAccountId,
+                ManagerUserId = condominium.ManagerUserId
+
             };
 
             return condominiumDto;

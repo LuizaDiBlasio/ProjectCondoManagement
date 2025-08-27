@@ -45,8 +45,8 @@
                     
             </td>
                 <td>
-                    <a class="btn btn-outline-info" asp-action="AssignManager" asp-route-id="@item.Id">Assign Manager</a>
-                    <a class="btn btn-outline-info" asp-controller="Units" asp-action="Index" asp-route-id="@item.Id">Units</a>
+                    <a class="btn btn-outline-secondary" asp-action="AssignManager" asp-route-id="@item.Id">Assign Manager</a>
+                    <a class="btn btn-outline-info" asp-controller="Units" asp-action="Index" asp-route-id="@item.Id" asp-route-condoName="@item.CondoName">Units</a>
                     <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
                     <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id">Details</a>
                     <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>

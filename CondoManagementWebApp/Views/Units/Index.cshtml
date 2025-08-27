@@ -6,16 +6,16 @@
 
 <h1>
     Units
-    @if (ViewBag.CondominiumId != null)
+    @if (ViewBag.CondoName != null)
     {
-        @: from @Model.FirstOrDefault()?.CondominiumDto?.CondoName
+        @: from @ViewBag.CondoName
     }
 </h1>
 
 <p>
-    @if (ViewBag.CondominiumId != null)
+    @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
     {
-        <a asp-action="Create" class="btn btn-success" asp-route-id="@ViewBag.CondominiumId">Add Unit</a>
+        <a asp-action="Create" class="btn btn-success" asp-route-condoId="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Add Unit</a>
         <a asp-controller="Condominium" asp-action="Index"  class="btn btn-outline-primary">Back to Condominiums</a>
  
     }
@@ -63,9 +63,9 @@
                 @Html.DisplayFor(modelItem => item.Bedrooms)
             </td>
             <td>
-                    <a class="btn btn-secondary" asp-action="AssignMember" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId">Manage Members</a>
-                <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId">Edit</a>
-                <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId">Details</a>
+                    <a class="btn btn-outline-secondary" asp-action="AssignMember" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Manage Members</a>
+                    <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Edit</a>
+                    <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Details</a>
                 <a class="btn btn-danger" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@item.Id">Delete</a>
                 
             </td>
@@ -94,6 +94,9 @@
                 <form id="deleteForm" method="post" asp-action="Delete">
                     @Html.AntiForgeryToken()
                     <input type="hidden" id="unitIdToDelete" name="id" />
+                    <input type="hidden" name="condoId" value="@ViewBag.CondominiumId" />
+                    <input type="hidden" name="condoName" value="@ViewBag.CondoName" />
+
                 </form>
             </div>
             <div class="modal-footer">

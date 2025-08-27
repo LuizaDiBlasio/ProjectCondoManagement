@@ -19,8 +19,13 @@
             {
                 <input type="hidden" name="memberId" value="@ViewBag.MemberId" />
             }
-            
 
+            @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
+            {
+                <input type="hidden" name="condoId" value="@ViewBag.CondominiumId" />
+                <input type="hidden" name="condoName" value="@ViewBag.CondoName" />
+
+            } 
 
 
             <div class="form-group">
@@ -44,9 +49,9 @@
 
                 
 
-                @if (ViewBag.CondominiumId != null)
+                @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
                 {
-                    <a asp-action="Index" asp-route-id="@ViewBag.CondominiumId" class="btn btn-outline-primary">Back to List</a>
+                    <a asp-action="Index" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName" class="btn btn-outline-primary">Back to List</a>
                 }
                 else if (ViewBag.MemberId != null)
                 {

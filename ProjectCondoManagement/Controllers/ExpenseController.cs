@@ -104,11 +104,11 @@ namespace ProjectCondoManagement.Controllers
 
                 await _expensesRepository.CreateAsync(expense, _dataContextFinances);
 
-                return Ok(new Response() { IsSuccess = true });
+                return Ok(new Response<object>() { IsSuccess = true });
             }
             catch
             {
-                return BadRequest(new Response() { IsSuccess = false, Message = "Unable to enter expense due to error" });
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to enter expense due to error" });
             }
         }
 
@@ -120,7 +120,7 @@ namespace ProjectCondoManagement.Controllers
         {
             if (expenseDto == null)
             {
-                return NotFound(new Response { IsSuccess = false, Message = "Unable to modify, expensa not found" });
+                return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to modify, expensa not found" });
             }
 
             try
@@ -129,11 +129,11 @@ namespace ProjectCondoManagement.Controllers
 
                 await _expensesRepository.UpdateAsync(expense, _dataContextFinances);
 
-                return Ok(new Response() { IsSuccess = true });
+                return Ok(new Response<object>() { IsSuccess = true });
             }
             catch
             {
-                return BadRequest(new Response() { IsSuccess = false, Message = "Unable to modify expense due to error" });
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to modify expense due to error" });
             }
         }
 
@@ -147,16 +147,16 @@ namespace ProjectCondoManagement.Controllers
 
                 if (expense == null)
                 {
-                    return NotFound(new Response { IsSuccess = false, Message = "Unable to delete, expensa not found" });
+                    return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to delete, expensa not found" });
                 }
 
                 await _expensesRepository.DeleteAsync(expense, _dataContextFinances);
 
-                return Ok(new Response() { IsSuccess = true });
+                return Ok(new Response<object>() { IsSuccess = true });
             }
             catch
             {
-                return BadRequest(new Response { IsSuccess = false, Message = "Unable to delete due to server error" });
+                return BadRequest(new Response<object> { IsSuccess = false, Message = "Unable to delete due to server error" });
             }
         }
 

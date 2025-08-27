@@ -176,7 +176,7 @@ namespace ProjectCondoManagement.Controllers
 
                     if (companyAdminUser == null)
                     {
-                        return NotFound(new Response { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
+                        return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
                     }
 
                     companyAdminUser.CompanyId = company.Id;
@@ -184,7 +184,6 @@ namespace ProjectCondoManagement.Controllers
                     await _userHelper.UpdateUserAsync(companyAdminUser);
                 }
 
-                return Ok(new Response { IsSuccess = true});
                 return Ok(new Response<object> { IsSuccess = true});
             }
             catch (Exception ex)
@@ -234,7 +233,7 @@ namespace ProjectCondoManagement.Controllers
 
                     if (companyAdminUser == null)
                     {
-                        return NotFound(new Response { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
+                        return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
                     }
 
                     companyAdminUser.CompanyId = company.Id;

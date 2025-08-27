@@ -12,6 +12,8 @@
 
             <input type="hidden" asp-for="UnitId" />
             <input type="hidden" name="condoId" value="@ViewBag.CondominiumId" />
+            <input type="hidden" name="condoName" value="@ViewBag.CondoName" />
+
 
 
 
@@ -65,9 +67,9 @@
 
             <div class="mt-4">
                 <button type="submit" class="btn btn-success">Update Members</button>
-                @if(ViewBag.CondominiumId != null)
+                @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
                 {
-                    <a asp-action="Index" class="btn btn-outline-danger" asp-route-id="@ViewBag.CondominiumId">Cancel</a>
+                    <a asp-action="Index" class="btn btn-outline-danger" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Cancel</a>
                 }
                 else
                 {

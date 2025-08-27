@@ -60,7 +60,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (message == null)
             {
-                return NotFound(new Response () { IsSuccess = false, Message = "Message not found, unable to retrieve details"});  
+                return NotFound(new Response<object>() { IsSuccess = false, Message = "Message not found, unable to retrieve details"});  
             }
 
             var statusList = _messageRepository.GetMessageStatusList();
@@ -78,7 +78,7 @@ namespace ProjectCondoManagement.Controllers
         {
             if (messageDto == null)
             {
-                return BadRequest(new Response() { IsSuccess = false, Message = "Unable change message status" });
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable change message status" });
             }
 
             try
@@ -87,11 +87,11 @@ namespace ProjectCondoManagement.Controllers
 
                 _messageRepository.UpdateAsync(message, _dataContextUsers);
 
-                return Ok(new Response() { IsSuccess = true, Message = "Status updated successfully" });
+                return Ok(new Response<object>() { IsSuccess = true, Message = "Status updated successfully" });
             }
             catch
             {
-                return BadRequest(new Response() { IsSuccess = false, Message = "Unable change message status" });
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable change message status" });
             }
         }
 
@@ -102,7 +102,7 @@ namespace ProjectCondoManagement.Controllers
         {
             if(messageDto == null)
             {
-                return BadRequest(new Response() { IsSuccess = false, Message = "Unable to send message" });
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to send message" });
             }
 
             try
@@ -111,11 +111,11 @@ namespace ProjectCondoManagement.Controllers
                 
                 await _messageRepository.CreateAsync(message, _dataContextUsers);
 
-                return Ok(new Response() { IsSuccess = true , Message ="Message sent successfully!"});
+                return Ok(new Response<object>() { IsSuccess = true , Message ="Message sent successfully!"});
             }
             catch
             {
-                return BadRequest(new Response() { IsSuccess = false, Message = "Unable to send message" });
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to send message" });
             }
         }
 
@@ -131,18 +131,18 @@ namespace ProjectCondoManagement.Controllers
 
                 if (message == null)
                 {
-                    return NotFound(new Response { IsSuccess = false, Message = "Unable to delete, message not found" });
+                    return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to delete, message not found" });
                 }
 
                 message.DeletedByReceiver = true;
 
                 await _messageRepository.UpdateAsync(message, _dataContextUsers);
 
-                return Ok(new Response { IsSuccess = true });
+                return Ok(new Response<object> { IsSuccess = true });
             }
             catch
             {
-                return BadRequest(new Response { IsSuccess = false, Message = "Unable to delete message" });
+                return BadRequest(new Response<object> { IsSuccess = false, Message = "Unable to delete message" });
             }
         }
 
@@ -157,18 +157,18 @@ namespace ProjectCondoManagement.Controllers
 
                 if (message == null)
                 {
-                    return NotFound(new Response { IsSuccess = false, Message = "Unable to delete, message not found" });
+                    return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to delete, message not found" });
                 }
 
                 message.DeletedBySender = true;
 
                 await _messageRepository.UpdateAsync(message, _dataContextUsers);
 
-                return Ok(new Response { IsSuccess = true});
+                return Ok(new Response<object> { IsSuccess = true});
             }
             catch
             {
-                return BadRequest(new Response { IsSuccess = false, Message = "Unable to delete message" });
+                return BadRequest(new Response<object> { IsSuccess = false, Message = "Unable to delete message" });
             }
         }
 
@@ -186,7 +186,7 @@ namespace ProjectCondoManagement.Controllers
             // gera um link para o login
             string link = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/Login"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
-            Response response = _mailHelper.SendEmail(email, "Email notification", $"<h1>Email notification</h1>" +
+            Response<object> response = _mailHelper.SendEmail(email, "Email notification", $"<h1>Email notification</h1>" +
            $"You have receveived a message in your Omah app,<br><br><a href = \"{link}\">Click here to login and check your inbox. </a>"); //Contruir email e enviá-lo com o link 
 
             if (response.IsSuccess)
@@ -196,7 +196,7 @@ namespace ProjectCondoManagement.Controllers
 
             else
             {
-                return BadRequest(new Response { IsSuccess = false, Message = "Message sent internally but no notification was sent to receivers email" });
+                return BadRequest(new Response<object> { IsSuccess = false, Message = "Message sent internally but no notification was sent to receivers email" });
             }
 
         }

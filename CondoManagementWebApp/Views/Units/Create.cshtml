@@ -16,13 +16,14 @@
 
             @if(Model.MemberId != null)
             {
-                <input type="hidden" name="MemberId" value="@Model.MemberId.Value" />
+                <input type="hidden" name="MemberId" value="@Model.MemberId" />
             }
             
 
-            @if (Model.CondoId != null)
+            @if (Model.CondoId != null && Model.CondoName != null)
             {
-                <input type="hidden" name="CondominiumId" value="@Model.CondoId.Value" />
+                <input type="hidden" name="CondominiumId" value="@Model.CondoId" />
+                <input type="hidden" name="CondoName" value="@Model.CondoName" />
             }
             else
             {

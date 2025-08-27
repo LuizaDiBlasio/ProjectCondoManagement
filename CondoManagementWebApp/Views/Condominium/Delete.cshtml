@@ -32,13 +32,13 @@
             @Html.DisplayNameFor(model => model.ManagerUserId)
         </dt>
         <dd class="col-sm-10">
-            @if (Model.ManagerUserId == null)
+            @if (Model.ManagerUser == null)
             {
                 <span class="text-danger">No Manager Assigned</span>
             }
             else
             {
-                @Html.DisplayFor(model => model.ManagerUserId)
+                @Html.DisplayFor(model => model.ManagerUser.FullName)
             }
         </dd>
     </dl>

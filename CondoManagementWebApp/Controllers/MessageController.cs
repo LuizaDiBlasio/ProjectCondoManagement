@@ -114,12 +114,12 @@ namespace CondoManagementWebApp.Controllers
 
                 var messageDto = _converterHelper.ToMessageDto(model, date, senderEmail, status);
 
-                var apiCall = await _apiCallService.PostAsync<MessageDto, Response>("api/Message/CreateMessage", messageDto);
+                var apiCall = await _apiCallService.PostAsync<MessageDto, Response<object>>("api/Message/CreateMessage", messageDto);
 
                 if (apiCall.IsSuccess)
                 {
                     //Enviar notificação via email para quem recebe mensagem 
-                    var sendEmail = await _apiCallService.PostAsync<string, Response>("api/Message/SendEmailNotification", messageDto.ReceiverEmail);
+                    var sendEmail = await _apiCallService.PostAsync<string, Response<object>>("api/Message/SendEmailNotification", messageDto.ReceiverEmail);
 
                     if (sendEmail.IsSuccess)
                     {
@@ -191,7 +191,7 @@ namespace CondoManagementWebApp.Controllers
                 {
                     var messageDtoWithStatusName = await SelectStatusName(messageDto);
 
-                    var apiCall = await _apiCallService.PostAsync<MessageDto,Response>("api/Message/EditMessageStatus", messageDtoWithStatusName);
+                    var apiCall = await _apiCallService.PostAsync<MessageDto,Response<object>>("api/Message/EditMessageStatus", messageDtoWithStatusName);
 
                     if (apiCall.IsSuccess)
                     {
@@ -245,7 +245,7 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var apiCall = await _apiCallService.PostAsync<int, Response>($"api/Message/DeleteReceivedMessages", id);
+                var apiCall = await _apiCallService.PostAsync<int, Response<object>>($"api/Message/DeleteReceivedMessages", id);
 
                 return Json(new { success = apiCall.IsSuccess });
             }
@@ -262,7 +262,7 @@ namespace CondoManagementWebApp.Controllers
             try
             {
                 
-                var apiCall = await _apiCallService.PostAsync<int, Response>($"api/Message/DeleteSentMessages", id);
+                var apiCall = await _apiCallService.PostAsync<int, Response<object>>($"api/Message/DeleteSentMessages", id);
 
                 // Retornar o resultado da API diretamente como um JSON para o AJAX processar.
                 return Json(new { success = apiCall.IsSuccess });

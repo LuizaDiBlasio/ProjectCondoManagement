@@ -202,7 +202,7 @@ namespace CondoManagementWebApp.Controllers
                     return NotFound();
                 }
 
-                return View(id);
+                return View(condoMember);
             }
             catch (Exception)
             {

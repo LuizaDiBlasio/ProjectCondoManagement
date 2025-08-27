@@ -44,7 +44,7 @@ namespace ProjectCondoManagement.Controllers
         public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetCondominiums()
         {
 
-            //TODO : no final so preencher os condominios com o id da company
+            //TODO: no final so preencher os condominios com o id da company
 
             //var email = this.User.Identity?.Name;
 
@@ -138,7 +138,6 @@ namespace ProjectCondoManagement.Controllers
 
 
             var condominium = _converterHelper.ToCondominium(condominiumDto, false);
-
 
             try
             {

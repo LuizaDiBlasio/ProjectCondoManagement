@@ -26,7 +26,7 @@ namespace CondoManagementWebApp.Controllers
 
 
         // GET: UnitsController
-        public async Task<IActionResult> Index(int? id)
+        public async Task<IActionResult> Index(int? id, string? condoName)
         {
             IEnumerable<UnitDto> units = new List<UnitDto>();
 
@@ -38,6 +38,12 @@ namespace CondoManagementWebApp.Controllers
                 }
                 else
                 {
+                    if(condoName != null)
+                    {
+                        ViewBag.CondoName = condoName;
+                    }
+
+                   
                     ViewBag.CondominiumId = id;
 
                     units = await _apiCallService.GetAsync<IEnumerable<UnitDto>>($"api/Units/condo/{id.Value}");
@@ -48,13 +54,11 @@ namespace CondoManagementWebApp.Controllers
             }
             catch (Exception ex)
             {
-                _flashMessage.Danger($"{ex.Message}");
+                _flashMessage.Danger($"Error fetching units");
+                return View(units);
             }
 
-
-
-
-            return View(units);
+            
         }
 
         // GET: UnitsController
@@ -88,19 +92,18 @@ namespace CondoManagementWebApp.Controllers
             }
             catch (Exception ex)
             {
-                _flashMessage.Danger($"{ex.Message}");
+                _flashMessage.Danger($"Error loading units.");
+
+                return View(units);
             }
 
-
-
-
-            return View(units);
+           
         }
 
 
 
         // GET: UnitsController/Details/5
-        public async Task<IActionResult> Details(int? id, int? condoId, int? memberId)
+        public async Task<IActionResult> Details(int? id, int? condoId, string? condoName, int? memberId)
         {
             if (id == null)
             {
@@ -115,9 +118,11 @@ namespace CondoManagementWebApp.Controllers
                     return NotFound();
                 }
 
-                if (condoId != null)
+                if (condoId != null && condoName != null)
                 {
                     ViewBag.CondominiumId = condoId;
+                    ViewBag.CondoName = condoName;
+
                 }
                 if (memberId != null)
                 {
@@ -129,24 +134,38 @@ namespace CondoManagementWebApp.Controllers
             catch (Exception ex)
             {
                 _flashMessage.Danger($"Error fetching unit");
+
+                if (condoId != null && condoName != null)
+                {
+                    return RedirectToAction(nameof(Index), new { id = condoId, condoName = condoName });
+                }
+
+                if (memberId != null)
+                {
+                    return RedirectToAction(nameof(MemberUnits), new { id = memberId });
+                }
+
+                return RedirectToAction(nameof(Index));
             }
 
-            return RedirectToAction(nameof(Index));
+            
         }
 
         // GET: UnitsController/Create
-        public ActionResult Create(int? id, int? memberId)
+        public async  Task<IActionResult> Create(int? memberId, int? condoId, string? condoName)
         {
+
             var model = new UnitDtoViewModel();
 
-            if (id != null)
+            if (condoId != null && condoName != null)
             {
-                model.CondoId = id.Value;
+                model.CondoId = condoId;
+                model.CondoName = condoName;
             }
 
             else
             {
-                var condos = _apiCallService.GetAsync<IEnumerable<CondominiumDto>>("api/Condominiums").Result;
+                var condos = await _apiCallService.GetAsync<IEnumerable<CondominiumDto>>("api/Condominiums");
 
                 model.Condos = condos.Select(c => new SelectListItem
                 {
@@ -212,11 +231,13 @@ namespace CondoManagementWebApp.Controllers
                     {
                         return RedirectToAction("MemberUnits", new { id = model.MemberId });
                     }
+                    if ( model.CondoName != null)
+                    {
+                        return RedirectToAction(nameof(Index), new { id = model.CondominiumId, condoName = model.CondoName });
+                    }
 
                     return RedirectToAction(nameof(Index));
                 }
-
-
 
 
                 _flashMessage.Danger(result.Message);
@@ -233,7 +254,7 @@ namespace CondoManagementWebApp.Controllers
         }
 
         // GET: UnitsController/Edit/5
-        public async Task<ActionResult> Edit(int? id, int? condoId, int? memberId)
+        public async Task<ActionResult> Edit(int? id, int? condoId, string? condoName, int? memberId)
         {
             if (id == null)
             {
@@ -248,9 +269,11 @@ namespace CondoManagementWebApp.Controllers
                     return NotFound();
                 }
 
-                if (condoId != null)
+                if (condoId != null && condoName != null)
                 {
                     ViewBag.CondominiumId = condoId;
+                    ViewBag.CondoName = condoName;
+
                 }
                 if (memberId != null)
                 {
@@ -262,6 +285,17 @@ namespace CondoManagementWebApp.Controllers
             catch (Exception)
             {
                 _flashMessage.Danger("Error retrieving unit for edit.");
+
+                if (condoId != null && condoName != null)
+                {
+                    return RedirectToAction(nameof(Index), new { id = condoId, condoName = condoName });
+                }
+
+                if (memberId != null)
+                {
+                    return RedirectToAction(nameof(MemberUnits), new { id = memberId });
+                }
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -274,7 +308,7 @@ namespace CondoManagementWebApp.Controllers
         // POST: UnitsController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UnitDto unitDto, int? condoId, int? memberId)
+        public async Task<IActionResult> Edit(int id, UnitDto unitDto, int? condoId, string? condoName, int? memberId)
         {
             if (id != unitDto.Id)
             {
@@ -283,6 +317,17 @@ namespace CondoManagementWebApp.Controllers
 
             if (!ModelState.IsValid)
             {
+                if (condoId != null && condoName != null)
+                {
+                    ViewBag.CondominiumId = condoId;
+                    ViewBag.CondoName = condoName;
+                }
+  
+                if (memberId != null)
+                {
+                    ViewBag.MemberId = memberId;
+                }
+
                 return View(unitDto);
             }
 
@@ -294,13 +339,24 @@ namespace CondoManagementWebApp.Controllers
                 if (!result.IsSuccess)
                 {
                     _flashMessage.Danger("Error updating unit");
+                    if (condoId != null && condoName != null)
+                    {
+                        ViewBag.CondominiumId = condoId;
+                        ViewBag.CondoName = condoName;
+                    }
+
+                    if (memberId != null)
+                    {
+                        ViewBag.MemberId = memberId;
+                    }
+
                     return View(unitDto);
                 }
 
 
-                if (condoId != null)
+                if (condoId != null && condoName != null)
                 {
-                    return RedirectToAction(nameof(Index), new { id = condoId });
+                    return RedirectToAction(nameof(Index), new { id = condoId, condoName = condoName});
                 }
 
                 if (memberId != null)
@@ -315,6 +371,17 @@ namespace CondoManagementWebApp.Controllers
                 _flashMessage.Danger("Error updating unit");
             }
 
+            if (condoId != null && condoName != null)
+            {
+                ViewBag.CondominiumId = condoId;
+                ViewBag.CondoName = condoName;
+            }
+
+            if (memberId != null)
+            {
+                ViewBag.MemberId = memberId;
+            }
+
             return View(unitDto);
         }
 
@@ -322,7 +389,7 @@ namespace CondoManagementWebApp.Controllers
         // POST: UnitsController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int? id, int? memberId)
+        public async Task<IActionResult> Delete(int? id, int? condoId, string? condoName)
         {
             if (id == null)
             {
@@ -336,20 +403,29 @@ namespace CondoManagementWebApp.Controllers
                 if (unit == null)
                 {
                     _flashMessage.Danger("Unit not found.");
+
+                    if(condoId != null && condoName != null)
+                    {
+                        return RedirectToAction(nameof(Index), new { id = condoId, condoName = condoName });
+                    }
+
                     return RedirectToAction(nameof(Index));
+
                 }
 
 
                 var hasRelations = unit.CondoMemberDtos?.Any() ?? false;
                 if (hasRelations)
                 {
-                    if(memberId != null)
-                    {
-                        _flashMessage.Danger("Unit cannot be deleted because it is associated with one or more members.");
-                        return RedirectToAction("MemberUnits", new { id = memberId });
-                    }
+                  
 
                     _flashMessage.Danger("Unit cannot be deleted because it is associated with one or more members.");
+
+                    if (condoId != null && condoName != null)
+                    {
+                        return RedirectToAction(nameof(Index), new { id = condoId, condoName = condoName });
+                    }
+
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -363,11 +439,24 @@ namespace CondoManagementWebApp.Controllers
                     _flashMessage.Confirmation("Unit deleted successfully.");
                 }
 
+
+                if (condoId != null && condoName != null)
+                {
+                    return RedirectToAction(nameof(Index), new { id = condoId, condoName = condoName });
+                }
+
+
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
                 _flashMessage.Danger("An unexpected error occurred.");
+
+                if (condoId != null && condoName != null)
+                {
+                    return RedirectToAction(nameof(Index), new { id = condoId, condoName = condoName });
+                }
+
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -375,16 +464,17 @@ namespace CondoManagementWebApp.Controllers
 
 
 
-        public async Task<IActionResult> AssignMember(int? id, int? condoId)
+        public async Task<IActionResult> AssignMember(int? id, int? condoId, string? condoName)
         {
 
             if (id == null)
             {
                 return NotFound();
             }
-            if(condoId != null)
+            if(condoId != null && condoName != null)
             {
                 ViewBag.CondominiumId = condoId;
+                ViewBag.CondoName = condoName;
             }
 
             try
@@ -410,6 +500,12 @@ namespace CondoManagementWebApp.Controllers
             catch (Exception ex)
             {
                 _flashMessage.Danger("Error retrieving members.");
+
+                if (condoId != null && condoName != null)
+                {
+                    return RedirectToAction(nameof(Index), new { id = condoId, condoName = condoName });
+                }
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -421,11 +517,17 @@ namespace CondoManagementWebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AssignMember(AssignMemberViewModel model, int? condoId)
+        public async Task<IActionResult> AssignMember(AssignMemberViewModel model, int? condoId, string? condoName)
         {
 
             if (!ModelState.IsValid)
             {
+                if (condoId != null && condoName != null)
+                {
+                    ViewBag.CondominiumId = condoId;
+                    ViewBag.CondoName = condoName;
+                }
+
                 return View(model);
             }
 
@@ -473,9 +575,9 @@ namespace CondoManagementWebApp.Controllers
 
                 _flashMessage.Confirmation("Members updated succesfully.");
 
-                if(condoId != null)
+                if(condoId != null && condoName != null)
                 {
-                    return RedirectToAction(nameof(Index), new { id = condoId });
+                    return RedirectToAction(nameof(Index), new { id = condoId, condoName = condoName });
                 }
 
                 return RedirectToAction(nameof(Index));
@@ -483,9 +585,17 @@ namespace CondoManagementWebApp.Controllers
             catch (Exception)
             {
                 _flashMessage.Danger("Error updating member");
+
+                if (condoId != null && condoName != null)
+                {
+                    ViewBag.CondominiumId = condoId;
+                    ViewBag.CondoName = condoName;
+                }
+
+                return View(model);
             }
 
-            return View(model);
+            
 
         }
 
