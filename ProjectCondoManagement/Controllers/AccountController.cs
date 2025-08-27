@@ -44,6 +44,8 @@ namespace ProjectCondoManagement.Controllers
 
         }
 
+
+        //________________________________________________________________________________________________________________________login com 2fa
         /// <summary>
         /// Authenticates a user based on their login credentials.
         /// If the user's account requires two-factor authentication (2FA), a verification token is sent via SMS.
@@ -82,7 +84,7 @@ namespace ProjectCondoManagement.Controllers
                     var response = await _smsHelper.SendSmsAsync("+351936752044", $"Your authentication code is: {token}");
                     if (response.IsSuccess)
                     {
-                        return Ok(new  Response<object>
+                        return Ok(new Response<object>
                         {
                             Token = null,
                             Expiration = null,
@@ -102,7 +104,7 @@ namespace ProjectCondoManagement.Controllers
                     throw;
                 }
 
-                
+
             }
             else
             {
@@ -110,6 +112,32 @@ namespace ProjectCondoManagement.Controllers
             }
         }
 
+
+        //_______________________________________________________________________________________________________login sem 2fa
+
+        //[Microsoft.AspNetCore.Mvc.HttpPost("Login")]
+        //public async Task<IActionResult> Login([FromBody] LoginDto loginDtoModel)
+        //{
+        //    var user = await _userHelper.GetUserByEmailAsync(loginDtoModel.Username);
+
+        //    if (user == null)
+        //    {
+        //        return NotFound(new Response<object>() { Message = "Login failed, user not found." });
+        //    }
+
+        //    if (user.IsActive == false)
+        //    {
+        //        return Unauthorized(new Response<object> () { Message = "User is not active in the system, please contact admin" });
+        //    }
+
+        //    var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login 
+
+        //    if (result.Succeeded)
+        //    {
+        //        return Ok();
+        //    }
+        //    return Unauthorized(new Response<object>() { Message = "Login failed, please contact admin" });
+        //}
 
 
         /// <summary>

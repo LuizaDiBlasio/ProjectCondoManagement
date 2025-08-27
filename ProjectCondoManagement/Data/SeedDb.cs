@@ -247,13 +247,13 @@ namespace ProjectCondoManagement.Data
                         Address = "Gudetamalandia, 5",
                         CompanyId = userNikitinha.CompanyId
                     };
-                    var create5 = await _contextCondos.Condominiums.AddAsync(condominium4);
+                    var create5 = await _contextCondos.Condominiums.AddAsync(condominium5);
                     await _contextCondos.SaveChangesAsync();
 
                 }
 
                 // ---------------- USER "LUIZA" SYSADMIN ----------------
-                await _userHelper.CheckRoleAsync("Admin");
+                await _userHelper.CheckRoleAsync("SysAdmin");
 
                 var userLuiza = await _userHelper.GetUserByEmailAsync("luizabandeira90@gmail.com");
                 if (userLuiza == null)
