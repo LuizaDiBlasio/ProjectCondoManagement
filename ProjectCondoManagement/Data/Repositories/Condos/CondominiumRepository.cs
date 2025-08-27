@@ -121,5 +121,14 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             }
         }
 
+        public async Task<List<CondoMember>> GetCondoCondomembers(int condoId)
+        {
+                return _dataContextCondos.Units
+                        .Where(u => u.CondominiumId == condoId)
+                        .SelectMany(u => u.CondoMembers!) 
+                        .ToList();
+
+        }
+
     }
 }

@@ -105,19 +105,14 @@ namespace ProjectCondoManagement.Controllers
         [Microsoft.AspNetCore.Mvc.HttpPost("GetAllCondoMemberPayments")]
         public async Task<List<PaymentDto>> GetAllCondoMemberPayments([FromBody] string condoId)
         {
-            var condo = await _condominiumRepository.GetByIdAsync(int.Parse(condoId), _dataContextCondos);
-
-            if(condo == null)
-            {
-                return new List<PaymentDto>();
-            }
-
             var usersCondoMembers = new List<User>();
 
-            if(condo.CondoMembers != null)
+            var condoMembers = await _condominiumRepository.GetCondoCondomembers(int.Parse(condoId));
+
+            if (condoMembers != null)
             {
                 //converter condoMembers para users
-                foreach (var condoMember in condo.CondoMembers)
+                foreach (var condoMember in condoMembers)
                 {
                     var user = await _userHelper.GetUserByEmailAsync(condoMember.Email);
                     usersCondoMembers.Add(user);
@@ -189,11 +184,11 @@ namespace ProjectCondoManagement.Controllers
 
                 await _paymentRepository.CreateAsync(payment, _dataContextFinances);
 
-                return Ok( new Response () { IsSuccess = true});
+                return Ok( new Response<object> () { IsSuccess = true});
             }
             catch
             {
-                return BadRequest(new Response () { IsSuccess = false, Message = "Unable to issue payment due to serve error" });
+                return BadRequest(new Response<object> () { IsSuccess = false, Message = "Unable to issue payment due to serve error" });
             }
         }
 
@@ -211,11 +206,11 @@ namespace ProjectCondoManagement.Controllers
 
                 await _paymentRepository.CreateAsync(payment, _dataContextFinances);
 
-                return Ok(new Response() { IsSuccess = true });
+                return Ok(new Response<object>() { IsSuccess = true });
             }
             catch
             {
-                return BadRequest(new Response() { IsSuccess = false, Message = "Unable to issue payment due to serve error" });
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to issue payment due to serve error" });
             }
         }
 
@@ -260,12 +255,12 @@ namespace ProjectCondoManagement.Controllers
 
                 await _paymentRepository.UpdateAsync(payment, _dataContextFinances);
 
-                return Ok(new Response() { IsSuccess = true, Message = "Payment successful" });
+                return Ok(new Response<object>() { IsSuccess = true, Message = "Payment successful" });
                
             }
             catch
             {
-                return BadRequest(new Response() { IsSuccess = false, Message = "Unable to make payment due to server error" });
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to make payment due to server error" });
             }
         }
 

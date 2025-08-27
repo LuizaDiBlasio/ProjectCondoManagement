@@ -183,7 +183,7 @@ namespace CondoManagementWebApp.Controllers
                 //CONVERTER PARA PAYMENT DTO
                 var paymentDto = _converterHelper.FromOneTimeToPaymentDto(model);
 
-                var apiCall = await _apiCallService.PostAsync<PaymentDto, Response>("api/Payment/CreateOneTimePayment", paymentDto);
+                var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/CreateOneTimePayment", paymentDto);
 
                 if (apiCall.IsSuccess)
                 {
@@ -231,7 +231,7 @@ namespace CondoManagementWebApp.Controllers
                 //CONVERTER PARA PAYMENT DTO
                 var paymentDto = _converterHelper.FromRecurringToPaymentDto(model);
 
-                var apiCall = await _apiCallService.PostAsync<PaymentDto, Response>("api/Payment/CreateRecurringPayment", paymentDto);
+                var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/CreateRecurringPayment", paymentDto);
 
                 if (apiCall.IsSuccess)
                 {
@@ -308,7 +308,7 @@ namespace CondoManagementWebApp.Controllers
 
                 //Fazer requisição para fazer fazer pagamento
 
-                var apiCall = await _apiCallService.PostAsync<PaymentDto, Response>("api/Payment/MakePayment", paymentDto); 
+                var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/MakePayment", paymentDto); 
 
                 if(apiCall.IsSuccess)
                 {

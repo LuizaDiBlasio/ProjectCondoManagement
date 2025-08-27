@@ -158,7 +158,7 @@ namespace ProjectCondoManagement.Controllers
                 {
                     if (allPayments.Any(p => p.Expenses.Any(e => e.Id == id))) //caso haja pagamentos, ver se existe alguma despesa com esse id
                     {
-                        return Conflict(new Response { IsSuccess = false, Message = "Unable to delete, expense included in issued payments" });
+                        return Conflict(new Response<object> { IsSuccess = false, Message = "Unable to delete, expense included in issued payments" });
                     }
 
                 }

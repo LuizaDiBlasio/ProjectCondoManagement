@@ -404,8 +404,8 @@ namespace ProjectCondoManagement.Helpers
                 Id = isNew ? 0 : invoice.Id,    
                 PaymentDate = invoice.PaymentDate,  
                 CondominiumId = invoice.CondominiumId,
-                AccountId = invoice.AccountId,
-                FinancialAccountDto = ToFinancialAccountDto(invoice.FinancialAccount, false),
+                PayerAccountId = invoice.PayerAccountId,
+                BeneficiaryAccountId = invoice.BeneficiaryAccountId,
                 Payment = ToPaymentDto(invoice.Payment, false)
             };
             
