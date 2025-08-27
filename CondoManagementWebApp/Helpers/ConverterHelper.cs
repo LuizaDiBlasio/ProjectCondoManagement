@@ -229,5 +229,18 @@ namespace CondoManagementWebApp.Helpers
         }
 
 
+        public UnitDto ToUnitDto(UnitDtoViewModel model)
+        {
+            var unitDto = new UnitDto()
+            {
+                Id = model.Id,
+                CondominiumId = (model.CondominiumId),
+                Bedrooms = model.Bedrooms,
+                Floor = model.Floor,
+                Door = model.Door,
+            };
+
+            return unitDto;
+        }
     }
 }

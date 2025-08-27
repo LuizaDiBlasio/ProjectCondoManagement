@@ -25,7 +25,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
         }
 
 
-        public async Task<Response> LinkImages(IEnumerable<CondoMember> condoMembers)
+        public async Task<Response<object>> LinkImages(IEnumerable<CondoMember> condoMembers)
         {
             try
             {
@@ -50,7 +50,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
                     })
                     .ToList();
 
-                return new Response
+                return new Response<object>
                 {
                     IsSuccess = true,
                     Message = "Images linked successfully"
@@ -58,7 +58,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             }
             catch (Exception ex)
             {
-                return new Response
+                return new Response<object>
                 {
                     IsSuccess = false,
                     Message = $"Error linking images: {ex.Message}"
@@ -77,8 +77,14 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
 
             return condoMember; 
         }
-            
 
-        
+
+        public async Task<CondoMember?> GetByIdWithIncludeAsync(int id, DataContextCondos context)
+        {
+            return await context.CondoMembers.Include(c => c.Units).ThenInclude(u => u.Condominium).FirstOrDefaultAsync(c => c.Id == id);
+
+        }
+
+
     }
 }

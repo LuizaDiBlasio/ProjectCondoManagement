@@ -9,11 +9,11 @@ using ProjectCondoManagement.Data.Entites.UsersDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.UsersDb
+namespace ProjectCondoManagement.Migrations.DataContextUsersMigrations
 {
     [DbContext(typeof(DataContextUsers))]
-    [Migration("20250814131836_UpdateDb")]
-    partial class UpdateDb
+    [Migration("20250820110205_InitCreate")]
+    partial class InitCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -166,13 +166,16 @@ namespace ProjectCondoManagement.Migrations.UsersDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Addres")
+                    b.Property<string>("Address")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FinancialAccountId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -272,7 +275,9 @@ namespace ProjectCondoManagement.Migrations.UsersDb
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId");
+                    b.HasIndex("CompanyId")
+                        .IsUnique()
+                        .HasFilter("[CompanyId] IS NOT NULL");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -339,15 +344,15 @@ namespace ProjectCondoManagement.Migrations.UsersDb
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.User", b =>
                 {
                     b.HasOne("ProjectCondoManagement.Data.Entites.UsersDb.Company", "Company")
-                        .WithMany("Users")
-                        .HasForeignKey("CompanyId");
+                        .WithOne("CompanyAdmin")
+                        .HasForeignKey("ProjectCondoManagement.Data.Entites.UsersDb.User", "CompanyId");
 
                     b.Navigation("Company");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.Company", b =>
                 {
-                    b.Navigation("Users");
+                    b.Navigation("CompanyAdmin");
                 });
 #pragma warning restore 612, 618
         }

@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace ClassLibrary
 {
-    public class Response
+    public class Response<T>
     {
         public bool IsSuccess { get; set; }
 
         public string Message { get; set; }
 
-        public object Results { get; set; }
+        public T? Results { get; set; }
 
         public string? Token { get; set; }
 

@@ -20,13 +20,13 @@ namespace ProjectCondoManagement.Helpers
             _converterHelper = converterHelper;
         }
 
-        public async Task<Response> LinkCompanyToCondominiumAsync(CondominiumDto condominium)
+        public async Task<Response<object>> LinkCompanyToCondominiumAsync(CondominiumDto condominium)
         {
             var company = await _companyRepository.GetByIdAsync(condominium.CompanyId.Value, _dataContextUsers);
 
             if (company == null)
             {
-                return new Response
+                return new Response<object>
                 {
                     IsSuccess = false,
                     Message = $"Company with ID {condominium.CompanyId} not found."
@@ -37,14 +37,14 @@ namespace ProjectCondoManagement.Helpers
 
             if (condominium.Company == null)
             {
-                return new Response
+                return new Response<object>
                 {
                     IsSuccess = false,
                     Message = "Failed to convert company data."
                 };
             }
 
-            return new Response
+            return new Response<object>
             {
                 IsSuccess = true,
                 Message = "Linked Successfully"

@@ -35,5 +35,6 @@ namespace CondoManagementWebApp.Helpers
         PaymentDto FromOneTimeToPaymentDto(CreateOneTimePaymentViewModel model);
 
         PaymentDto FromRecurringToPaymentDto(CreateRecurringPaymentViewModel model);
+        UnitDto ToUnitDto(UnitDtoViewModel model);
     }
 }

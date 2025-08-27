@@ -12,6 +12,22 @@ namespace ProjectCondoManagement.Migrations.CondosDb
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Condominiums",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CompanyId = table.Column<int>(type: "int", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CondoName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ManagerUserId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Condominiums", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CondoMembers",
                 columns: table => new
                 {
@@ -24,27 +40,19 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IdDocument = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TaxIdNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConduminiumId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CondominiumId = table.Column<int>(type: "int", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CondoMembers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Condominiums",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CompanyId = table.Column<int>(type: "int", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ManagerUserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Condominiums", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CondoMembers_Condominiums_CondominiumId",
+                        column: x => x.CondominiumId,
+                        principalTable: "Condominiums",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -269,6 +277,11 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                 name: "IX_CondoMemberMeeting_MeetingsAttendedId",
                 table: "CondoMemberMeeting",
                 column: "MeetingsAttendedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CondoMembers_CondominiumId",
+                table: "CondoMembers",
+                column: "CondominiumId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CondoMemberUnit_UnitsId",

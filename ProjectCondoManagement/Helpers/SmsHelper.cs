@@ -14,7 +14,7 @@ namespace ProjectCondoManagement.Helpers
             _configuration = configuration;
         }
 
-        public async Task<Response> SendSmsAsync(string phoneNumber, string message)
+        public async Task<Response<object>> SendSmsAsync(string phoneNumber, string message)
         {
             //  configuração
             var accountSid = _configuration["TwilioSettings:AccountSid"];
@@ -38,7 +38,7 @@ namespace ProjectCondoManagement.Helpers
                 if (messageResource.Status == MessageResource.StatusEnum.Queued || messageResource.Status == MessageResource.StatusEnum.Sending)
                 {
                     // A mensagem está a caminho.
-                    return new Response
+                    return new Response<object>
                     {
                         IsSuccess = true,
                         Message = $"SMS enviado e em processamento. Status: {messageResource.Status}."
@@ -47,7 +47,7 @@ namespace ProjectCondoManagement.Helpers
                 else
                 {
                     //mensagem falhou
-                    return new Response
+                    return new Response<object>
                     {
                         IsSuccess = false,
                         Message = $"Falha no envio inicial do SMS. Status: {messageResource.Status}."
@@ -58,7 +58,7 @@ namespace ProjectCondoManagement.Helpers
             catch (Exception ex)
             {
                 // tratar exceções
-                return new Response
+                return new Response<object>
                 {
                     IsSuccess = false,
                     Message = ex.Message

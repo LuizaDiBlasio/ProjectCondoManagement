@@ -9,7 +9,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
     {
         Task<Condominium> GetCondoManagerCondominium(string id);
 
-        Task<Response> LinkManager(List<CondominiumDto> condominiums);
+        Task<Response<object>> LinkManager(List<CondominiumDto> condominiums);
 
         Task<List<Condominium>> GetCompanyCondominiums(List<int> condominiumsIds);
 

@@ -83,10 +83,9 @@ namespace CondoManagementWebApp.Controllers
                 return View(condoMemberDto);
             }
 
-
             try
             {
-                var result = await _apiCallService.PostAsync<CondoMemberDto, Response>("api/CondoMembers", condoMemberDto);
+                var result = await _apiCallService.PostAsync<CondoMemberDto, Response<object>>("api/CondoMembers", condoMemberDto);
                 if (result == null)
                 {
                     _flashMessage.Danger($"An error occurred while creating the condo member.");
@@ -99,7 +98,7 @@ namespace CondoManagementWebApp.Controllers
 
                     registerUserDto.SelectedRole = "CondoMember";
 
-                    var result2 = await _apiCallService.PostAsync<RegisterUserDto, Response>("api/Account/AssociateUser", registerUserDto);
+                    var result2 = await _apiCallService.PostAsync<RegisterUserDto, Response<object>>("api/Account/AssociateUser", registerUserDto);
                     if (!result2.IsSuccess)
                     {
                         var createdMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{condoMemberDto.Email}");
@@ -171,7 +170,7 @@ namespace CondoManagementWebApp.Controllers
                 return View(condoMemberDto);
             }
 
-            var result = await _apiCallService.PostAsync<CondoMemberDto, Response>($"api/CondoMembers/Edit/{id}", condoMemberDto);
+            var result = await _apiCallService.PostAsync<CondoMemberDto, Response<object>>($"api/CondoMembers/Edit/{id}", condoMemberDto);
             if (result == null)
             {
                 _flashMessage.Danger($"An error occurred while updating the condo member.");
@@ -203,7 +202,7 @@ namespace CondoManagementWebApp.Controllers
                     return NotFound();
                 }
 
-                return View(id);
+                return View(condoMember);
             }
             catch (Exception)
             {

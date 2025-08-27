@@ -13,7 +13,7 @@ namespace ProjectCondoManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]  
     public class CondominiumsController : ControllerBase
     {
         private readonly DataContextCondos _context;
@@ -43,6 +43,31 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetCondominiums()
         {
+
+            //TODO: no final so preencher os condominios com o id da company
+
+            //var email = this.User.Identity?.Name;
+
+            //var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+
+            //if (user == null)
+            //{
+            //    return BadRequest("User not found.");
+            //}
+
+
+
+            //var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.CompanyId == user.CompanyId).ToListAsync();
+            //if (condominiums == null)
+            //{
+            //    return new List<CondominiumDto>();
+            //}
+
+
+
+
+
+
             var condominiums = await _condominiumRepository.GetAll(_context).ToListAsync();
             if (condominiums == null)
             {
@@ -60,6 +85,8 @@ namespace ProjectCondoManagement.Controllers
 
             return condominiumsDtos;
         }
+
+        
 
         // GET: api/Condominiums/5
         [HttpGet("{id}")]
@@ -84,6 +111,9 @@ namespace ProjectCondoManagement.Controllers
                 return BadRequest(result.Message);
             }
 
+            List<CondominiumDto> condominiumsDtos = new List<CondominiumDto>();
+            condominiumsDtos.Add(condominiumDto);
+            await _condominiumRepository.LinkManager(condominiumsDtos);
 
             return condominiumDto;
         }
@@ -109,12 +139,11 @@ namespace ProjectCondoManagement.Controllers
 
             var condominium = _converterHelper.ToCondominium(condominiumDto, false);
 
-
             try
             {
                 await _condominiumRepository.UpdateAsync(condominium, _context);
 
-                return Ok(new Response { IsSuccess = true, Message = "Condominium updated successfully." });
+                return Ok(new Response<object> { IsSuccess = true, Message = "Condominium updated successfully." });
             }
             catch (Exception ex)
             {
@@ -173,7 +202,7 @@ namespace ProjectCondoManagement.Controllers
 
                 await _condominiumRepository.CreateAsync(condominium, _context);
 
-                return Ok(new Response { IsSuccess = true, Message = "Condominium created successfully." });
+                return Ok(new Response<object> { IsSuccess = true, Message = "Condominium created successfully." });
             }
 
             catch (Exception ex)

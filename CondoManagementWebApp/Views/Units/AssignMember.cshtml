@@ -1,0 +1,88 @@
+﻿@model CondoManagementWebApp.Models.AssignMemberViewModel
+@{
+    ViewData["Title"] = "Assign Member";
+}
+
+<h1 class="mb-4">Manage Members</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="AssignMember" method="post">
+
+            <input type="hidden" asp-for="UnitId" />
+            <input type="hidden" name="condoId" value="@ViewBag.CondominiumId" />
+            <input type="hidden" name="condoName" value="@ViewBag.CondoName" />
+
+
+
+
+            <br />
+
+            <div class="mb-3">
+                <h5>Assign Members</h5>
+                @if (Model.Members != null && Model.Members.Any())
+                {
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                
+                                <th></th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var member in Model.Members)
+                            {
+
+                                <tr>
+                                    <td><img src="@member.ImageFullPath" alt="Member Image" class="img-fluid rounded border shadow" style="max-height: 100px;" /></td>
+                                    <td>
+                                        <label for="member_@member.Id">@member.FullName</label>
+                                    </td>
+                                    <td>@member.Email</td>
+                                    <td>@(member.PhoneNumber ?? "N/A")</td>
+                                    <td>
+                                        <input type="checkbox"
+                                               name="MemberIds"
+                                               value="@member.Id"
+                                               id="member_@member.Id"
+                                               @(Model.Unit?.CondoMemberDtos != null && Model.Unit.CondoMemberDtos.Any(c => c.Id == member.Id) ? "checked" : "") />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        No members available. Please create members accounts first.
+                    </div>
+                }
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">Update Members</button>
+                @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
+                {
+                    <a asp-action="Index" class="btn btn-outline-danger" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Cancel</a>
+                }
+                else
+                {
+                    <a asp-action="Index" class="btn btn-outline-danger">Cancel</a>
+                }
+                
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

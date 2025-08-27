@@ -46,9 +46,12 @@
                                         <input type="radio"
                                                name="ManagerUserId"
                                                value="@manager.Id"
+                                               id="manager_@manager.Id"
                                                @(Model.ManagerUserId == manager.Id ? "checked" : "") />
                                     </td>
-                                    <td>@manager.FullName</td>
+                                    <td>
+                                        <label for="manager_@manager.Id">@manager.FullName</label>
+                                    </td>
                                     <td>@manager.Email</td>
                                     <td>@(manager.PhoneNumber ?? "N/A")</td>
                                 </tr>

@@ -12,28 +12,29 @@ namespace ProjectCondoManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [Authorize(Roles = "SysAdmin")]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CondoMembersController : ControllerBase
     {
         private readonly DataContextCondos _context;
         private readonly ICondoMemberRepository _condoMemberRepository;
         private readonly IConverterHelper _converterHelper;
         private readonly IUserHelper _userHelper;
+        private readonly IUnitRepository _unitRepository;
 
-        public CondoMembersController(DataContextCondos context, ICondoMemberRepository condoMemberRepository, IConverterHelper converterHelper, IUserHelper userHelper)
+        public CondoMembersController(DataContextCondos context, ICondoMemberRepository condoMemberRepository, IConverterHelper converterHelper, IUserHelper userHelper,IUnitRepository unitRepository)
         {
             _context = context;
             _condoMemberRepository = condoMemberRepository;
             _converterHelper = converterHelper;
             _userHelper = userHelper;
+            _unitRepository = unitRepository;
         }
 
         // GET: api/CondoMembers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CondoMemberDto>>> GetCondoMembers()
         {
-            var condoMembers = await _condoMemberRepository.GetAll(_context).ToListAsync();
+            var condoMembers = await _condoMemberRepository.GetAll(_context).Include(c => c.Units).ThenInclude(u => u.Condominium).ToListAsync();
 
             if (condoMembers == null)
             {
@@ -52,7 +53,7 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<CondoMemberDto>> GetCondoMember(int id)
         {
-            var condoMember = await _condoMemberRepository.GetByIdAsync(id, _context);
+            var condoMember = await _condoMemberRepository.GetByIdWithIncludeAsync(id, _context);
             if (condoMember == null)
             {
                 return NotFound();
@@ -117,7 +118,7 @@ namespace ProjectCondoManagement.Controllers
             {
                 await _condoMemberRepository.UpdateAsync(condoMember, _context);
 
-                return Ok(new Response { IsSuccess = true, Message = "Condo member updated successfully." });
+                return Ok(new Response<CondoMember> { IsSuccess = true, Message = "Condo member updated successfully." });
             }
             catch (Exception ex)
             {
@@ -149,7 +150,7 @@ namespace ProjectCondoManagement.Controllers
 
                 await _condoMemberRepository.CreateAsync(condoMember, _context);
 
-                return Ok(new Response { IsSuccess = true, Message = "Condo member created successfully." });
+                return Ok(new Response<CondoMember> { IsSuccess = true, Message = "Condo member created successfully." });
             }
 
             catch (Exception ex)
@@ -160,6 +161,62 @@ namespace ProjectCondoManagement.Controllers
             }
 
         }
+
+
+        // POST api/CondoMembers/5/Units/10
+        [HttpPost("{memberId}/Units/{unitId}")]
+        public async Task<IActionResult> AddUnitToMember(int memberId, int unitId)
+        {
+            var member = await _condoMemberRepository.GetByIdWithIncludeAsync(memberId, _context);
+            if (member == null)
+            {
+                return NotFound();
+            }
+
+            var unit = await _unitRepository.GetByIdAsync(unitId, _context);
+
+            if (unit == null)
+            {
+                return NotFound();
+            }
+
+
+            if (member.Units.Any(u => u.Id == unitId))
+            {
+                return Ok(new { message = "Member already assigned to this unit." });
+            }
+
+
+            member.Units.Add(unit);
+            await _condoMemberRepository.UpdateAsync(member, _context);
+
+            return Ok(new { message = "Unit associated successfully" });
+        }
+
+
+        [HttpDelete("{memberId}/Units/{unitId}")]
+        public async Task<IActionResult> RemoveMemberFromUnit(int memberId, int unitId)
+        {
+            var member = await _condoMemberRepository.GetByIdWithIncludeAsync(memberId, _context);
+
+            if (member == null)
+            {
+                return NotFound();
+            }
+
+            var unitToRemove = member.Units.FirstOrDefault(u => u.Id == unitId);
+            if (unitToRemove == null)
+            {
+                return Ok(new { message = "Member was not assigned to this unit." });
+            }
+
+            member.Units.Remove(unitToRemove);
+            await _condoMemberRepository.UpdateAsync(member, _context);
+
+            return Ok(new { message = "Unit removed from member successfully." });
+        }
+
+
 
         // DELETE: api/CondoMembers/5
         [HttpDelete("{id}")]
@@ -185,7 +242,7 @@ namespace ProjectCondoManagement.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while deactivating the user.{result.Message}");
             }
 
-            return Ok(new Response { IsSuccess = true, Message = "Condo member deleted and user deactivated successfully." });
+            return Ok(new Response<CondoMember> { IsSuccess = true, Message = "Condo member deleted and user deactivated successfully." });
         }
 
 

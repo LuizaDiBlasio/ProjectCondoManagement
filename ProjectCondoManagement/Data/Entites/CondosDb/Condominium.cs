@@ -25,8 +25,6 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
         [NotMapped]
         public User? ManagerUser { get; set; }
 
-        public IEnumerable<CondoMember>? CondoMembers { get; set; }
-
         public IEnumerable<Unit>? Units { get; set; }
 
         public IEnumerable<Document>? Documents { get; set; }

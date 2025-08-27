@@ -64,7 +64,7 @@ namespace CondoManagementWebApp.Controllers
 
                 return View(condominium);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 _flashMessage.Danger($"Error feetching condominium");
             }
@@ -92,7 +92,7 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var result = await _apiCallService.PostAsync<CondominiumDto, Response>("api/Condominiums", condominiumDto);
+                var result = await _apiCallService.PostAsync<CondominiumDto, Response<object>>("api/Condominiums", condominiumDto);
 
                 if (result.IsSuccess)
                 {
@@ -157,7 +157,7 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var result = await _apiCallService.PostAsync<CondominiumDto, Response>($"api/Condominiums/Edit/{id}", condominiumDto);
+                var result = await _apiCallService.PostAsync<CondominiumDto, Response<object>>($"api/Condominiums/Edit/{id}", condominiumDto);
                 if (!result.IsSuccess)
                 {
                     ModelState.AddModelError("", result.Message);
@@ -216,10 +216,20 @@ namespace CondoManagementWebApp.Controllers
                     return NotFound();
                 }
 
+                var units = await _apiCallService.GetAsync<List<UnitDto>>($"api/Units/condo/{condominium.Id}");
+                var hasRelations = units?.Any() ?? false;
+
+                if (hasRelations)
+                {
+                    _flashMessage.Danger("Condo cannot be deleted because it is associated with one or more units.");
+                    return RedirectToAction(nameof(Index));
+                }
+
+
                 var result = await _apiCallService.DeleteAsync($"api/Condominiums/{id.Value}");
                 if (!result.IsSuccessStatusCode)
                 {
-                    ModelState.AddModelError("", "Failed to delete condo member. Please try again.");
+                    ModelState.AddModelError("", "Failed to delete condominium . Please try again.");
                     return View(condominium);
                 }
 
@@ -307,7 +317,7 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var result = await _apiCallService.PostAsync<CondominiumDto, Response>($"api/Condominiums/Edit/{id}", condo);
+                var result = await _apiCallService.PostAsync<CondominiumDto, Response<object>>($"api/Condominiums/Edit/{id}", condo);
                 if (!result.IsSuccess)
                 {
                     ModelState.AddModelError("", result.Message);

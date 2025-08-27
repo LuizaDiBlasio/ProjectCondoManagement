@@ -33,7 +33,6 @@ namespace ProjectCondoManagement.Helpers
             _dataContextUsers = dataContextUsers;
             _financialAccountRepository = financialAccountRepository;
             _dataContextFinances = dataContextFinances;
-            _dataContextUsers = dataContextUsers;
         }
 
 
@@ -368,7 +367,7 @@ namespace ProjectCondoManagement.Helpers
             return await _userManager.GetRolesAsync(user);
         }
 
-        public async Task<Response> DeactivateUserAsync(User user)
+        public async Task<Response<object>> DeactivateUserAsync(User user)
         {
             user.IsActive = false;
 
@@ -377,13 +376,13 @@ namespace ProjectCondoManagement.Helpers
                 var result = await _userManager.UpdateAsync(user);
                 if (result.Succeeded)
                 {
-                    return new Response
+                    return new Response<object>
                     {
                         IsSuccess = true,
                     };
                 }
 
-                return new Response
+                return new Response<object>
                 {
                     IsSuccess = false,
                     Message = "User deactivation failed.",
@@ -391,7 +390,7 @@ namespace ProjectCondoManagement.Helpers
             }
             catch (Exception ex)
             {
-                return new Response
+                return new Response<object>
                 {
                     IsSuccess = false,
                     Message = $"Error deactivating User.({ex.Message})"

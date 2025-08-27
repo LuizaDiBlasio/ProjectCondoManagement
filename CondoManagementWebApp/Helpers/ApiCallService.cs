@@ -35,7 +35,14 @@ namespace CondoManagementWebApp.Helpers
         {
             AddAuthorizationHeader();
             var response = await _httpClient.GetAsync(requestUri);
-            response.EnsureSuccessStatusCode(); // Lança exceção se o status não for 2xx
+            //response.EnsureSuccessStatusCode(); // Lança exceção se o status não for 2xx
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException(
+                    $"Erro {response.StatusCode}. " +
+                    $"Detalhes: {await response.Content.ReadAsStringAsync()}");
+            }
 
             return await response.Content.ReadFromJsonAsync<T>();
         }
@@ -50,6 +57,7 @@ namespace CondoManagementWebApp.Helpers
             );
             var response = await _httpClient.PostAsync(requestUri, jsonContent);
             response.EnsureSuccessStatusCode();
+
 
             return await response.Content.ReadFromJsonAsync<TResponse>();
         }

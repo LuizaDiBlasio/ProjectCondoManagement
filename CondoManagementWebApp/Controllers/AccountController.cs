@@ -1,4 +1,5 @@
-﻿using ClassLibrary;
+﻿using Azure;
+using ClassLibrary;
 using ClassLibrary.DtoModels;
 using CloudinaryDotNet.Actions;
 using CondoManagementWebApp.Helpers;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using NuGet.Common;
 using NuGet.Versioning;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -64,6 +66,9 @@ namespace CondoManagementWebApp.Controllers
         }
 
 
+
+        //________________________________________________________________________________________________________________________________________________________________
+
         /// <summary>
         /// Handles the login POST apiCall, authenticates the user, and redirects based on role.
         /// In case of success, Api returns a JWT wich will be stored as a cookie in the user session  
@@ -104,7 +109,7 @@ namespace CondoManagementWebApp.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var tokenResponse = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var tokenResponse = JsonSerializer.Deserialize<ClassLibrary.Response<Token>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (tokenResponse.Requires2FA) //TODO remover esse if antes de publicar
                     {
@@ -145,7 +150,7 @@ namespace CondoManagementWebApp.Controllers
                 else // Login falhou na API
                 {
                     var content2 = await response.Content.ReadAsStringAsync();
-                    var error = JsonSerializer.Deserialize<Response>(content2, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var error = JsonSerializer.Deserialize<ClassLibrary.Response<object>>(content2, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
@@ -195,7 +200,7 @@ namespace CondoManagementWebApp.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var tokenResponse = JsonSerializer.Deserialize<Response>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var tokenResponse = JsonSerializer.Deserialize<ClassLibrary.Response<object>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     // **1. Recebe o tokenResponse COMPLETO da API**
                     if (tokenResponse.IsSuccess)
@@ -217,7 +222,7 @@ namespace CondoManagementWebApp.Controllers
                 {
                     // Se a API retornar um erro (ex: código inválido)
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    var error = JsonSerializer.Deserialize<Response>(errorContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var error = JsonSerializer.Deserialize<ClassLibrary.Response<object>>(errorContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     return BadRequest(new { isSuccess = false, message = error?.Message ?? "Invalid verification code" });
                 }
             }
@@ -228,6 +233,54 @@ namespace CondoManagementWebApp.Controllers
 
             return BadRequest(new { isSuccess = false, message = "An unknown error occurred." });
         }
+
+
+
+
+        //_______________________________________________________________________________________________________________________________________
+
+        //login sem 2fa
+
+        //[HttpPost]
+        //public async Task<IActionResult> RequestLogin(LoginViewModel model)
+        //{
+
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return View("Login", model);
+        //    }
+
+        //    var loginDto = _converterHelper.ToLoginDto(model);
+        //    var jsonContent = new StringContent(
+        //        JsonSerializer.Serialize(loginDto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+        //        Encoding.UTF8,
+        //        "application/json"
+        //    );
+
+        //    try
+        //    {
+        //        var response = await _httpClient.PostAsync($"{_configuration["ApiSettings:BaseUrl"]}api/Account/Login", jsonContent);
+
+        //        if (response.IsSuccessStatusCode)
+        //        {
+        //            if (User.IsInRole("SysAdmin"))
+        //            {
+        //                return RedirectToAction("Account", "SysAdminDashboard");
+        //            }
+
+        //            //adicionar if para condoManager e companyAdmin
+        //        }
+
+        //        this.ModelState.AddModelError(string.Empty, "Unable to proceed with login");
+        //        return View("Login", model);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        this.ModelState.AddModelError(string.Empty, ex.Message);
+        //        return View("Login", model);
+        //    }
+        //}
+        //_____________________________________________________________________________________________________________________________________________________________
 
 
         /// <summary>
@@ -347,7 +400,7 @@ namespace CondoManagementWebApp.Controllers
                 //fazer chamada na api
                 try
                 {
-                    var apiCall = await _apiCallService.PostAsync<RegisterUserDto, Response>("api/Account/Register", registerDto);
+                    var apiCall = await _apiCallService.PostAsync<RegisterUserDto, ClassLibrary.Response<object>>("api/Account/Register", registerDto);
 
                     if (apiCall.IsSuccess)
                     {
@@ -412,7 +465,7 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var apiCall = await _apiCallService.PostAsync<ResetPasswordDto, Response>("api/Account/GenerateResetPasswordToken", resetPasswordDto);
+                var apiCall = await _apiCallService.PostAsync<ResetPasswordDto, ClassLibrary.Response<object>>("api/Account/GenerateResetPasswordToken", resetPasswordDto);
 
                 if (apiCall.IsSuccess)
                 {
@@ -455,7 +508,7 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var apiCall = await _apiCallService.PostAsync<ResetPasswordDto, Response>("api/Account/ResetPassword", resetPasswordDto);
+                var apiCall = await _apiCallService.PostAsync<ResetPasswordDto, ClassLibrary.Response<object>>("api/Account/ResetPassword", resetPasswordDto);
 
                 if (apiCall.IsSuccess)
                 {
@@ -576,7 +629,7 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var apiCall = await _apiCallService.PostAsync<ChangePasswordDto, Response>("api/Account/ChangePassword", changePasswordDto);
+                var apiCall = await _apiCallService.PostAsync<ChangePasswordDto, ClassLibrary.Response<object>>("api/Account/ChangePassword", changePasswordDto);
 
                 if (apiCall.IsSuccess)
                 {
@@ -821,7 +874,7 @@ namespace CondoManagementWebApp.Controllers
  
                 var editUserDetailsDto = _converterHelper.ToEditUserDetailsDto(model, model.CompanyName);
 
-                var apiCall = await _apiCallService.PostAsync<EditUserDetailsDto, Response>("api/Account/EditUserDetails", editUserDetailsDto);
+                var apiCall = await _apiCallService.PostAsync<EditUserDetailsDto, ClassLibrary.Response<object>>("api/Account/EditUserDetails", editUserDetailsDto);
 
                 if (apiCall.IsSuccess)
                 {

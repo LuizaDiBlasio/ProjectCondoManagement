@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Helpers
 {
-    
+
 
     public class ConverterHelper : IConverterHelper
     {
@@ -34,15 +34,15 @@ namespace ProjectCondoManagement.Helpers
                 Address = condoMemberDto.Address,
                 BirthDate = condoMemberDto.BirthDate,
                 PhoneNumber = condoMemberDto.PhoneNumber,
-                ImageUrl = condoMemberDto.ImageUrl,
+                ImageUrl = condoMemberDto.ImageUrl
             };
 
             return condoMember;
         }
 
-        public CondoMemberDto ToCondoMemberDto(CondoMember condoMember)
+        public CondoMemberDto ToCondoMemberDto(CondoMember condoMember, bool includeUnits = true)
         {
-            var condoMemberDto = new CondoMemberDto
+            var dto = new CondoMemberDto
             {
                 Id = condoMember.Id,
                 FullName = condoMember.FullName,
@@ -53,13 +53,20 @@ namespace ProjectCondoManagement.Helpers
                 ImageUrl = condoMember.ImageUrl
             };
 
-            return condoMemberDto;
+            if (includeUnits)
+            {
+                dto.Units = condoMember.Units?
+                    .Select(u => ToUnitDto(u, includeCondoMembers: false))
+                    .ToList() ?? new List<UnitDto>();
+            }
+
+            return dto;
         }
 
         public CondoMemberDto ToCondoMemberDto(User user)
         {
             var condoMemberDto = new CondoMemberDto
-            {               
+            {
                 FullName = user.FullName,
                 Email = user.Email,
                 Address = user.Address,
@@ -72,14 +79,14 @@ namespace ProjectCondoManagement.Helpers
 
         public UserDto ToUserDto(User user)
         {
-            if(user == null)
+            if (user == null)
             {
                 return null;
             }
 
             var userDto = new UserDto()
             {
-                Id = user.Id,   
+                Id = user.Id,
                 FullName = user.FullName,
                 BirthDate = user.BirthDate,
                 PhoneNumber = user.PhoneNumber,
@@ -87,10 +94,10 @@ namespace ProjectCondoManagement.Helpers
                 ImageUrl = user.ImageUrl,
                 IsActive = user.IsActive,
                 Email = user.Email,
-                CompanyId = user.CompanyId, 
+                CompanyId = user.CompanyId,
                 FinancialAccountId = user.FinancialAccountId,
             };
-            return userDto; 
+            return userDto;
         }
 
         public User ToUser(UserDto userDto)
@@ -107,27 +114,27 @@ namespace ProjectCondoManagement.Helpers
                 CompanyId = userDto.CompanyId,
                 FinancialAccountId = userDto.FinancialAccountId,
             };
-            return user;    
+            return user;
         }
 
         public async Task<User> ToEditedUser(EditUserDetailsDto editUserDetailsDto)
         {
-           var user = await _userHelper.GetUserByEmailAsync(editUserDetailsDto.Email);
+            var user = await _userHelper.GetUserByEmailAsync(editUserDetailsDto.Email);
 
             if (user == null)
             {
                 return null;
             }
 
-            user.FullName = editUserDetailsDto.FullName; 
+            user.FullName = editUserDetailsDto.FullName;
             user.BirthDate = editUserDetailsDto.BirthDate;
             user.PhoneNumber = editUserDetailsDto.PhoneNumber;
             user.Address = editUserDetailsDto.Address;
             user.ImageUrl = editUserDetailsDto.ImageUrl;
-            user.Email = editUserDetailsDto.Email;  
+            user.Email = editUserDetailsDto.Email;
             user.IsActive = editUserDetailsDto.IsActive;
-            user.CompanyId = editUserDetailsDto.CompanyId;  
-            user.FinancialAccountId = editUserDetailsDto.FinancialAccountId;    
+            user.CompanyId = editUserDetailsDto.CompanyId;
+            user.FinancialAccountId = editUserDetailsDto.FinancialAccountId;
 
             return user;
         }
@@ -163,17 +170,17 @@ namespace ProjectCondoManagement.Helpers
             condoMember.FullName = user.FullName;
             condoMember.PhoneNumber = user.PhoneNumber;
             condoMember.Address = user.Address;
-            condoMember.ImageUrl = user.ImageUrl;   
+            condoMember.ImageUrl = user.ImageUrl;
             condoMember.BirthDate = user.BirthDate;
 
-            return condoMember; 
+            return condoMember;
         }
 
-        public  CompanyDto ToCompanyDto(Company company)
+        public CompanyDto ToCompanyDto(Company company)
         {
             var companyDto = new CompanyDto()
             {
-                Id = company.Id,    
+                Id = company.Id,
                 Name = company.Name,
                 CondominiumDtos = company.Condominiums?.Select(c => ToCondominiumDto(c)).ToList() ?? new List<CondominiumDto>(),
                 Email = company.Email,
@@ -204,7 +211,7 @@ namespace ProjectCondoManagement.Helpers
                 CompanyAdminId = companyDto.CompanyAdminId,
             };
 
-            return company; 
+            return company;
         }
 
         public Condominium ToCondominium(CondominiumDto condominiumDto, bool isNew)
@@ -212,7 +219,7 @@ namespace ProjectCondoManagement.Helpers
             var condominium = new Condominium()
             {
                 Id = isNew ? 0 : condominiumDto.Id,
-                CondoName = condominiumDto.CondoName, 
+                CondoName = condominiumDto.CondoName,
                 CompanyId = condominiumDto.CompanyId,
                 Address = condominiumDto.Address,
                 ManagerUserId = condominiumDto.ManagerUserId,
@@ -222,7 +229,7 @@ namespace ProjectCondoManagement.Helpers
                 FinancialAccountId = condominiumDto.FinancialAccountId  
             };
 
-            return condominium; 
+            return condominium;
         }
 
         public CondominiumDto ToCondominiumDto(Condominium condominium)
@@ -231,14 +238,12 @@ namespace ProjectCondoManagement.Helpers
             var condominiumDto = new CondominiumDto()
             {
                 Id = condominium.Id,
-                CondoName = condominium.CondoName,    
+                CondoName = condominium.CondoName,
                 CompanyId = condominium.CompanyId,
                 Address = condominium.Address,
-                ManagerUserId = condominium.ManagerUserId,
-                Units = condominium.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),
-                Documents = condominium.Documents?.Select(d => ToDocumentDto(d)).ToList() ?? new List<DocumentDto>(),
-                Occurrences = condominium.Occurrences?.Select(o => ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>(),
                 FinancialAccountId = condominium.FinancialAccountId,
+                ManagerUserId = condominium.ManagerUserId
+
             };
 
             return condominiumDto;
@@ -270,36 +275,42 @@ namespace ProjectCondoManagement.Helpers
             };
             return occurence;
         }
-      
+
 
         public Unit ToUnit(UnitDto unitDto, bool isNew)
         {
             var unit = new Unit()
             {
                 Id = isNew ? 0 : unitDto.Id,
-                Condominium = ToCondominium(unitDto.CondominiumDto, false),
+                CondominiumId = unitDto.CondominiumId,
                 Floor = unitDto.Floor,
                 Door = unitDto.Door,
-                Occurrences = unitDto.OccurrenceDtos?.Select(o => ToOccurrence(o, false)).ToList() ?? new List<Occurrence>(),
-                CondoMembers = unitDto.CondoMemberDtos?.Select(c => ToCondoMember(c)).ToList() ?? new List<CondoMember>()
+                Bedrooms = unitDto.Bedrooms
             };
 
             return unit;
         }
 
-        public UnitDto ToUnitDto(Unit unit)
+        public UnitDto ToUnitDto(Unit unit, bool includeCondoMembers = true)
         {
-            var unitDto = new UnitDto()
+            var dto = new UnitDto
             {
                 Id = unit.Id,
-                CondominiumDto = ToCondominiumDto(unit.Condominium),
+                Bedrooms = unit.Bedrooms,
+                CondominiumId = unit.CondominiumId,
                 Floor = unit.Floor,
                 Door = unit.Door,
-                OccurrenceDtos = unit.Occurrences?.Select(o => ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>(),
-                CondoMemberDtos = unit.CondoMembers?.Select(c => ToCondoMemberDto(c)).ToList() ?? new List<CondoMemberDto>()
+                CondominiumDto = ToCondominiumDto(unit.Condominium)
             };
 
-            return unitDto;
+            if (includeCondoMembers)
+            {
+                dto.CondoMemberDtos = unit.CondoMembers?
+                    .Select(cm => ToCondoMemberDto(cm, includeUnits: false)) // ⚠️ corta aqui
+                    .ToList() ?? new List<CondoMemberDto>();
+            }
+
+            return dto;
         }
 
         public Document ToDocument(DocumentDto documentDto, bool isNew)
@@ -313,7 +324,7 @@ namespace ProjectCondoManagement.Helpers
                 DocumentUrl = documentDto.DocumentUrl,
                 DataUpload = documentDto.DataUpload
             };
-            return document;    
+            return document;
         }
 
         public DocumentDto ToDocumentDto(Document document)

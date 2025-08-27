@@ -103,7 +103,7 @@ namespace CondoManagementWebApp.Controllers
 
                 var expenseDtolWithExpenseTypeName = await SelectTypeName(expenseDto);
 
-                var apiCall = await _apiCallService.PostAsync<ExpenseDto, Response>("api/Expense/CreateExpense", expenseDto);
+                var apiCall = await _apiCallService.PostAsync<ExpenseDto, Response<object>>("api/Expense/CreateExpense", expenseDto);
 
                 if (apiCall.IsSuccess)
                 {
@@ -176,7 +176,7 @@ namespace CondoManagementWebApp.Controllers
 
                 expenseDto.CondominiumId = condominiumDto.Id;
 
-                var apiCall = await _apiCallService.PostAsync<ExpenseDto, Response>("api/Expense/EditExpense", expenseDto);
+                var apiCall = await _apiCallService.PostAsync<ExpenseDto, Response<object>>("api/Expense/EditExpense", expenseDto);
 
                 if (apiCall.IsSuccess)
                 {
@@ -202,7 +202,7 @@ namespace CondoManagementWebApp.Controllers
         {
             try
             {
-                var apiCall = await _apiCallService.PostAsync<int, Response>("api/Expense/Delete", id);
+                var apiCall = await _apiCallService.PostAsync<int, Response<object>>("api/Expense/Delete", id);
 
                 if (apiCall.IsSuccess)
                 {
