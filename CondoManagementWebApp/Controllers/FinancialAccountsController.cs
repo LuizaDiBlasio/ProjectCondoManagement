@@ -1,6 +1,7 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
 using CondoManagementWebApp.Helpers;
+using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -122,8 +123,8 @@ namespace CondoManagementWebApp.Controllers
 
 
 
-        // GET: FinancialAccountsController/Edit/5
-        public async Task<ActionResult> Deposit(int? id)
+        // GET: FinancialAccountsController/Deposit/5
+        public async Task<IActionResult> Deposit(int? id)
         {
             if (id == null)
             {
@@ -138,7 +139,13 @@ namespace CondoManagementWebApp.Controllers
                     return NotFound();
                 }
 
-                return View(financialAccountDto);
+                var model = new DepositViewModel
+                {
+                    OwnerId = financialAccountDto.Id,
+                    DepositValue = 0, // Initialize to 0 or any default value
+                };
+
+                return View(model);
 
             }
             catch (Exception)
@@ -150,7 +157,80 @@ namespace CondoManagementWebApp.Controllers
         }
 
 
+        // POST: FinancialAccountsController/Deposit/5
+        public async Task<IActionResult> Deposit(int? id, DepositViewModel model)
+        {
+            if (id != model.OwnerId)
+            {
+                return NotFound();
+            }
 
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var financialAccountDto = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{model.OwnerId}");
+
+            if (model.DepositValue <= 0)
+            {
+                ModelState.AddModelError("DepositValue", "Deposit amount must be greater than 0.");
+                return View(model);
+            }
+
+            //validação hard code dos campos das opções de pagamento
+            if (model.SelectedPaymentMethodId == 2) // Cartão de Crédito
+            {
+                if (string.IsNullOrEmpty(model.CreditCardNumber) || string.IsNullOrEmpty(model.Cvv))
+                {
+                    ModelState.AddModelError("CreditCardNumber", "Credit card number and CVV are required.");
+                    return View(model);                    
+                }
+            }
+            else if (model.SelectedPaymentMethodId == 1) // MbWay
+            {
+                if (string.IsNullOrEmpty(model.PhoneNumber))
+                {
+                    ModelState.AddModelError("PhoneNumber", "Phone number is required.");
+                    return View(model);
+                }
+            }
+            else if (model.SelectedPaymentMethodId == 3)//AssociatedBankAccount
+            {
+                if (financialAccountDto.IsActive == false)
+                {
+                    ModelState.AddModelError("AssociatedBankAccount", "No Account associated");
+                    return View(model);
+                }
+
+                model.CreditCardNumber = financialAccountDto.CardNumber;
+
+            }
+
+
+            try
+            {
+
+                financialAccountDto.Balance += model.DepositValue;
+
+                var result = await _apiCallService.PostAsync<FinancialAccountDto, Response<object>>($"api/FinancialAccounts/Edit/{id}", financialAccountDto);
+                if (!result.IsSuccess)
+                {
+                    _flashMessage.Danger("Error making deposit!");
+                    return View(model);
+                }
+
+                _flashMessage.Confirmation("Deposit successfull.");
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception)
+            {
+                _flashMessage.Danger("Error making deposit!");
+            }
+
+            return View(model);
+
+        }
 
 
     }
