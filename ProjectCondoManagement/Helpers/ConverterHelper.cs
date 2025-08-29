@@ -448,7 +448,7 @@ namespace ProjectCondoManagement.Helpers
             var financialAccountDto = new FinancialAccountDto()
             {
                 Id = isNew ? 0 : financialAccount.Id,
-                InitialDeposit = financialAccount.InitialDeposit,
+                Balance = financialAccount.Balance,
                 IsActive = financialAccount.IsActive,
                 CardNumber = financialAccount.CardNumber,
                 AssociatedBankAccount = financialAccount.AssociatedBankAccount,
@@ -513,7 +513,7 @@ namespace ProjectCondoManagement.Helpers
             var financialAccount = new FinancialAccount()
             {
                 Id = isNew ? 0 : financialAccountDto.Id,
-                InitialDeposit = financialAccountDto.InitialDeposit,
+                Balance = financialAccountDto.Balance,
                 IsActive = financialAccountDto.IsActive,
                 CardNumber = financialAccountDto.CardNumber,
                 AssociatedBankAccount= financialAccountDto.AssociatedBankAccount,   

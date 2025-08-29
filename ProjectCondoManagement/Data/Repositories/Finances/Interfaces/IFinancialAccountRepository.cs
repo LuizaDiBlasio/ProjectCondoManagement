@@ -6,6 +6,6 @@ namespace ProjectCondoManagement.Data.Repositories.Finances.Interfaces
 {
     public interface IFinancialAccountRepository : IGenericRepository<FinancialAccount, DataContextFinances>
     {
-        Task<FinancialAccount> CreateFinancialAccountAsync();
+        Task<FinancialAccount> CreateFinancialAccountAsync(string name);
     }
 }

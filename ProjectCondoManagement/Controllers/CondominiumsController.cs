@@ -195,7 +195,7 @@ namespace ProjectCondoManagement.Controllers
 
 
                 //Atribuir financial account
-                var financialAccount = await _financialAccountRepository.CreateFinancialAccountAsync();
+                var financialAccount = await _financialAccountRepository.CreateFinancialAccountAsync(condominium.CondoName);
 
                 condominium.FinancialAccountId = financialAccount.Id;
 

@@ -137,7 +137,8 @@ namespace ProjectCondoManagement.Controllers
 
                 var financialAccount = new FinancialAccount()
                 {
-                    InitialDeposit = 0 // depósito inicial vai ser sempre 0
+                    OwnerName = company.Name,
+                    Balance = 0 // depósito inicial vai ser sempre 0
                 };
 
                 await _financialAccountRepository.CreateAsync(financialAccount, _contextFinances);

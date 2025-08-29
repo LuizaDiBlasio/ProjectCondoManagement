@@ -25,6 +25,8 @@ namespace ClassLibrary.DtoModels
 
         public int? FinancialAccountId { get; set; } 
 
+        public FinancialAccountDto? FinancialAccountDto { get; set; }
+
         public bool IsActive { get; set; } = true;
 
         public bool Uses2FA { get; set; }   //TODO: Tirar essa propriedade quando publicar

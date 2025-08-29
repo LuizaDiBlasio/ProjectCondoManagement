@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
 
 namespace ProjectCondoManagement.Controllers
@@ -22,15 +24,14 @@ namespace ProjectCondoManagement.Controllers
         private readonly IMailHelper _mailHelper;
         private readonly ICondoMemberRepository _condoMemberRepository;
         private readonly DataContextCondos _dataContextCondos;
+        private readonly DataContextFinances _dataContextFinances;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly ISmsHelper _smsHelper;
-
-
-
+        private readonly IFinancialAccountRepository _financialAccountRepository;
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
-                               IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService, ICondoMemberRepository condoMemberRepository
-                             , ISmsHelper smsHelper)
+                               IMailHelper mailHelper, DataContextCondos dataContextCondos, DataContextFinances dataContextFinances, IJwtTokenService jwtTokenService,
+                               ICondoMemberRepository condoMemberRepository , ISmsHelper smsHelper, IFinancialAccountRepository financialAccountRepository )
         {
             _userHelper = userHelper;
             _httpClient = httpClient;
@@ -38,10 +39,11 @@ namespace ProjectCondoManagement.Controllers
             _converterHelper = converterHelper;
             _mailHelper = mailHelper;
             _dataContextCondos = dataContextCondos;
+            _dataContextFinances = dataContextFinances;
             _jwtTokenService = jwtTokenService;
             _condoMemberRepository = condoMemberRepository;
             _smsHelper = smsHelper;
-
+            _financialAccountRepository = financialAccountRepository;
         }
 
 
@@ -250,6 +252,8 @@ namespace ProjectCondoManagement.Controllers
                 return StatusCode(500, new { Message = "Internal server error: User not registered" });
             }
 
+          
+
             string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
 
             // gera um link de confirmção para o email
@@ -292,7 +296,7 @@ namespace ProjectCondoManagement.Controllers
                 var newUser = await _userHelper.CreateUser(registerDtoModel);
 
                 if (newUser == null)//se retorna null, CreateUser foi mal sucedido 
-                {
+                {                   
                     return StatusCode(500, new { Message = "Internal server error: User not registered" });
                 }
 

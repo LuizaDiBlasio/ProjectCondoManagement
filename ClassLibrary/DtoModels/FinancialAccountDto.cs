@@ -10,7 +10,9 @@ namespace ClassLibrary.DtoModels
     {
         public int Id { get; set; }
 
-        public decimal InitialDeposit { get; set; }
+        public string OwnerName { get; set; }
+
+        public decimal Balance { get; set; }
 
         public bool IsActive { get; set; } = false;
 

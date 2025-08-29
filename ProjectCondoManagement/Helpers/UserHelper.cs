@@ -89,12 +89,14 @@ namespace ProjectCondoManagement.Helpers
             {
                 var financialAccount = new FinancialAccount()
                 {
-                    InitialDeposit = 0 // depósito inicial vai ser sempre 0
+                    Balance = 0,
+                    OwnerName = user.FullName,
                 };
 
                 await _financialAccountRepository.CreateAsync(financialAccount, _dataContextFinances); //add FinAcc na Bd
 
-                user.FinancialAccountId = financialAccount.Id;  
+                user.FinancialAccountId = financialAccount.Id; 
+                user.FinancialAccount = financialAccount;
             }
 
             //TODO Tirar o if e essa atribuição de bool quando publicar, manter só o método de ativação
