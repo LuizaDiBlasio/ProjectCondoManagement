@@ -6,18 +6,54 @@ namespace CondoManagementWebApp.Models
 {
     public class MakePaymentViewModel
     {
-        public int Id { get; set; } 
+        public int Id { get; set; }
 
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "You must select a payment method")]
         public int SelectedPaymentMethodId { get; set; }
 
-        public List<SelectListItem> PaymentMethods { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem>? PaymentMethods { get; set; } = new List<SelectListItem>();
 
-        [Required]
-        public int BeneficiaryAccountId { get; set; }   
+
+        public List<SelectListItem>? BeneficiaryTypeList { get; set; }
+
+
+        public int SelectedBeneficiaryId { get; set; }
+
+
+        //fazer validação no controller
+        [Display(Name = "Recipient's Omah Wallet Number")]
+        public int? BeneficiaryAccountId { get; set; }
 
         public bool IsPaid { get; set; } = false;
 
+
+        //parte dos metodos de pagamento 
+
+        // Campos para Cartão de Crédito
+        [Display(Name = "Credit card number")]
+        public string? CreditCardNumber { get; set; }
+
+
+        [Display(Name = "Cvv number")]
+        public string? Cvv { get; set; }
+
+
+        [Display(Name = "Expiration date")]
+        public string? ExpirationDate { get; set; } // MM/AA
+
+
+        // Campo para MBWay
+        [Display(Name = "Phone Number")]
+        public string? PhoneNumber { get; set; }
+
+
+        //Campo para Omah Wallet
+        [Display(Name = "My Omah Wallet Number")]
+        public int? PayerFinancialAccountId { get; set; }
+
+        //campo para beneficiário externo
+        [Display(Name = "Recipient's Bank Account")]
+        public string? ExternalRecipientBankAccount { get; set; }    
     }
 }

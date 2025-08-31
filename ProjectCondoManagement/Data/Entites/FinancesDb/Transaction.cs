@@ -13,9 +13,11 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public FinancialAccount AccountPayer { get; set; }
 
-        public int BeneficiaryAccountId { get; set; }// FK para TransactionsAsBeneficiary
+        public int? BeneficiaryAccountId { get; set; }// FK para TransactionsAsBeneficiary
 
-        public FinancialAccount AccountBeneficiary { get; set; }
+        public FinancialAccount? AccountBeneficiary { get; set; }
+
+        public string? ExternalRecipientBankAccount { get; set; }
 
         public int PaymentId { get; set; }
 

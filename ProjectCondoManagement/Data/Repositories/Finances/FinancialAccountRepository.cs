@@ -18,7 +18,8 @@ namespace ProjectCondoManagement.Data.Repositories.Finances
         {
             var financialAccount = new FinancialAccount()
             {
-                InitialDeposit = 0 // depósito inicial vai ser sempre 0
+                Deposit = 0, // depósito inicial vai ser sempre 0
+                Balance = 0
             };
 
             await CreateAsync(financialAccount, _dataContextFinances); //add FinAcc na Bd

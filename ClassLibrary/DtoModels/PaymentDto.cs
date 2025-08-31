@@ -36,5 +36,8 @@ namespace ClassLibrary.DtoModels
 
         public TransactionDto? TransactionDto { get; set; }
 
+        public List<int>? SelectedExpensesIds { get; set; }
+
+
     }
 }

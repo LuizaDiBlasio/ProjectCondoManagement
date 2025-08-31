@@ -183,9 +183,9 @@ namespace CondoManagementWebApp.Controllers
                 return View(model);
         }
 
-        // POST: UnitsController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        //POST: UnitsController/Create  //TODO 
+       [HttpPost]
+       [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UnitDtoViewModel model)
         {
 
@@ -231,7 +231,7 @@ namespace CondoManagementWebApp.Controllers
                     {
                         return RedirectToAction("MemberUnits", new { id = model.MemberId });
                     }
-                    if ( model.CondoName != null)
+                    if (model.CondoName != null)
                     {
                         return RedirectToAction(nameof(Index), new { id = model.CondominiumId, condoName = model.CondoName });
                     }

@@ -98,7 +98,7 @@ namespace ProjectCondoManagement.Controllers
         {
             if (companyDto == null)
             {
-                return BadRequest(new Response<object> { IsSuccess = false, Message = "System error" });
+                return BadRequest(new   Response<object> { IsSuccess = false, Message = "System error" });
             }
 
 
@@ -137,7 +137,8 @@ namespace ProjectCondoManagement.Controllers
 
                 var financialAccount = new FinancialAccount()
                 {
-                    InitialDeposit = 0 // depósito inicial vai ser sempre 0
+                    Deposit = 0, // depósito inicial vai ser sempre 0
+                    Balance = 0
                 };
 
                 await _financialAccountRepository.CreateAsync(financialAccount, _contextFinances);

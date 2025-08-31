@@ -24,13 +24,11 @@ namespace ProjectCondoManagement.Controllers
         private readonly DataContextCondos _dataContextCondos;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly ISmsHelper _smsHelper;
-
-
-
+        private readonly IWebHostEnvironment _env;
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
                                IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService, ICondoMemberRepository condoMemberRepository
-                             , ISmsHelper smsHelper)
+                             , ISmsHelper smsHelper, IWebHostEnvironment env)
         {
             _userHelper = userHelper;
             _httpClient = httpClient;
@@ -41,11 +39,10 @@ namespace ProjectCondoManagement.Controllers
             _jwtTokenService = jwtTokenService;
             _condoMemberRepository = condoMemberRepository;
             _smsHelper = smsHelper;
-
+            _env = env;
         }
 
 
-        //________________________________________________________________________________________________________________________login com 2fa
         /// <summary>
         /// Authenticates a user based on their login credentials.
         /// If the user's account requires two-factor authentication (2FA), a verification token is sent via SMS.
@@ -77,6 +74,26 @@ namespace ProjectCondoManagement.Controllers
 
             if (result.RequiresTwoFactor) //se login for bem sucedido
             {
+                //TODO tirar _____________________________________________________________
+                if (_env.IsDevelopment())
+                {
+                    // Gera token JWT direto
+                    var roles = await _userHelper.GetRolesAsync(user);
+                    var userRole = roles.FirstOrDefault() ?? "User";
+                    var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
+
+                    return Ok(new Response<object>
+                    {
+                        Token = tokenJwt,
+                        Expiration = DateTime.UtcNow.AddDays(15),
+                        Requires2FA = false,
+                        Role = userRole,
+                        IsSuccess = true,
+                        Message = "2FA skipped in development"
+                    });
+                }
+                //_______________________________________________________________________
+
                 var token = await _userHelper.GenerateTwoFactorTokenAsync(user, "Phone");
                 try
                 {
@@ -108,36 +125,29 @@ namespace ProjectCondoManagement.Controllers
             }
             else
             {
-                return StatusCode(500, new { Message = "Wrong credentials, please try again" });
+                //TODO tirar isso   // Gera token JWT direto
+                    var roles = await _userHelper.GetRolesAsync(user);
+                    var userRole = roles.FirstOrDefault() ?? "User";
+                    var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
+
+                    return Ok(new Response<object>
+                    {
+                        Token = tokenJwt,
+                        Expiration = DateTime.UtcNow.AddDays(15),
+                        Requires2FA = false,
+                        Role = userRole,
+                        IsSuccess = true,
+                        Message = "2FA skipped in development"
+                    });
+
+                //TODO descomentar
+                //return StatusCode(500, new { Message = "Wrong credentials, please try again" });
             }
         }
 
 
-        //_______________________________________________________________________________________________________login sem 2fa
 
-        //[Microsoft.AspNetCore.Mvc.HttpPost("Login")]
-        //public async Task<IActionResult> Login([FromBody] LoginDto loginDtoModel)
-        //{
-        //    var user = await _userHelper.GetUserByEmailAsync(loginDtoModel.Username);
-
-        //    if (user == null)
-        //    {
-        //        return NotFound(new Response<object>() { Message = "Login failed, user not found." });
-        //    }
-
-        //    if (user.IsActive == false)
-        //    {
-        //        return Unauthorized(new Response<object> () { Message = "User is not active in the system, please contact admin" });
-        //    }
-
-        //    var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login 
-
-        //    if (result.Succeeded)
-        //    {
-        //        return Ok();
-        //    }
-        //    return Unauthorized(new Response<object>() { Message = "Login failed, please contact admin" });
-        //}
+       
 
 
         /// <summary>
@@ -240,7 +250,7 @@ namespace ProjectCondoManagement.Controllers
         /// An <see cref="IActionResult"/> with a success message if the user is registered and the email is sent,
         /// otherwise, an error response.
         /// </returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "SysAdmin")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Microsoft.AspNetCore.Mvc.HttpPost("AssociateUser")]
         public async Task<IActionResult> AssociateUser([FromBody] RegisterUserDto registerDtoModel)
         {
@@ -583,7 +593,7 @@ namespace ProjectCondoManagement.Controllers
 
                 if (condomember == null)
                 {
-                    return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to update, user not found in the system" });
+                    return NotFound(new Response<object>  { IsSuccess = false, Message = "Unable to update, user not found in the system" });
                 }
 
                 await _condoMemberRepository.UpdateAsync(condomember, _dataContextCondos);

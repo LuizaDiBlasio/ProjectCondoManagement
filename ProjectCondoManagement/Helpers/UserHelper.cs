@@ -89,7 +89,8 @@ namespace ProjectCondoManagement.Helpers
             {
                 var financialAccount = new FinancialAccount()
                 {
-                    InitialDeposit = 0 // depósito inicial vai ser sempre 0
+                    Deposit = 0, // depósito inicial vai ser sempre 0
+                    Balance = 0
                 };
 
                 await _financialAccountRepository.CreateAsync(financialAccount, _dataContextFinances); //add FinAcc na Bd
@@ -390,7 +391,7 @@ namespace ProjectCondoManagement.Helpers
             }
             catch (Exception ex)
             {
-                return new Response<object>
+                return new Response<object> 
                 {
                     IsSuccess = false,
                     Message = $"Error deactivating User.({ex.Message})"

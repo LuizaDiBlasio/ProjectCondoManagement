@@ -1,14 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Security;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using System.ComponentModel.DataAnnotations.Schema;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ProjectCondoManagement.Data
 {
@@ -131,6 +128,8 @@ namespace ProjectCondoManagement.Data
             }
 
             // ---------------- CONDOMEMBER DE TESTE ----------------
+
+
             var unit = await _contextCondos.Units.FirstOrDefaultAsync();
             if (unit != null)
             {
@@ -251,6 +250,143 @@ namespace ProjectCondoManagement.Data
                     await _contextCondos.SaveChangesAsync();
 
                 }
+
+                // _______________________TESTE FINANCES___________________________
+                //_____________________USER PARA CONDOMEMBER_______________________
+                await _userHelper.CheckRoleAsync("CondoMember");
+
+                var userCondoMember = await _userHelper.GetUserByEmailAsync("condomember0@yopmail.com");
+                if (userCondoMember == null)
+                {
+                    userCondoMember = new User
+                    {
+                        FullName = "userCondoMember",
+                        Email = "condomember0@yopmail.com",
+                        UserName = "condomember0@yopmail.com",
+                        PhoneNumber = "12345678",
+                        Address = "Condominio Laranje",
+                        BirthDate = new DateTime(1990, 04, 06),
+                        IsActive = true,
+                        EmailConfirmed = true
+                    };
+
+
+                    var result = await _userHelper.AddUserAsync(userCondoMember, "123456");
+                    if (result != IdentityResult.Success)
+                    {
+                        throw new InvalidOperationException("Could not create the user in seeder");
+                    }
+
+                    await _userHelper.AddUserToRoleAsync(userCondoMember, "CondoMember");
+
+
+                    var financialAccount = new FinancialAccount()
+                    {
+                        Deposit = 200, // depósito inicial vai ser sempre 0
+                        Balance = 200
+                    };
+
+                    await _contextFinances.FinancialAccounts.AddAsync(financialAccount); //add FinAcc na Bd
+                    await _contextFinances.SaveChangesAsync();
+
+                    userCondoMember.FinancialAccountId = financialAccount.Id;
+
+                    await _userHelper.UpdateUserAsync(userCondoMember);
+                }
+                else
+                {
+                    var isInRole = await _userHelper.IsUserInRoleAsync(userCondoMember, "CondoMember");
+                    if (!isInRole)
+                    {
+                        await _userHelper.AddUserToRoleAsync(userCondoMember, "CondoMember");
+                    }
+                }
+
+                //________________CRIAR UNIT DO CONDOlARANJE___________________
+                var firstUnit = await _contextCondos.Units.FirstOrDefaultAsync(u => u.Id == 1);
+                if (firstUnit == null)
+                {
+                    firstUnit = new Unit()
+                    {
+                        CondominiumId = 1,
+                        Floor = "1",
+                        Door = "1",
+                        Bedrooms = 2
+
+                    };
+                }
+                await _contextCondos.Units.AddAsync(firstUnit);
+                await _contextCondos.SaveChangesAsync();
+
+
+                //criar condoMember 
+                var condoMember = await _contextCondos.CondoMembers.FirstOrDefaultAsync(c => c.Id == 1);
+                if (condoMember == null)
+                {
+                    //lista de units do condomember
+                    var unitsList = new List<Unit>();
+                    unitsList.Add(firstUnit);
+
+                    condoMember = new CondoMember()
+                    {
+                        FullName = "CondoMember",
+                        BirthDate = DateTime.Now,
+                        PhoneNumber = "87654321",
+                        Email = "condomember0@yopmail.com",
+                        IdDocument = "987546898",
+                        TaxIdNumber = "9469054784",
+                        Units = unitsList
+                    };
+                }
+
+                await _contextCondos.CondoMembers.AddAsync(condoMember);
+                await _contextCondos.SaveChangesAsync();
+
+                //____________________PAYMENT CONDO LARANJE______________________________
+
+                //criar expense
+                var expense = await _contextFinances.Expenses.FirstOrDefaultAsync(e=> e.Id == 1);
+                if(expense == null)
+                {
+                    expense = new Expense()
+                    {
+                        Detail = "Monthly quota",
+                        Amount = 100,
+                        ExpenseType = Entites.Enums.ExpenseType.Quota,
+                        CondominiumId = 1,
+                    };
+
+                    await _contextFinances.Expenses.AddAsync(expense);
+                    await _contextFinances.SaveChangesAsync();
+
+                    var expenses = new List<Expense>();
+                    expenses.Add(expense);
+
+
+                    //_______________________CRIAR PAYMENT____________________
+                    var payment1 = await _contextFinances.Payments.FirstOrDefaultAsync(p => p.Id == 1);
+
+                    if (payment1 == null)
+                    {
+                        payment1 = new Payment()
+                        {
+                            IssueDate = DateTime.Now,
+                            DueDate = DateTime.Now,
+                            PayerFinancialAccountId = userCondoMember.FinancialAccountId.Value,
+                            CondominiumId = 1,
+                            Expenses = expenses,
+                        };
+
+                        await _contextFinances.Payments.AddAsync(payment1);
+                        await _contextFinances.SaveChangesAsync();
+                    }
+                }
+
+               
+
+
+
+                //_______________________________________________________________________________________________________________________________________
 
                 // ---------------- USER "LUIZA" SYSADMIN ----------------
                 await _userHelper.CheckRoleAsync("SysAdmin");

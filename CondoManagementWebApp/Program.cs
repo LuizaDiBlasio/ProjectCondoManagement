@@ -18,6 +18,8 @@ builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
 
 builder.Services.AddScoped<IApiCallService, ApiCallService>();
 
+builder.Services.AddScoped<IPaymentHelper, PaymentHelper>();
+
 builder.Services.AddScoped<CloudinaryService>();
 
 SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JEaF5cXmRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXded3VWR2VcVEZxWUZWYEk=");

@@ -1,0 +1,106 @@
+﻿@model CondoManagementWebApp.Models.CreateRecurringPaymentViewModel
+
+@{
+    ViewData["Title"] = "Create Recurrent Payment";
+}
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-8 col-xxl-8">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <h4 class="card-title welcome-text mb-0">Enter Recurrent Payment</h4>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <form asp-action="RequestCreateRecurrentPayment">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                            <input type="hidden" asp-for="CondominiumId" />
+
+                            <div class="form-group mb-3">
+                                <label asp-for="IssueDate" class="control-label"></label>
+                                <input id="issueDateInput" asp-for="IssueDate" class="form-control" />
+                                <span asp-validation-for="IssueDate" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="DueDate" class="control-label"></label>
+                                <input id="dueDateInput" asp-for="DueDate" class="form-control" />
+                                <span asp-validation-for="DueDate" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="PayerFinancialAccountId" class="control-label"></label>
+                                <input asp-for="PayerFinancialAccountId" class="form-control" />
+                                <span asp-validation-for="PayerFinancialAccountId" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="SelectedExpensesIds" class="form-label">Select Company Condominiums</label>
+                                <div class="border p-3 rounded" style="max-height: 250px; overflow-y: auto;">
+                                    @if (Model.ExpensesToSelect != null && Model.ExpensesToSelect.Any())
+                                    {
+                                        @foreach (var expenseItem in Model.ExpensesToSelect)
+                                        {
+                                            <div class="form-check">
+                                                <input type="checkbox"
+                                                       name="SelectedExpensesId"
+                                                       value="@expenseItem.Value"
+                                                       id="expense_@expenseItem.Value"
+                                                       class="form-check-input"
+                                                @(Model.SelectedExpensesIds != null && Model.SelectedExpensesIds.Contains(int.Parse(expenseItem.Value)) ? "checked" : "") />
+                                                <label class="form-check-label" for="expense_@expenseItem.Value">
+                                                    @expenseItem.Text
+                                                </label>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p>No expenses available to select.</p>
+                                    }
+                                </div>
+                                <span asp-validation-for="SelectedExpensesIds" class="text-danger"></span>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-3">
+                                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                                <input type="submit" value="Create" class="btn btn-primary" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializa o DatePicker para a data de emissão
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            new ej.calendars.DatePicker({
+                format: 'MM/dd/yyyy',
+                placeholder: 'Select Issue Date',
+                min: today
+            }).appendTo('#issueDateInput');
+
+            // Inicializa o DatePicker para a data de vencimento
+            new ej.calendars.DatePicker({
+                format: 'MM/dd/yyyy',
+                placeholder: 'Select Due Date',
+                min: today
+            }).appendTo('#dueDateInput');
+        });
+    </script>
+}

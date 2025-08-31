@@ -23,16 +23,6 @@ namespace ProjectCondoManagement.Data.Repositories.Finances
                                 .FirstOrDefaultAsync(p => p.Id == id);     
         }
 
-        public List<SelectListItem> GetPaymentMethodsList()
-        {
-            var selectList = new List<SelectListItem>
-            {
-                new SelectListItem{Value = "0", Text = "Select a shift..."},
-                new SelectListItem{Value = "1", Text = "MbWay"},
-                new SelectListItem{Value = "2", Text = "Credit card"},
-                new SelectListItem{Value = "3", Text = "Apple pay"}
-            };
-            return selectList;
-        }
+       
     }
 }

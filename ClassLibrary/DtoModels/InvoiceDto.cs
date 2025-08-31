@@ -14,16 +14,18 @@ namespace ClassLibrary.DtoModels
 
         public int CondominiumId { get; set; }
 
-        public int PayerAccountId { get; set; }
+        public int? PayerAccountId { get; set; }
 
-        public FinancialAccountDto PayerFinancialAccountDto { get; set; }
+        public FinancialAccountDto? PayerFinancialAccountDto { get; set; }
 
-        public int BeneficiaryAccountId { get; set; }
+        public int? BeneficiaryAccountId { get; set; }
 
-        public FinancialAccountDto BeneficiaryFinancialAccountDto { get; set; }
+        public FinancialAccountDto? BeneficiaryFinancialAccountDto { get; set; }
 
         public int PaymentId { get; set; }
 
+
         public PaymentDto Payment { get; set; }
+
     }
  }

@@ -29,7 +29,6 @@ namespace CondoManagementWebApp.Controllers
         private readonly HttpClient _httpClient;
         private readonly IApiCallService _apiCallService;
 
-
         public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient,
             IConverterHelper converterHelper, CloudinaryService cloudinaryService, IApiCallService apiCallService)
         {
@@ -40,7 +39,6 @@ namespace CondoManagementWebApp.Controllers
             _cloudinaryService = cloudinaryService;
             _converterHelper = converterHelper;
             _apiCallService = apiCallService;
-
         }
 
         /// <summary>
@@ -109,7 +107,7 @@ namespace CondoManagementWebApp.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var tokenResponse = JsonSerializer.Deserialize<ClassLibrary.Response<Token>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var tokenResponse = JsonSerializer.Deserialize<ClassLibrary.Response<object>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (tokenResponse.Requires2FA) //TODO remover esse if antes de publicar
                     {

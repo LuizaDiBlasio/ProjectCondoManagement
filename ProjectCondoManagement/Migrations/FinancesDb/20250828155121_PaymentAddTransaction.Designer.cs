@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 
@@ -11,9 +12,11 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 namespace ProjectCondoManagement.Migrations.FinancesDb
 {
     [DbContext(typeof(DataContextFinances))]
-    partial class DataContextFinancesModelSnapshot : ModelSnapshot
+    [Migration("20250828155121_PaymentAddTransaction")]
+    partial class PaymentAddTransaction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,22 +92,19 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.Property<int?>("BeneficiaryAccountId")
+                    b.Property<int>("BeneficiaryAccountId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("BeneficiaryFinancialAccountId")
+                    b.Property<int>("BeneficiaryFinancialAccountId")
                         .HasColumnType("int");
 
                     b.Property<int>("CondominiumId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ExternalRecipientBankAccount")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("PayerAccountId")
+                    b.Property<int>("PayerAccountId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PayerFinancialAccountId")
+                    b.Property<int>("PayerFinancialAccountId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("PaymentDate")
@@ -169,14 +169,11 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.Property<int?>("BeneficiaryAccountId")
+                    b.Property<int>("BeneficiaryAccountId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DateAndTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("ExternalRecipientBankAccount")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PayerAccountId")
                         .HasColumnType("int");
@@ -204,7 +201,9 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                 {
                     b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.FinancialAccount", "BeneficiaryFinancialAccount")
                         .WithMany()
-                        .HasForeignKey("BeneficiaryFinancialAccountId");
+                        .HasForeignKey("BeneficiaryFinancialAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.Payment", "Payment")
                         .WithOne("Invoice")
@@ -213,7 +212,9 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
 
                     b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.FinancialAccount", "PayerFinancialAccount")
                         .WithMany()
-                        .HasForeignKey("PayerFinancialAccountId");
+                        .HasForeignKey("PayerFinancialAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("BeneficiaryFinancialAccount");
 
@@ -236,7 +237,8 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.FinancialAccount", "AccountBeneficiary")
                         .WithMany("TransactionsAsBeneficiary")
                         .HasForeignKey("BeneficiaryAccountId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.Payment", "Payment")
                         .WithOne("Transaction")

@@ -448,7 +448,8 @@ namespace ProjectCondoManagement.Helpers
             var financialAccountDto = new FinancialAccountDto()
             {
                 Id = isNew ? 0 : financialAccount.Id,
-                InitialDeposit = financialAccount.InitialDeposit,
+                Deposit = financialAccount.Deposit,
+                Balance = financialAccount.Balance,
                 IsActive = financialAccount.IsActive,
                 CardNumber = financialAccount.CardNumber,
                 AssociatedBankAccount = financialAccount.AssociatedBankAccount,
@@ -503,6 +504,7 @@ namespace ProjectCondoManagement.Helpers
                 PayerAccountId = transactionDto.PayerAccountId,
                 BeneficiaryAccountId = transactionDto.BeneficiaryAccountId,
                 PaymentId = transactionDto.PaymentId,
+                ExternalRecipientBankAccount = transactionDto.ExternalRecipientBankAccount,
             };
 
             return transaction; 
@@ -513,7 +515,8 @@ namespace ProjectCondoManagement.Helpers
             var financialAccount = new FinancialAccount()
             {
                 Id = isNew ? 0 : financialAccountDto.Id,
-                InitialDeposit = financialAccountDto.InitialDeposit,
+                Deposit = financialAccountDto.Deposit,
+                Balance = financialAccountDto.Balance,
                 IsActive = financialAccountDto.IsActive,
                 CardNumber = financialAccountDto.CardNumber,
                 AssociatedBankAccount= financialAccountDto.AssociatedBankAccount,   

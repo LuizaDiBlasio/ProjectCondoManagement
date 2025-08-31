@@ -105,7 +105,7 @@ namespace ProjectCondoManagement.Controllers
 
                 await _expensesRepository.CreateAsync(expense, _dataContextFinances);
 
-                return Ok(new Response<object>() { IsSuccess = true });
+                return Ok(new   Response<object>() { IsSuccess = true });
             }
             catch
             {

@@ -206,11 +206,10 @@ namespace CondoManagementWebApp.Helpers
         {
             var paymentDto = new PaymentDto()
             {
-                IssueDate = model.IssueDate,
-                DueDate = model.DueDate,
+                IssueDate = model.IssueDate.Value,
+                DueDate = model.DueDate.Value,
                 PayerFinancialAccountId = model.PayerFinancialAccountId,
                 CondominiumId = model.CondominiumId,
-                OneTimeExpenseDto = model.OneTimeExpense,
             };
             return paymentDto;
         }
@@ -219,11 +218,11 @@ namespace CondoManagementWebApp.Helpers
         {
             var paymentDto = new PaymentDto()
             {
-                IssueDate = model.IssueDate,
-                DueDate = model.DueDate,
+                IssueDate = model.IssueDate.Value,
+                DueDate = model.DueDate.Value,
                 PayerFinancialAccountId = model.PayerFinancialAccountId,
                 CondominiumId = model.CondominiumId,
-                ExpensesDto = model.ExpensesDto,
+                SelectedExpensesIds = model.SelectedExpensesIds,
             };
             return paymentDto;  
         }

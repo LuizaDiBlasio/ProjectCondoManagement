@@ -1,19 +1,14 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
-using ProjectCondoManagement.Migrations.CondosDb;
-using System.Threading.Tasks;
 using System.Web.Mvc;
-using Twilio.Rest.Api.V2010.Account.Call;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -31,21 +26,24 @@ namespace ProjectCondoManagement.Controllers
         private readonly ICondominiumRepository _condominiumRepository;
         private readonly DataContextCondos _dataContextCondos;
         private readonly IExpenseRepository _expenseRepository;
-        private readonly ITransactionRepository _transactionRepository; 
+        private readonly ITransactionRepository _transactionRepository;
         private readonly IInvoiceRepository _invoiceRepository;
+        private readonly IFinancialAccountRepository _financialAccountRepository;
 
         public PaymentController(IPaymentRepository paymentRepository, DataContextFinances dataContextFinances, IConverterHelper converterHelper, IUserHelper userHelper,
-            ICondominiumRepository condominiumRepository, DataContextCondos dataContextCondos, IExpenseRepository expenseRepository, ITransactionRepository transactionRepository, IInvoiceRepository invoiceRepository)
+            ICondominiumRepository condominiumRepository, DataContextCondos dataContextCondos, IExpenseRepository expenseRepository, ITransactionRepository transactionRepository, IInvoiceRepository invoiceRepository,
+            IFinancialAccountRepository financialAccountRepository)
         {
             _paymentRepository = paymentRepository;
             _dataContextFinances = dataContextFinances;
             _converterHelper = converterHelper;
             _userHelper = userHelper;
-            _condominiumRepository = condominiumRepository; 
+            _condominiumRepository = condominiumRepository;
             _dataContextCondos = dataContextCondos;
             _expenseRepository = expenseRepository;
-            _transactionRepository = transactionRepository; 
+            _transactionRepository = transactionRepository;
             _invoiceRepository = invoiceRepository;
+            _financialAccountRepository = financialAccountRepository;
         }
 
 
@@ -79,17 +77,17 @@ namespace ProjectCondoManagement.Controllers
         {
             // get condominium 
             var condominium = await _condominiumRepository.GetByIdAsync(int.Parse(condoId), _dataContextCondos);
-            if(condominium == null)
+            if (condominium == null)
             {
-                return new List<PaymentDto>();  
+                return new List<PaymentDto>();
             }
 
 
-            var allPayments = _paymentRepository.GetAll(_dataContextFinances).ToList();
-
             if (condoId != null)
             {
-                var condoPayments = allPayments.Where(p => p.PayerFinancialAccountId == condominium.FinancialAccountId).ToList();
+                var condoPayments = _paymentRepository.GetAll(_dataContextFinances)
+                                                      .Where(p => p.PayerFinancialAccountId == condominium.FinancialAccountId)
+                                                      .ToList();
 
                 //converter
 
@@ -109,7 +107,7 @@ namespace ProjectCondoManagement.Controllers
 
             var condoMembers = await _condominiumRepository.GetCondoCondomembers(int.Parse(condoId));
 
-            if (condoMembers != null)
+            if (condoMembers.Any())
             {
                 //converter condoMembers para users
                 foreach (var condoMember in condoMembers)
@@ -118,19 +116,33 @@ namespace ProjectCondoManagement.Controllers
                     usersCondoMembers.Add(user);
                 }
 
-                var allPayments = _paymentRepository.GetAll(_dataContextFinances).ToList();
+                //se não houver users
+                if (!usersCondoMembers.Any())
+                {
+                    return new List<PaymentDto>();
+                }
 
-                var allCondomemberPayments = new List<Payment>();
+                var allpayments = _paymentRepository.GetAll(_dataContextFinances);
 
-                allCondomemberPayments = allPayments
-                                .Where(payment => usersCondoMembers
-                                .Any(user => user.FinancialAccountId == payment.PayerFinancialAccountId))
-                                .ToList();
+                if (!allpayments.Any())
+                {
+                    return new List<PaymentDto>();
+                }
+
+                var allCondomemberPayments = allpayments
+                               .Where(payment => usersCondoMembers
+                               .Any(user => user.FinancialAccountId == payment.PayerFinancialAccountId))
+                               .ToList();
+
 
                 //converter
-                var allCondomemberPaymentsDto = allCondomemberPayments.Select(p => _converterHelper.ToPaymentDto(p, false)).ToList() ?? new List<PaymentDto>();
 
-                return allCondomemberPaymentsDto;
+                if (allCondomemberPayments.Any())
+                {
+                    var allCondomemberPaymentsDto = allCondomemberPayments.Select(p => _converterHelper.ToPaymentDto(p, false)).ToList() ?? new List<PaymentDto>();
+                    return allCondomemberPaymentsDto;
+                }
+
             }
 
             return new List<PaymentDto>();
@@ -165,7 +177,7 @@ namespace ProjectCondoManagement.Controllers
 
                 //criar expense
 
-                if(payment.OneTimeExpense != null)
+                if (payment.OneTimeExpense != null)
                 {
                     var oneTimeExpense = new Expense()
                     {
@@ -180,15 +192,15 @@ namespace ProjectCondoManagement.Controllers
                     payment.Expenses.Add(oneTimeExpense);
                 }
 
-               //criar payment
+                //criar payment
 
                 await _paymentRepository.CreateAsync(payment, _dataContextFinances);
 
-                return Ok( new Response<object> () { IsSuccess = true});
+                return Ok(new Response<object>() { IsSuccess = true });
             }
             catch
             {
-                return BadRequest(new Response<object> () { IsSuccess = false, Message = "Unable to issue payment due to serve error" });
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to issue payment due to serve error" });
             }
         }
 
@@ -198,9 +210,16 @@ namespace ProjectCondoManagement.Controllers
         {
             try
             {
+                //escolher as expenses:
+                var allExpenses = _expenseRepository.GetAll(_dataContextFinances);
+
+                var selectedExpenses = allExpenses.Where(expense => paymentDto.SelectedExpensesIds.Contains(expense.Id)).ToList();
+
                 //converter para payment
                 var payment = _converterHelper.ToPayment(paymentDto, true);
 
+                //adcionar lista
+                payment.Expenses = selectedExpenses;
 
                 //criar payment
 
@@ -222,6 +241,7 @@ namespace ProjectCondoManagement.Controllers
         [Microsoft.AspNetCore.Mvc.HttpPost("MakePayment")]
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> MakePayment([FromBody] PaymentDto paymentDto)
         {
+
             try
             {
                 //criar transaction
@@ -238,11 +258,12 @@ namespace ProjectCondoManagement.Controllers
                     CondominiumId = paymentDto.CondominiumId,
                     PayerAccountId = transaction.PayerAccountId,
                     BeneficiaryAccountId = transaction.BeneficiaryAccountId,
+                    
                     PaymentId = paymentDto.Id,
                 };
 
-                await _invoiceRepository.CreateAsync(invoice, _dataContextFinances);    
-                
+                await _invoiceRepository.CreateAsync(invoice, _dataContextFinances);
+
                 paymentDto.InvoiceId = invoice.Id;
                 paymentDto.TransactionId = transaction.Id;
 
@@ -256,13 +277,33 @@ namespace ProjectCondoManagement.Controllers
                 await _paymentRepository.UpdateAsync(payment, _dataContextFinances);
 
                 return Ok(new Response<object>() { IsSuccess = true, Message = "Payment successful" });
-               
+
             }
             catch
             {
                 return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to make payment due to server error" });
             }
         }
+
+        [Microsoft.AspNetCore.Mvc.HttpPost("DeductPayment")]
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> DeductPayment([FromBody] PaymentDto paymentDto)
+        {
+            try
+            {
+                var financialAccount = await _financialAccountRepository.GetByIdAsync(paymentDto.PayerFinancialAccountId, _dataContextFinances);
+
+                // deduzir pagament
+                financialAccount.Balance = financialAccount.Balance - paymentDto.TotalAmount;
+
+                return Ok(new Response<object>() { IsSuccess = true });
+            }
+            catch
+            {
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to process with payment" });
+            }
+
+        }
+
 
 
         // POST: PaymensController/Delete/5 CANCEL PAYMENT
@@ -283,7 +324,7 @@ namespace ProjectCondoManagement.Controllers
                     return Ok();
                 }
 
-               return BadRequest();
+                return BadRequest();
             }
             catch
             {
@@ -293,27 +334,6 @@ namespace ProjectCondoManagement.Controllers
 
         //Metodos auxiliares
 
-        [Microsoft.AspNetCore.Mvc.HttpGet("GetPaymentMethodsList")] 
-        public List<SelectListItem> GetPaymentMethodsList()
-        {
-            return _paymentRepository.GetPaymentMethodsList();
         
-        }
-
-        [Microsoft.AspNetCore.Mvc.HttpGet("GetSelectedPaymentMethod/{id}")]
-        public string GetPaymentMethod(int id)
-        {
-            var paymentMethodList = _paymentRepository.GetPaymentMethodsList();
-
-            var selectedPaymentMethod = paymentMethodList.FirstOrDefault(pm => pm.Value == id.ToString());
-
-            if(selectedPaymentMethod != null)
-            {
-                return selectedPaymentMethod.Text.ToString();
-            }
-
-            return string.Empty;    
-            
-        }
     }
 }

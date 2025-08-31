@@ -93,8 +93,8 @@ namespace ProjectCondoManagement.Controllers
 
 
 
-        // POST: api/CondoMembers/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //// POST: api/CondoMembers/5
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> EditCondoMember(int id, [FromBody] CondoMemberDto condoMemberDto)
         {
@@ -127,8 +127,8 @@ namespace ProjectCondoManagement.Controllers
 
         }
 
-        // POST: api/CondoMembers
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //// POST: api/CondoMembers
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<IActionResult> PostCondoMember([FromBody] CondoMemberDto condoMemberDto)
         {
