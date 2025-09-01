@@ -8,12 +8,6 @@ namespace CondoManagementWebApp.Models
 {
     public class CreateOneTimePaymentViewModel
     {
-        [DateGreaterThanToday(ErrorMessage = "Issue Date must be a future date.")]
-        [Required(ErrorMessage = "The issue date is required.")]
-        [Display(Name = "Issue Date")]
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
-        public DateTime? IssueDate { get; set; }
 
         [DateGreaterThanToday(ErrorMessage = "Issue Date must be a future date.")]
         [Required(ErrorMessage = "The due date is required.")]

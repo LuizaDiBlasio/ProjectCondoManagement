@@ -212,6 +212,10 @@ namespace CondoManagementWebApp.Controllers
                 //CONVERTER PARA PAYMENT DTO
                 var paymentDto = _converterHelper.FromOneTimeToPaymentDto(model);
 
+                //atribur propriedades fora do view model
+
+                paymentDto.IssueDate = DateTime.Now;
+
                 paymentDto.OneTimeExpenseDto = expenseDto; 
 
                 var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/CreateOneTimePayment", paymentDto);
@@ -262,6 +266,9 @@ namespace CondoManagementWebApp.Controllers
 
                 //CONVERTER PARA PAYMENT DTO
                 var paymentDto = _converterHelper.FromRecurringToPaymentDto(model);
+
+                //atribur propriedade fora do view model
+                paymentDto.IssueDate = DateTime.Now;
 
                 var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/CreateRecurringPayment", paymentDto);
 
@@ -358,7 +365,7 @@ namespace CondoManagementWebApp.Controllers
 
             }
 
-            //validação manual para account id ou external bakn account
+            //validação manual para account id ou external bank account
             if(model.SelectedBeneficiaryId != 3)
             {
                 if (model.BeneficiaryAccountId == null)
@@ -397,21 +404,43 @@ namespace CondoManagementWebApp.Controllers
 
                 paymentDto.PaymentMethod = paymentMethod;
 
+                //caso pagamento seja feito com conta Omah, certificar que conta esteja ativa
+                if(paymentMethod == "Omah Wallet")
+                {
+                    var financialAccountDto = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{paymentDto.PayerFinancialAccountId}");
+
+                    if (!financialAccountDto.IsActive)
+                    {
+                        _flashMessage.Danger("Payment failed, your Omah Wallet is inactive");
+                        return View("MakePayment", model);
+                    }
+                }
+
                 //caso seja um beneficiario externo , não atribuir a conta Omah e atribuir a conta de banco externa
                 if (model.SelectedBeneficiaryId == 3)
                 {
                     model.BeneficiaryAccountId = null;   
                 }
-
-                //criar transaction
-                paymentDto.TransactionDto = new TransactionDto() //o id vai ser zero por enquanto 
+                else //caso seja pagamento interno ver se a account do beneficiary está válida
                 {
-                    PaymentId = paymentDto.Id,
-                    DateAndTime = DateTime.Now,
-                    PayerAccountId = paymentDto.PayerFinancialAccountId,
-                    BeneficiaryAccountId = model.BeneficiaryAccountId, 
-                    ExternalRecipientBankAccount = model.ExternalRecipientBankAccount,
-                };
+                    var financialAccountDto = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{model.BeneficiaryAccountId}");
+
+                    if (!financialAccountDto.IsActive)
+                    {
+                        _flashMessage.Danger("Payment failed, recipient's Omah Wallet is inactive");
+                        return View("MakePayment", model);
+                    }
+                }
+
+                    //criar transaction
+                    paymentDto.TransactionDto = new TransactionDto() //o id vai ser zero por enquanto 
+                    {
+                        PaymentId = paymentDto.Id,
+                        DateAndTime = DateTime.Now,
+                        PayerAccountId = paymentDto.PayerFinancialAccountId,
+                        BeneficiaryAccountId = model.BeneficiaryAccountId,
+                        ExternalRecipientBankAccount = model.ExternalRecipientBankAccount,
+                    };
 
                 //subtrair de account caso method payment seja omahWallet
 
@@ -464,7 +493,7 @@ namespace CondoManagementWebApp.Controllers
                     return View("MakePayment", model);
                 }
 
-                _flashMessage.Confirmation(apiCall.Message);
+                _flashMessage.Confirmation(apiCall.Message); 
                 return View("MakePayment", model);
             }
             catch

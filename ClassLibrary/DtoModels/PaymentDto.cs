@@ -10,7 +10,7 @@ namespace ClassLibrary.DtoModels
     {
         public int Id { get; set; }
 
-        public DateTime IssueDate { get; set; }
+        public DateTime? IssueDate { get; set; }
 
         public DateTime DueDate { get; set; }
 

@@ -62,7 +62,9 @@ namespace ProjectCondoManagement.Controllers
 
             // get user payments
             var allPayments = _paymentRepository.GetAll(_dataContextFinances)
-                                                .Include(p => p.Expenses).ToList();
+                                                .Include(p => p.Expenses)
+                                                .Include(p =>p.Transaction)
+                                                .ToList();
 
             var userPayments = allPayments
                                 .Where(p => p.PayerFinancialAccountId == user.FinancialAccountId)
@@ -92,6 +94,7 @@ namespace ProjectCondoManagement.Controllers
                 var condoPayments = _paymentRepository.GetAll(_dataContextFinances)
                                                       .Where(p => p.PayerFinancialAccountId == condominium.FinancialAccountId)
                                                       .Include(p => p.Expenses)
+                                                      .Include(p => p.Transaction)
                                                       .ToList();
 
                 //converter
@@ -138,6 +141,7 @@ namespace ProjectCondoManagement.Controllers
                                .Where(payment => usersCondoMembers
                                .Any(user => user.FinancialAccountId == payment.PayerFinancialAccountId))
                                .Include(p => p.Expenses)
+                               .Include(p =>p.Transaction)
                                .ToList();
 
 
@@ -251,11 +255,8 @@ namespace ProjectCondoManagement.Controllers
             try
             {
                 //buscar payment
-                var payment = await _paymentRepository.GetByIdAsync(paymentDto.Id, _dataContextFinances);
-                if (payment == null)
-                {
-                    return NotFound(new Response<object>() { IsSuccess = false, Message = "Payment not found." });
-                }
+                var payment = _converterHelper.ToPayment(paymentDto, false);
+
 
                 //converter para transaction
                 var transaction = _converterHelper.ToTransaction(paymentDto.TransactionDto, true);
@@ -272,14 +273,25 @@ namespace ProjectCondoManagement.Controllers
                     BeneficiaryAccountId = transaction.BeneficiaryAccountId
                 };
 
+
                 //associar
                 payment.Invoice = invoice;
 
                 // marcar o pagamento como pago
                 payment.IsPaid = true;
 
-                //fazer update do pagamento
+
+                //salvar alterações
                 await _paymentRepository.UpdateAsync(payment, _dataContextFinances);
+
+                //buscar payment e atribuir ids
+                var updatedPayment = await _paymentRepository.GetByIdAsync(payment.Id, _dataContextFinances);
+
+                updatedPayment.TransactionId = updatedPayment.Transaction.Id;
+                updatedPayment.InvoiceId = updatedPayment.Invoice.Id;
+
+                //nova atualização
+                await _paymentRepository.UpdateAsync(updatedPayment, _dataContextFinances);
 
                 return Ok(new Response<object>() { IsSuccess = true, Message = "Payment successful" });
 

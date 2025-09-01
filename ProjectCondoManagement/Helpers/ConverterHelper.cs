@@ -389,7 +389,8 @@ namespace ProjectCondoManagement.Helpers
                 InvoiceDto = payment.Invoice == null? null : ToInvoiceDto(payment.Invoice, false),
                 ExpensesDto = payment.Expenses?.Select(e => ToExpenseDto(e, false)).ToList() ?? new List<ExpenseDto>(),
                 OneTimeExpenseDto = payment.OneTimeExpense == null ? null : ToExpenseDto(payment.OneTimeExpense, false),
-                PayerFinancialAccountId = payment.PayerFinancialAccountId
+                PayerFinancialAccountId = payment.PayerFinancialAccountId,
+                TransactionDto = payment.Transaction == null ? null : ToTransactionDto(payment.Transaction, false),
             };  
            
             return paymentDto;
@@ -404,8 +405,7 @@ namespace ProjectCondoManagement.Helpers
                 PaymentDate = invoice.PaymentDate,  
                 CondominiumId = invoice.CondominiumId,
                 PayerAccountId = invoice.PayerAccountId,
-                BeneficiaryAccountId = invoice.BeneficiaryAccountId,
-                Payment = ToPaymentDto(invoice.Payment, false)
+                BeneficiaryAccountId = invoice.BeneficiaryAccountId
             };
             
             return invoiceDto;
@@ -432,9 +432,9 @@ namespace ProjectCondoManagement.Helpers
                 Id = isNew ? 0 : transaction.Id,
                 DateAndTime = transaction.DateAndTime,
                 PayerAccountId = transaction.PayerAccountId,
-                AccountPayerDto = ToFinancialAccountDto(transaction.AccountPayer, false),   
+                //AccountPayerDto = ToFinancialAccountDto(transaction.AccountPayer, false),   
                 BeneficiaryAccountId = transaction.BeneficiaryAccountId,
-                AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
+                //AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
                 
             };
             
@@ -477,7 +477,7 @@ namespace ProjectCondoManagement.Helpers
             var payment = new Payment()
             {
                 Id = isNew ? 0 : paymentDto.Id,
-                IssueDate = paymentDto.IssueDate,
+                IssueDate = paymentDto.IssueDate.Value,
                 DueDate = paymentDto.DueDate,
                 PaymentMethod = isNew ? null : paymentDto.PaymentMethod,
                 PayerFinancialAccountId = paymentDto.PayerFinancialAccountId,

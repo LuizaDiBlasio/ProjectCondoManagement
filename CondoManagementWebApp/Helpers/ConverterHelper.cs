@@ -206,7 +206,6 @@ namespace CondoManagementWebApp.Helpers
         {
             var paymentDto = new PaymentDto()
             {
-                IssueDate = model.IssueDate.Value,
                 DueDate = model.DueDate.Value,
                 PayerFinancialAccountId = model.PayerFinancialAccountId,
                 CondominiumId = model.CondominiumId,
@@ -218,7 +217,6 @@ namespace CondoManagementWebApp.Helpers
         {
             var paymentDto = new PaymentDto()
             {
-                IssueDate = model.IssueDate.Value,
                 DueDate = model.DueDate.Value,
                 PayerFinancialAccountId = model.PayerFinancialAccountId,
                 CondominiumId = model.CondominiumId,

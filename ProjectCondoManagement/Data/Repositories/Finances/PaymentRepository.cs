@@ -20,6 +20,7 @@ namespace ProjectCondoManagement.Data.Repositories.Finances
         {
                 return await _dataContextFinances.Payments
                                 .Include(p => p.Expenses)
+                                .Include(p => p.OneTimeExpense)
                                 .FirstOrDefaultAsync(p => p.Id == id);     
         }
 

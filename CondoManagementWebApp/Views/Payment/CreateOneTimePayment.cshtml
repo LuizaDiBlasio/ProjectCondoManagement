@@ -21,11 +21,6 @@
 
                             <input type="hidden" asp-for="CondominiumId" />
 
-                            <div class="form-group mb-3">
-                                <label asp-for="IssueDate" class="control-label"></label>
-                                <input id="issueDateInput" asp-for="IssueDate" class="form-control" />
-                                <span asp-validation-for="IssueDate" class="text-danger"></span>
-                            </div>
 
                             <div class="form-group mb-3">
                                 <label asp-for="DueDate" class="control-label"></label>
@@ -34,7 +29,7 @@
                             </div>
 
                             <div class="form-group mb-3">
-                                <label asp-for="PayerFinancialAccountId" class="control-label"></label>
+                                <label asp-for="PayerFinancialAccountId" class="control-label">Payer's Omah wallet number</label>
                                 <input asp-for="PayerFinancialAccountId" class="form-control" />
                                 <span asp-validation-for="PayerFinancialAccountId" class="text-danger"></span>
                             </div>
@@ -82,13 +77,6 @@
             var today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            new ej.calendars.DatePicker({
-                format: 'MM/dd/yyyy',
-                placeholder: 'Select Issue Date',
-                min: today,
-                value: null // Garante que o valor inicial é nulo
-            }).appendTo('#issueDateInput');
-
             // Inicializa o DatePicker para a data de vencimento
             new ej.calendars.DatePicker({
                 format: 'MM/dd/yyyy',
@@ -98,4 +86,20 @@
             }).appendTo('#dueDateInput');
         });
     </script>
+
+    <style>
+        .text-purple {
+            color: #8A2BE2 !important;
+        }
+        /* Garantindo que a seta apareça, usando o seletor mais específico */
+        .form-control {
+            -webkit-appearance: menulist;
+            -moz-appearance: menulist;
+            appearance: menulist;
+        }
+        /* Ajustando a cor do texto do select para ser legível */
+        select.form-control option {
+            color: black;
+        }
+    </style>
 }
