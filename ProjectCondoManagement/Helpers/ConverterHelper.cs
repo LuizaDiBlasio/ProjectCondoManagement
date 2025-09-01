@@ -389,8 +389,7 @@ namespace ProjectCondoManagement.Helpers
                 InvoiceDto = payment.Invoice == null? null : ToInvoiceDto(payment.Invoice, false),
                 ExpensesDto = payment.Expenses?.Select(e => ToExpenseDto(e, false)).ToList() ?? new List<ExpenseDto>(),
                 OneTimeExpenseDto = payment.OneTimeExpense == null ? null : ToExpenseDto(payment.OneTimeExpense, false),
-                TransactionDto = payment.Transaction == null ? null : ToTransactionDto(payment.Transaction, false),
-                
+                PayerFinancialAccountId = payment.PayerFinancialAccountId
             };  
            
             return paymentDto;
@@ -436,7 +435,6 @@ namespace ProjectCondoManagement.Helpers
                 AccountPayerDto = ToFinancialAccountDto(transaction.AccountPayer, false),   
                 BeneficiaryAccountId = transaction.BeneficiaryAccountId,
                 AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
-                PaymentDto = ToPaymentDto(transaction.Payment, false),
                 
             };
             

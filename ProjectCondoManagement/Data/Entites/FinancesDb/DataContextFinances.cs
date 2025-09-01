@@ -38,15 +38,15 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
             // Mapeamento do relacionamento 1:1 entre Payment e Invoice
             modelBuilder.Entity<Payment>()
                 .HasOne(p => p.Invoice)
-                    .WithOne(i => i.Payment)
-                .HasForeignKey<Invoice>(i => i.Id) // A chave estrangeira está em Invoice (lado dependente), e usa a PK de Invoice
+                    .WithOne()
+                .HasForeignKey<Invoice>(i => i.PaymentId) // A chave estrangeira  em Invoice (lado dependente)
                 .IsRequired(false); //  um Payment pode existir sem uma Invoice (Invoice é nullable).
 
             // Mapeamento do relacionamento 1:1 entre Payment e Transaction
             modelBuilder.Entity<Payment>()
                 .HasOne(p => p.Transaction)
-                    .WithOne(i => i.Payment)
-                .HasForeignKey<Transaction>(i => i.Id) // A chave estrangeira está em Transaction (lado dependente), e usa a PK de Transaction
+                    .WithOne()
+                .HasForeignKey<Transaction>(t => t.PaymentId) // A chave estrangeira em Transaction (lado dependente)
                 .IsRequired(false); //  um Payment pode existir sem uma Transaction - transação ainda não foi feita (Transaction é nullable).
 
 

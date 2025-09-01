@@ -351,7 +351,7 @@ namespace CondoManagementWebApp.Controllers
             }
             else if(model.SelectedPaymentMethodId == 3)//omah wallet
             {
-                if(model.BeneficiaryAccountId == 0)
+                if(model.PayerFinancialAccountId == 0)
                 {
                     ModelState.AddModelError("OmahWalletNumber", "Omah wallet number is required");
                 }
@@ -396,7 +396,6 @@ namespace CondoManagementWebApp.Controllers
                 }
 
                 paymentDto.PaymentMethod = paymentMethod;
-                paymentDto.IsPaid = true;
 
                 //caso seja um beneficiario externo , não atribuir a conta Omah e atribuir a conta de banco externa
                 if (model.SelectedBeneficiaryId == 3)
@@ -415,9 +414,16 @@ namespace CondoManagementWebApp.Controllers
                 };
 
                 //subtrair de account caso method payment seja omahWallet
-                if(model.BeneficiaryAccountId  != 0)
+
+                if(model.SelectedPaymentMethodId == 3)
                 {
-                    var deductAccount = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/DeductPayment", paymentDto);
+                    var deductDto = new CashFlowDto()
+                    {
+                        TotalAmount = paymentDto.TotalAmount,
+                        AccountId = paymentDto.PayerFinancialAccountId,
+                    }; 
+
+                    var deductAccount = await _apiCallService.PostAsync<CashFlowDto, Response<object>>("api/Payment/DeductPayment", deductDto);
 
                     if(!deductAccount.IsSuccess)
                     {
@@ -425,6 +431,28 @@ namespace CondoManagementWebApp.Controllers
                         return View("MakePayment", model);
                     }
                 }
+
+                //adicionar ao account do beneficiario
+                if (model.SelectedBeneficiaryId != 3) // se não for externo
+                {
+                    var incomeDto = new CashFlowDto()
+                    {
+                        TotalAmount = paymentDto.TotalAmount,
+                        AccountId = paymentDto.TransactionDto.BeneficiaryAccountId.Value,
+                    };
+
+                    if (model.BeneficiaryAccountId != 0)
+                    {
+                        var incomePay = await _apiCallService.PostAsync<CashFlowDto, Response<object>>("api/Payment/IncomePayment", incomeDto);
+
+                        if (!incomePay.IsSuccess)
+                        {
+                            _flashMessage.Danger(incomePay.Message);
+                            return View("MakePayment", model);
+                        }
+                    }
+                }
+               
 
                 //Fazer requisição para fazer fazer pagamento
 

@@ -2,6 +2,7 @@
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
@@ -60,9 +61,12 @@ namespace ProjectCondoManagement.Controllers
             }
 
             // get user payments
-            var allPayments = _paymentRepository.GetAll(_dataContextFinances).ToList();
+            var allPayments = _paymentRepository.GetAll(_dataContextFinances)
+                                                .Include(p => p.Expenses).ToList();
 
-            var userPayments = allPayments.Where(p => p.PayerFinancialAccountId == user.FinancialAccountId).ToList();
+            var userPayments = allPayments
+                                .Where(p => p.PayerFinancialAccountId == user.FinancialAccountId)
+                                .ToList();
 
             //converter
             var userPaymentsDto = userPayments.Select(p => _converterHelper.ToPaymentDto(p, false)).ToList() ?? new List<PaymentDto>();
@@ -87,6 +91,7 @@ namespace ProjectCondoManagement.Controllers
             {
                 var condoPayments = _paymentRepository.GetAll(_dataContextFinances)
                                                       .Where(p => p.PayerFinancialAccountId == condominium.FinancialAccountId)
+                                                      .Include(p => p.Expenses)
                                                       .ToList();
 
                 //converter
@@ -132,6 +137,7 @@ namespace ProjectCondoManagement.Controllers
                 var allCondomemberPayments = allpayments
                                .Where(payment => usersCondoMembers
                                .Any(user => user.FinancialAccountId == payment.PayerFinancialAccountId))
+                               .Include(p => p.Expenses)
                                .ToList();
 
 
@@ -160,7 +166,7 @@ namespace ProjectCondoManagement.Controllers
             {
                 var paymentDto = _converterHelper.ToPaymentDto(paymentWithExpenses, false);
 
-                return Ok(paymentWithExpenses);
+                return Ok(paymentDto);
             }
 
             return NotFound(new PaymentDto());
@@ -244,36 +250,35 @@ namespace ProjectCondoManagement.Controllers
 
             try
             {
-                //criar transaction
+                //buscar payment
+                var payment = await _paymentRepository.GetByIdAsync(paymentDto.Id, _dataContextFinances);
+                if (payment == null)
+                {
+                    return NotFound(new Response<object>() { IsSuccess = false, Message = "Payment not found." });
+                }
 
+                //converter para transaction
                 var transaction = _converterHelper.ToTransaction(paymentDto.TransactionDto, true);
 
-                await _transactionRepository.CreateAsync(transaction, _dataContextFinances);
+                //associar
+                payment.Transaction = transaction;
 
                 //criar invoice
-
                 var invoice = new Invoice()
                 {
                     PaymentDate = transaction.DateAndTime,
-                    CondominiumId = paymentDto.CondominiumId,
+                    CondominiumId = payment.CondominiumId,
                     PayerAccountId = transaction.PayerAccountId,
-                    BeneficiaryAccountId = transaction.BeneficiaryAccountId,
-                    
-                    PaymentId = paymentDto.Id,
+                    BeneficiaryAccountId = transaction.BeneficiaryAccountId
                 };
 
-                await _invoiceRepository.CreateAsync(invoice, _dataContextFinances);
-
-                paymentDto.InvoiceId = invoice.Id;
-                paymentDto.TransactionId = transaction.Id;
-
-                //fazer update do pagamento
-
-                var payment = _converterHelper.ToPayment(paymentDto, false);
-
-                payment.Transaction = transaction;
+                //associar
                 payment.Invoice = invoice;
 
+                // marcar o pagamento como pago
+                payment.IsPaid = true;
+
+                //fazer update do pagamento
                 await _paymentRepository.UpdateAsync(payment, _dataContextFinances);
 
                 return Ok(new Response<object>() { IsSuccess = true, Message = "Payment successful" });
@@ -285,15 +290,47 @@ namespace ProjectCondoManagement.Controllers
             }
         }
 
+
         [Microsoft.AspNetCore.Mvc.HttpPost("DeductPayment")]
-        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> DeductPayment([FromBody] PaymentDto paymentDto)
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> DeductPayment([FromBody] CashFlowDto deductDto)
         {
             try
             {
-                var financialAccount = await _financialAccountRepository.GetByIdAsync(paymentDto.PayerFinancialAccountId, _dataContextFinances);
+                var financialAccount = await _financialAccountRepository.GetByIdAsync(deductDto.AccountId, _dataContextFinances);
 
-                // deduzir pagament
-                financialAccount.Balance = financialAccount.Balance - paymentDto.TotalAmount;
+                // deduzir pagamento
+
+                if (financialAccount.Balance < deductDto.TotalAmount)
+                {
+                    return Ok(new Response<object>() { IsSuccess = false, Message = "Insufficient balance" });
+                }
+
+                financialAccount.Balance = financialAccount.Balance - deductDto.TotalAmount;
+
+                // update da financial account
+                await _financialAccountRepository.UpdateAsync(financialAccount, _dataContextFinances);
+
+                return Ok(new Response<object>() { IsSuccess = true });
+            }
+            catch
+            {
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to process payment" });
+            }
+
+        }
+
+        [Microsoft.AspNetCore.Mvc.HttpPost("IncomePayment")]
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> IncomePayment([FromBody] CashFlowDto incomeDto)
+        {
+            try
+            {
+                var financialAccount = await _financialAccountRepository.GetByIdAsync(incomeDto.AccountId, _dataContextFinances);
+
+                // deduzir pagamento
+                financialAccount.Balance = financialAccount.Balance + incomeDto.TotalAmount;
+
+                // update da financial account
+                await _financialAccountRepository.UpdateAsync(financialAccount, _dataContextFinances);
 
                 return Ok(new Response<object>() { IsSuccess = true });
             }
@@ -303,6 +340,7 @@ namespace ProjectCondoManagement.Controllers
             }
 
         }
+
 
 
 

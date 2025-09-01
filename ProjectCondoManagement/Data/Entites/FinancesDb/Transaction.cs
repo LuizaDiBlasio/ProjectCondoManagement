@@ -9,9 +9,9 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public DateTime DateAndTime { get; set; }
 
-        public int PayerAccountId { get; set; } //FK para TransactionsAsPayer
+        public int? PayerAccountId { get; set; } //FK para TransactionsAsPayer
 
-        public FinancialAccount AccountPayer { get; set; }
+        public FinancialAccount? AccountPayer { get; set; }
 
         public int? BeneficiaryAccountId { get; set; }// FK para TransactionsAsBeneficiary
 
@@ -21,6 +21,5 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public int PaymentId { get; set; }
 
-        public Payment Payment { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 
@@ -11,9 +12,11 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 namespace ProjectCondoManagement.Migrations.FinancesDb
 {
     [DbContext(typeof(DataContextFinances))]
-    partial class DataContextFinancesModelSnapshot : ModelSnapshot
+    [Migration("20250831190646_PaymentTransactionRemmove")]
+    partial class PaymentTransactionRemmove
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,7 +53,7 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
 
                     b.HasIndex("PaymentId");
 
-                    b.ToTable("Expenses", (string)null);
+                    b.ToTable("Expenses");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.FinancesDb.FinancialAccount", b =>
@@ -81,7 +84,7 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("FinancialAccounts", (string)null);
+                    b.ToTable("FinancialAccounts");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.FinancesDb.Invoice", b =>
@@ -119,7 +122,7 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
 
                     b.HasIndex("PayerFinancialAccountId");
 
-                    b.ToTable("Invoices", (string)null);
+                    b.ToTable("Invoices");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.FinancesDb.Payment", b =>
@@ -161,7 +164,7 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
 
                     b.HasIndex("OneTimeExpenseId");
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.FinancesDb.Transaction", b =>
@@ -190,7 +193,7 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
 
                     b.HasIndex("PayerAccountId");
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.FinancesDb.Expense", b =>

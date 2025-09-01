@@ -32,7 +32,5 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public Transaction? Transaction { get; set; }
 
-       
-
     }
 }

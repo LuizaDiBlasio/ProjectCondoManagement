@@ -56,9 +56,17 @@ namespace CondoManagementWebApp.Helpers
                 "application/json"
             );
             var response = await _httpClient.PostAsync(requestUri, jsonContent);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                // Log ou retorne o conteúdo do erro
+                throw new Exception($"API call failed with status code {response.StatusCode}. Content: {errorContent}");
+            }
+
             response.EnsureSuccessStatusCode();
 
-
+        
             return await response.Content.ReadFromJsonAsync<TResponse>();
         }
 

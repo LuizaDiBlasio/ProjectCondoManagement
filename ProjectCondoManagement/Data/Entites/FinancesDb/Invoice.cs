@@ -21,8 +21,6 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public int PaymentId { get; set; }  
 
-        public Payment Payment { get; set; }
-
         public string? ExternalRecipientBankAccount { get; set; }
     }
 }
