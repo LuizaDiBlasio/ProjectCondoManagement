@@ -16,5 +16,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
         Task UpdateCondominiumsCompanyId(Company company);
 
         Task<List<CondoMember>> GetCondoCondomembers(int condoId);
+
+        Task<Response<object>> LinkFinancialAccount(List<CondominiumDto> condominiums);
     }
 }

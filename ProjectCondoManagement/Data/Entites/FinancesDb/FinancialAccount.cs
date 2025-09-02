@@ -1,4 +1,5 @@
 ﻿using ClassLibrary;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProjectCondoManagement.Data.Entites.FinancesDb
 {
@@ -17,10 +18,11 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public string? AssociatedBankAccount { get; set; }   
 
-        public string? BankName { get; set; }    
+        public string? BankName { get; set; }
 
+        [NotMapped]
         public IEnumerable<Transaction>? TransactionsAsPayer { get; set; }
-
+        [NotMapped]
         public IEnumerable<Transaction>? TransactionsAsBeneficiary { get; set; }
 
     }

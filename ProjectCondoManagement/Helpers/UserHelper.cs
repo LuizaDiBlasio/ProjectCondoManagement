@@ -49,6 +49,8 @@ namespace ProjectCondoManagement.Helpers
                 return null; //já existe o user --> resposta negativa (null)
             }
 
+            
+
             user = new User
             {
                 FullName = registerDtoModel.FullName,
@@ -61,6 +63,20 @@ namespace ProjectCondoManagement.Helpers
                 CompanyId = registerDtoModel.CompanyId,
                 FinancialAccountId = null,
             };
+
+            if (registerDtoModel.SelectedRole == "CondoMember")
+            {
+                var financialAccount = new FinancialAccount
+                {
+                    Balance = 0,
+                    OwnerName = registerDtoModel.FullName
+                };
+
+                await _financialAccountRepository.CreateAsync(financialAccount, _dataContextFinances);
+
+                user.FinancialAccountId = financialAccount.Id;
+            }
+
 
             var result = await AddUserAsync(user, "123456"); //add user depois de criado
 
@@ -99,13 +115,13 @@ namespace ProjectCondoManagement.Helpers
                 user.FinancialAccount = financialAccount;
             }
 
-            //TODO Tirar o if e essa atribuição de bool quando publicar, manter só o método de ativação
-            user.Uses2FA = true;
+            ////TODO Tirar o if e essa atribuição de bool quando publicar, manter só o método de ativação
+            //user.Uses2FA = true;
 
-            if (user.Uses2FA == true)
-            {
-                var activation2FA = await EnableTwoFactorAuthenticationAsync(user, true);
-            }
+            //if (user.Uses2FA == true)
+            //{
+            //    var activation2FA = await EnableTwoFactorAuthenticationAsync(user, true);
+            //}
 
 
             return user;

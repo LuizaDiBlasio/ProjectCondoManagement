@@ -9,7 +9,7 @@
 <hr />
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Deposit">
+        <form asp-action="Deposit" asp-route-id="@Model.OwnerId" asp-route-email="@ViewBag.Email">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 
@@ -64,7 +64,7 @@
 
             <div class="form-group mt-3">
                 <input type="submit" value="Deposit" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                <a asp-action="Details" asp-route-id="@Model.OwnerId" asp-route-email="@ViewBag.Email" class="btn btn-secondary">Back to List</a>
             </div>
         </form>
     </div>

@@ -275,6 +275,7 @@ namespace CondoManagementWebApp.Controllers
                     Address = condominium.Address,
                     CondoName = condominium.CondoName,
                     ManagerUserId = condominium.ManagerUserId,
+                    FinancialAccountId = condominium.FinancialAccountId,
                     Managers = managers
                 };
 
@@ -312,6 +313,7 @@ namespace CondoManagementWebApp.Controllers
                 CompanyId = model.CompanyId,
                 Address = model.Address,
                 CondoName = model.CondoName,
+                FinancialAccountId = model.FinancialAccountId,
                 ManagerUserId = model.ManagerUserId
             };
 
@@ -334,6 +336,10 @@ namespace CondoManagementWebApp.Controllers
             return View(model);
 
         }
+
+
+       
+
 
 
 

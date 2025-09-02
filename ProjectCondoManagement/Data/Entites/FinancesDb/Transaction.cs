@@ -9,16 +9,23 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public DateTime DateAndTime { get; set; }
 
-        public int PayerAccountId { get; set; } //FK para TransactionsAsPayer
+        public int? PayerAccountId { get; set; } //FK para TransactionsAsPayer
 
-        public FinancialAccount AccountPayer { get; set; }
+        public FinancialAccount? AccountPayer { get; set; }
 
-        public int BeneficiaryAccountId { get; set; }// FK para TransactionsAsBeneficiary
+        public int? BeneficiaryAccountId { get; set; }// FK para TransactionsAsBeneficiary
 
-        public FinancialAccount AccountBeneficiary { get; set; }
+        public FinancialAccount? AccountBeneficiary { get; set; }
 
-        public int PaymentId { get; set; }
+        public string? ExternalRecipientBankAccount { get; set; }
 
-        public Payment Payment { get; set; }
+        public int? PaymentId { get; set; }
+
+        public Payment? Payment { get; set; }
+
+        public decimal? Amount { get; set; }  
+
+        public int? CompanyId { get; set; }
+
     }
 }

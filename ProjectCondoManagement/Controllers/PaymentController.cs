@@ -236,8 +236,8 @@ namespace ProjectCondoManagement.Controllers
                 {
                     PaymentDate = transaction.DateAndTime,
                     CondominiumId = paymentDto.CondominiumId,
-                    PayerAccountId = transaction.PayerAccountId,
-                    BeneficiaryAccountId = transaction.BeneficiaryAccountId,
+                    PayerAccountId = transaction.PayerAccountId.Value,
+                    BeneficiaryAccountId = transaction.BeneficiaryAccountId.Value,
                     PaymentId = paymentDto.Id,
                 };
 

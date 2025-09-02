@@ -1,13 +1,12 @@
-﻿namespace CondoManagementWebApp.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CondoManagementWebApp.Models
 {
     public class DepositViewModel
     {
         public int OwnerId { get; set; }
 
         public decimal DepositValue { get; set; }
-
-        public string DepositMethod { get; set; }
-
 
         public int SelectedPaymentMethodId { get; set; } // 1: Bank Transfer, 2: Credit Card, 3: Associated Bank Account
 

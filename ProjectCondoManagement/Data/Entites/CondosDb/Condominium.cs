@@ -1,4 +1,5 @@
 ﻿using ClassLibrary;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection.Metadata;
@@ -19,6 +20,9 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
         public string CondoName { get; set; }
 
         public string? ManagerUserId { get; set; }
+
+        [NotMapped]
+        public FinancialAccount? FinancialAccount { get; set; }
 
         public int? FinancialAccountId { get; set; } 
 

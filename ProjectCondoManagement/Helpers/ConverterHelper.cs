@@ -306,7 +306,7 @@ namespace ProjectCondoManagement.Helpers
             if (includeCondoMembers)
             {
                 dto.CondoMemberDtos = unit.CondoMembers?
-                    .Select(cm => ToCondoMemberDto(cm, includeUnits: false)) // ⚠️ corta aqui
+                    .Select(cm => ToCondoMemberDto(cm, includeUnits: false))
                     .ToList() ?? new List<CondoMemberDto>();
             }
 
@@ -448,6 +448,7 @@ namespace ProjectCondoManagement.Helpers
             var financialAccountDto = new FinancialAccountDto()
             {
                 Id = isNew ? 0 : financialAccount.Id,
+                OwnerName= financialAccount.OwnerName,
                 Balance = financialAccount.Balance,
                 IsActive = financialAccount.IsActive,
                 CardNumber = financialAccount.CardNumber,
@@ -513,6 +514,7 @@ namespace ProjectCondoManagement.Helpers
             var financialAccount = new FinancialAccount()
             {
                 Id = isNew ? 0 : financialAccountDto.Id,
+                OwnerName = financialAccountDto.OwnerName,
                 Balance = financialAccountDto.Balance,
                 IsActive = financialAccountDto.IsActive,
                 CardNumber = financialAccountDto.CardNumber,

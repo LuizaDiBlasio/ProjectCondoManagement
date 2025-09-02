@@ -4,7 +4,12 @@ using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Threading.Tasks;
+using System.Transactions;
+using System.Web.Helpers;
 using Vereyon.Web;
 
 namespace CondoManagementWebApp.Controllers
@@ -22,12 +27,42 @@ namespace CondoManagementWebApp.Controllers
 
 
         // GET: FinancialAccountsController/Details/5
-        public async Task<ActionResult> Details(int? id)
+        public async Task<ActionResult> Details(int? id, string? email)
         {
+
+            if (User.IsInRole("CompanyAdmin"))
+            {
+                var user = await _apiCallService.PostAsync<string, UserDto>("api/Account/GetUserByEmail", email);
+
+                var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{user.CompanyId}");
+
+                id = company.FinancialAccountId;
+
+            }
+
+
+
+            if (User.IsInRole("CondoMember"))
+            {
+                var user = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email}");
+
+                id = user.FinancialAccountId;
+            }
+
             if (id == null)
             {
                 return NotFound();
             }
+
+
+            if (email == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Email = email;
+
+                     
 
             try
             {
@@ -50,12 +85,30 @@ namespace CondoManagementWebApp.Controllers
 
         
         // GET: FinancialAccountsController/Edit/5
-        public async Task<ActionResult> Edit(int? id)
+        public async Task<ActionResult> Edit(int? id, string? email, int? returnId, string? returnUrl)
         {
             if (id == null)
             {
                 return NotFound();
             }
+
+            if (email == null)
+            {
+                return NotFound();
+            }
+
+            if (returnUrl == null)
+            {
+                return NotFound();
+            }
+
+            if (returnId != null)
+            {
+                ViewBag.ReturnId = returnId;
+            }
+
+            ViewBag.Email = email;
+            ViewBag.ReturnUrl = returnUrl;
 
             try
             {
@@ -71,7 +124,7 @@ namespace CondoManagementWebApp.Controllers
             catch (Exception)
             {
                 _flashMessage.Danger("Error retrieving account for editing.");
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(CondoAccounts), new { email });
             }
 
         }
@@ -79,12 +132,20 @@ namespace CondoManagementWebApp.Controllers
         // POST: FinancialAccountsController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, FinancialAccountDto financialAccountDto)
+        public async Task<IActionResult> Edit(int id, string? email, FinancialAccountDto financialAccountDto)
         {
             if (id != financialAccountDto.Id)
             {
                 return NotFound();
             }
+
+            if (email == null)
+            {
+                return NotFound();
+            }
+         
+
+            ViewBag.Email = email;
 
             if (!ModelState.IsValid)
             {
@@ -110,26 +171,40 @@ namespace CondoManagementWebApp.Controllers
                     }
 
                     _flashMessage.Confirmation("Financial details updated.");
-                    return RedirectToAction(nameof(Index));
+                    if (User.IsInRole("CondoMember"))
+                    {
+                        return RedirectToAction(nameof(Details), new { email });
+                    }
+                    return RedirectToAction(nameof(CondoAccounts), new { email });
                 }
                 catch (Exception)
                 {
                     _flashMessage.Danger("Error updating account");
-                }
+                     return View(financialAccountDto);
+            }
 
-            return View(financialAccountDto);
+            
 
         }
 
 
 
         // GET: FinancialAccountsController/Deposit/5
-        public async Task<IActionResult> Deposit(int? id)
+        [HttpGet]
+        public async Task<IActionResult> Deposit(int? id, string? email)
         {
             if (id == null)
             {
                 return NotFound();
             }
+
+            if (email == null)
+            {
+                return NotFound();
+            }
+
+
+            ViewBag.Email = email;
 
             try
             {
@@ -142,7 +217,7 @@ namespace CondoManagementWebApp.Controllers
                 var model = new DepositViewModel
                 {
                     OwnerId = financialAccountDto.Id,
-                    DepositValue = 0, // Initialize to 0 or any default value
+                    DepositValue = 0, 
                 };
 
                 return View(model);
@@ -158,15 +233,30 @@ namespace CondoManagementWebApp.Controllers
 
 
         // POST: FinancialAccountsController/Deposit/5
-        public async Task<IActionResult> Deposit(int? id, DepositViewModel model)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Deposit(int? id, string? email, DepositViewModel model)
         {
             if (id != model.OwnerId)
             {
                 return NotFound();
             }
 
+            if (email == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Email = email;
+
             if (!ModelState.IsValid)
             {
+                return View(model);
+            }
+
+            if(model.SelectedPaymentMethodId == 0)
+            {
+                _flashMessage.Danger("Choose a payment method.");
                 return View(model);
             }
 
@@ -220,8 +310,19 @@ namespace CondoManagementWebApp.Controllers
                     return View(model);
                 }
 
+
+                //var transaction = new TransactionDto
+                //{
+                //    DateAndTime = DateTime.Now,
+                //    PayerAccountId = financialAccountDto.Id,
+                //    ExternalRecipientBankAccount = financialAccountDto.OwnerName,
+                //    Amount = model.DepositValue,
+                //};
+
+
+
                 _flashMessage.Confirmation("Deposit successfull.");
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Details), new { id = id, email = email });
             }
             catch (Exception)
             {
@@ -229,6 +330,40 @@ namespace CondoManagementWebApp.Controllers
             }
 
             return View(model);
+
+        }
+
+
+        public async Task<IActionResult> CondoAccounts(string? email)
+        {
+            if (email == null)
+            {
+                return NotFound();
+            }
+
+            IEnumerable<FinancialAccountDto> condoAccounts = new List<FinancialAccountDto>();
+            
+            ViewBag.Email = email;
+
+
+            try
+            {
+                var user = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email}");
+
+                var condominiums = await _apiCallService.GetAsync<IEnumerable<CondominiumDto>>("api/Condominiums");
+
+                var managerCondos = condominiums.Where(c => c.ManagerUserId == user.Id);
+
+                condoAccounts = managerCondos.Where(c => c.FinancialAccountDto != null).Select(c => c.FinancialAccountDto!);
+
+                return View(condoAccounts);
+            }
+            catch (Exception ex)
+            {
+                _flashMessage.Danger($"Error fetching condos ");
+                return View(condoAccounts);
+            }
+
 
         }
 

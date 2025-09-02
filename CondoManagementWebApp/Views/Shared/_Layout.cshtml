@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -13,12 +14,12 @@
     <link rel="stylesheet" href="~/CondoManagementWebApp.styles.css" asp-append-version="true" />
     <link href="https://cdn.syncfusion.com/ej2/30.2.4/bootstrap5.css" rel="stylesheet"   />
     <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon.png" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-***********" crossorigin="anonymous" referrerpolicy="no-referrer" /> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-*" crossorigin="anonymous" referrerpolicy="no-referrer" /> 
 
 </head>
 <body>
 
-    
+
 
 
     <div id="preloader">
@@ -33,8 +34,7 @@
         <div class="nav-header">
             <a href="/" class="brand-logo">
                 <img class="logo-abbr" src="~/images/logo.png" alt="Logo" />
-               @*  <img class="logo-compact" src="~/images/logo-text.png" alt="Logo Text" />
-                <img class="brand-title" src="~/images/logo-text.png" alt="Brand Title" /> *@
+               
             </a>
             <div class="nav-control">
                 <div class="hamburger">
@@ -42,6 +42,8 @@
                 </div>
             </div>
         </div>
+    
+
         @if (User.IsInRole("SysAdmin"))
         {
             <div class="deznav">
@@ -75,12 +77,23 @@
                 </div>
             </div>
         }
-
-        @if (User.IsInRole("CondoManager"))
+        else if(User.IsInRole("CondoManager"))
         {
             <div class="deznav">
                 <div class="deznav-scroll">
                     <ul class="metismenu" id="menu">
+
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="flaticon-381-user-7"></i>
+                                <span class="nav-text">Condos</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="Condominium" asp-action="Index">Condominiums</a></li>
+                                <li><a asp-controller="Units" asp-action="Index">Units</a></li>
+                                <li><a asp-controller="CondoMember" asp-action="Index">Condo Members</a></li>
+                            </ul>
+                        </li>
                         <li>
                             <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                                 <i class="fas fa-dollar-sign"></i>
@@ -91,31 +104,7 @@
                                 <li><a asp-controller="Payment" asp-action="IndexCondominiumPayments">Condominium payments</a></li>
                                 <li><a asp-controller="Payment" asp-action="IndexAllCondoMembersPayments">Condominium members payments</a></li>
                                 <li><a asp-controller="Expense" asp-action="IndexExpenses">Expenses</a></li>
-                                <li><a asp-controller="FinancialAccount" asp-action="ActivateFinancialAccount">Activate account</a></li>
-                            </ul>
-                        </li>
-                      
-                    </ul>
-                    <div class="copyright">
-                        <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
-                        <p>by YourTeam</p>
-                    </div>
-                </div>
-            </div>
-        }
-
-        @if (User.IsInRole("CompanyAdmin"))
-        {
-            <div class="deznav">
-                <div class="deznav-scroll">
-                    <ul class="metismenu" id="menu">
-                        <li>
-                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                                <i class="fas fa-dollar-sign"></i>
-                                <span class="nav-text">Finances</span>
-                            </a>
-                            <ul aria-expanded="false">
-                                <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
+                                <li><a asp-controller="FinancialAccounts" asp-action="CondoAccounts" asp-route-email="@User.FindFirst(ClaimTypes.Name)?.Value">Condominiums Accounts</a></li>
                             </ul>
                         </li>
 
@@ -126,153 +115,158 @@
                     </div>
                 </div>
             </div>
-        }
+         }
 
-        @if (User.IsInRole("CondoMember"))
-        {
-            <div class="deznav">
-                <div class="deznav-scroll">
-                    <ul class="metismenu" id="menu">
-                        <li>
-                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                                <i class="fas fa-dollar-sign"></i>
-                                <span class="nav-text">Finances</span>
-                            </a>
-                            <ul aria-expanded="false">
-                                <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
-                                <li><a asp-controller="Payment" asp-action="IndexCondoMemberPayments">My Payments</a></li>
-                                <li><a asp-controller="FinancialAccount" asp-action="ActivateFinancialAccount">Activate Financial Account</a></li>
-                            </ul>
-                        </li>
+         else if (User.IsInRole("CompanyAdmin"))
+         {
+           <div class="deznav">
+                    <div class="deznav-scroll">
+                        <ul class="metismenu" id="menu">
+                            <li>
+                                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span class="nav-text">Finances</span>
+                                </a>
+                                <ul aria-expanded="false">
+                                    <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
+                                    <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Financial Account</a></li>
+                                </ul>
+                            </li>
 
-                    </ul>
-                    <div class="copyright">
-                        <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
-                        <p>by YourTeam</p>
-                    </div>
-                </div>
-            </div>
-        }
-
-        <div class="deznav">
-            <div class="deznav-scroll">
-                <ul class="metismenu" id="menu">
-                    <li>
-                        <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                            <i class="flaticon-381-user-7"></i>
-                            <span class="nav-text">Condos</span>
-                        </a>
-                        <ul aria-expanded="false">
-                            <li><a asp-controller="Condominium" asp-action="Index">Condominiums</a></li>
-                            <li><a asp-controller="Units" asp-action="Index">Units</a></li>
-                            <li><a asp-controller="CondoMember" asp-action="Index">Condo Members</a></li>                            
                         </ul>
-                    </li>
-                </ul>
-                <div class="copyright">
-                    <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
-                    <p>by YourTeam</p>
-                </div>
-            </div>
-        </div>
+                        <div class="copyright">
+                            <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
+                            <p>by YourTeam</p>
+                        </div>
+                    </div>
+            </div>     
+         }
 
-        <div class="header">
-            <div class="header-content">
-                <nav class="navbar navbar-expand">
-                    <div class="collapse navbar-collapse justify-content-between">
-                        <div class="header-left">
-                            <div class="dashboard_bar">
-                                <div class="search_bar dropdown">
-                                    <div class="dropdown-menu p-0 m-0">
-                                        
+            else if (User.IsInRole("CondoMember"))
+            {
+                <div class="deznav">
+                    <div class="deznav-scroll">
+                        <ul class="metismenu" id="menu">
+                            <li>
+                                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span class="nav-text">Finances</span>
+                                </a>
+                                <ul aria-expanded="false">
+                                    <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
+                                    <li><a asp-controller="Payment" asp-action="IndexCondoMemberPayments">My Payments</a></li>
+                                    <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Financial Account</a></li>
+                                </ul>
+                            </li>
+
+                        </ul>
+                        <div class="copyright">
+                            <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
+                            <p>by YourTeam</p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+
+
+                <div class="header">
+                    <div class="header-content">
+                        <nav class="navbar navbar-expand">
+                            <div class="collapse navbar-collapse justify-content-between">
+                                <div class="header-left">
+                                    <div class="dashboard_bar">
+                                        <div class="search_bar dropdown">
+                                            <div class="dropdown-menu p-0 m-0">
+
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                                <ul class="navbar-nav header-right">
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        <li class="nav-item dropdown header-profile">
+                                            <div class="header-info me-3">
+                                                <span class="text-black">@User.Identity.Name</span>
+                                            </div>
+                                            <a class="nav-link" href="javascript:void(0);" role="button" data-bs-toggle="dropdown">
+                                                <i class="fa-solid fa-user"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-end">
+                                                <a asp-controller="Account" asp-action="Profile" class="dropdown-item ai-icon">
+                                                    <svg id="icon-user1" class="text-primary" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                                    <span class="ms-2">Profile</span>
+                                                </a>
+                                                <a asp-controller="Account" asp-action="ChangePassword" class="dropdown-item ai-icon">
+                                                    <i class="fa-solid fa-key text-light-blue me-2"></i>
+                                                    <span class="ms-2">Change Password</span>
+                                                </a>
+                                                <a asp-controller="Message" asp-action="IndexReceived" class="dropdown-item ai-icon">
+                                                    <svg id="icon-inbox" class="text-success" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                                    <span class="ms-2">Inbox</span>
+                                                </a>
+                                                <a asp-controller="Account" asp-action="Logout" class="dropdown-item ai-icon">
+                                                    <svg id="icon-logout" class="text-danger" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                                    <span class="ms-2">Logout</span>
+                                                </a>
+                                            </div>
+                                        </li>
+
+                                    }
+                                    else
+                                    {
+                                        <li class="nav-item">
+                                            <a class="nav-link btn btn-primary light me-2" asp-controller="Account" asp-action="Login">
+                                                <i class="fas fa-sign-in-alt"></i>
+                                                <span class="ms-1">Login</span>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
                             </div>
-                        </div>
-                        <ul class="navbar-nav header-right">
-                            @if (User.Identity.IsAuthenticated)
-                            {
-                                <li class="nav-item dropdown header-profile">
-                                    <div class="header-info me-3">
-                                        <span class="text-black">@User.Identity.Name</span>
-                                    </div>
-                                    <a class="nav-link" href="javascript:void(0);" role="button" data-bs-toggle="dropdown">
-                                        <i class="fa-solid fa-user"></i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-end">
-                                        <a asp-controller="Account" asp-action="Profile" class="dropdown-item ai-icon">
-                                            <svg id="icon-user1" class="text-primary" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                            <span class="ms-2">Profile</span>
-                                        </a>
-                                        <a asp-controller="Account" asp-action="ChangePassword" class="dropdown-item ai-icon">
-                                            <i class="fa-solid fa-key text-light-blue me-2"></i>
-                                            <span class="ms-2">Change Password</span>
-                                        </a>
-                                        <a asp-controller="Message" asp-action="IndexReceived" class="dropdown-item ai-icon">
-                                            <svg id="icon-inbox" class="text-success" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                                            <span class="ms-2">Inbox</span>
-                                        </a>
-                                        <a asp-controller="Account" asp-action="Logout" class="dropdown-item ai-icon">
-                                            <svg id="icon-logout" class="text-danger" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                                            <span class="ms-2">Logout</span>
-                                        </a>
-                                    </div>
-                                </li>
-                                
-                            }
-                            else
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link btn btn-primary light me-2" asp-controller="Account" asp-action="Login">
-                                        <i class="fas fa-sign-in-alt"></i>
-                                        <span class="ms-1">Login</span>
-                                    </a>
-                                </li>
-                            }
-                        </ul>
+                        </nav>
                     </div>
-                </nav>
-            </div>
-        </div>
+                </div>
 
-        <div class="content-body">
-            <div class="container-fluid">
-                <flash dismissable="true" />
-                @RenderBody()
-            </div>
-        </div>
-
-     
-    </div>
-
-    <!--Core dependencies -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Syncfusion -->
-    <script src="https://cdn.syncfusion.com/ej2/30.2.4/dist/ej2.min.js"></script>
-
-    <!--App + vendor plugins -->
-    <script src="~/vendor/global/global.min.js"></script>
-    <script src="~/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
-    <script src="~/vendor/chartjs/chart.bundle.min.js"></script>
-    <script src="~/vendor/owl-carousel/owl.carousel.js"></script>
-    <script src="~/vendor/apexchart/apexchart.js"></script>
-    <script src="~/vendor/jqvmap/js/jquery.vmap.min.js"></script>
-    <script src="~/vendor/jqvmap/js/jquery.vmap.world.js"></script>
-    <script src="~/vendor/jqvmap/js/jquery.vmap.usa.js"></script>
-    <script src="~/vendor/peity/jquery.peity.min.js"></script>
-
-    <!--Custom dashboard and app scripts -->
-    <script src="~/js/dashboard/dashboard-1.js"></script>
-    <script src="~/js/custom.min.js"></script>
-    <script src="~/js/deznav-init.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+                <div class="content-body">
+                    <div class="container-fluid">
+                        <flash dismissable="true" />
+                        @RenderBody()
+                    </div>
+                </div>
 
 
-    <script>
-        function carouselReview() {
-            jQuery('.testimonial-one').owlCarousel({
+ </div>
+
+            <!--Core dependencies -->
+            <script src="~/lib/jquery/dist/jquery.min.js"></script>
+            <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+            <!-- Syncfusion -->
+            <script src="https://cdn.syncfusion.com/ej2/30.2.4/dist/ej2.min.js"></script>
+
+            <!--App + vendor plugins -->
+            <script src="~/vendor/global/global.min.js"></script>
+            <script src="~/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+            <script src="~/vendor/chartjs/chart.bundle.min.js"></script>
+            <script src="~/vendor/owl-carousel/owl.carousel.js"></script>
+            <script src="~/vendor/apexchart/apexchart.js"></script>
+            <script src="~/vendor/jqvmap/js/jquery.vmap.min.js"></script>
+            <script src="~/vendor/jqvmap/js/jquery.vmap.world.js"></script>
+            <script src="~/vendor/jqvmap/js/jquery.vmap.usa.js"></script>
+            <script src="~/vendor/peity/jquery.peity.min.js"></script>
+
+            <!--Custom dashboard and app scripts -->
+            <script src="~/js/dashboard/dashboard-1.js"></script>
+            <script src="~/js/custom.min.js"></script>
+            <script src="~/js/deznav-init.js"></script>
+            <script src="~/js/site.js" asp-append-version="true"></script>
+
+
+            <script>
+                function carouselReview() {
+                jQuery('.testimonial-one').owlCarousel({
                 loop: true,
                 autoplay: true,
                 margin: 0,
@@ -280,29 +274,31 @@
                 dots: false,
                 navText: ['<i class="las la-long-arrow-alt-left"></i>', '<i class="las la-long-arrow-alt-right"></i>'],
                 responsive: {
-                    0: { items: 1 },
-                    480: { items: 1 },
-                    767: { items: 1 },
-                    1000: { items: 1 }
+                0: { items: 1 },
+                480: { items: 1 },
+                767: { items: 1 },
+                1000: { items: 1 }
                 }
-            });
-            jQuery('#next-slide').on('click', function () {
+                });
+                jQuery('#next-slide').on('click', function () {
                 $('.testimonial-one').trigger('next.owl.carousel');
-            });
-            jQuery('#prev-slide').on('click', function () {
+                });
+                jQuery('#prev-slide').on('click', function () {
                 $('.testimonial-one').trigger('prev.owl.carousel');
-            });
-        }
-        jQuery(window).on('load', function () {
-            setTimeout(function () {
+                });
+                }
+                jQuery(window).on('load', function () {
+                setTimeout(function () {
                 carouselReview();
-            }, 1000);
-        });
-    </script>
+                }, 1000);
+                });
+            </script>
 
-    @await RenderSectionAsync("Scripts", required: false)
+            @await RenderSectionAsync("Scripts", required: false)
+            ;
 
-    <ejs-scripts></ejs-scripts>
+                
+            <ejs-scripts></ejs-scripts>
 
 </body>
 </html>

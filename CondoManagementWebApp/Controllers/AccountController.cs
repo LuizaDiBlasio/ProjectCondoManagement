@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using NuGet.Common;
 using NuGet.Versioning;
 using System.IdentityModel.Tokens.Jwt;
@@ -375,13 +377,24 @@ namespace CondoManagementWebApp.Controllers
         [Microsoft.AspNetCore.Mvc.HttpPost]
         public async Task<IActionResult> RequestRegister(RegisterUserViewModel model) // registra o user
         {
+            var selectList = new List<SelectListItem>
+                    {
+                        new SelectListItem{Value = "0", Text = "Select a role..."},
+                        new SelectListItem{Value = "CondoManager", Text = "Condo manager"},
+                        new SelectListItem{Value = "CondoMember", Text = "Condo member"},
+                        new SelectListItem{Value = "CompanyAdmin", Text = "Company admin"},
+                    };
+
+
             if (ModelState.IsValid) //ver se modelo é válido
             {
 
+
                 if (model.SelectedRole == "0") // Se a opção "Select a role..." foi selecionada
                 {
-                    ModelState.AddModelError("SelectedRole", "You must select a valid role."); // Adiciona um erro específico para o campo SelectedRole
+                    ModelState.AddModelError("SelectedRole", "You must select a valid role."); // Adiciona um erro específico para o campo SelectedRole  
 
+                    model.AvailableRoles = selectList;
 
                     return View("Register", model); // Retorna a View com o erro
                 }
@@ -406,11 +419,13 @@ namespace CondoManagementWebApp.Controllers
                     {
                         _flashMessage.Confirmation(apiCall.Message);
 
-                        return View("Register", new RegisterUserViewModel());
+                        return RedirectToAction(nameof(SysAdminDashboard));
                     }
                     else // Login falhou na API
                     {
                         _flashMessage.Danger(apiCall.Message);
+
+                        model.AvailableRoles = selectList;
 
                         return View("Register", model);
                     }
@@ -420,6 +435,9 @@ namespace CondoManagementWebApp.Controllers
                     if (e.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {
                         _flashMessage.Danger("Access Unauthorized or session expired, please login again.");
+
+
+                        model.AvailableRoles = selectList;
                         return View("Register", model);
                     }
                     // outros erros HTTP de forma diferente
@@ -430,12 +448,17 @@ namespace CondoManagementWebApp.Controllers
                 {
                     // qualquer outro erro inesperado
                     _flashMessage.Danger($"An unexpected error occurred: {e.Message}");
+
+                    model.AvailableRoles = selectList;
+
                     return View("Register", model);
                 }
 
             }
             // Se o result.Succeeded for false (login falhou )
             _flashMessage.Danger("An unexpected error occurred, user cannot be registered");
+
+            model.AvailableRoles = selectList;
 
             return View("Register", model);
         }

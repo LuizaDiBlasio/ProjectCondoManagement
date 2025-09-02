@@ -9,6 +9,7 @@ using ProjectCondoManagement.Helpers;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using System.ComponentModel.DataAnnotations.Schema;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 
 namespace ProjectCondoManagement.Data
 {
@@ -23,8 +24,7 @@ namespace ProjectCondoManagement.Data
         private readonly IUserHelper _userHelper;
 
         private readonly ICondominiumRepository _condominiumRepository;
-
-
+        private readonly IFinancialAccountRepository _financialAccountRepository;
 
         public SeedDb(DataContextCondos contextCondos, DataContextFinances dataContextFinances, DataContextUsers contextUsers, IUserHelper userHelper, ICondominiumRepository condominiumRepository) //TODO apagar condo repository
         {
@@ -96,6 +96,25 @@ namespace ProjectCondoManagement.Data
                 await _userHelper.CheckRoleAsync("CondoManager");
                 await _userHelper.AddUserToRoleAsync(user2, "CondoManager");
             }
+            if(user2.FinancialAccountId == null)
+            {
+                var account = new FinancialAccount
+                {
+                    OwnerName = $"{user2.FullName}",
+                    Balance = 0
+                };
+                
+                await _contextFinances.FinancialAccounts.AddAsync(account);
+                await _contextFinances.SaveChangesAsync();
+
+                user2.FinancialAccountId = account.Id;
+                await _userHelper.UpdateUserAsync(user2);
+
+
+            }
+
+
+
 
             // ---------------- CONDOMÍNIO LARANJE ----------------
             var condo = await _contextCondos.Condominiums
@@ -110,8 +129,29 @@ namespace ProjectCondoManagement.Data
                     CompanyId = user2.CompanyId
                 };
 
+
+                
+
+
                 await _contextCondos.Condominiums.AddAsync(condo);
                 await _contextCondos.SaveChangesAsync();
+            }
+
+            if (condo.FinancialAccountId == null)
+            {
+                var account = new FinancialAccount
+                {
+                    OwnerName = $"{condo.CondoName}",
+                    Balance = 0
+                };
+
+                await _contextFinances.FinancialAccounts.AddAsync(account);
+                await _contextFinances.SaveChangesAsync();
+
+                condo.FinancialAccountId = account.Id;
+                await _condominiumRepository.UpdateAsync(condo, _contextCondos);
+
+
             }
 
             // ---------------- CONDOMÍNIO PAZUVILLA ----------------

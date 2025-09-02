@@ -46,33 +46,33 @@ namespace ProjectCondoManagement.Controllers
 
             //TODO: no final so preencher os condominios com o id da company
 
-            //var email = this.User.Identity?.Name;
+            var email = this.User.Identity?.Name;
 
-            //var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
 
-            //if (user == null)
-            //{
-            //    return BadRequest("User not found.");
-            //}
-
-
-
-            //var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.CompanyId == user.CompanyId).ToListAsync();
-            //if (condominiums == null)
-            //{
-            //    return new List<CondominiumDto>();
-            //}
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
 
 
 
-
-
-
-            var condominiums = await _condominiumRepository.GetAll(_context).ToListAsync();
+            var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.CompanyId == user.CompanyId).ToListAsync();
             if (condominiums == null)
             {
                 return new List<CondominiumDto>();
             }
+
+
+
+
+
+
+            //var condominiums = await _condominiumRepository.GetAll(_context).ToListAsync();
+            //if (condominiums == null)
+            //{
+            //    return new List<CondominiumDto>();
+            //}
 
             var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c)).ToList();
 
@@ -82,6 +82,7 @@ namespace ProjectCondoManagement.Controllers
             }
 
             await _condominiumRepository.LinkManager(condominiumsDtos);
+            await _condominiumRepository.LinkFinancialAccount(condominiumsDtos);
 
             return condominiumsDtos;
         }
