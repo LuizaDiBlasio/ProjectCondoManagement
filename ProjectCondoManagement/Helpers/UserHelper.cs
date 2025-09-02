@@ -408,7 +408,7 @@ namespace ProjectCondoManagement.Helpers
             }
             catch (Exception ex)
             {
-                return new Response<object>
+                return new Response<object> 
                 {
                     IsSuccess = false,
                     Message = $"Error deactivating User.({ex.Message})"

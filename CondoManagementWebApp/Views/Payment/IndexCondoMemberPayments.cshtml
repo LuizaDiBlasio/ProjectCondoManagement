@@ -1,67 +1,85 @@
 ﻿@model IEnumerable<ClassLibrary.DtoModels.PaymentDto>
 
 @{
-    ViewData["Title"] = "IndexCondoMemberPayments";
+    ViewData["Title"] = "My Payments";
 }
 
-<h1>My Payments</h1>
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>My Payments</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">My Payments</a></li>
+                </ol>
+            </div>
+        </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IssueDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DueDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PaymentMethod)
-            </th>
-            
-            <th>
-                @Html.DisplayNameFor(model => model.CondominiumId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsPaid)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TotalAmount)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IssueDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DueDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PaymentMethod)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CondominiumId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsPaid)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TotalAmount)
-            </td>
-            <td>
-                @Html.ActionLink("Pay", "MakePayment", new { id=item.Id }) 
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        @if (!Model.Any())
+        {
+            <p>No payments found.</p>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-xl-12 col-xxl-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Payments List</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>@Html.DisplayNameFor(model => model.Id)</th>
+                                            <th>@Html.DisplayNameFor(model => model.IssueDate)</th>
+                                            <th>@Html.DisplayNameFor(model => model.DueDate)</th>
+                                            <th>@Html.DisplayNameFor(model => model.TotalAmount)</th>
+                                            <th>Payment date</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.IssueDate)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.DueDate)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.TotalAmount)</td>
+                                                <td>
+                                                    @if (!item.IsPaid)
+                                                    {
+                                                        <span> Not paid</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>@item.TransactionDto.DateAndTime</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (!item.IsPaid)
+                                                    {
+                                                        @Html.ActionLink("Pay", "MakePayment", new { id = item.Id }, new { @class = "btn btn-primary" })
+                                                    }
+                                                </td>
+
+                                               
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

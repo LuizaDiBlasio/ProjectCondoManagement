@@ -117,7 +117,7 @@ namespace ProjectCondoManagement.Controllers
 
                 await _unitRepository.CreateAsync(unit, _context);
 
-                return Ok(new Response<Unit> { IsSuccess = true, Message = "Unit created successfully.", Results = unit});
+                return Ok(new Response<Unit> { IsSuccess = true, Message = "Unit created successfully.", Results = unit });
             }
 
             catch (Exception ex)
@@ -127,7 +127,7 @@ namespace ProjectCondoManagement.Controllers
             }
         }
 
-        // POST: api/Units/5
+        //POST: api/Units/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> EditUnits(int id, [FromBody] UnitDto unitDto)

@@ -1,19 +1,15 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
+using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
-using ProjectCondoManagement.Migrations.CondosDb;
-using System.Threading.Tasks;
 using System.Web.Mvc;
-using Twilio.Rest.Api.V2010.Account.Call;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -31,21 +27,24 @@ namespace ProjectCondoManagement.Controllers
         private readonly ICondominiumRepository _condominiumRepository;
         private readonly DataContextCondos _dataContextCondos;
         private readonly IExpenseRepository _expenseRepository;
-        private readonly ITransactionRepository _transactionRepository; 
+        private readonly ITransactionRepository _transactionRepository;
         private readonly IInvoiceRepository _invoiceRepository;
+        private readonly IFinancialAccountRepository _financialAccountRepository;
 
         public PaymentController(IPaymentRepository paymentRepository, DataContextFinances dataContextFinances, IConverterHelper converterHelper, IUserHelper userHelper,
-            ICondominiumRepository condominiumRepository, DataContextCondos dataContextCondos, IExpenseRepository expenseRepository, ITransactionRepository transactionRepository, IInvoiceRepository invoiceRepository)
+            ICondominiumRepository condominiumRepository, DataContextCondos dataContextCondos, IExpenseRepository expenseRepository, ITransactionRepository transactionRepository, IInvoiceRepository invoiceRepository,
+            IFinancialAccountRepository financialAccountRepository)
         {
             _paymentRepository = paymentRepository;
             _dataContextFinances = dataContextFinances;
             _converterHelper = converterHelper;
             _userHelper = userHelper;
-            _condominiumRepository = condominiumRepository; 
+            _condominiumRepository = condominiumRepository;
             _dataContextCondos = dataContextCondos;
             _expenseRepository = expenseRepository;
-            _transactionRepository = transactionRepository; 
+            _transactionRepository = transactionRepository;
             _invoiceRepository = invoiceRepository;
+            _financialAccountRepository = financialAccountRepository;
         }
 
 
@@ -62,9 +61,14 @@ namespace ProjectCondoManagement.Controllers
             }
 
             // get user payments
-            var allPayments = _paymentRepository.GetAll(_dataContextFinances).ToList();
+            var allPayments = _paymentRepository.GetAll(_dataContextFinances)
+                                                .Include(p => p.Expenses)
+                                                .Include(p =>p.Transaction)
+                                                .ToList();
 
-            var userPayments = allPayments.Where(p => p.PayerFinancialAccountId == user.FinancialAccountId).ToList();
+            var userPayments = allPayments
+                                .Where(p => p.PayerFinancialAccountId == user.FinancialAccountId)
+                                .ToList();
 
             //converter
             var userPaymentsDto = userPayments.Select(p => _converterHelper.ToPaymentDto(p, false)).ToList() ?? new List<PaymentDto>();
@@ -79,17 +83,19 @@ namespace ProjectCondoManagement.Controllers
         {
             // get condominium 
             var condominium = await _condominiumRepository.GetByIdAsync(int.Parse(condoId), _dataContextCondos);
-            if(condominium == null)
+            if (condominium == null)
             {
-                return new List<PaymentDto>();  
+                return new List<PaymentDto>();
             }
 
 
-            var allPayments = _paymentRepository.GetAll(_dataContextFinances).ToList();
-
             if (condoId != null)
             {
-                var condoPayments = allPayments.Where(p => p.PayerFinancialAccountId == condominium.FinancialAccountId).ToList();
+                var condoPayments = _paymentRepository.GetAll(_dataContextFinances)
+                                                      .Where(p => p.PayerFinancialAccountId == condominium.FinancialAccountId)
+                                                      .Include(p => p.Expenses)
+                                                      .Include(p => p.Transaction)
+                                                      .ToList();
 
                 //converter
 
@@ -109,28 +115,49 @@ namespace ProjectCondoManagement.Controllers
 
             var condoMembers = await _condominiumRepository.GetCondoCondomembers(int.Parse(condoId));
 
-            if (condoMembers != null)
+            if (condoMembers.Any())
             {
                 //converter condoMembers para users
                 foreach (var condoMember in condoMembers)
                 {
-                    var user = await _userHelper.GetUserByEmailAsync(condoMember.Email);
-                    usersCondoMembers.Add(user);
+                    var userSearch = await _userHelper.GetUserByEmailAsync(condoMember.Email);
+                    if (userSearch != null)
+                    {
+                        usersCondoMembers.Add(userSearch);
+                    }
                 }
 
-                var allPayments = _paymentRepository.GetAll(_dataContextFinances).ToList();
+                //se não houver users
+                if (!usersCondoMembers.Any())
+                {
+                    return new List<PaymentDto>();
+                }
 
-                var allCondomemberPayments = new List<Payment>();
+                var allpayments = _paymentRepository.GetAll(_dataContextFinances);
 
-                allCondomemberPayments = allPayments
-                                .Where(payment => usersCondoMembers
-                                .Any(user => user.FinancialAccountId == payment.PayerFinancialAccountId))
-                                .ToList();
+                if (!allpayments.Any())
+                {
+                    return new List<PaymentDto>();
+                }
+
+                //extrair financial accountIds dos condoMembers
+                var financialAccountIds = usersCondoMembers.Select(u => u.FinancialAccountId).ToList();
+
+                var allCondomemberPayments = allpayments
+                               .Where(payment => financialAccountIds.Contains(payment.PayerFinancialAccountId))
+                               .Include(p => p.Expenses)
+                               .Include(p =>p.Transaction)
+                               .ToList();
+
 
                 //converter
-                var allCondomemberPaymentsDto = allCondomemberPayments.Select(p => _converterHelper.ToPaymentDto(p, false)).ToList() ?? new List<PaymentDto>();
 
-                return allCondomemberPaymentsDto;
+                if (allCondomemberPayments.Any())
+                {
+                    var allCondomemberPaymentsDto = allCondomemberPayments.Select(p => _converterHelper.ToPaymentDto(p, false)).ToList() ?? new List<PaymentDto>();
+                    return allCondomemberPaymentsDto;
+                }
+
             }
 
             return new List<PaymentDto>();
@@ -148,7 +175,7 @@ namespace ProjectCondoManagement.Controllers
             {
                 var paymentDto = _converterHelper.ToPaymentDto(paymentWithExpenses, false);
 
-                return Ok(paymentWithExpenses);
+                return Ok(paymentDto);
             }
 
             return NotFound(new PaymentDto());
@@ -163,32 +190,22 @@ namespace ProjectCondoManagement.Controllers
                 //converter para payment
                 var payment = _converterHelper.ToPayment(paymentDto, true);
 
-                //criar expense
+                //criar payment
 
                 if(payment.OneTimeExpense != null)
                 {
-                    var oneTimeExpense = new Expense()
-                    {
-                        Id = 0,
-                        Amount = payment.OneTimeExpense.Amount,
-                        ExpenseType = payment.OneTimeExpense.ExpenseType,
-                        Detail = payment.OneTimeExpense.Detail,
-                    };
 
-                    await _expenseRepository.CreateAsync(oneTimeExpense, _dataContextFinances);
-
-                    payment.Expenses.Add(oneTimeExpense);
+                    payment.Expenses.Add(payment.OneTimeExpense);
                 }
-
-               //criar payment
 
                 await _paymentRepository.CreateAsync(payment, _dataContextFinances);
 
-                return Ok( new Response<object> () { IsSuccess = true});
+
+                return Ok(new Response<object>() { IsSuccess = true });
             }
             catch
             {
-                return BadRequest(new Response<object> () { IsSuccess = false, Message = "Unable to issue payment due to serve error" });
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to issue payment due to serve error" });
             }
         }
 
@@ -198,9 +215,16 @@ namespace ProjectCondoManagement.Controllers
         {
             try
             {
+                //escolher as expenses:
+                var allExpenses = _expenseRepository.GetAll(_dataContextFinances);
+
+                var selectedExpenses = allExpenses.Where(expense => paymentDto.SelectedExpensesIds.Contains(expense.Id)).ToList();
+
                 //converter para payment
                 var payment = _converterHelper.ToPayment(paymentDto, true);
 
+                //adcionar lista
+                payment.Expenses = selectedExpenses;
 
                 //criar payment
 
@@ -222,41 +246,51 @@ namespace ProjectCondoManagement.Controllers
         [Microsoft.AspNetCore.Mvc.HttpPost("MakePayment")]
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> MakePayment([FromBody] PaymentDto paymentDto)
         {
+
             try
             {
-                //criar transaction
+                //buscar payment
+                var payment = _converterHelper.ToPayment(paymentDto, false);
 
+
+                //converter para transaction
                 var transaction = _converterHelper.ToTransaction(paymentDto.TransactionDto, true);
 
-                await _transactionRepository.CreateAsync(transaction, _dataContextFinances);
+                //associar
+                payment.Transaction = transaction;
 
                 //criar invoice
-
                 var invoice = new Invoice()
                 {
                     PaymentDate = transaction.DateAndTime,
-                    CondominiumId = paymentDto.CondominiumId,
-                    PayerAccountId = transaction.PayerAccountId.Value,
-                    BeneficiaryAccountId = transaction.BeneficiaryAccountId.Value,
-                    PaymentId = paymentDto.Id,
+                    CondominiumId = payment.CondominiumId,
+                    PayerAccountId = transaction.PayerAccountId,
+                    BeneficiaryAccountId = transaction.BeneficiaryAccountId
                 };
 
-                await _invoiceRepository.CreateAsync(invoice, _dataContextFinances);    
-                
-                paymentDto.InvoiceId = invoice.Id;
-                paymentDto.TransactionId = transaction.Id;
 
-                //fazer update do pagamento
-
-                var payment = _converterHelper.ToPayment(paymentDto, false);
-
-                payment.Transaction = transaction;
+                //associar
                 payment.Invoice = invoice;
 
+                // marcar o pagamento como pago
+                payment.IsPaid = true;
+
+
+                //salvar alterações
                 await _paymentRepository.UpdateAsync(payment, _dataContextFinances);
 
+                //buscar payment e atribuir ids
+                var updatedPayment = await _paymentRepository.GetByIdAsync(payment.Id, _dataContextFinances);
+
+                updatedPayment.TransactionId = updatedPayment.Transaction.Id;
+                updatedPayment.InvoiceId = updatedPayment.Invoice.Id;
+
+                //nova atualização
+                await _paymentRepository.UpdateAsync(updatedPayment, _dataContextFinances);
+
+
                 return Ok(new Response<object>() { IsSuccess = true, Message = "Payment successful" });
-               
+
             }
             catch
             {
@@ -265,8 +299,61 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
+        [Microsoft.AspNetCore.Mvc.HttpPost("DeductPayment")]
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> DeductPayment([FromBody] CashFlowDto deductDto)
+        {
+            try
+            {
+                var financialAccount = await _financialAccountRepository.GetByIdAsync(deductDto.AccountId, _dataContextFinances);
+
+                // deduzir pagamento
+
+                if (financialAccount.Balance < deductDto.TotalAmount)
+                {
+                    return Ok(new Response<object>() { IsSuccess = false, Message = "Insufficient balance" });
+                }
+
+                financialAccount.Balance = financialAccount.Balance - deductDto.TotalAmount;
+
+                // update da financial account
+                await _financialAccountRepository.UpdateAsync(financialAccount, _dataContextFinances);
+
+                return Ok(new Response<object>() { IsSuccess = true });
+            }
+            catch
+            {
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to process payment" });
+            }
+
+        }
+
+        [Microsoft.AspNetCore.Mvc.HttpPost("IncomePayment")]
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> IncomePayment([FromBody] CashFlowDto incomeDto)
+        {
+            try
+            {
+                var financialAccount = await _financialAccountRepository.GetByIdAsync(incomeDto.AccountId, _dataContextFinances);
+
+                // deduzir pagamento
+                financialAccount.Balance = financialAccount.Balance + incomeDto.TotalAmount;
+
+                // update da financial account
+                await _financialAccountRepository.UpdateAsync(financialAccount, _dataContextFinances);
+
+                return Ok(new Response<object>() { IsSuccess = true });
+            }
+            catch
+            {
+                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to process with payment" });
+            }
+
+        }
+
+
+
+
         // POST: PaymensController/Delete/5 CANCEL PAYMENT
-        [Microsoft.AspNetCore.Mvc.HttpPost("Delete/{id}")]
+        [Microsoft.AspNetCore.Mvc.HttpDelete("Delete/{id}")]
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Delete(int id)
         {
             try
@@ -282,8 +369,11 @@ namespace ProjectCondoManagement.Controllers
                     await _paymentRepository.DeleteAsync(payment, _dataContextFinances);
                     return Ok();
                 }
-
-               return BadRequest();
+                else
+                {
+                    return Conflict();
+                }
+                
             }
             catch
             {
@@ -291,29 +381,8 @@ namespace ProjectCondoManagement.Controllers
             }
         }
 
-        //Metodos auxiliares
-
-        [Microsoft.AspNetCore.Mvc.HttpGet("GetPaymentMethodsList")] 
-        public List<SelectListItem> GetPaymentMethodsList()
-        {
-            return _paymentRepository.GetPaymentMethodsList();
         
-        }
 
-        [Microsoft.AspNetCore.Mvc.HttpGet("GetSelectedPaymentMethod/{id}")]
-        public string GetPaymentMethod(int id)
-        {
-            var paymentMethodList = _paymentRepository.GetPaymentMethodsList();
-
-            var selectedPaymentMethod = paymentMethodList.FirstOrDefault(pm => pm.Value == id.ToString());
-
-            if(selectedPaymentMethod != null)
-            {
-                return selectedPaymentMethod.Text.ToString();
-            }
-
-            return string.Empty;    
-            
-        }
+        
     }
 }

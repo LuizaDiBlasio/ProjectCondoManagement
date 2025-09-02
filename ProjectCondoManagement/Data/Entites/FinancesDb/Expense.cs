@@ -16,6 +16,8 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public int CondominiumId {  get; set; } 
 
+        public int? PaymentId { get; set; }  
+
         public ExpenseType ExpenseType { get; set; }
 
         public override string ToString()

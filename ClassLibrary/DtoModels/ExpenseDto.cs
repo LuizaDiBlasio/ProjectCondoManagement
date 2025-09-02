@@ -18,6 +18,8 @@ namespace ClassLibrary.DtoModels
 
         public int  CondominiumId { get; set; }
 
+        public int? PaymentId { get; set; }
+
 
         [Display(Name = "Type")]
         public EnumDto ExpenseTypeDto { get; set; }

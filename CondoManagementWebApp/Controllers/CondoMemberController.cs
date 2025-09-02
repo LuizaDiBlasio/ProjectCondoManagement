@@ -86,7 +86,7 @@ namespace CondoManagementWebApp.Controllers
             try
             {
                 var result = await _apiCallService.PostAsync<CondoMemberDto, Response<object>>("api/CondoMembers", condoMemberDto);
-                if (result == null)
+                if (!result.IsSuccess)
                 {
                     _flashMessage.Danger($"An error occurred while creating the condo member.");
                     return View(condoMemberDto);
@@ -99,24 +99,20 @@ namespace CondoManagementWebApp.Controllers
                     registerUserDto.SelectedRole = "CondoMember";
 
                     var result2 = await _apiCallService.PostAsync<RegisterUserDto, Response<object>>("api/Account/AssociateUser", registerUserDto);
-                    if (!result2.IsSuccess)
-                    {
-                        var createdMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{condoMemberDto.Email}");
-                        if (createdMember == null)
-                        {
-                            return NotFound("Condo member not found after creation.");
-                        }
-
-                        await _apiCallService.DeleteAsync($"api/CondoMembers/{createdMember.Id}");
-                        ModelState.AddModelError("", $"{result2.Message}");
-                        return View(condoMemberDto);
-                    }
+                    
 
                     return RedirectToAction(nameof(Index));
                 }
             }
             catch (Exception)
             {
+                var createdMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{condoMemberDto.Email}");
+                if (createdMember == null)
+                {
+                    return NotFound("Condo member not found after creation.");
+                }
+
+                await _apiCallService.DeleteAsync($"api/CondoMembers/{createdMember.Id}");
 
                 _flashMessage.Danger($"An error occurred while creating the condo member.");
                 return View(condoMemberDto);

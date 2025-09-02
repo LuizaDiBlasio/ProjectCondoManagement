@@ -1,5 +1,6 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
@@ -13,9 +14,10 @@ using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Controllers
 {
-    [Route("api/[controller]")]
+    [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
     [ApiController]
-    public class FinancialAccountsController : ControllerBase
+    [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public class FinancialAccountsController : Controller
     {
         private readonly IFinancialAccountRepository _financialAccountRepository;
         private readonly IConverterHelper _converterHelper;
@@ -28,6 +30,8 @@ namespace ProjectCondoManagement.Controllers
             _context = context;
         }
 
+        public IFinancialAccountRepository FinancialAccount { get; }
+        public IConverterHelper ConverterHelper { get; }
 
         // GET api/FinancialAccounts/5
         [HttpGet("{id}")]

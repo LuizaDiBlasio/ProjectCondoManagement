@@ -32,6 +32,9 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public Transaction? Transaction { get; set; }
 
+        public string? MbwayNumber { get; set; }    
+
+        public string? CreditCard {  get; set; }    
 
     }
 }

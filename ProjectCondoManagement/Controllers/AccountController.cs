@@ -32,6 +32,10 @@ namespace ProjectCondoManagement.Controllers
         private readonly IWebHostEnvironment _env;
 
 
+
+
+
+
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
                                IMailHelper mailHelper, DataContextCondos dataContextCondos, DataContextFinances dataContextFinances, IJwtTokenService jwtTokenService,
                                ICondoMemberRepository condoMemberRepository , ISmsHelper smsHelper, IFinancialAccountRepository financialAccountRepository, IWebHostEnvironment env)
@@ -51,7 +55,6 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-        //________________________________________________________________________________________________________________________login com 2fa
         /// <summary>
         /// Authenticates a user based on their login credentials.
         /// If the user's account requires two-factor authentication (2FA), a verification token is sent via SMS.
@@ -83,8 +86,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (result.RequiresTwoFactor) //se login for bem sucedido
             {
-
-                //TODO: remover isto depois de testar---------------------------------------------
+                //TODO tirar _____________________________________________________________
                 if (_env.IsDevelopment())
                 {
                     // Gera token JWT direto
@@ -102,11 +104,7 @@ namespace ProjectCondoManagement.Controllers
                         Message = "2FA skipped in development"
                     });
                 }
-
-
-                //--------------------------------------------------------------------------------
-
-
+                //_______________________________________________________________________
 
                 var token = await _userHelper.GenerateTwoFactorTokenAsync(user, "Phone");
                 try
@@ -139,32 +137,29 @@ namespace ProjectCondoManagement.Controllers
             }
             else
             {
+                //TODO tirar isso   // Gera token JWT direto
+                    var roles = await _userHelper.GetRolesAsync(user);
+                    var userRole = roles.FirstOrDefault() ?? "User";
+                    var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
 
-                var roles = await _userHelper.GetRolesAsync(user);
-                var userRole = roles.FirstOrDefault() ?? "User";
-                var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
+                    return Ok(new Response<object>
+                    {
+                        Token = tokenJwt,
+                        Expiration = DateTime.UtcNow.AddDays(15),
+                        Requires2FA = false,
+                        Role = userRole,
+                        IsSuccess = true,
+                        Message = "2FA skipped in development"
+                    });
 
-                return Ok(new Response<object>
-                {
-                    Token = tokenJwt,
-                    Expiration = DateTime.UtcNow.AddDays(15),
-                    Requires2FA = false,
-                    Role = userRole,
-                    IsSuccess = true,
-                    Message = "Login successful"
-                });
-
-
-
-
-                //TODO: meter o status code, o foi acima feito para testes
-
+                //TODO descomentar
                 //return StatusCode(500, new { Message = "Wrong credentials, please try again" });
             }
         }
 
 
-        
+
+       
 
 
         /// <summary>
@@ -639,7 +634,7 @@ namespace ProjectCondoManagement.Controllers
 
                 if (condomember == null)
                 {
-                    return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to update, user not found in the system" });
+                    return NotFound(new Response<object>  { IsSuccess = false, Message = "Unable to update, user not found in the system" });
                 }
 
                 await _condoMemberRepository.UpdateAsync(condomember, _dataContextCondos);

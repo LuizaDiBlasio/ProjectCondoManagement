@@ -19,14 +19,11 @@ namespace ClassLibrary.DtoModels
         public int? BeneficiaryAccountId { get; set; }// FK para TransactionsAsBeneficiary
 
         public FinancialAccountDto? AccountBeneficiaryDto { get; set; }
+        public decimal? Amount { get; set; }
 
         public string? ExternalRecipientBankAccount { get; set; }
 
-        public decimal? Amount { get; set; }
-
-        public int? PaymentId { get; set; }
-
-        public PaymentDto? PaymentDto { get; set; }
+        public int PaymentId { get; set; }
 
     }
 }

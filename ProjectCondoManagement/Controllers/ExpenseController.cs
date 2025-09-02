@@ -105,7 +105,7 @@ namespace ProjectCondoManagement.Controllers
 
                 await _expensesRepository.CreateAsync(expense, _dataContextFinances);
 
-                return Ok(new Response<object>() { IsSuccess = true });
+                return Ok(new   Response<object>() { IsSuccess = true });
             }
             catch
             {
@@ -121,12 +121,17 @@ namespace ProjectCondoManagement.Controllers
         {
             if (expenseDto == null)
             {
-                return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to modify, expensa not found" });
+                return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to modify, expense not found" });
             }
 
             try
             {
                 var expense = _converterHelper.ToExpense(expenseDto, false);
+
+                if (expense.PaymentId != null)
+                {
+                    return Ok(new Response<object> { IsSuccess = false, Message = "Unable to modify, expense posted in a payment" });
+                }
 
                 await _expensesRepository.UpdateAsync(expense, _dataContextFinances);
 
@@ -151,18 +156,10 @@ namespace ProjectCondoManagement.Controllers
                     return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to delete, expensa not found" });
                 }
 
-                //despesa não pode fazer parte de nenhum pagamento 
-
-                var allPayments = _paymentsRepository.GetAll(_dataContextFinances);
-                if (allPayments != null)
+                if (expense.PaymentId != null)
                 {
-                    if (allPayments.Any(p => p.Expenses.Any(e => e.Id == id))) //caso haja pagamentos, ver se existe alguma despesa com esse id
-                    {
-                        return Conflict(new Response<object> { IsSuccess = false, Message = "Unable to delete, expense included in issued payments" });
-                    }
-
+                    return Ok(new Response<object> { IsSuccess = false, Message = "Unable to delete, expense posted in a payment" });
                 }
-
 
                 await _expensesRepository.DeleteAsync(expense, _dataContextFinances);
 

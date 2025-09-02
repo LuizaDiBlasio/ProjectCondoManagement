@@ -1,0 +1,104 @@
+﻿@model CondoManagementWebApp.Models.CreateOneTimePaymentViewModel
+
+@{
+    ViewData["Title"] = "Create One-Time Payment";
+}
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-8 col-xxl-8">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <h4 class="card-title welcome-text mb-0">Enter One-Time Payment</h4>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <form asp-action="RequestCreateOneTimePayment">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                            <input type="hidden" asp-for="CondominiumId" />
+
+
+                            <div class="form-group mb-3">
+                                <label asp-for="DueDate" class="control-label"></label>
+                                <input id="dueDateInput" asp-for="DueDate" class="form-control" />
+                                <span asp-validation-for="DueDate" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="PayerFinancialAccountId" class="control-label">Payer's Omah wallet number</label>
+                                <input asp-for="PayerFinancialAccountId" class="form-control" placeholder="Enter an account number"/>
+                                <span asp-validation-for="PayerFinancialAccountId" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="ExpenseAmount" class="control-label"></label>
+                                <input asp-for="ExpenseAmount" class="form-control" placeholder="Enter an amount"/>
+                                <span asp-validation-for="ExpenseAmount" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="ExpenseDetail" class="control-label"></label>
+                                <input asp-for="ExpenseDetail" class="form-control" />
+                                <span asp-validation-for="ExpenseDetail" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="ExpenseTypeValue" class="form-label font-weight-bold text-purple">Expense Type</label>
+                                <select asp-for="ExpenseTypeValue" asp-items="Model.ExpenseTypesList" class="form-control">
+                                    <option selected disabled>-- Select Expense Type --</option>
+                                </select>
+                                <span asp-validation-for="ExpenseTypeValue" class="text-danger"></span>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-3">
+                                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                                <input type="submit" value="Create" class="btn btn-primary" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+               document.addEventListener('DOMContentLoaded', function () {
+            // Inicializa o DatePicker para a data de emissão
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Inicializa o DatePicker para a data de vencimento
+            new ej.calendars.DatePicker({
+                format: 'MM/dd/yyyy',
+                min: today,
+                placeholder: 'Select Due Date',
+                value: null // Garante que o valor inicial é nulo
+            }).appendTo('#dueDateInput');
+        });
+    </script>
+
+    <style>
+        .text-purple {
+            color: #8A2BE2 !important;
+        }
+        /* Garantindo que a seta apareça, usando o seletor mais específico */
+        .form-control {
+            -webkit-appearance: menulist;
+            -moz-appearance: menulist;
+            appearance: menulist;
+        }
+        /* Ajustando a cor do texto do select para ser legível */
+        select.form-control option {
+            color: black;
+        }
+    </style>
+}

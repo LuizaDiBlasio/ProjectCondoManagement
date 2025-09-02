@@ -193,6 +193,7 @@
                             Token: token
                         }),
                         success: function(data) {
+                            console.log("Resposta do Verify2FA:", data)
                             if (data.isSuccess) {
                                 $('#twoFAModal').modal('hide');
                                    

@@ -81,6 +81,8 @@ builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();    
+
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();    
 
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
@@ -96,8 +98,6 @@ builder.Services.AddScoped<IFinancialAccountRepository, FinancialAccountReposiro
 builder.Services.AddScoped<IMailHelper, MailHelper>();
 
 builder.Services.AddScoped<ICondominiumHelper, CondominiumHelper>();
-
-builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 

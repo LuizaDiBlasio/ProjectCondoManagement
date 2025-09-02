@@ -162,36 +162,49 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                var expenseDto = _converterHelper.ToExpenseDto(model);
+                var expenseDto = await _apiCallService.GetAsync<ExpenseDto>($"api/Expense/GetExpense/{model.Id}");
+                if (expenseDto == null)
+                {
+                    return View("Error");
+                }
 
-                var expenseDtolWithExpenseTypeName = await SelectTypeName(expenseDto);
+                var editedExpenseDto = _converterHelper.ToExpenseDto(model);
+
+                //adicionar paymentId
+                 editedExpenseDto.PaymentId = expenseDto.PaymentId; 
+
+                var expenseDtolWithExpenseTypeName = await SelectTypeName(editedExpenseDto);
 
                 var condominiumDto = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
                 if (condominiumDto == null)
                 {
                     model.ExpenseTypeDtoList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
                     _flashMessage.Danger("Unable to modify expense");
-                    return View(model);
+                    return View("EditExpense", model);
                 }
 
-                expenseDto.CondominiumId = condominiumDto.Id;
+                editedExpenseDto.CondominiumId = condominiumDto.Id;
 
-                var apiCall = await _apiCallService.PostAsync<ExpenseDto, Response<object>>("api/Expense/EditExpense", expenseDto);
+                var apiCall = await _apiCallService.PostAsync<ExpenseDto, Response<object>>("api/Expense/EditExpense", editedExpenseDto);
 
                 if (apiCall.IsSuccess)
                 {
                     return RedirectToAction(nameof(IndexExpenses));
                 }
+                else
+                {
+                    _flashMessage.Danger(apiCall.Message);
 
-                model.ExpenseTypeDtoList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
-                _flashMessage.Danger(apiCall.Message);
-                return View("CreateExpense", model);
+                    model.ExpenseTypeDtoList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
+                    return View("EditExpense", model);
+                }
+
             }
             catch
             {
                 model.ExpenseTypeDtoList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
                 _flashMessage.Danger("Unable to modify expense");
-                return View("CreateExpense", model);
+                return View("EditExpense", model);
             }
         }
 
@@ -208,22 +221,20 @@ namespace CondoManagementWebApp.Controllers
                 {
                     return RedirectToAction(nameof(IndexExpenses));
                 }
+                else
+                {
+                    _flashMessage.Danger(apiCall.Message);
+                    //recarregar lista e nome do condominio
+                    var model = await LoadIndexExpensesView();
 
-                _flashMessage.Danger(apiCall.Message);
+                    return View("IndexExpenses", model);
+                }     
 
-                //recarregar lista e nome do condominio
-                var model = LoadIndexExpensesView();
-
-                return View("IndexExpenses", model);
+                
             }
-            catch
+            catch 
             {
-                _flashMessage.Danger("Unable to delete");
-
-                //recarregar lista e nome do condominio
-                var model = LoadIndexExpensesView();
-
-                return View("IndexExpenses", model);
+                return View("Error");
             }
         }
 

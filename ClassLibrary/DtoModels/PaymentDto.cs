@@ -10,7 +10,7 @@ namespace ClassLibrary.DtoModels
     {
         public int Id { get; set; }
 
-        public DateTime IssueDate { get; set; }
+        public DateTime? IssueDate { get; set; }
 
         public DateTime DueDate { get; set; }
 
@@ -35,6 +35,12 @@ namespace ClassLibrary.DtoModels
         public int? TransactionId { get; set; }
 
         public TransactionDto? TransactionDto { get; set; }
+
+        public List<int>? SelectedExpensesIds { get; set; }
+
+        public string? MbwayNumber { get; set; }
+
+        public string? CreditCard { get; set; }
 
     }
 }

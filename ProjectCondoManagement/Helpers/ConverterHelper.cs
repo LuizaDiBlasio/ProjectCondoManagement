@@ -389,8 +389,10 @@ namespace ProjectCondoManagement.Helpers
                 InvoiceDto = payment.Invoice == null? null : ToInvoiceDto(payment.Invoice, false),
                 ExpensesDto = payment.Expenses?.Select(e => ToExpenseDto(e, false)).ToList() ?? new List<ExpenseDto>(),
                 OneTimeExpenseDto = payment.OneTimeExpense == null ? null : ToExpenseDto(payment.OneTimeExpense, false),
+                PayerFinancialAccountId = payment.PayerFinancialAccountId,
                 TransactionDto = payment.Transaction == null ? null : ToTransactionDto(payment.Transaction, false),
-                
+                InvoiceId = payment.InvoiceId, 
+                TransactionId = payment.TransactionId,  
             };  
            
             return paymentDto;
@@ -405,8 +407,8 @@ namespace ProjectCondoManagement.Helpers
                 PaymentDate = invoice.PaymentDate,  
                 CondominiumId = invoice.CondominiumId,
                 PayerAccountId = invoice.PayerAccountId,
-                BeneficiaryAccountId = invoice.BeneficiaryAccountId,
-                Payment = ToPaymentDto(invoice.Payment, false)
+                BeneficiaryAccountId = invoice.BeneficiaryAccountId, 
+                PaymentId = invoice.PaymentId,  
             };
             
             return invoiceDto;
@@ -422,6 +424,7 @@ namespace ProjectCondoManagement.Helpers
                 Detail = expense.Detail,
                 CondominiumId = expense.CondominiumId,
                 ExpenseTypeDto = new EnumDto { Name = expense.ExpenseType.ToString(), Value = (int)expense.ExpenseType },
+                PaymentId = expense.PaymentId,  
             };
            return expenseDto;   
         }
@@ -433,10 +436,9 @@ namespace ProjectCondoManagement.Helpers
                 Id = isNew ? 0 : transaction.Id,
                 DateAndTime = transaction.DateAndTime,
                 PayerAccountId = transaction.PayerAccountId,
-                AccountPayerDto = ToFinancialAccountDto(transaction.AccountPayer, false),   
+                //AccountPayerDto = ToFinancialAccountDto(transaction.AccountPayer, false),   
                 BeneficiaryAccountId = transaction.BeneficiaryAccountId,
-                AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
-                PaymentDto = ToPaymentDto(transaction.Payment, false),
+                //AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
                 
             };
             
@@ -468,7 +470,8 @@ namespace ProjectCondoManagement.Helpers
                 Amount = expenseDto.Amount,
                 ExpenseType = (ExpenseType)expenseDto.ExpenseTypeDto.Value,
                 Detail = expenseDto.Detail,
-                CondominiumId = expenseDto.CondominiumId
+                CondominiumId = expenseDto.CondominiumId,
+                PaymentId = expenseDto.PaymentId
             };
 
             return expense; 
@@ -479,7 +482,7 @@ namespace ProjectCondoManagement.Helpers
             var payment = new Payment()
             {
                 Id = isNew ? 0 : paymentDto.Id,
-                IssueDate = paymentDto.IssueDate,
+                IssueDate = paymentDto.IssueDate.Value,
                 DueDate = paymentDto.DueDate,
                 PaymentMethod = isNew ? null : paymentDto.PaymentMethod,
                 PayerFinancialAccountId = paymentDto.PayerFinancialAccountId,
@@ -490,6 +493,8 @@ namespace ProjectCondoManagement.Helpers
                 Transaction = isNew ? null : paymentDto.TransactionDto != null ? ToTransaction(paymentDto.TransactionDto, false) : null,
                 TransactionId = isNew ? null : paymentDto.TransactionDto == null ? null : paymentDto.TransactionDto.Id,
                 InvoiceId = paymentDto.InvoiceId,
+                MbwayNumber = paymentDto.MbwayNumber,
+                CreditCard = paymentDto.CreditCard, 
             };
 
             return payment; 
@@ -504,6 +509,7 @@ namespace ProjectCondoManagement.Helpers
                 PayerAccountId = transactionDto.PayerAccountId,
                 BeneficiaryAccountId = transactionDto.BeneficiaryAccountId,
                 PaymentId = transactionDto.PaymentId,
+                ExternalRecipientBankAccount = transactionDto.ExternalRecipientBankAccount,
             };
 
             return transaction; 

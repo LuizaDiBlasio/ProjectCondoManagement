@@ -9,11 +9,11 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.FinancesDb
+namespace ProjectCondoManagement.Migrations
 {
     [DbContext(typeof(DataContextFinances))]
-    [Migration("20250823182504_UpdateFinances")]
-    partial class UpdateFinances
+    [Migration("20250902123239_TransactionExpenseChanges")]
+    partial class TransactionExpenseChanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,9 +49,16 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.Property<int?>("PaymentId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("PaymentId1")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PaymentId");
+
+                    b.HasIndex("PaymentId1")
+                        .IsUnique()
+                        .HasFilter("[PaymentId1] IS NOT NULL");
 
                     b.ToTable("Expenses");
                 });
@@ -67,13 +74,16 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.Property<string>("AssociatedBankAccount")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("BankName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CardNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("InitialDeposit")
+                    b.Property<decimal>("Deposit")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("IsActive")
@@ -87,27 +97,43 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.FinancesDb.Invoice", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("AccountId")
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BeneficiaryAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("BeneficiaryFinancialAccountId")
                         .HasColumnType("int");
 
                     b.Property<int>("CondominiumId")
                         .HasColumnType("int");
 
-                    b.Property<int>("FinancialAccountId")
+                    b.Property<string>("ExternalRecipientBankAccount")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PayerAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PayerFinancialAccountId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserEmail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("PaymentId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FinancialAccountId");
+                    b.HasIndex("BeneficiaryFinancialAccountId");
+
+                    b.HasIndex("PayerFinancialAccountId");
+
+                    b.HasIndex("PaymentId")
+                        .IsUnique();
 
                     b.ToTable("Invoices");
                 });
@@ -120,8 +146,17 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CondominiumId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreditCard")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("InvoiceId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsPaid")
                         .HasColumnType("bit");
@@ -129,13 +164,17 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.Property<DateTime>("IssueDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
+                    b.Property<string>("MbwayNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserEmail")
-                        .IsRequired()
+                    b.Property<int>("PayerFinancialAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentMethod")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TransactionId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -145,18 +184,30 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.FinancesDb.Transaction", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("BeneficiaryAccountId")
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("BeneficiaryAccountId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CondominiumId")
+                    b.Property<int?>("CompanyId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DateAndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PayerAccountId")
+                    b.Property<string>("ExternalRecipientBankAccount")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PayerAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PaymentId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -164,6 +215,10 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.HasIndex("BeneficiaryAccountId");
 
                     b.HasIndex("PayerAccountId");
+
+                    b.HasIndex("PaymentId")
+                        .IsUnique()
+                        .HasFilter("[PaymentId] IS NOT NULL");
 
                     b.ToTable("Transactions");
                 });
@@ -173,24 +228,29 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.Payment", null)
                         .WithMany("Expenses")
                         .HasForeignKey("PaymentId");
+
+                    b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.Payment", null)
+                        .WithOne("OneTimeExpense")
+                        .HasForeignKey("ProjectCondoManagement.Data.Entites.FinancesDb.Expense", "PaymentId1");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.FinancesDb.Invoice", b =>
                 {
-                    b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.FinancialAccount", "FinancialAccount")
+                    b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.FinancialAccount", "BeneficiaryFinancialAccount")
                         .WithMany()
-                        .HasForeignKey("FinancialAccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("BeneficiaryFinancialAccountId");
 
-                    b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.Payment", "Payment")
+                    b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.FinancialAccount", "PayerFinancialAccount")
+                        .WithMany()
+                        .HasForeignKey("PayerFinancialAccountId");
+
+                    b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.Payment", null)
                         .WithOne("Invoice")
-                        .HasForeignKey("ProjectCondoManagement.Data.Entites.FinancesDb.Invoice", "Id")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("ProjectCondoManagement.Data.Entites.FinancesDb.Invoice", "PaymentId");
 
-                    b.Navigation("FinancialAccount");
+                    b.Navigation("BeneficiaryFinancialAccount");
 
-                    b.Navigation("Payment");
+                    b.Navigation("PayerFinancialAccount");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.FinancesDb.Transaction", b =>
@@ -198,24 +258,20 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.FinancialAccount", "AccountBeneficiary")
                         .WithMany("TransactionsAsBeneficiary")
                         .HasForeignKey("BeneficiaryAccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.Payment", "Payment")
-                        .WithOne("Transaction")
-                        .HasForeignKey("ProjectCondoManagement.Data.Entites.FinancesDb.Transaction", "Id");
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.FinancialAccount", "AccountPayer")
                         .WithMany("TransactionsAsPayer")
                         .HasForeignKey("PayerAccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.Payment", null)
+                        .WithOne("Transaction")
+                        .HasForeignKey("ProjectCondoManagement.Data.Entites.FinancesDb.Transaction", "PaymentId");
 
                     b.Navigation("AccountBeneficiary");
 
                     b.Navigation("AccountPayer");
-
-                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.FinancesDb.FinancialAccount", b =>
@@ -230,6 +286,8 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     b.Navigation("Expenses");
 
                     b.Navigation("Invoice");
+
+                    b.Navigation("OneTimeExpense");
 
                     b.Navigation("Transaction");
                 });

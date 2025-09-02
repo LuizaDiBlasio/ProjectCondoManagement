@@ -98,7 +98,7 @@ namespace ProjectCondoManagement.Controllers
         {
             if (companyDto == null)
             {
-                return BadRequest(new Response<object> { IsSuccess = false, Message = "System error" });
+                return BadRequest(new   Response<object> { IsSuccess = false, Message = "System error" });
             }
 
 
