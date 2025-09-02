@@ -201,12 +201,12 @@ namespace CondoManagementWebApp.Controllers
 
                 //criar expense 
                 var expenseDto = new ExpenseDto()
-                    {
-                        Amount = model.ExpenseAmount,
-                        Detail = model.ExpenseDetail,
-                        ExpenseTypeDto = new EnumDto() { Value = model.ExpenseTypeValue, Name = expenseType.Text},
-                        CondominiumId = model.CondominiumId,    
-                    };
+                {
+                    Amount = model.ExpenseAmount,
+                    Detail = model.ExpenseDetail,
+                    ExpenseTypeDto = new EnumDto() { Value = model.ExpenseTypeValue, Name = expenseType.Text },
+                    CondominiumId = model.CondominiumId,
+                };
 
 
                 //CONVERTER PARA PAYMENT DTO
@@ -216,7 +216,7 @@ namespace CondoManagementWebApp.Controllers
 
                 paymentDto.IssueDate = DateTime.Now;
 
-                paymentDto.OneTimeExpenseDto = expenseDto; 
+                paymentDto.OneTimeExpenseDto = expenseDto;
 
                 var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/CreateOneTimePayment", paymentDto);
 
@@ -404,6 +404,18 @@ namespace CondoManagementWebApp.Controllers
 
                 paymentDto.PaymentMethod = paymentMethod;
 
+                //Caso pagamento seja feito com cartão de crédito
+                if (paymentMethod == "Credit card")
+                {
+                    paymentDto.CreditCard = model.CreditCardNumber;
+                }
+
+                //caso pagamento seja feito com mbway
+                if(paymentMethod == "MbWay")
+                {
+                    paymentDto.MbwayNumber = model.PhoneNumber;
+                }
+
                 //caso pagamento seja feito com conta Omah, certificar que conta esteja ativa
                 if(paymentMethod == "Omah Wallet")
                 {
@@ -483,14 +495,16 @@ namespace CondoManagementWebApp.Controllers
                 }
                
 
-                //Fazer requisição para fazer fazer pagamento
+                //Fazer requisição para fazer pagamento
 
                 var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/MakePayment", paymentDto); 
 
                 if(apiCall.IsSuccess)
                 {
-                    _flashMessage.Confirmation(apiCall.Message);
-                    return View("MakePayment", model);
+                    var paidPayment = await _apiCallService.GetAsync<PaymentDto>($"api/Payment/GetPaymentDetails/{paymentDto.Id}");
+
+                    
+                    return RedirectToAction("InvoiceDetails", "Invoice", new { id = paidPayment.InvoiceId });
                 }
 
                 _flashMessage.Confirmation(apiCall.Message); 
@@ -507,11 +521,15 @@ namespace CondoManagementWebApp.Controllers
         [HttpPost("RequestDelete")]
         public async Task<ActionResult> RequestDelete(int id)
         {
+            CondominiumDto condoManagerCondo = null;
+
+            PaymentDto paymentDto = null;
+
             try
             {
-                var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
+                condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
 
-                var paymentDto = await _apiCallService.GetAsync<PaymentDto>($"api/Payment/GetPaymentDetails/{id}");
+                paymentDto = await _apiCallService.GetAsync<PaymentDto>($"api/Payment/GetPaymentDetails/{id}");
 
                 var apiCall = await _apiCallService.DeleteAsync($"api/Payment/Delete/{id}");
 
@@ -526,12 +544,42 @@ namespace CondoManagementWebApp.Controllers
                         return RedirectToAction(nameof(IndexAllCondoMembersPayments));
                     }
                 }
+                else
+                {
+                    if (condoManagerCondo.FinancialAccountId == paymentDto.PayerFinancialAccountId)
+                    {
+                        _flashMessage.Danger("Unable to process cancellation due to server error");
+                        return RedirectToAction(nameof(IndexCondominiumPayments));
+                    }
+                    else
+                    {
+                        _flashMessage.Danger("Unable to process cancellation due to server error");
+                        return RedirectToAction(nameof(IndexAllCondoMembersPayments));
+                    }
+                }
+                
 
-                return Json(new { success = false, message = "An HTTP error occurred. Please try again later." });
             }
-            catch
+            catch(System.Net.Http.HttpRequestException ex)
             {
-                return Json(new { success = false, message = "An HTTP error occurred. Please try again later." });
+                if(condoManagerCondo != null && paymentDto != null)
+                {
+                    if (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+                    {
+                        if (condoManagerCondo.FinancialAccountId == paymentDto.PayerFinancialAccountId)
+                        {
+                            _flashMessage.Danger("Payment is already paid, unable to process cancellation");
+                            return RedirectToAction(nameof(IndexCondominiumPayments));
+                        }
+                        else
+                        {
+                            _flashMessage.Danger("Payment is already paid, unable to process cancellation");
+                            return RedirectToAction(nameof(IndexAllCondoMembersPayments));
+                        }
+                    }
+                }
+
+                return View("Error");
             }
         }
     }

@@ -391,6 +391,8 @@ namespace ProjectCondoManagement.Helpers
                 OneTimeExpenseDto = payment.OneTimeExpense == null ? null : ToExpenseDto(payment.OneTimeExpense, false),
                 PayerFinancialAccountId = payment.PayerFinancialAccountId,
                 TransactionDto = payment.Transaction == null ? null : ToTransactionDto(payment.Transaction, false),
+                InvoiceId = payment.InvoiceId, 
+                TransactionId = payment.TransactionId,  
             };  
            
             return paymentDto;
@@ -405,7 +407,8 @@ namespace ProjectCondoManagement.Helpers
                 PaymentDate = invoice.PaymentDate,  
                 CondominiumId = invoice.CondominiumId,
                 PayerAccountId = invoice.PayerAccountId,
-                BeneficiaryAccountId = invoice.BeneficiaryAccountId
+                BeneficiaryAccountId = invoice.BeneficiaryAccountId, 
+                PaymentId = invoice.PaymentId,  
             };
             
             return invoiceDto;
@@ -421,6 +424,7 @@ namespace ProjectCondoManagement.Helpers
                 Detail = expense.Detail,
                 CondominiumId = expense.CondominiumId,
                 ExpenseTypeDto = new EnumDto { Name = expense.ExpenseType.ToString(), Value = (int)expense.ExpenseType },
+                PaymentId = expense.PaymentId,  
             };
            return expenseDto;   
         }
@@ -466,7 +470,8 @@ namespace ProjectCondoManagement.Helpers
                 Amount = expenseDto.Amount,
                 ExpenseType = (ExpenseType)expenseDto.ExpenseTypeDto.Value,
                 Detail = expenseDto.Detail,
-                CondominiumId = expenseDto.CondominiumId
+                CondominiumId = expenseDto.CondominiumId,
+                PaymentId = expenseDto.PaymentId
             };
 
             return expense; 
@@ -488,6 +493,8 @@ namespace ProjectCondoManagement.Helpers
                 Transaction = isNew ? null : paymentDto.TransactionDto != null ? ToTransaction(paymentDto.TransactionDto, false) : null,
                 TransactionId = isNew ? null : paymentDto.TransactionDto == null ? null : paymentDto.TransactionDto.Id,
                 InvoiceId = paymentDto.InvoiceId,
+                MbwayNumber = paymentDto.MbwayNumber,
+                CreditCard = paymentDto.CreditCard, 
             };
 
             return payment; 

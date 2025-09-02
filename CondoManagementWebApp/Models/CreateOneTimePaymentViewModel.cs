@@ -19,6 +19,7 @@ namespace CondoManagementWebApp.Models
 
         [Required]
         [Display(Name = "Omah wallet number")]
+        [Range(1, int.MaxValue, ErrorMessage = "The value must be greater than zero.")]
         public int PayerFinancialAccountId { get; set; }
 
         public int CondominiumId { get; set; }

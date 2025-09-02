@@ -50,6 +50,13 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
                 .IsRequired(false); //  um Payment pode existir sem uma Transaction - transação ainda não foi feita (Transaction é nullable).
 
 
+            // Mapeamento do relacionamento 1:N entre Payment e Expense
+            modelBuilder.Entity<Payment>()
+                   .HasMany(p => p.Expenses)
+                   .WithOne() 
+                   .HasForeignKey("PaymentId");
+
+
             // Mapeamento do relacionamento 1:many entre  AccountPayer - TransactionsAsPayer
             modelBuilder.Entity<Transaction>()
                 .HasOne(t => t.AccountPayer)

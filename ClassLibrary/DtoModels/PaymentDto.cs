@@ -38,6 +38,9 @@ namespace ClassLibrary.DtoModels
 
         public List<int>? SelectedExpensesIds { get; set; }
 
+        public string? MbwayNumber { get; set; }
+
+        public string? CreditCard { get; set; }
 
     }
 }

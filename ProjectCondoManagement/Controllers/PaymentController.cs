@@ -120,8 +120,11 @@ namespace ProjectCondoManagement.Controllers
                 //converter condoMembers para users
                 foreach (var condoMember in condoMembers)
                 {
-                    var user = await _userHelper.GetUserByEmailAsync(condoMember.Email);
-                    usersCondoMembers.Add(user);
+                    var userSearch = await _userHelper.GetUserByEmailAsync(condoMember.Email);
+                    if (userSearch != null)
+                    {
+                        usersCondoMembers.Add(userSearch);
+                    }
                 }
 
                 //se não houver users
@@ -137,9 +140,11 @@ namespace ProjectCondoManagement.Controllers
                     return new List<PaymentDto>();
                 }
 
+                //extrair financial accountIds dos condoMembers
+                var financialAccountIds = usersCondoMembers.Select(u => u.FinancialAccountId).ToList();
+
                 var allCondomemberPayments = allpayments
-                               .Where(payment => usersCondoMembers
-                               .Any(user => user.FinancialAccountId == payment.PayerFinancialAccountId))
+                               .Where(payment => financialAccountIds.Contains(payment.PayerFinancialAccountId))
                                .Include(p => p.Expenses)
                                .Include(p =>p.Transaction)
                                .ToList();
@@ -185,26 +190,16 @@ namespace ProjectCondoManagement.Controllers
                 //converter para payment
                 var payment = _converterHelper.ToPayment(paymentDto, true);
 
-                //criar expense
-
-                if (payment.OneTimeExpense != null)
-                {
-                    var oneTimeExpense = new Expense()
-                    {
-                        Id = 0,
-                        Amount = payment.OneTimeExpense.Amount,
-                        ExpenseType = payment.OneTimeExpense.ExpenseType,
-                        Detail = payment.OneTimeExpense.Detail,
-                    };
-
-                    await _expenseRepository.CreateAsync(oneTimeExpense, _dataContextFinances);
-
-                    payment.Expenses.Add(oneTimeExpense);
-                }
-
                 //criar payment
 
+                if(payment.OneTimeExpense != null)
+                {
+
+                    payment.Expenses.Add(payment.OneTimeExpense);
+                }
+
                 await _paymentRepository.CreateAsync(payment, _dataContextFinances);
+
 
                 return Ok(new Response<object>() { IsSuccess = true });
             }
@@ -293,6 +288,7 @@ namespace ProjectCondoManagement.Controllers
                 //nova atualização
                 await _paymentRepository.UpdateAsync(updatedPayment, _dataContextFinances);
 
+
                 return Ok(new Response<object>() { IsSuccess = true, Message = "Payment successful" });
 
             }
@@ -357,7 +353,7 @@ namespace ProjectCondoManagement.Controllers
 
 
         // POST: PaymensController/Delete/5 CANCEL PAYMENT
-        [Microsoft.AspNetCore.Mvc.HttpPost("Delete/{id}")]
+        [Microsoft.AspNetCore.Mvc.HttpDelete("Delete/{id}")]
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Delete(int id)
         {
             try
@@ -373,8 +369,11 @@ namespace ProjectCondoManagement.Controllers
                     await _paymentRepository.DeleteAsync(payment, _dataContextFinances);
                     return Ok();
                 }
-
-                return BadRequest();
+                else
+                {
+                    return Conflict();
+                }
+                
             }
             catch
             {
