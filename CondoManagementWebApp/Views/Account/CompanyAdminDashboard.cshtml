@@ -2,7 +2,7 @@
 @using System.Globalization
 
 @{
-	ViewData["Title"] = "Dashboard";
+	ViewData["Title"] = "CompanyAdminDashboard";
 }
 
 <ejs-toast id="fail-save-fees" title="Error!" content="A problem has been occurred while submitting your data, please try again later..." cssClass="e-toast-danger" icon="e-error">
@@ -24,7 +24,7 @@
 		<a asp-controller="Account" asp-action="CompanyAdminDashboard" class="btn btn-primary rounded light">Refresh</a> 
 	</div>
 	<div class="row">
-		<div class="col-xl-6 col-xxl-6">
+		<a class="col-xl-6 col-xxl-6" href="#condominium-list">
 			<div class="row">
 				<div class="col-xl-12">
 					<div class="card bg-danger property-bx text-white">
@@ -38,7 +38,7 @@
 									</svg>
 								</span>
 								<div class="media-body mb-sm-0 mb-3 me-5">
-									<h4 class="fs-22 text-white">Total Properties</h4>
+									<h4 class="fs-22 text-white">Your Condominiums</h4>
 									<div class="progress mt-3 mb-2" style="height:8px;">
 										<div class="progress-bar bg-white progress-animated" style="width: 86%; height:8px;" role="progressbar">
 											<span class="sr-only">86% Complete</span>
@@ -46,13 +46,13 @@
 									</div>
 									<span class="fs-14">431 more to break last month record</span>
 								</div>
-								<span class="fs-35 font-w500">4,562</span>
+								<span class="fs-35 font-w500">@Model.Condominiums.Count()</span>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		</a>
 		<form asp-controller="Finances" asp-action="SaveFees" method="post">
 		<div class="col-xl-6 ">
 			<div class="card fees-bx">
@@ -89,6 +89,69 @@
 			</div>
 		</div>
 		</form>
+	</div>
+</div>
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+<div class="col-lg-12" id="condominium-list">
+	<div class="card">
+		<div class="card-header">
+			<h4 class="card-title">Registered Condominiums</h4>
+		</div>
+		<div class="card-body">
+			<div class="table-responsive">
+				<table class="table table-responsive-md">
+					<thead>
+						<tr>
+							<th class="width80">#</th>
+							<th>Address</th>
+							<th>NºUnits</th>
+							<th>NºMeetings   </th>
+							<th>NºOcurrences </th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach(var condominium in Model.Condominiums)
+						{
+							<tr>
+								<td><strong>@condominium.Id</strong></td>
+								<td>@condominium.Address</td>
+								<td>@condominium.Units.Count()</td>
+								<td>@condominium.Meetings.Count()</td>
+								<td>@condominium.Occurrences.Count()</td>
+								<td>
+									<div class="dropdown">
+										<button type="button" class="btn btn-success light sharp" data-bs-toggle="dropdown" aria-expanded="false">
+											<svg width="20px" height="20px" viewBox="0 0 24 24" version="1.1"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect x="0" y="0" width="24" height="24"></rect><circle fill="#000000" cx="5" cy="12" r="2"></circle><circle fill="#000000" cx="12" cy="12" r="2"></circle><circle fill="#000000" cx="19" cy="12" r="2"></circle></g></svg>
+										</button>
+										<div class="dropdown-menu" style="">
+											<a class="dropdown-item" asp-controller="Account" asp-action="CompanyAdminDashboard">Edit</a>
+											<a class="dropdown-item text-danger" asp-controller="Account" asp-action="CompanyAdminDashboard">Delete</a>
+										</div>
+									</div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
 	</div>
 </div>
 

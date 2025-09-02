@@ -15,6 +15,8 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public Guid BlobId { get; set; }
 
+        public string? DocumentUrl { get; set; }
+
         //TODO Tratar do bloc
         public string BlobUrl => BlobId == Guid.Empty
        ? $"https://gestaoescolar.blob.core.windows.net/imagens/noImage.jpeg"

@@ -362,6 +362,16 @@ namespace ProjectCondoManagement.Helpers
 
         }
 
+        public async Task<IEnumerable<User>> GetUsersByRoleAsync(string role)
+        {
+            if (await _roleManager.RoleExistsAsync(role))
+            {
+                return await _userManager.GetUsersInRoleAsync(role);
+            }
+
+            return new List<User>();
+        }
+
 
 
 

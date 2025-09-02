@@ -6,13 +6,17 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
     {
         public int Id { get; set; }
 
-        public int CondominiumId { get; set; }
+        public Condominium? Condominium { get; set; }
 
-        public Condominium Condominium { get; set; }
+        public int CondominiumId { get; set; }
 
         public string Floor { get; set; }
 
-        public IEnumerable<Occurrence> Occurrences { get; set; }
+        public int Bedrooms { get; set; }
+
+        public IEnumerable<Occurrence>? Occurrences { get; set; }
+
+        public ICollection<CondoMember>? CondoMembers { get; set; }
 
         public string Door { get; set; }
     }

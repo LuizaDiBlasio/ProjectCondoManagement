@@ -60,5 +60,23 @@ namespace CondoManagementWebApp.Helpers
             return response;
         }
 
+
+        public async Task<TResponse> GetByQueryAsync<TResponse>(string requestUri, string query)
+        {
+            AddAuthorizationHeader();
+
+            // Serializa o objeto
+            var jsonContent = new StringContent(
+                JsonSerializer.Serialize(query),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await _httpClient.PostAsync(requestUri, jsonContent);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<TResponse>();
+        }
+
     }
 }

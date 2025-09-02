@@ -1,4 +1,5 @@
 ﻿using ClassLibrary;
+using ClassLibrary.DtoModels;
 
 namespace ProjectCondoManagement.Data.Entites.FinancesDb
 {
@@ -22,5 +23,8 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public Transaction? Transaction { get; set; }
 
+        public Expense? OneTimeExpense { get; set; }
+
+        public int CondominiumId { get; set; }
     }
 }

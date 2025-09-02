@@ -11,14 +11,16 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public int CondominiumId { get; set; }
 
-        public int AccountId { get; set; }
+        public int? PayerAccountId { get; set; }
 
-        public FinancialAccount FinancialAccount { get; set; }
+        public FinancialAccount? PayerFinancialAccount { get; set; }
 
-        public string UserId { get; set; }
+        public int? BeneficiaryAccountId { get; set; }
 
-        public Payment Payment { get; set; }
+        public FinancialAccount? BeneficiaryFinancialAccount { get; set; }
 
-        public decimal TotalAmount => Payment != null ? Payment.Expenses.Sum(e => e.Amount) : 0;
+        public int PaymentId { get; set; }
+
+        public string? ExternalRecipientBankAccount { get; set; }
     }
 }

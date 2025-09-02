@@ -1,8 +1,9 @@
-using CondoManagementWebApp.Helpers;
-using Vereyon.Web;
 using CloudinaryDotNet;
+using CondoManagementWebApp.Helpers;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using ProjectCondoManagement.Data.Entites.CondosDb;
 using Syncfusion.Licensing;
+using Vereyon.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,10 @@ builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
+
+builder.Services.AddScoped<IFeeHelper, FeeHelper>();
+
+builder.Services.AddScoped<ICondominiumHelper, CondominiumHelper>();
 
 builder.Services.AddScoped<IApiCallService, ApiCallService>();
 

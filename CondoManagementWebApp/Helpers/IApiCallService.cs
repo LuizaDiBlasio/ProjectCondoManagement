@@ -22,5 +22,8 @@
 
         public Task<HttpResponseMessage> DeleteAsync(string requestUri);
 
+        public Task<TResponse> GetByQueryAsync<TResponse>(string requestUri, string query);
+
+
     }
 }

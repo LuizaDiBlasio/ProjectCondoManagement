@@ -63,6 +63,13 @@ namespace ProjectCondoManagement.Data
                     EmailConfirmed = true
                 };
 
+                FinancialAccount financialAccount = new FinancialAccount
+                {
+                    IsActive = true,
+                };
+
+                user.FinancialAccountId = financialAccount.Id;
+
                 var result = await _userHelper.AddUserAsync(user, "123456"); //criar utilizador, mandar utilizador e password
 
                 if (result != IdentityResult.Success) //se o resultado não for bem sucedido (usa propriedade da classe Identity) 

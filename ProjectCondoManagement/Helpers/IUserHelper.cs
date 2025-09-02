@@ -46,5 +46,7 @@ namespace ProjectCondoManagement.Helpers
         Task<IList<string>> GetRolesAsync(User user); //busca o role do user
 
         Task<Response> DeactivateUserAsync(User user); //Desativa o user, não o elimina da BD, só altera o IsActive para false 
+
+        public Task<IEnumerable<User>> GetUsersByRoleAsync(string role);
     }
 }

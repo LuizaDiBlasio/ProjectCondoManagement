@@ -21,12 +21,15 @@ namespace CondoManagementWebApp.Controllers
         private readonly IConverterHelper _converterHelper;
         private readonly CloudinaryService _cloudinaryService;
         private readonly IApiCallService _apiCallService;
+        private readonly IFeeHelper _feeHelper;
+        private readonly ICondominiumHelper _condominiumHelper;
         private readonly HttpClient _httpClient;
 
         private readonly string baseUrl = "https://localhost:7001/"; //TODO : Mudar depois que publicar
 
         public AccountController(IFlashMessage flashMessage, IConfiguration configuration, HttpClient httpClient,
-            IConverterHelper converterHelper, CloudinaryService cloudinaryService,IApiCallService apiCallService)
+            IConverterHelper converterHelper, CloudinaryService cloudinaryService,IApiCallService apiCallService,
+            IFeeHelper feeHelper,ICondominiumHelper condominiumHelper)
         {
 
             _flashMessage = flashMessage;
@@ -34,6 +37,8 @@ namespace CondoManagementWebApp.Controllers
             _httpClient = httpClient;
             _cloudinaryService = cloudinaryService;
             _apiCallService = apiCallService;
+            _feeHelper = feeHelper;
+            _condominiumHelper = condominiumHelper;
             _converterHelper = converterHelper;
         }
 
@@ -258,27 +263,14 @@ namespace CondoManagementWebApp.Controllers
         {
             var model = new CompanyAdminDashboardViewModel
             {
-                Fees = await GetFeesAsync()
+                Fees = await _feeHelper.GetFeesAsync(),
+                Condominiums = await _condominiumHelper.GetCondominiumsAsync(this.User.Identity.Name),
             };
 
             return View(model);
         }
 
-        public async Task<IEnumerable<Fee>> GetFeesAsync()
-        {
-            var fees = await _apiCallService.GetAsync<IEnumerable<Fee>>("api/Finances/GetFees");
 
-            return fees;
-        }
-
-        // <summary>
-        /// Displays the "Not Authorized" view when a user tries to access a restricted area.
-        /// </summary>
-        /// <returns>The "Not Authorized" view.</returns>
-        public IActionResult NotAuthorized()
-        {
-            return View();
-        }
 
     }
 }

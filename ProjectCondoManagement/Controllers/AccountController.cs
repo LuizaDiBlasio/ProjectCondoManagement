@@ -161,6 +161,21 @@ namespace ProjectCondoManagement.Controllers
 
         }
 
+        [HttpPost("GetUser")]
+        public async Task<ActionResult<UserDto>> GetUser([FromBody]string email)
+        {
+            var user = await _userHelper.GetUserByEmailAsync(email);
+
+            if (user == null)
+            {
+                return Ok(NoContent());
+            }
+
+            var userDto = _converterHelper.ToUserDto(user);
+
+            return Ok(userDto);
+        }
+
     }
 }
 

@@ -163,13 +163,22 @@ namespace ProjectCondoManagement.Migrations.UsersDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Addres")
+                    b.Property<string>("Address")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CompanyAdminId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CondominiumIds")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FinancialAccountId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -186,19 +195,6 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
-                });
-
-            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.CompanyCondominium", b =>
-                {
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CondominiumId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CompanyId", "CondominiumId");
-
-                    b.ToTable("CompanyCondominiums");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.User", b =>
@@ -229,6 +225,9 @@ namespace ProjectCondoManagement.Migrations.UsersDb
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("FinancialAccountId")
+                        .HasColumnType("int");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -339,31 +338,13 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.CompanyCondominium", b =>
-                {
-                    b.HasOne("ProjectCondoManagement.Data.Entites.UsersDb.Company", "Company")
-                        .WithMany("CompanyCondominiums")
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Company");
-                });
-
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.User", b =>
                 {
                     b.HasOne("ProjectCondoManagement.Data.Entites.UsersDb.Company", "Company")
-                        .WithMany("Users")
+                        .WithMany()
                         .HasForeignKey("CompanyId");
 
                     b.Navigation("Company");
-                });
-
-            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.Company", b =>
-                {
-                    b.Navigation("CompanyCondominiums");
-
-                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

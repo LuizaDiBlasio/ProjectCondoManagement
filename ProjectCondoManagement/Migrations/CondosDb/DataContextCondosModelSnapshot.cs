@@ -67,6 +67,9 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("CondominiumId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -88,7 +91,14 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.Property<string>("TaxIdNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("UnitId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CondominiumId");
+
+                    b.HasIndex("UnitId");
 
                     b.ToTable("CondoMembers");
                 });
@@ -106,6 +116,13 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CondoName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FinancialAccountId")
                         .HasColumnType("int");
 
                     b.Property<string>("ManagerUserId")
@@ -137,6 +154,9 @@ namespace ProjectCondoManagement.Migrations.CondosDb
 
                     b.Property<DateTime>("DataUpload")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("DocumentUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FileName")
                         .IsRequired()
@@ -221,6 +241,9 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Bedrooms")
+                        .HasColumnType("int");
 
                     b.Property<int>("CondominiumId")
                         .HasColumnType("int");
@@ -321,6 +344,17 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.CondoMember", b =>
+                {
+                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Condominium", null)
+                        .WithMany("CondoMembers")
+                        .HasForeignKey("CondominiumId");
+
+                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Unit", null)
+                        .WithMany("CondoMembers")
+                        .HasForeignKey("UnitId");
+                });
+
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Document", b =>
                 {
                     b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Condominium", null)
@@ -397,6 +431,8 @@ namespace ProjectCondoManagement.Migrations.CondosDb
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Condominium", b =>
                 {
+                    b.Navigation("CondoMembers");
+
                     b.Navigation("Documents");
 
                     b.Navigation("Meetings");
@@ -411,6 +447,11 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.Navigation("Occurences");
 
                     b.Navigation("Votings");
+                });
+
+            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Unit", b =>
+                {
+                    b.Navigation("CondoMembers");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Voting", b =>
