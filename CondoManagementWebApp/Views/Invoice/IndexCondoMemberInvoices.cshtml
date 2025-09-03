@@ -1,0 +1,62 @@
+﻿@model IEnumerable<ClassLibrary.DtoModels.InvoiceDto>
+
+@{
+	ViewData["Title"] = "IndexCondoMemberInvoices";
+}
+
+<div class="row page-titles mx-0 d-flex align-items-center">
+	<div class="col-sm-6 p-md-0">
+		<div class="welcome-text">
+			<h4>My Invoices</h4>
+		</div>
+	</div>
+</div>
+
+@if (!Model.Any())
+{
+	<p class="mt-4">No invoices found.</p>
+}
+else
+{
+	<div class="card mt-4">
+		<div class="card-body p-0">
+			<div class="table-responsive">
+				<table class="table table-striped table-hover">
+					<thead>
+						<tr>
+							<th>
+								Invoice Id
+							</th>
+							<th>
+								Payment Date
+							</th>
+							<th>
+								Payment Id
+							</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var item in Model)
+						{
+							<tr>
+								<td>
+									@Html.DisplayFor(modelItem => item.Id)
+								</td>
+								<td>
+									@item.PaymentDate.ToShortDateString()
+								</td>
+								<td>
+									@Html.DisplayFor(modelItem => item.PaymentId)
+								</td>
+								<td>
+									@Html.ActionLink("Details", "InvoiceDetails", new { id = item.Id }, new { @class = "btn btn-outline-info" })
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+}

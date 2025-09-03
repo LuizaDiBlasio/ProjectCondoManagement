@@ -34,13 +34,7 @@ namespace ProjectCondoManagement.Data
 
         public async Task SeedAsync() //método para inicializar com admin
         {
-            //await _contextCondos.Database.EnsureCreatedAsync();
-
-            //await _contextUsers.Database.EnsureCreatedAsync();
-
-            //await _contextFinances.Database.EnsureCreatedAsync();
-
-
+            
 
             await _contextCondos.Database.MigrateAsync(); // Faz migrações pendentes. Caso não exista BD, cria uma BD aos moldes do _context 
 

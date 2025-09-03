@@ -392,7 +392,9 @@ namespace ProjectCondoManagement.Helpers
                 PayerFinancialAccountId = payment.PayerFinancialAccountId,
                 TransactionDto = payment.Transaction == null ? null : ToTransactionDto(payment.Transaction, false),
                 InvoiceId = payment.InvoiceId, 
-                TransactionId = payment.TransactionId,  
+                TransactionId = payment.TransactionId, 
+                MbwayNumber = payment.MbwayNumber,  
+                CreditCard= payment.CreditCard, 
             };  
            
             return paymentDto;
@@ -439,6 +441,7 @@ namespace ProjectCondoManagement.Helpers
                 //AccountPayerDto = ToFinancialAccountDto(transaction.AccountPayer, false),   
                 BeneficiaryAccountId = transaction.BeneficiaryAccountId,
                 //AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
+                ExternalRecipientBankAccount = transaction.ExternalRecipientBankAccount
                 
             };
             

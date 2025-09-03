@@ -1,0 +1,65 @@
+﻿@model IEnumerable<ClassLibrary.DtoModels.InvoiceDto>
+
+@{
+	ViewData["Title"] = "IndexAllCondoMembersInvoices";
+}
+
+<div class="row page-titles mx-0 d-flex align-items-center">
+	<div class="col-sm-6 p-md-0">
+		<div class="welcome-text">
+			<h4>Condominium Members Invoices</h4>
+		</div>
+	</div>
+	<div class="col-sm-6 p-md-0 text-sm-end mt-2 mt-sm-0">
+		<a asp-controller="Invoice" asp-action="IndexCondominiumInvoices" class="btn btn-primary me-2">Condominium Invoices</a>
+	</div>
+</div>
+
+@if (!Model.Any())
+{
+	<p class="mt-4">No invoices found.</p>
+}
+else
+{
+	<div class="card mt-4">
+		<div class="card-body p-0">
+			<div class="table-responsive">
+				<table class="table table-striped table-hover">
+					<thead>
+						<tr>
+							<th>
+								Invoice Id
+							</th>
+							<th>
+								Payment Date
+							</th>
+							<th>
+								Payment Id
+							</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var item in Model)
+						{
+							<tr>
+								<td>
+									@Html.DisplayFor(modelItem => item.Id)
+								</td>
+								<td>
+									@item.PaymentDate.ToShortDateString()
+								</td>
+								<td>
+									@Html.DisplayFor(modelItem => item.PaymentId)
+								</td>
+								<td>
+									@Html.ActionLink("Details", "InvoiceDetails", new { id = item.Id }, new { @class = "btn btn-outline-info" })
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+}

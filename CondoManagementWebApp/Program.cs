@@ -3,6 +3,7 @@ using Vereyon.Web;
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Syncfusion.Licensing;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,9 +65,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         };
     });
 
-
-
-
+builder.WebHost.ConfigureKestrel(options =>
+{
+    // Aumenta o limite de tamanho do cabeçalho para todos os endpoints
+    options.Limits.MaxRequestHeadersTotalSize = 32768;
+});
 
 builder.Services.AddScoped<IApiCallService, ApiCallService>();
 

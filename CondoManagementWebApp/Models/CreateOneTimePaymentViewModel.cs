@@ -38,7 +38,7 @@ namespace CondoManagementWebApp.Models
 
         [Required]
         [Display(Name = "Expense type")]
-        public int ExpenseTypeValue { get; set; }
+        public int? ExpenseTypeValue { get; set; }
 
 
         [BindNever]

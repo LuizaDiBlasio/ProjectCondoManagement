@@ -115,65 +115,6 @@ namespace ProjectCondoManagement.Controllers
 
 
 
-        // POST: Expense/Edit/5
-        [Microsoft.AspNetCore.Mvc.HttpPost("EditExpense")]
-        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> EditExpense([FromBody] ExpenseDto expenseDto)
-        {
-            if (expenseDto == null)
-            {
-                return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to modify, expense not found" });
-            }
-
-            try
-            {
-                var expense = _converterHelper.ToExpense(expenseDto, false);
-
-                if (expense.PaymentId != null)
-                {
-                    return Ok(new Response<object> { IsSuccess = false, Message = "Unable to modify, expense posted in a payment" });
-                }
-
-                await _expensesRepository.UpdateAsync(expense, _dataContextFinances);
-
-                return Ok(new Response<object>() { IsSuccess = true });
-            }
-            catch
-            {
-                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to modify expense due to error" });
-            }
-        }
-
-        // GET: Expense/Delete/5
-        [Microsoft.AspNetCore.Mvc.HttpPost("Delete")]
-        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Delete([FromBody] int id)
-        {
-            try
-            {
-                var expense = await _expensesRepository.GetByIdAsync(id, _dataContextFinances);
-
-                if (expense == null)
-                {
-                    return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to delete, expensa not found" });
-                }
-
-                if (expense.PaymentId != null)
-                {
-                    return Ok(new Response<object> { IsSuccess = false, Message = "Unable to delete, expense posted in a payment" });
-                }
-
-                await _expensesRepository.DeleteAsync(expense, _dataContextFinances);
-
-                return Ok(new Response<object>() { IsSuccess = true });
-            }
-            catch
-            {
-                return BadRequest(new Response<object> { IsSuccess = false, Message = "Unable to delete due to server error" });
-            }
-        }
-
-
-
-
         //Medotos auxiliares
 
         [Microsoft.AspNetCore.Mvc.HttpGet("GetExpenseTypeList")]

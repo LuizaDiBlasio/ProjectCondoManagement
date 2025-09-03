@@ -8,5 +8,7 @@ namespace ProjectCondoManagement.Data.Repositories.Finances.Interfaces
     {
         Task<Payment?> GetPaymentWithExpenses(int id);
 
+        Task<Payment?> GetPaymentWithExpensesAndTransaction(int id);
+
     }
 }

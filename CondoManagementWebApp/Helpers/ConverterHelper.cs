@@ -190,17 +190,7 @@ namespace CondoManagementWebApp.Helpers
             return messageDto;
         }
 
-        public ExpenseDto ToExpenseDto(CreateEditExpenseViewModel model)
-        {
-            var expenseDto = new ExpenseDto()
-            {
-                Id = model.Id,
-                Amount = model.Amount,
-                Detail = model.Detail,
-                ExpenseTypeDto = model.ExpenseTypeDto,
-            };
-            return expenseDto;  
-        }
+       
 
         public PaymentDto FromOneTimeToPaymentDto(CreateOneTimePaymentViewModel model)
         {
@@ -213,17 +203,7 @@ namespace CondoManagementWebApp.Helpers
             return paymentDto;
         }
 
-        public PaymentDto FromRecurringToPaymentDto(CreateRecurringPaymentViewModel model)
-        {
-            var paymentDto = new PaymentDto()
-            {
-                DueDate = model.DueDate.Value,
-                PayerFinancialAccountId = model.PayerFinancialAccountId,
-                CondominiumId = model.CondominiumId,
-                SelectedExpensesIds = model.SelectedExpensesIds,
-            };
-            return paymentDto;  
-        }
+        
 
 
         public UnitDto ToUnitDto(UnitDtoViewModel model)

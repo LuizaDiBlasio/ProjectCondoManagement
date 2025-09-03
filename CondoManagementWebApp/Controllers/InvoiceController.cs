@@ -43,34 +43,113 @@ namespace CondoManagementWebApp.Controllers
                 }
 
                 //buscar payment
-                var payment = await _apiCallService.GetAsync<PaymentDto>($"api/Payment/GetPaymentDetails/{invoice.PaymentId}");
+                var paymentDto = await _apiCallService.GetAsync<PaymentDto>($"api/Payment/GetPaymentWithTransacAndExp/{invoice.PaymentId}"); //vem sem transaction e sem mbway #
 
-                model.Payment = payment;
+                model.Payment = paymentDto;
 
 
                 //buscar payer account
-                if(payment.PayerFinancialAccountId != 0)
+                if(paymentDto.PayerFinancialAccountId != 0)
                 {
-                    var payerFinancialAccount = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{payment.PayerFinancialAccountId}");
+                    var payerFinancialAccount = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{paymentDto.PayerFinancialAccountId}");
                     model.PayerFinancialAccountDto = payerFinancialAccount;
                 }
-            
 
-                //buscar beneficiary account
-                var transaction = await _apiCallService.GetAsync<TransactionDto>($"api/Transaction/{payment.TransactionId}");
 
-                if(transaction != null)
+                //buscar account do condo 
+                var condoFinancialAccount = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{paymentDto.CondominiumId}");
+
+                model.CondominiumFinancialAccountId = condoFinancialAccount.Id;
+
+
+
+                if (paymentDto.TransactionDto != null)
                 {
-                    model.Payment.TransactionDto = transaction;
 
-                    model.PaymentDate = transaction.DateAndTime;
+                    model.PaymentDate = paymentDto.TransactionDto.DateAndTime;
 
-                    var beneficiaryFinancialAccount = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{transaction.BeneficiaryAccountId}");
-                    model.BeneficiaryFinancialAccountDto = beneficiaryFinancialAccount;
+                    if (paymentDto.TransactionDto.BeneficiaryAccountId != null)
+                    {
+                        var beneficiaryFinancialAccount = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{paymentDto.TransactionDto.BeneficiaryAccountId}");//problema aqui
+
+                        model.BeneficiaryFinancialAccountDto = beneficiaryFinancialAccount;
+                    }
+                    else
+                    {
+                        model.BeneficiaryFinancialAccountDto = null;
+                    }
+
                 }
-                
 
                 return View(model);
+
+            }
+            catch
+            {
+                return View("Error");
+            }
+        }
+
+
+        [HttpGet("IndexCondominiumInvoices")]
+        public async Task<ActionResult<List<InvoiceDto>>> IndexCondominiumInvoices()
+        {
+            try
+            {
+                //achar o condominio do condoManager
+                var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
+                if (condoManagerCondo == null)
+                {
+                    _flashMessage.Danger("You are not managing any condominiums currently");
+                    return View(new List<InvoiceDto>());
+                }
+
+                var condoInvoices = await _apiCallService.GetAsync<List<InvoiceDto>>($"api/Invoice/GetCondominiumInvoices/{condoManagerCondo.Id}");
+
+                return View(condoInvoices);
+
+            }
+            catch
+            {
+                return View("Error");
+            }
+        }
+
+
+        [HttpGet("IndexCondoMemberInvoices")]
+        public async Task<ActionResult<List<InvoiceDto>>> IndexCondoMemberInvoices()
+        {
+            try
+            {  
+                var condoMemberInvoices = await _apiCallService.GetByQueryAsync<List<InvoiceDto>>("api/Invoice/GetCondoMemberInvoices", this.User.Identity.Name);
+
+                return View(condoMemberInvoices);
+
+            }
+            catch
+            {
+                return View("Error");
+            }
+        }
+
+
+
+        [HttpGet("IndexAllCondoMembersInvoices")]
+        public async Task<ActionResult<List<InvoiceDto>>> IndexAllCondoMembersInvoices()
+        {
+            try
+            {
+                //achar o condominio do condoManager
+                var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
+                if (condoManagerCondo == null)
+                {
+                    _flashMessage.Danger("You are not managing any condominiums currently");
+                    return View(new List<InvoiceDto>());
+                }
+
+                var condoMembersInvoices = await _apiCallService.GetAsync<List<InvoiceDto>>($"api/Invoice/GetAllCondoMembersInvoices/{condoManagerCondo.Id}");
+
+                return View(condoMembersInvoices);
 
             }
             catch

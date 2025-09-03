@@ -24,13 +24,12 @@
             <div class="col-xl-12 col-xxl-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Payment Details</h4>
+                        <h4 class="card-title">Payment Information</h4>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6 mb-4">
-                                <h5>Payment Information</h5>
-                                <hr />
+
                                 <dl class="row">
 
                                     <dt class="col-sm-4">
@@ -98,21 +97,21 @@
                                         Issue date
                                     </dt>
                                     <dd class="col-sm-8">
-                                        @Html.DisplayFor(model => model.Payment.IssueDate)
+                                        @Model.Payment.IssueDate?.ToShortDateString()
                                     </dd>
                                     <dt class="col-sm-4">
                                         Due date
                                     </dt>
                                     <dd class="col-sm-8">
-                                        @Html.DisplayFor(model => model.Payment.DueDate)
+                                        @Model.Payment.DueDate.ToShortDateString()
                                     </dd>
                                     <dt class="col-sm-4">
                                         Payment date
                                     </dt>
                                     <dd class="col-sm-8">
-                                        @Html.DisplayFor(model => model.PaymentDate)
+                                        @Model.PaymentDate.ToShortDateString()
                                     </dd>
-                                    
+
                                 </dl>
                             </div>
                         </div>
@@ -124,7 +123,7 @@
         <div class="col-xl-12 col-xxl-12 mt-4">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Associated Expenses</h4>
+                    <h4 class="card-title">Associated Expense</h4>
                 </div>
                 <div class="card-body">
                     @if (!Model.Payment.ExpensesDto.Any())
@@ -160,7 +159,20 @@
         </div>
 
         <div class="mt-4">
-           @*  <a asp-action="IndexInvoices" class="btn btn-outline-secondary">Back to List</a> *@
+
+            @if (User.IsInRole("CondoMember"))
+            {
+                <a asp-action="IndexCondoMemberInvoices" class="btn btn-outline-secondary ms-2">Back to List</a>
+            }
+            else if (Model.Payment.PayerFinancialAccountId == Model.CondominiumFinancialAccountId)
+            {
+                <a asp-action="IndexCondominiumInvoices" class="btn btn-outline-secondary ms-2">Back to List</a>
+            }
+            else
+            {
+                <a asp-action="IndexAllCondoMembersInvoices" class="btn btn-outline-secondary ms-2">Back to List</a>
+            }
+
         </div>
     </div>
 </div>

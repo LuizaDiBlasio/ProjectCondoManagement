@@ -270,7 +270,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (response.IsSuccess) //se conseguiu enviar o email
             {
-                return StatusCode(200, new { Message = "User registered, a confirmation email has been sent" });
+                return StatusCode(200, new Response<object> { Message = "User registered, a confirmation email has been sent", IsSuccess = true });
             }
 
             //se não conseguiu enviar email:

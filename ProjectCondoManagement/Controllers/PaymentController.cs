@@ -182,11 +182,29 @@ namespace ProjectCondoManagement.Controllers
 
         }
 
+        [Microsoft.AspNetCore.Mvc.HttpGet("GetPaymentWithTransacAndExp/{id}")]
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> GetPaymentWithTransacAndExp(int id)
+        {
+            var payment = await _paymentRepository.GetPaymentWithExpensesAndTransaction(id);
+
+            if (payment != null)
+            {
+                var paymentDto = _converterHelper.ToPaymentDto(payment, false);
+
+                return Ok(paymentDto);
+            }
+
+            return NotFound(new PaymentDto());
+
+        }
+
+
         [Microsoft.AspNetCore.Mvc.HttpPost("CreateOneTimePayment")]
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> CreateOneTimePayment([FromBody] PaymentDto paymentDto)
         {
             try
             {
+               
                 //converter para payment
                 var payment = _converterHelper.ToPayment(paymentDto, true);
 
@@ -210,37 +228,6 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-        [Microsoft.AspNetCore.Mvc.HttpPost("CreateRecurringPayment")]
-        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> CreateRecurringPayment([FromBody] PaymentDto paymentDto)
-        {
-            try
-            {
-                //escolher as expenses:
-                var allExpenses = _expenseRepository.GetAll(_dataContextFinances);
-
-                var selectedExpenses = allExpenses.Where(expense => paymentDto.SelectedExpensesIds.Contains(expense.Id)).ToList();
-
-                //converter para payment
-                var payment = _converterHelper.ToPayment(paymentDto, true);
-
-                //adcionar lista
-                payment.Expenses = selectedExpenses;
-
-                //criar payment
-
-                await _paymentRepository.CreateAsync(payment, _dataContextFinances);
-
-                return Ok(new Response<object>() { IsSuccess = true });
-            }
-            catch
-            {
-                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to issue payment due to serve error" });
-            }
-        }
-
-
-
-
 
         //// POST: PaymensController/MakePayment 
         [Microsoft.AspNetCore.Mvc.HttpPost("MakePayment")]
@@ -250,8 +237,21 @@ namespace ProjectCondoManagement.Controllers
             try
             {
                 //buscar payment
-                var payment = _converterHelper.ToPayment(paymentDto, false);
+                var payment = await _paymentRepository.GetByIdAsync(paymentDto.Id, _dataContextFinances);
 
+                if (payment == null)
+                {
+                    return Ok(new Response<object>() { IsSuccess = false, Message = "Payment not found." });
+                }
+
+                if (payment.IsPaid)
+                {
+                    return Ok(new Response<object>() { IsSuccess = false, Message = "Payment has already been made." });
+                }
+
+                payment.PaymentMethod = paymentDto.PaymentMethod;
+                payment.CreditCard = paymentDto.CreditCard;
+                payment.MbwayNumber = paymentDto.MbwayNumber;
 
                 //converter para transaction
                 var transaction = _converterHelper.ToTransaction(paymentDto.TransactionDto, true);
@@ -279,6 +279,7 @@ namespace ProjectCondoManagement.Controllers
                 //salvar alterações
                 await _paymentRepository.UpdateAsync(payment, _dataContextFinances);
 
+                
                 //buscar payment e atribuir ids
                 var updatedPayment = await _paymentRepository.GetByIdAsync(payment.Id, _dataContextFinances);
 
