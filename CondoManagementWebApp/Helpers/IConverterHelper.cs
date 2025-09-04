@@ -33,5 +33,11 @@ namespace CondoManagementWebApp.Helpers
         PaymentDto FromOneTimeToPaymentDto(CreateOneTimePaymentViewModel model);
 
         UnitDto ToUnitDto(UnitDtoViewModel model);
+
+        OccurrenceDto ToOccurenceDto(CreateOccurrenceViewModel model);
+
+        OccurrenceDto ToEditedOccurrenceDto(EditOccurrenceViewModel model);
+
+        EditOccurrenceViewModel ToEditOccurrenceView(OccurrenceDto occurrenceDto, List<int> selectedIds);
     }
 }

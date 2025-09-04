@@ -91,6 +91,7 @@
                                 <li><a asp-controller="Condominium" asp-action="Index">Condominiums</a></li>
                                 <li><a asp-controller="Units" asp-action="Index">Units</a></li>
                                 <li><a asp-controller="CondoMember" asp-action="Index">Condo Members</a></li>
+                                <li><a asp-controller="Occurrence" asp-action="IndexOccurrences">Occurrences</a></li>
                             </ul>
                         </li>
                         <li>
@@ -121,6 +122,16 @@
            <div class="deznav">
                     <div class="deznav-scroll">
                         <ul class="metismenu" id="menu">
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="flaticon-dashboard-1"></i>
+                                <span class="nav-text">Manage Company</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="Company" asp-action="Edit">Manage condos</a></li>
+                            </ul>
+                        </li>
+                        <li>
                             <li>
                                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                                     <i class="fas fa-dollar-sign"></i>
@@ -145,6 +156,16 @@
                 <div class="deznav">
                     <div class="deznav-scroll">
                         <ul class="metismenu" id="menu">
+
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="flaticon-381-user-7"></i>
+                                <span class="nav-text">My Condo</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="Occurrence" asp-action="IndexOccurrences">Occurrences</a></li>
+                            </ul>
+                        </li>
                             <li>
                                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                                     <i class="fas fa-dollar-sign"></i>
@@ -152,8 +173,8 @@
                                 </a>
                                 <ul aria-expanded="false">
                                     <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
-                                    <li><a asp-controller="Payment" asp-action="IndexCondoMemberPayments">My Payments</a></li>
-                                    <li><a asp-controller="Invoice" asp-action="IndexCondoMemberInvoices">My Invoices</a></li>
+                                    <li><a asp-controller="Payment" asp-action="IndexCondoMemberPayments">Payments</a></li>
+                                    <li><a asp-controller="Invoice" asp-action="IndexCondoMemberInvoices">Invoices</a></li>
                                     <li><a asp-controller="FinancialAccount" asp-action="ActivateFinancialAccount">Activate Financial Account</a></li>
                                 </ul>
                             </li>

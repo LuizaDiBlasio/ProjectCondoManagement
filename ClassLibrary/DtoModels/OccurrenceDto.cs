@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,12 +13,25 @@ namespace ClassLibrary.DtoModels
 
         public string Details { get; set; }
 
+        public string Subject { get; set; }
+
+
+        [Display(Name ="Date")]
         public DateTime DateAndTime { get; set; }
 
-        public DateTime ResolutionDate { get; set; }
 
-        public IEnumerable<UnitDto> UnitDtos { get; set; }
+        [Display(Name = "Resolution Date")]
+        public DateTime? ResolutionDate { get; set; }
 
-        public int? Meeting { get; set; }
+
+        [Display(Name = "Units involved")]
+        public List<UnitDto> UnitDtos { get; set; }
+
+
+        [Display(Name = "Status")]
+        public bool IsResolved { get; set; } = false;
+
+
+        public int CondominiumId { get; set; }  
     }
 }

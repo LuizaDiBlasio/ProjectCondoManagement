@@ -78,8 +78,11 @@ namespace ProjectCondoManagement.Controllers
                 return BadRequest();
             }
 
-            var condoMember = await _condoMemberRepository.GetAll(_context)
+            var condoMember = await _condoMemberRepository.GetAll(_context).Include(c => c.Units).ThenInclude(u => u.Condominium)
                 .FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
+
+            var condoMembers = new List<CondoMember> { condoMember };// Create a list with the single condo member for linking images
+            await _condoMemberRepository.LinkImages(condoMembers); // Link images to the single condo member
 
             if (condoMember == null)
             {

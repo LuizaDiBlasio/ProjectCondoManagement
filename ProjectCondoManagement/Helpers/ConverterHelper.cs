@@ -63,6 +63,8 @@ namespace ProjectCondoManagement.Helpers
             return dto;
         }
 
+
+
         public CondoMemberDto ToCondoMemberDto(User user)
         {
             var condoMemberDto = new CondoMemberDto
@@ -257,7 +259,7 @@ namespace ProjectCondoManagement.Helpers
                 Details = occurrence.Details,
                 DateAndTime = occurrence.DateAndTime,
                 UnitDtos = occurrence.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),
-                Meeting = occurrence.Meeting
+                IsResolved = occurrence.IsResolved,
             };
 
             return occurrenceDto;
@@ -269,9 +271,10 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = isNew ? 0 : occurrenceDto.Id,
                 Details = occurrenceDto.Details,
+                Subject = occurrenceDto.Subject,
                 DateAndTime = occurrenceDto.DateAndTime,
                 Units = occurrenceDto.UnitDtos?.Select(u => ToUnit(u, false)).ToList() ?? new List<Unit>(),
-                Meeting = occurrenceDto.Meeting
+                CondominiumId = occurrenceDto.CondominiumId,
             };
             return occurence;
         }
@@ -312,6 +315,8 @@ namespace ProjectCondoManagement.Helpers
 
             return dto;
         }
+
+
 
         public Document ToDocument(DocumentDto documentDto, bool isNew)
         {
@@ -531,6 +536,22 @@ namespace ProjectCondoManagement.Helpers
                 BankName = financialAccountDto.BankName,
             };
             return financialAccount;
+        }
+
+        public OccurrenceDto ToOccurrenceDto(Occurrence occurrence, bool isNew)
+        {
+            var occurrenceDto = new OccurrenceDto()
+            {
+                Id = isNew ? 0 : occurrence.Id,
+                Details = occurrence.Details,
+                CondominiumId = occurrence.CondominiumId,
+                UnitDtos = occurrence.Units?.Select(u => ToUnitDto(u, false)).ToList() ?? new List<UnitDto>(),
+                ResolutionDate = occurrence.ResolutionDate,
+                DateAndTime = occurrence.DateAndTime,
+                IsResolved = occurrence.IsResolved,
+                Subject = occurrence.Subject,
+            };
+            return occurrenceDto;   
         }
     }
     

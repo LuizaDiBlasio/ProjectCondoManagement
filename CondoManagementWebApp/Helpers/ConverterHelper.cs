@@ -219,5 +219,46 @@ namespace CondoManagementWebApp.Helpers
 
             return unitDto;
         }
+
+        public OccurrenceDto ToOccurenceDto(CreateOccurrenceViewModel model)
+        {
+            var ocurrenceDto = new OccurrenceDto()
+            {
+                Id = 0,
+                Details = model.Details,
+                DateAndTime = model.DateAndTime.Value,
+                Subject = model.Subject,
+            };
+            return ocurrenceDto;    
+        }
+
+        public OccurrenceDto ToEditedOccurrenceDto(EditOccurrenceViewModel model)
+        {
+            var occurrenceDto = new OccurrenceDto()
+            {
+                Id = model.Id,
+                Details = model.Details,
+                DateAndTime = model.DateAndTime.Value,
+                Subject = model.Subject,    
+                CondominiumId = model.CondominiumId,    
+            };
+            return occurrenceDto;   
+        }
+
+        public EditOccurrenceViewModel ToEditOccurrenceView(OccurrenceDto occurrenceDto, List<int> selectedIds)
+        {
+           
+            var model = new EditOccurrenceViewModel()
+            {
+                Details = occurrenceDto.Details,
+                Subject = occurrenceDto.Subject,
+                SelectedUnitIds = selectedIds,
+                IsResolved = occurrenceDto.IsResolved,
+                DateAndTime = occurrenceDto.DateAndTime,
+                Id = occurrenceDto.Id,
+                CondominiumId = occurrenceDto.CondominiumId,    
+            };
+            return model;
+        }
     }
 }

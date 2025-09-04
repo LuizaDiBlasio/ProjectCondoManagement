@@ -1,0 +1,84 @@
+﻿@model IEnumerable<ClassLibrary.DtoModels.OccurrenceDto>
+
+@{
+    ViewData["Title"] = "IndexOccurrences";
+}
+
+<div class="row page-titles mx-0 d-flex align-items-center">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text">
+            <h4>Condominium Occurrences</h4>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 text-sm-end mt-2 mt-sm-0">
+        <a asp-action="CreateOccurrence" class="btn btn-primary">Report</a>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <p class="mt-4">No occurrences found.</p>
+}
+else
+{
+    <div class="card mt-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Id)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Subject)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.DateAndTime)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.ResolutionDate)
+                            </th>
+                            <th>
+                                Status
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Id)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Subject)
+                                </td>
+                                <td>
+                                    @item.DateAndTime.ToShortDateString()
+                                </td>
+                                <td>
+                                    @Html.Raw(item.ResolutionDate.HasValue ? item.ResolutionDate.Value.ToShortDateString() : "-")
+                                </td>
+                                <td>
+                                    <span class="badge @(item.IsResolved ? "bg-success" : "bg-danger") fs-6">
+                                        @(item.IsResolved ? "Resolved" : "Unresolved")
+                                    </span>
+                                </td>
+                                <td>
+                                @if(this.User.IsInRole("CondoManager"))
+                                {
+                                    <a asp-action="EditOccurrence" asp-route-id="@item.Id" class="btn btn-outline-info">Edit</a>
+                                }
+                                   
+                                    <a asp-action="DetailsOccurrence" asp-route-id="@item.Id" class="btn btn-outline-secondary">Details</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

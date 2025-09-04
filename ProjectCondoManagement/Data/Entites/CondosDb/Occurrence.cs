@@ -8,12 +8,16 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public string Details { get; set; }
 
+        public string Subject { get; set; }
+
         public DateTime DateAndTime { get; set; }
 
-        public DateTime ResolutionDate { get; set; }
+        public DateTime? ResolutionDate { get; set; }
 
-        public IEnumerable<Unit> Units { get; set; }
+        public List<Unit> Units { get; set; }
 
-        public int? Meeting { get; set; }  //nullable para marcar se foi ou não discutida em uma reunião
+        public bool IsResolved { get; set; } = false;
+
+        public int CondominiumId { get; set; }  
     }
 }

@@ -64,5 +64,7 @@ namespace ProjectCondoManagement.Helpers
         Transaction ToTransaction(TransactionDto transactionDto, bool isNew);
 
         public FinancialAccount ToFinancialAccount(FinancialAccountDto financialAccountDto, bool isNew);
+
+        OccurrenceDto ToOccurrenceDto(Occurrence occurrence, bool isNew);
     }
 }
