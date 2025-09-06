@@ -92,21 +92,21 @@ namespace CondoManagementWebApp.Controllers
 
 
         [HttpGet("IndexCondominiumInvoices")]
-        public async Task<ActionResult<List<InvoiceDto>>> IndexCondominiumInvoices()
+        public async Task<ActionResult<List<CondominiumWithInvoicesDto>>> IndexCondominiumInvoices()
         {
             try
             {
                 //achar o condominio do condoManager
-                var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-                if (condoManagerCondo == null)
+                var managerCondosWithInvoices = await _apiCallService.GetAsync<List<CondominiumWithInvoicesDto>>("api/Invoice/GetCondominiumsWithInvoices");
+                if (managerCondosWithInvoices == null)
                 {
                     _flashMessage.Danger("You are not managing any condominiums currently");
-                    return View(new List<InvoiceDto>());
+                    return View(new List<CondominiumWithInvoicesDto>());
                 }
 
-                var condoInvoices = await _apiCallService.GetAsync<List<InvoiceDto>>($"api/Invoice/GetCondominiumInvoices/{condoManagerCondo.Id}");
 
-                return View(condoInvoices);
+
+                return View(managerCondosWithInvoices);
 
             }
             catch
@@ -117,11 +117,11 @@ namespace CondoManagementWebApp.Controllers
 
 
         [HttpGet("IndexCondoMemberInvoices")]
-        public async Task<ActionResult<List<InvoiceDto>>> IndexCondoMemberInvoices()
+        public async Task<ActionResult<List<CondominiumWithInvoicesDto>>> IndexCondoMemberInvoices()
         {
             try
             {  
-                var condoMemberInvoices = await _apiCallService.GetByQueryAsync<List<InvoiceDto>>("api/Invoice/GetCondoMemberInvoices", this.User.Identity.Name);
+                var condoMemberInvoices = await _apiCallService.GetAsync<List<CondominiumWithInvoicesDto>>("api/Invoice/GetMemberCondominiumsWithInvoices");
 
                 return View(condoMemberInvoices);
 
@@ -135,19 +135,11 @@ namespace CondoManagementWebApp.Controllers
 
 
         [HttpGet("IndexAllCondoMembersInvoices")]
-        public async Task<ActionResult<List<InvoiceDto>>> IndexAllCondoMembersInvoices()
+        public async Task<ActionResult<List<CondominiumWithInvoicesDto>>> IndexAllCondoMembersInvoices()
         {
             try
             {
-                //achar o condominio do condoManager
-                var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-                if (condoManagerCondo == null)
-                {
-                    _flashMessage.Danger("You are not managing any condominiums currently");
-                    return View(new List<InvoiceDto>());
-                }
-
-                var condoMembersInvoices = await _apiCallService.GetAsync<List<InvoiceDto>>($"api/Invoice/GetAllCondoMembersInvoices/{condoManagerCondo.Id}");
+                var condoMembersInvoices = await _apiCallService.GetAsync<List<CondominiumWithInvoicesDto>>($"api/Invoice/GetAllCondoMembersInvoices");
 
                 return View(condoMembersInvoices);
 

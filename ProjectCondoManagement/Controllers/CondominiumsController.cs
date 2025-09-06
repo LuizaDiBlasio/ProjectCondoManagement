@@ -7,8 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Finances;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
+using ProjectCondoManagement.Migrations.CondosDb;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -26,6 +28,7 @@ namespace ProjectCondoManagement.Controllers
         private readonly IPaymentRepository _paymentRepository;
         private readonly DataContextFinances _dataContextFinances;
         private readonly ICondoMemberRepository _condoMemberRepository;
+        private readonly IInvoiceRepository _invoiceRepository;
 
         public CondominiumsController(DataContextCondos context,
                                       ICondominiumRepository condominiumRepository,
@@ -35,7 +38,8 @@ namespace ProjectCondoManagement.Controllers
                                       IFinancialAccountRepository financialAccounRepository,
                                       IPaymentRepository paymentRepository,
                                       DataContextFinances dataContextFinances,
-                                      ICondoMemberRepository condoMemberRepository)
+                                      ICondoMemberRepository condoMemberRepository,
+                                      IInvoiceRepository invoiceRepository)
         {
             _context = context;
             _condominiumRepository = condominiumRepository;
@@ -46,6 +50,7 @@ namespace ProjectCondoManagement.Controllers
             _paymentRepository = paymentRepository;
             _dataContextFinances = dataContextFinances;
             _condoMemberRepository = condoMemberRepository;
+            _invoiceRepository = invoiceRepository;
         }
 
         // GET: api/Condominiums
