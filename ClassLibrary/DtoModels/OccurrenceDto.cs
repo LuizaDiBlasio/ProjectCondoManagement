@@ -32,6 +32,10 @@ namespace ClassLibrary.DtoModels
         public bool IsResolved { get; set; } = false;
 
 
-        public int CondominiumId { get; set; }  
+        public int CondominiumId { get; set; }
+
+        public MeetingDto? Meeting { get; set; }
+
+        public int? MeetingId { get; set; }
     }
 }

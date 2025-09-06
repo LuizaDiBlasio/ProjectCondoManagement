@@ -31,21 +31,20 @@ namespace CondoManagementWebApp.Controllers
 
         // GET: PaymentController
         [HttpGet("IndexCondominiumPayments")]
-        public async Task<ActionResult<List<PaymentDto>>> IndexCondominiumPayments()
+        public async Task<ActionResult<List<CondominiumWithPaymentsDto>>> IndexCondominiumPayments()
         {
             try
             {
                 //achar o condominio do condoManager
-                var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-                if (condoManagerCondo == null)
+                var condosWithPayments = await _apiCallService.GetAsync<List<CondominiumWithPaymentsDto>>($"api/Condominiums/GetCondoManagerCondominiumsWithPayments/{this.User.Identity.Name}") ;
+                if (condosWithPayments == null)
                 {
                     _flashMessage.Danger("You are not managing any condominiums currently");
                     return View(new List<PaymentDto>());
                 }
+   
 
-                var condoPayments = await _apiCallService.GetByQueryAsync<List<PaymentDto>>("api/Payment/GetCondoPayments", $"{condoManagerCondo.Id}");
-
-                return View(condoPayments);
+                return View(condosWithPayments);
 
             }
             catch
@@ -61,15 +60,7 @@ namespace CondoManagementWebApp.Controllers
         {
             try
             {
-                //achar o condominio do condoManager
-                var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-                if (condoManagerCondo == null)
-                {
-                    _flashMessage.Danger("You are not managing any condominiums currently");
-                    return View(new List<PaymentDto>());
-                }
-
-                var allCondoMemeberPayments = await _apiCallService.GetByQueryAsync<List<PaymentDto>>("api/Payment/GetAllCondoMemberPayments", $"{condoManagerCondo.Id}");
+                var allCondoMemeberPayments = await _apiCallService.GetAsync<List<CondominiumWithPaymentsDto>>("api/Payment/GetAllCondoMembersPayments");
 
                 return View(allCondoMemeberPayments);
             }
@@ -130,11 +121,17 @@ namespace CondoManagementWebApp.Controllers
         {
             var model = new CreateOneTimePaymentViewModel();
 
-            var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-            if (condoManagerCondo == null)
+            var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
+            if (condoManagerCondos != null && !condoManagerCondos.Any())
             {
                 _flashMessage.Danger("You are not managing any condominiums currently");
-                return View(new CreateOneTimePaymentViewModel());
+                return View("CreateOneTimePayment", new CreateOneTimePaymentViewModel());
+            }
+
+            var condosToSelectList = _converterHelper.ToCondosSelectList(condoManagerCondos);
+            if (condosToSelectList.Any())
+            {
+                model.CondosToSelect = condosToSelectList;  
             }
 
             var expenseTypeList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
@@ -143,8 +140,6 @@ namespace CondoManagementWebApp.Controllers
             {
                 model.ExpenseTypesList = expenseTypeList;
             }
-
-            model.CondominiumId = condoManagerCondo.Id;
 
             return View(model);
         }
@@ -162,14 +157,12 @@ namespace CondoManagementWebApp.Controllers
             try
             {
                 //PREENCHER MODEL (propriedades fora da view)
-                var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-                if (condoManagerCondo == null)
+                var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
+                if (condoManagerCondos != null && !condoManagerCondos.Any())
                 {
                     _flashMessage.Danger("You are not managing any condominiums currently");
                     return View("CreateOneTimePayment", new CreateOneTimePaymentViewModel());
                 }
-
-                //model.CondominiumId = condoManagerCondo.Id;
 
                 var expenseTypeList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
 
@@ -186,7 +179,7 @@ namespace CondoManagementWebApp.Controllers
                     Amount = model.ExpenseAmount,
                     Detail = model.ExpenseDetail,
                     ExpenseTypeDto = new EnumDto() { Value = model.ExpenseTypeValue.Value, Name = expenseType.Text },
-                    CondominiumId = model.CondominiumId,
+                    CondominiumId = model.CondominiumId.Value,
                 };
 
 
@@ -201,9 +194,11 @@ namespace CondoManagementWebApp.Controllers
 
                 var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/CreateOneTimePayment", paymentDto);
 
-                if (apiCall.IsSuccess)
+                if (apiCall.IsSuccess && condoManagerCondos != null)
                 {
-                    if(condoManagerCondo.FinancialAccountId == paymentDto.PayerFinancialAccountId)
+                    var isCondoPayment = condoManagerCondos.Any(c => c.FinancialAccountId == paymentDto.PayerFinancialAccountId);
+
+                    if (isCondoPayment)
                     {
                         return RedirectToAction(nameof(IndexCondominiumPayments));
                     }
@@ -211,6 +206,7 @@ namespace CondoManagementWebApp.Controllers
                     {
                         return RedirectToAction(nameof(IndexAllCondoMembersPayments));
                     }
+
                 }
 
                 _flashMessage.Danger("Unable to issue payment");

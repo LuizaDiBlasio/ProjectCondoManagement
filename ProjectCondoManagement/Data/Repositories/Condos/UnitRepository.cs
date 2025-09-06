@@ -24,7 +24,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
 
         public async Task<List<SelectListItem>> GetCondoUnitsList(int id)
         {
-            var unitsList = _dataContextCondos.Units.Where(u =>u.Id == id).ToList();    
+            var unitsList = await _dataContextCondos.Units.Where(u => u.CondominiumId == id).ToListAsync();
 
             return unitsList.Select(u => new SelectListItem
             {

@@ -25,35 +25,29 @@ namespace CondoManagementWebApp.Controllers
         }
         // GET: OccurenceController
         [HttpGet("IndexOccurrences")]
-        public async Task<ActionResult<List<OccurrenceDto>>> IndexOccurrences()
+        public async Task<ActionResult<List<CondominiumWithOccurrencesDto>>> IndexOccurrences()
         {
             try
             {
                 if (this.User.IsInRole("CondoManager"))
                 {
-                    var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-                    if (condoManagerCondo == null)
-                    {
-                        _flashMessage.Danger("You are not managing any condos currently");
-                        return View(new List<OccurrenceDto>());
-                    }
-
-                    var condoOccurences = await _apiCallService.GetAsync<List<OccurrenceDto>>($"api/Occurrence/GetAllCondoOccurrences/{condoManagerCondo.Id}");
+                   
+                    var condoOccurences = await _apiCallService.GetAsync<List<CondominiumWithOccurrencesDto>>($"api/Occurrence/GetAllCondoOccurrences");
 
                     if (!condoOccurences.Any())
                     {
-                        return View(new List<OccurrenceDto>());
+                        return View(new List<CondominiumWithOccurrencesDto>());
                     }
 
                     return View(condoOccurences);
                 }
-                else
+                else if (this.User.IsInRole("CondoMember"))
                 {
-                    var condoMemberOccurrences = await _apiCallService.GetAsync<List<OccurrenceDto>>($"api/Occurrence/GetCondoMemberOccurrences/{this.User.Identity.Name}");
+                    var condoMemberOccurrences = await _apiCallService.GetAsync<List<CondominiumWithOccurrencesDto>>($"api/Occurrence/GetCondoMemberOccurrences/{this.User.Identity.Name}");
 
                     return View(condoMemberOccurrences);
                 }
-               
+                return View(new List<CondominiumWithOccurrencesDto>());
             }
             catch
             {
@@ -90,17 +84,10 @@ namespace CondoManagementWebApp.Controllers
         {
             var model = new CreateOccurrenceViewModel();
 
-            //achar o condominio do condoManager
-            if (this.User.IsInRole("CondoManager"))
-            {
-                model.UnitsToSelect = await GetUnitsList(this.User.Identity.Name);
-            }
-            else //será o condoMember
-            {
-                model.UnitsToSelect = await GetCondoMemberUnitsList(this.User.Identity.Name);
-            }
+            model.CondosToSelect = await GetCondosList();
 
-                return View(model);
+            return View(model);
+
         }
 
         // POST: OccurenceController/Create
@@ -111,14 +98,7 @@ namespace CondoManagementWebApp.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    if (this.User.IsInRole("CondoManager"))
-                    {
-                        model.UnitsToSelect = await GetUnitsList(this.User.Identity.Name);
-                    }
-                    else //será o condoMember
-                    {
-                        model.UnitsToSelect = await GetCondoMemberUnitsList(this.User.Identity.Name);
-                    }
+                    model.CondosToSelect = await GetCondosList();
 
                     return View("CreateOccurrence", model);
                 }
@@ -130,46 +110,25 @@ namespace CondoManagementWebApp.Controllers
 
                 occurrenceDto.UnitDtos = selectedUnitsList;
 
-                //atribuir condo
-                if (this.User.IsInRole("CondoManager"))
-                {
-                    var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-
-                    occurrenceDto.CondominiumId = condoManagerCondo.Id;
-                }
-                else
-                {
-                    var condoMemberWithUnits =  await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{this.User.Identity.Name}");
-
-                    var firstSelectedUnit = selectedUnitsList.FirstOrDefault(); //seleciona primeiro item escolhido da lista, uma ocorrencia não pode acontecer em 2 condos diferentes
-
-                    if (firstSelectedUnit != null)
-                    {
-                        occurrenceDto.CondominiumId = firstSelectedUnit.CondominiumId;
-                    }
-
-                }
-
-
                 var apicall = await _apiCallService.PostAsync<OccurrenceDto, Response<object>>("api/Occurrence/CreateOccurrence", occurrenceDto);
 
                 if (apicall.IsSuccess)
                 {
                     if (this.User.IsInRole("CondoManager"))
                     {
+                        _flashMessage.Confirmation("Occurence reported successfully, condominium administration will contact you as soon as possible");
                         return RedirectToAction(nameof(IndexOccurrences));
                     }
                     else
                     {
                         _flashMessage.Confirmation("Occurence reported successfully, condominium administratio will contact you as soon as possible");
-                        model.UnitsToSelect = await GetUnitsList(this.User.Identity.Name);
-                        return View("CreateOccurrence", model);
+                        return RedirectToAction(nameof(IndexOccurrences));
                     }
                 }
                 else
                 {
                     _flashMessage.Danger(apicall.Message);
-                    model.UnitsToSelect = await GetUnitsList(this.User.Identity.Name);
+                    model.CondosToSelect = await GetCondosList();
                     return View("CreateOccurrence", model);
                 }
             }
@@ -179,6 +138,7 @@ namespace CondoManagementWebApp.Controllers
             }
         }
 
+       
         // GET: OccurenceController/Edit/5
         public async Task<ActionResult> EditOccurrence(int id)
         {
@@ -200,10 +160,11 @@ namespace CondoManagementWebApp.Controllers
 
                 if (this.User.IsInRole("CondoManager"))
                 {
-                    model.UnitsToSelect = await GetUnitsList(this.User.Identity.Name);
+                    model.CondosToSelect = await GetCondosList();
                 }
                 else //será o condoMember
                 {
+                    model.CondosToSelect = await GetCondosList();
                     model.UnitsToSelect = await GetCondoMemberUnitsList(this.User.Identity.Name);
                 }
 
@@ -224,15 +185,13 @@ namespace CondoManagementWebApp.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    
-                   model.UnitsToSelect = await GetUnitsList(this.User.Identity.Name);
-                    
+                    model.CondosToSelect = await GetCondosList();
+                    model.UnitsToSelect = await GetCondoMemberUnitsList(this.User.Identity.Name);
+
                     return View("EditOccurrence", model);
                 }
 
                 var editedOccurrenceDto = _converterHelper.ToEditedOccurrenceDto(model);
-
-                
 
                 //obter lista de units selecionadas
                 var selectedUnitsList = await _apiCallService.PostAsync<List<int>, List<UnitDto>>("api/Occurrence/GetSelectedUnits", model.SelectedUnitIds);
@@ -254,7 +213,8 @@ namespace CondoManagementWebApp.Controllers
                 }
                 else
                 {
-                    model.UnitsToSelect = await GetUnitsList(this.User.Identity.Name);
+                    model.CondosToSelect = await GetCondosList();
+                    model.UnitsToSelect = await GetCondoMemberUnitsList(this.User.Identity.Name);
 
                     return View("EditOccurrence", model);
                 }
@@ -267,15 +227,10 @@ namespace CondoManagementWebApp.Controllers
         }
 
         //Metodos Auxiliares
-        public async Task<List<SelectListItem>> GetUnitsList(string condoManagerEmail)
+        public async Task<List<SelectListItem>> GetUnitsList(int condoId)
         {
-            var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", condoManagerEmail);
-            if (condoManagerCondo == null)
-            {    
-                return new List<SelectListItem>();
-            }
 
-            return await _apiCallService.GetAsync<List<SelectListItem>>($"api/Units/GetCondoUnitsList/{condoManagerCondo.Id}");
+            return await _apiCallService.GetAsync<List<SelectListItem>>($"api/Units/GetCondoUnitsList/{condoId}");
         }
 
         public async Task<List<SelectListItem>> GetCondoMemberUnitsList(string condoMemberEmail)
@@ -294,6 +249,41 @@ namespace CondoManagementWebApp.Controllers
             }
             return new List<SelectListItem>();
         }
-        
+
+
+        private async Task<List<SelectListItem>> GetCondosList()
+        {
+            var condosList = new List<SelectListItem>();    
+
+            if (this.User.IsInRole("CondoManager"))
+            {
+                var managerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>($"api/Condominiums/ByManager");
+                if (managerCondos != null && managerCondos.Any())
+                {
+                    condosList = managerCondos.Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = c.CondoName.ToString()
+                    }).ToList();
+                }
+            }
+            else if (this.User.IsInRole("CondoMember"))
+            {
+                var memberCondos = await _apiCallService.GetAsync<List<CondominiumDto>>($"api/Condominiums/ByCondoMember");
+                if (memberCondos != null && memberCondos.Any())
+                {
+                    condosList = memberCondos.Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = c.CondoName.ToString()
+                    }).ToList();
+                }
+            }
+
+            return condosList;
+
+        }
+
+
     }
 }

@@ -24,7 +24,9 @@ namespace ClassLibrary.DtoModels
         [Display(Name = "Condo Manager")]
         public string? ManagerUserId { get; set; }
 
-        public int? FinancialAccountId { get; set; }     
+        public int? FinancialAccountId { get; set; } 
+        
+        public FinancialAccountDto? FinancialAccountDto { get; set; }
 
         public UserDto? ManagerUser { get; set; }
 
@@ -36,7 +38,7 @@ namespace ClassLibrary.DtoModels
 
         public IEnumerable<MeetingDto>? Meetings { get; set; }
 
-        public IEnumerable<OccurrenceDto>? Occurrences { get; set; }
+        public List<OccurrenceDto>? Occurrences { get; set; }
 
     }
 }

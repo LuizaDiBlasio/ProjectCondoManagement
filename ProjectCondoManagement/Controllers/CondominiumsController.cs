@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
@@ -22,13 +23,19 @@ namespace ProjectCondoManagement.Controllers
         private readonly IUserHelper _userHelper;
         private readonly ICondominiumHelper _condominiumHelper;
         private readonly IFinancialAccountRepository _financialAccountRepository;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly DataContextFinances _dataContextFinances;
+        private readonly ICondoMemberRepository _condoMemberRepository;
 
         public CondominiumsController(DataContextCondos context,
                                       ICondominiumRepository condominiumRepository,
                                       IConverterHelper converterHelper,
                                       IUserHelper userHelper,
                                       ICondominiumHelper condominiumHelper,
-                                      IFinancialAccountRepository financialAccounRepository)
+                                      IFinancialAccountRepository financialAccounRepository,
+                                      IPaymentRepository paymentRepository,
+                                      DataContextFinances dataContextFinances,
+                                      ICondoMemberRepository condoMemberRepository)
         {
             _context = context;
             _condominiumRepository = condominiumRepository;
@@ -36,7 +43,9 @@ namespace ProjectCondoManagement.Controllers
             _userHelper = userHelper;
             _condominiumHelper = condominiumHelper;
             _financialAccountRepository = financialAccounRepository;
-
+            _paymentRepository = paymentRepository;
+            _dataContextFinances = dataContextFinances;
+            _condoMemberRepository = condoMemberRepository;
         }
 
         // GET: api/Condominiums
@@ -74,7 +83,7 @@ namespace ProjectCondoManagement.Controllers
                 return new List<CondominiumDto>();
             }
 
-            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c)).ToList();
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList();
 
             if (condominiumsDtos == null)
             {
@@ -99,7 +108,7 @@ namespace ProjectCondoManagement.Controllers
                 return NotFound();
             }
 
-            var condominiumDto = _converterHelper.ToCondominiumDto(condominium);
+            var condominiumDto = _converterHelper.ToCondominiumDto(condominium, false);
             if (condominiumDto == null)
             {
                 return NotFound();
@@ -235,27 +244,116 @@ namespace ProjectCondoManagement.Controllers
             return NoContent();
         }
 
-        //Metodo auxiliar para expenses
-        [HttpPost("GetCondoManagerCondominiumDto")]
-        public async Task<IActionResult> GetCondoManagerCondominiumDto([FromBody] string condoManagerEmail)
+
+
+        [HttpGet("GetCondoManagerCondominiumsWithPayments/{email}")]
+        public async Task<ActionResult<List<CondominiumWithPaymentsDto>>> GetCondoManagerCondominiumsWithPayments(string email)
         {
-            var user = await _userHelper.GetUserByEmailAsync(condoManagerEmail);
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
 
-            if (user == null)
+            var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.ManagerUserId == user.Id).ToListAsync();
+            if (condominiums == null)
             {
-                return NotFound();
+                return new List<CondominiumWithPaymentsDto>();
             }
 
-            var condoManagerCondo = await _condominiumRepository.GetCondoManagerCondominium(user.Id);
 
-            if (condoManagerCondo == null)
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList();
+
+            if (condominiumsDtos == null)
             {
-                return NotFound();
+                return new List<CondominiumWithPaymentsDto>();
             }
 
-            var condoManagerCondoDto = _converterHelper.ToCondominiumDto(condoManagerCondo);
+            // FinancialAccountIds de todos os condomínios
+            var condominiumFinancialAccountIds = condominiums.Select(c => c.FinancialAccountId)
+                                                             .Where(id => id.HasValue)
+                                                             .Select(id => id.Value)
+                                                             .ToList();
 
-            return Ok(condoManagerCondoDto);
+            // Buscar todos os pagamentos onde  Fin. acc Id do pagante == Fin. acc Id Condo.
+            var allPayments = await _paymentRepository.GetAll(_dataContextFinances)
+                .Where(p => condominiumFinancialAccountIds.Contains(p.PayerFinancialAccountId))
+                .Include(p => p.Transaction)
+                .Include(p => p.Expenses)
+                .ToListAsync();
+
+            // Converter 
+            var allPaymentsDto = allPayments.Select(p => _converterHelper.ToPaymentDto(p, false)).ToList();
+
+            //Lista a ser populada
+            var condosWithPaymentsDtoList = new List<CondominiumWithPaymentsDto>();
+
+            foreach (var condo in condominiums)
+            {
+                // Buscar pagamentos para o condomínio atual, pelo FinancialAccountId
+                var condoPaymentsDto = allPaymentsDto
+                    .Where(p => p.PayerFinancialAccountId == condo.FinancialAccountId)
+                    .ToList();
+
+                
+                var condominiumWithPaymentsDto = new CondominiumWithPaymentsDto()
+                {
+                    CondominiumId = condo.Id,
+                    CondoName = condo.CondoName,
+                    CondoPayments = condoPaymentsDto
+                };
+
+                condosWithPaymentsDtoList.Add(condominiumWithPaymentsDto);
+            }
+
+            return condosWithPaymentsDtoList;
+
+        }
+
+
+        // GET: api/Condominiums/ByManager/{managerId}
+        [HttpGet("ByManager")]
+        public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetMangerCondos()
+        {
+            var email = this.User.Identity?.Name;
+
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+
+            var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.ManagerUserId == user.Id).ToListAsync();
+            if (condominiums == null)
+            {
+                return new List<CondominiumDto>();
+            }
+
+
+
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList();
+
+            if (condominiumsDtos == null)
+            {
+                return new List<CondominiumDto>();
+            }
+
+            await _condominiumRepository.LinkManager(condominiumsDtos);
+            await _condominiumRepository.LinkFinancialAccount(condominiumsDtos);
+
+            return condominiumsDtos;
+        }
+
+
+        [HttpGet("ByCondoMember")]
+        public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetCondoMemberCondos()
+        {
+            var email = this.User.Identity?.Name;
+
+            var condoMember = await _condoMemberRepository.GetCondoMemberByEmailAsync(email);
+
+            var condominiums = condoMember.Units.Select(u => u.Condominium).ToList();
+            if (condominiums == null)
+            {
+                return new List<CondominiumDto>();
+            }
+
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList();
+
+
+            return condominiumsDtos;
         }
 
     }

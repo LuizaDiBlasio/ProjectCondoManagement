@@ -23,25 +23,64 @@ namespace ProjectCondoManagement.Controllers
         private readonly DataContextCondos _dataContextCondos;
         private readonly IConverterHelper _converterHelper;
         private readonly ICondoMemberRepository _condoMemberRepository;
+        private readonly IUserHelper _userHelper;
+        private readonly ICondominiumRepository _condominiumRepository;
 
-        public OccurrenceController(IOccurenceRepository occurrenceRepository, DataContextCondos dataContextCondos, IConverterHelper converterHelper, ICondoMemberRepository condoMemberRepository)
+        public OccurrenceController(IOccurenceRepository occurrenceRepository, DataContextCondos dataContextCondos, IConverterHelper converterHelper, ICondoMemberRepository condoMemberRepository, 
+                                    IUserHelper userHelper, ICondominiumRepository condominiumRepository)
         {
             _occurrenceRepository = occurrenceRepository;
             _dataContextCondos = dataContextCondos;
             _converterHelper = converterHelper;
             _condoMemberRepository = condoMemberRepository;
+            _userHelper = userHelper;
+            _condominiumRepository = condominiumRepository;
         }
 
 
         // GET: OccurrenceController
-        [HttpGet("GetAllCondoOccurrences/{id}")]
-        public async Task<ActionResult<List<OccurrenceDto>>> GetAllCondoOccurrences(int id)
+        [HttpGet("GetAllCondoOccurrences")]
+        public async Task<ActionResult<List<CondominiumWithOccurrencesDto>>> GetAllCondoOccurrences()
         {
-            var condoOccurrences = _occurrenceRepository.GetAll(_dataContextCondos).Where(o => o.CondominiumId == id). ToList();
+            var email = this.User.Identity?.Name;
 
-            var occurrencesDto = condoOccurrences.Select(o => _converterHelper.ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>();
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
 
-            return Ok(occurrencesDto);    
+            var condominiums = await _condominiumRepository.GetAll(_dataContextCondos).Where(c => c.ManagerUserId == user.Id).ToListAsync();
+            if (condominiums == null)
+            {
+                return new List<CondominiumWithOccurrencesDto>();
+            }
+
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c,true)).ToList();
+
+           var condominiumIds = condominiums.Select(c =>  c.Id).ToList();  
+
+            //buscar  ocorrencias que contenham o id do condominio iguais aos da lista de ids
+            var allCondosOccurrences = await _occurrenceRepository.GetAll(_dataContextCondos) 
+                                                        .Where(o => condominiumIds
+                                                        .Contains(o.CondominiumId))
+                                                        .ToListAsync();
+
+            var allCondosOccurrencesDto = allCondosOccurrences.Select(o => _converterHelper.ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>();
+
+            var condosWithOccurrencesDto = new List<CondominiumWithOccurrencesDto>();
+
+            foreach (var condo in condominiumsDtos)
+            {
+                var condoOccurences = allCondosOccurrencesDto.Where(o => o.CondominiumId == condo.Id)
+                                                             .ToList();
+
+                var condoWithOccurrences = new CondominiumWithOccurrencesDto()
+                {
+                    CondominiumId = condo.Id,
+                    CondoName = condo.CondoName,
+                    OccurrencesDto = condoOccurences
+                };
+
+                condosWithOccurrencesDto.Add(condoWithOccurrences);
+            }
+            return Ok(condosWithOccurrencesDto);    
         }
 
 
@@ -78,6 +117,7 @@ namespace ProjectCondoManagement.Controllers
         {
             try
             {
+
                 var occurrence = _converterHelper.ToOccurrence(occurrenceDto, true);
 
                 if (occurrence.Units != null && occurrence.Units.Any())
@@ -162,7 +202,7 @@ namespace ProjectCondoManagement.Controllers
 
 
         [HttpGet("GetCondoMemberOccurrences/{email}")]
-        public async Task<ActionResult<List<OccurrenceDto>>> GetCondoMemberOccurrences(string email)
+        public async Task<ActionResult<List<CondominiumWithOccurrencesDto>>> GetCondoMemberOccurrences(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
             {
@@ -183,7 +223,27 @@ namespace ProjectCondoManagement.Controllers
 
             var occurrences = condoMember.Units.SelectMany(u => u.Occurrences).ToList();
 
-            return occurrences.Select(o => _converterHelper.ToOccurrenceDto(o, false)).ToList() ?? new List<OccurrenceDto>();
+            var occurrencesDto = occurrences?.Select(o => _converterHelper.ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>();
+
+            var condominiums = condoMember.Units.Select(u => u.Condominium).ToList();
+
+            var condosWithOccurrencesDto = new List<CondominiumWithOccurrencesDto>();
+
+            foreach (var condo in condominiums)
+            {
+                var condoOccurences = occurrencesDto.Where(o => o.CondominiumId == condo.Id)
+                                                             .ToList();
+
+                var condoWithOccurrences = new CondominiumWithOccurrencesDto()
+                {
+                    CondominiumId = condo.Id,
+                    CondoName = condo.CondoName,
+                    OccurrencesDto = condoOccurences
+                };
+
+                condosWithOccurrencesDto.Add(condoWithOccurrences);
+            }
+            return Ok(condosWithOccurrencesDto);
         }
 
 

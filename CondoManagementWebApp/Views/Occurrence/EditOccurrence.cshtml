@@ -40,29 +40,17 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-4">
-                                        <label asp-for="SelectedUnitIds" class="form-label">Select Company Condominiums</label>
-                                        <div class="border p-3 rounded" style="max-height: 250px; overflow-y: auto;">
-                                            @if (Model.UnitsToSelect != null && Model.UnitsToSelect.Any())
-                                            {
-                                                @foreach (var unitItem in Model.UnitsToSelect)
-                                                {
-                                                    <div class="form-check">
-                                                        <input type="checkbox"
-                                                               name="SelectedUnitIds"
-                                                               value="@unitItem.Value"
-                                                               id="unit_@unitItem.Value"
-                                                               class="form-check-input"
-                                                        @(Model.SelectedUnitIds != null && Model.SelectedUnitIds.Contains(int.Parse(unitItem.Value)) ? "checked" : "") />
-                                                        <label class="form-check-label" for="unit_@unitItem.Value">
-                                                            @unitItem.Text
-                                                        </label>
-                                                    </div>
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <p>No condos available to select.</p>
-                                            }
+                                        <label asp-for="CondominiumId" class="form-label">Condominium Payment Reference </label>
+                                        <select asp-for="CondominiumId" asp-items="Model.CondosToSelect" class="form-control" id="condominiumSelect">
+                                            <option value="">-- Select Condominium --</option>
+                                        </select>
+                                        <span asp-validation-for="CondominiumId" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group mb-4">
+                                        <label asp-for="SelectedUnitIds" class="form-label">Select units involved</label>
+                                        <div class="border p-3 rounded" style="max-height: 250px; overflow-y: auto;" id="unitsListContainer">
+                                            <p>Please select a condominium to load the units.</p>
                                         </div>
                                         <span asp-validation-for="SelectedUnitIds" class="text-danger"></span>
                                     </div>
@@ -104,13 +92,13 @@
 
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
-             // Inicializa o DatePicker
-         var DateAndTimePicker = new ej.calendars.DatePicker({
+            // Inicializa o DatePicker
+            var dateValue = '@(Model.DateAndTime.HasValue ? Model.DateAndTime.Value.ToString("MM-dd-yyyy") : "")';
+            var DateAndTimePicker = new ej.calendars.DatePicker({
                 format: 'MM/dd/yyyy',
                 placeholder: 'Select a date',
                 max: new Date(),
-                // Configura o valor inicial do date picker
-                value: new Date('@(Model.DateAndTime.HasValue ? Model.DateAndTime.Value.ToString("MM-dd-yyyy") : "")')
+                value: dateValue ? new Date(dateValue) : null
             });
             DateAndTimePicker.appendTo('#dateAndTime');
 
@@ -118,12 +106,72 @@
             const isResolvedSwitch = document.getElementById('isResolvedSwitch');
             const isResolvedLabel = document.getElementById('isResolvedLabel');
 
+            if (isResolvedSwitch.checked) {
+                isResolvedLabel.innerHTML = '<span class="text-success">Resolved</span>';
+            } else {
+                isResolvedLabel.innerHTML = '<span class="text-danger">Unresolved</span>';
+            }
+
             isResolvedSwitch.addEventListener('change', function() {
                 if (this.checked) {
                     isResolvedLabel.innerHTML = '<span class="text-success">Resolved</span>';
                 } else {
                     isResolvedLabel.innerHTML = '<span class="text-danger">Unresolved</span>';
                 }
+            });
+
+            // Adicione esta nova função para carregar as unidades
+            function loadUnits(condoId, selectedUnits) {
+                var unitsContainer = $('#unitsListContainer');
+                unitsContainer.empty();
+
+                if (condoId) {
+                    $.ajax({
+                        url: `/GetCondoUnitsList/${condoId}`,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (units) {
+                            if (units.length > 0) {
+                                $.each(units, function (i, unit) {
+                                    // Verifique se a unidade deve ser selecionada
+                                    var isChecked = selectedUnits.includes(parseInt(unit.value)) ? 'checked' : '';
+                                    var checkboxHtml = `
+                                        <div class="form-check">
+                                            <input type="checkbox"
+                                                name="SelectedUnitIds"
+                                                value="${unit.value}"
+                                                id="unit_${unit.value}"
+                                                class="form-check-input"
+                                                ${isChecked} />
+                                            <label class="form-check-label" for="unit_${unit.value}">
+                                                ${unit.text}
+                                            </label>
+                                        </div>`;
+                                    unitsContainer.append(checkboxHtml);
+                                });
+                            } else {
+                                unitsContainer.append('<p>No units available for this condominium.</p>');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error fetching units: " + error);
+                            unitsContainer.append('<p>Error loading units. Please try again.</p>');
+                        }
+                    });
+                }
+            }
+
+            // Chame a função quando a página for carregada, usando os dados do modelo
+            var initialCondoId = $('#condominiumSelect').val();
+            var initialSelectedUnits = @(Html.Raw(Json.Serialize(Model.SelectedUnitIds)));
+            if (initialCondoId) {
+                loadUnits(initialCondoId, initialSelectedUnits);
+            }
+
+            // Ative a função também no evento de mudança, para permitir a troca de condomínio
+            $('#condominiumSelect').change(function () {
+                var condoId = $(this).val();
+                loadUnits(condoId, []); // Passe um array vazio, já que não há unidades pré-selecionadas
             });
         });
     </script>

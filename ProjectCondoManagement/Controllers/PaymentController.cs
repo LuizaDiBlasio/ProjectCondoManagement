@@ -108,59 +108,76 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-        [Microsoft.AspNetCore.Mvc.HttpPost("GetAllCondoMemberPayments")]
-        public async Task<List<PaymentDto>> GetAllCondoMemberPayments([FromBody] string condoId)
+        [Microsoft.AspNetCore.Mvc.HttpGet("GetAllCondoMembersPayments")]
+        public async Task<List<CondominiumWithPaymentsDto>> GetAllCondoMemberPayments()
         {
-            var usersCondoMembers = new List<User>();
+            var email = this.User.Identity?.Name;
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
 
-            var condoMembers = await _condominiumRepository.GetCondoCondomembers(int.Parse(condoId));
+            // buscar todos os condomínios do manager
+            var condominiums = await _condominiumRepository.GetAll(_dataContextCondos)
+                .Where(c => c.ManagerUserId == user.Id)
+                .ToListAsync();
 
-            if (condoMembers.Any())
+            if (condominiums == null || !condominiums.Any())
             {
-                //converter condoMembers para users
-                foreach (var condoMember in condoMembers)
-                {
-                    var userSearch = await _userHelper.GetUserByEmailAsync(condoMember.Email);
-                    if (userSearch != null)
-                    {
-                        usersCondoMembers.Add(userSearch);
-                    }
-                }
-
-                //se não houver users
-                if (!usersCondoMembers.Any())
-                {
-                    return new List<PaymentDto>();
-                }
-
-                var allpayments = _paymentRepository.GetAll(_dataContextFinances);
-
-                if (!allpayments.Any())
-                {
-                    return new List<PaymentDto>();
-                }
-
-                //extrair financial accountIds dos condoMembers
-                var financialAccountIds = usersCondoMembers.Select(u => u.FinancialAccountId).ToList();
-
-                var allCondomemberPayments = allpayments
-                               .Where(payment => financialAccountIds.Contains(payment.PayerFinancialAccountId))
-                               .Include(p => p.Expenses)
-                               .Include(p =>p.Transaction)
-                               .ToList();
-
-
-                //converter
-
-                if (allCondomemberPayments.Any())
-                {
-                    var allCondomemberPaymentsDto = allCondomemberPayments.Select(p => _converterHelper.ToPaymentDto(p, false)).ToList() ?? new List<PaymentDto>();
-                    return allCondomemberPaymentsDto;
-                }
-
+                return new List<CondominiumWithPaymentsDto>();
             }
 
-            return new List<PaymentDto>();
+            // buscar os emails de todos os membros de todos os condomínios
+            var allCondoMemberEmails = new List<string>();
+            foreach (var condo in condominiums)
+            {
+                var condoMembers = await _condominiumRepository.GetCondoCondomembers(condo.Id);
+                allCondoMemberEmails.AddRange(condoMembers.Select(cm => cm.Email));
+            }
+
+            // Buscar os Users desses emails
+            var allCondoMemberUsers = await _userHelper.GetUsersByEmailsAsync(allCondoMemberEmails);
+
+            // Extrair os FinancialAccountIds de todos os users
+            var memberFinancialAccountIds = allCondoMemberUsers
+                .Where(u => u.FinancialAccountId.HasValue)
+                .Select(u => u.FinancialAccountId.Value)
+                .Distinct()
+                .ToList();
+
+            if (!memberFinancialAccountIds.Any())
+            {
+                return new List<CondominiumWithPaymentsDto>();
+            }
+
+            // Buscar todos os pagamentos de todos os membros 
+            var allMemberPayments = await _paymentRepository.GetAll(_dataContextFinances)
+                .Where(p => memberFinancialAccountIds.Contains(p.PayerFinancialAccountId))
+                .Include(p => p.Expenses)
+                .Include(p => p.Transaction)
+                .ToListAsync();
+
+            // Converter 
+            var allMemberPaymentsDto = allMemberPayments.Select(p => _converterHelper.ToPaymentDto(p, false)).ToList();
+
+            // instanciar lista
+            var condosWithPaymentsDtoList = new List<CondominiumWithPaymentsDto>();
+
+            foreach (var condo in condominiums)
+            {
+                // Encontrar os pagamentos para o condomínio atual, usando o pelo condo id
+                var condoPaymentsDto = allMemberPaymentsDto
+                    .Where(p => p.CondominiumId == condo.Id)
+                    .ToList();
+
+            
+                var condominiumWithPaymentsDto = new CondominiumWithPaymentsDto
+                {
+                    CondominiumId = condo.Id,
+                    CondoName = condo.CondoName,
+                    CondoPayments = condoPaymentsDto
+                };
+                condosWithPaymentsDtoList.Add(condominiumWithPaymentsDto);
+            }
+
+            return condosWithPaymentsDtoList;
         }
 
 

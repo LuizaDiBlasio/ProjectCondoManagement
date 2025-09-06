@@ -198,7 +198,7 @@ namespace CondoManagementWebApp.Helpers
             {
                 DueDate = model.DueDate.Value,
                 PayerFinancialAccountId = model.PayerFinancialAccountId,
-                CondominiumId = model.CondominiumId,
+                CondominiumId = model.CondominiumId.Value,
             };
             return paymentDto;
         }
@@ -228,6 +228,7 @@ namespace CondoManagementWebApp.Helpers
                 Details = model.Details,
                 DateAndTime = model.DateAndTime.Value,
                 Subject = model.Subject,
+                CondominiumId = model.CondominiumId.Value
             };
             return ocurrenceDto;    
         }
@@ -239,8 +240,8 @@ namespace CondoManagementWebApp.Helpers
                 Id = model.Id,
                 Details = model.Details,
                 DateAndTime = model.DateAndTime.Value,
-                Subject = model.Subject,    
-                CondominiumId = model.CondominiumId,    
+                Subject = model.Subject,  
+                CondominiumId= model.CondominiumId.Value    
             };
             return occurrenceDto;   
         }
@@ -259,6 +260,47 @@ namespace CondoManagementWebApp.Helpers
                 CondominiumId = occurrenceDto.CondominiumId,    
             };
             return model;
+        }
+
+        public List<SelectListItem> ToCondoMembersSelectList(List<CondoMemberDto> condomembersList)
+        {
+            return condomembersList.Select(cm => new SelectListItem
+            {
+                Value = cm.Id.ToString(),
+                Text = cm.ToString()
+            }).ToList();
+        }
+
+        public List<SelectListItem> ToOccurrrencesSelectList(List<OccurrenceDto> occurrencesList)
+        {
+            return occurrencesList.Select(o => new SelectListItem
+            {
+                Value = o.Id.ToString(),
+                Text = o.ToString()
+            }).ToList();
+        }
+
+        public List<SelectListItem> ToCondosSelectList(List<CondominiumDto> condominiumList)
+        {
+            return condominiumList.Select(cm => new SelectListItem
+            {
+                Value = cm.Id.ToString(),
+                Text = cm.CondoName.ToString()
+            }).ToList();
+        }
+
+        public MeetingDto ToNewMeetingDto(CreateMeetingViewModel model)
+        {
+            var meetignDto = new MeetingDto()
+            {
+                Id = 0, 
+                CondominiumId = model.CondominiumId,    
+                DateAndTime = model.DateAndTime.Value, 
+                Title = model.Title,
+                Description = model.Description,
+
+            };
+            return meetignDto;  
         }
     }
 }

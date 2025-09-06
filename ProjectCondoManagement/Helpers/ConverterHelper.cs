@@ -184,7 +184,7 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = company.Id,
                 Name = company.Name,
-                CondominiumDtos = company.Condominiums?.Select(c => ToCondominiumDto(c)).ToList() ?? new List<CondominiumDto>(),
+                CondominiumDtos = company.Condominiums?.Select(c => ToCondominiumDto(c, false)).ToList() ?? new List<CondominiumDto>(),
                 Email = company.Email,
                 Address = company.Address,
                 PhoneNumber = company.PhoneNumber,
@@ -234,7 +234,7 @@ namespace ProjectCondoManagement.Helpers
             return condominium;
         }
 
-        public CondominiumDto ToCondominiumDto(Condominium condominium)
+        public CondominiumDto ToCondominiumDto(Condominium condominium, bool IncludeOccurrence)
         {
 
             var condominiumDto = new CondominiumDto()
@@ -244,8 +244,8 @@ namespace ProjectCondoManagement.Helpers
                 CompanyId = condominium.CompanyId,
                 Address = condominium.Address,
                 FinancialAccountId = condominium.FinancialAccountId,
-                ManagerUserId = condominium.ManagerUserId
-
+                ManagerUserId = condominium.ManagerUserId,
+                Occurrences = IncludeOccurrence == true? condominium.Occurrences?.Select(o => ToOccurrenceDto(o, false)).ToList() ?? new List<OccurrenceDto>() : null
             };
 
             return condominiumDto;
@@ -260,6 +260,7 @@ namespace ProjectCondoManagement.Helpers
                 DateAndTime = occurrence.DateAndTime,
                 UnitDtos = occurrence.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),
                 IsResolved = occurrence.IsResolved,
+                CondominiumId = occurrence.CondominiumId,   
             };
 
             return occurrenceDto;
@@ -303,7 +304,7 @@ namespace ProjectCondoManagement.Helpers
                 CondominiumId = unit.CondominiumId,
                 Floor = unit.Floor,
                 Door = unit.Door,
-                CondominiumDto = ToCondominiumDto(unit.Condominium)
+                CondominiumDto = ToCondominiumDto(unit.Condominium, false)
             };
 
             if (includeCondoMembers)
@@ -442,11 +443,10 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = isNew ? 0 : transaction.Id,
                 DateAndTime = transaction.DateAndTime,
-                PayerAccountId = transaction.PayerAccountId,
-                //AccountPayerDto = ToFinancialAccountDto(transaction.AccountPayer, false),   
+                PayerAccountId = transaction.PayerAccountId,  
                 BeneficiaryAccountId = transaction.BeneficiaryAccountId,
-                //AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
-                ExternalRecipientBankAccount = transaction.ExternalRecipientBankAccount
+                ExternalRecipientBankAccount = transaction.ExternalRecipientBankAccount,
+                PaymentId = transaction.PaymentId,  
                 
             };
             
@@ -552,6 +552,20 @@ namespace ProjectCondoManagement.Helpers
                 Subject = occurrence.Subject,
             };
             return occurrenceDto;   
+        }
+
+        public MeetingDto ToMeetingDto(Meeting meeting)
+        {
+            var meetingDto = new MeetingDto()
+            {
+                Id = meeting.Id,
+                CondominiumId = meeting.CondominiumId,
+                DateAndTime = meeting.DateAndTime,
+                CondoMembersDto = meeting.CondoMembers.Select(c => ToCondoMemberDto(c, false)).ToList() ?? new List<CondoMemberDto>(),
+                OccurencesDto = meeting.Occurences.Select(o => ToOccurrenceDto(o, false)).ToList() ?? new List<OccurrenceDto>(),
+
+            };
+            return meetingDto;
         }
     }
     

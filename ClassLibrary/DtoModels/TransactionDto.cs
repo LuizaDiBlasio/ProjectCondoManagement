@@ -22,7 +22,7 @@ namespace ClassLibrary.DtoModels
 
         public string? ExternalRecipientBankAccount { get; set; }
 
-        public int PaymentId { get; set; }
+        public int? PaymentId { get; set; }
 
     }
 }

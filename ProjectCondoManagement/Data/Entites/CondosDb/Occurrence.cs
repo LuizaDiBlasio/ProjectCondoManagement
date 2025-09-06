@@ -19,5 +19,9 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
         public bool IsResolved { get; set; } = false;
 
         public int CondominiumId { get; set; }  
+
+        public Meeting? Meeting { get; set; }
+
+        public int? MeetingId { get; set; }  
     }
 }

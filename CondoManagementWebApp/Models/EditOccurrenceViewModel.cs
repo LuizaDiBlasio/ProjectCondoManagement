@@ -8,7 +8,11 @@ namespace CondoManagementWebApp.Models
     {
         public int Id { get; set; }
 
-        public int CondominiumId { get; set; }  
+        public List<SelectListItem>? CondosToSelect { get; set; }
+
+        [Required]
+        [Display(Name = "Occurrence Condominium")]
+        public int? CondominiumId { get; set; }
 
         [Required]
         [StringLength(150, ErrorMessage = "The field {0} must have a maximum of {1} characters.")]

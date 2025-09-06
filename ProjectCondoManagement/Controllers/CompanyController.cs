@@ -358,7 +358,7 @@ namespace ProjectCondoManagement.Controllers
         {
             var companyCondominiums = await _condominiumRepository.GetCompanyCondominiums(companyDto.SelectedCondominiumIds);
 
-            var companyCondominiumsDtos = companyCondominiums?.Select(c => _converterHelper.ToCondominiumDto(c)).ToList() ?? new List<CondominiumDto>();
+            var companyCondominiumsDtos = companyCondominiums?.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList() ?? new List<CondominiumDto>();
 
 
             return Ok(companyCondominiumsDtos); 

@@ -28,7 +28,13 @@ namespace CondoManagementWebApp.Models
         public List<int>? SelectedUnitIds { get; set; }
 
 
-        public List<SelectListItem>? UnitsToSelect { get; set; } 
+        public List<SelectListItem>? UnitsToSelect { get; set; }
+
+        public List<SelectListItem>? CondosToSelect { get; set; }
+
+        [Required]
+        [Display(Name = "Occurrence Condominium")]
+        public int? CondominiumId { get; set; }
 
     }
 }

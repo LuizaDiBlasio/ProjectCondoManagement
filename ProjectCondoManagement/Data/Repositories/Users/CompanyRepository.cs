@@ -151,7 +151,7 @@ namespace ProjectCondoManagement.Data.Repositories.Users
 
             var condos = _condominiumRepository.GetAll(_contextCondos);
 
-            var condosDto = condos?.Select(c => _converterHelper.ToCondominiumDto(c)).ToList() ?? new List<CondominiumDto>();
+            var condosDto = condos?.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList() ?? new List<CondominiumDto>();
 
             foreach(var condo in condosDto)
             {

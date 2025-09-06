@@ -19,9 +19,6 @@
                         <form asp-action="RequestCreateOneTimePayment">
                             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                            <input type="hidden" asp-for="CondominiumId" />
-
-
                             <div class="form-group mb-3">
                                 <label asp-for="DueDate" class="control-label"></label>
                                 <input id="dueDateInput" asp-for="DueDate" class="form-control" />
@@ -32,6 +29,14 @@
                                 <label asp-for="PayerFinancialAccountId" class="control-label">Payer's Omah wallet number</label>
                                 <input asp-for="PayerFinancialAccountId" class="form-control" placeholder="Enter an account number"/>
                                 <span asp-validation-for="PayerFinancialAccountId" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="CondominiumId" class="form-label">Condominium Payment Reference </label>
+                                <select asp-for="CondominiumId" asp-items="Model.CondosToSelect" class="form-control">
+                                    <option value="">-- Select Condominium --</option>
+                                </select>
+                                <span asp-validation-for="CondominiumId" class="text-danger"></span>
                             </div>
 
                             <div class="form-group mb-3">
@@ -52,6 +57,7 @@
                                 </select>
                                 <span asp-validation-for="ExpenseTypeValue" class="text-danger"></span>
                             </div>
+                           
 
 
                             <div class="d-flex justify-content-between mt-3">
