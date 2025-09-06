@@ -26,21 +26,15 @@ namespace CondoManagementWebApp.Controllers
 
         
         //GET: ExpenseController
-        public async Task<IActionResult> IndexExpenses()
+        public async Task<ActionResult<List<CondominiumWithExpensesDto>>> IndexExpenses()
         {
 
             try
-            {
-                var condominiumDto = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
+            {        
+                var condosExpenses = await _apiCallService.GetAsync<List<CondominiumWithExpensesDto>>("api/Expense/GetExpensesFromCondominiums");
 
-                var condoExpenses = await _apiCallService.GetByQueryAsync<IEnumerable<ExpenseDto>>("api/Expense/GetExpensesFromCondominium", this.User.Identity.Name);
-
-                var model = new IndexExpensesViewModel()
-                {
-                    ExpensesDto = condoExpenses,
-                    CondominiumName = condominiumDto.CondoName,
-                };
-                return View(model);
+                
+                return View(condosExpenses);
 
             }
             catch (Exception)

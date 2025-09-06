@@ -7,7 +7,7 @@ namespace ProjectCondoManagement.Data.Repositories.Finances.Interfaces
 {
     public interface IExpenseRepository : IGenericRepository<Expense, DataContextFinances>
     {
-        Task<List<Expense>> GetExpensesFromCondominium(Condominium condoManagerCondo);
+        Task<List<Expense>> GetExpensesFromCondominium(Condominium condo);
 
         List<SelectListItem> GetExpenseTypeList();
 

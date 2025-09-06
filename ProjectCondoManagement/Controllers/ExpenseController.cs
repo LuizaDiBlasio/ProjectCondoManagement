@@ -3,8 +3,10 @@ using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Finances;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
 using System.Text.Json;
@@ -24,9 +26,10 @@ namespace ProjectCondoManagement.Controllers
         private readonly ICondominiumRepository _condominiumRepository;
         private readonly IExpenseRepository _expensesRepository;
         private readonly IPaymentRepository _paymentsRepository;
+        private readonly DataContextCondos _dataContextCondos;
 
         public ExpenseController(DataContextFinances dataContextFinances, IConverterHelper converterHelper, IUserHelper userHelper, ICondominiumRepository condominiumRepository,
-            IExpenseRepository expenseRepository, IPaymentRepository paymentsRepository)
+            IExpenseRepository expenseRepository, IPaymentRepository paymentsRepository, DataContextCondos dataContextCondos)
         {
             _dataContextFinances = dataContextFinances;
             _converterHelper = converterHelper;
@@ -34,39 +37,45 @@ namespace ProjectCondoManagement.Controllers
             _condominiumRepository = condominiumRepository;
             _expensesRepository = expenseRepository;
             _paymentsRepository = paymentsRepository;
+            _dataContextCondos = dataContextCondos;
         }
 
 
         // GET: Expense/GetExpensesFromCondominium
-        [Microsoft.AspNetCore.Mvc.HttpPost("GetExpensesFromCondominium")]
-        public async Task<ActionResult<List<ExpenseDto>>> GetExpensesFromCondominium([FromBody] JsonElement condoManagerEmail)
+        [Microsoft.AspNetCore.Mvc.HttpGet("GetExpensesFromCondominiums")]
+        public async Task<ActionResult<List<CondominiumWithExpensesDto>>> GetExpensesFromCondominiums()
         {
-            var email = condoManagerEmail.GetString();
+            var email = this.User.Identity?.Name;
 
-            var user = await _userHelper.GetUserByEmailAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
 
-            if (user == null)
+            var condominiums =  _condominiumRepository.GetAll(_dataContextCondos).Where(c => c.ManagerUserId == user.Id).ToList();
+            if (condominiums == null)
             {
-                return NotFound();
+                return new List<CondominiumWithExpensesDto>();
             }
 
-            var condoManagerCondo = await _condominiumRepository.GetCondoManagerCondominium(user.Id);
+            var condosWithExpensesDto = new List<CondominiumWithExpensesDto>();
 
-            if (condoManagerCondo == null)
+            foreach (var condo in condominiums)
             {
-                return NotFound();
+                var condoExpenses = await _expensesRepository.GetExpensesFromCondominium(condo);
+
+                var condoExpensesDto = condoExpenses?.Select(e => _converterHelper.ToExpenseDto(e, false)).ToList() ?? new List<ExpenseDto>();
+
+
+                var condoWithExpensessDto = new CondominiumWithExpensesDto()
+                {
+                    CondominiumId = condo.Id,
+                    CondoName = condo.CondoName,
+                    ExpensesDto = condoExpensesDto
+                };
+
+                condosWithExpensesDto.Add(condoWithExpensessDto);
             }
 
-            var condominiumExpenses = await _expensesRepository.GetExpensesFromCondominium(condoManagerCondo);
 
-            if (condominiumExpenses == null)
-            {
-                return NotFound();
-            }
-
-            var condominiumExpensesDto = condominiumExpenses?.Select(e => _converterHelper.ToExpenseDto(e, false)) ?? new List<ExpenseDto>();
-
-            return Ok(condominiumExpensesDto);
+            return Ok(condosWithExpensesDto);
 
         }
 

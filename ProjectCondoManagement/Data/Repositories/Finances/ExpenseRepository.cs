@@ -17,11 +17,12 @@ namespace ProjectCondoManagement.Data.Repositories.Finances
         {
             _dataContextFinances = dataContextFinances;
         }
-        public async Task<List<Expense>> GetExpensesFromCondominium(Condominium condoManagerCondo)
+        public async Task<List<Expense>> GetExpensesFromCondominium(Condominium condo)
         {
+            
             return await _dataContextFinances.Expenses
-                        .Where(e => e.CondominiumId == condoManagerCondo.Id)
-                        .ToListAsync();
+                       .Where(e => e.CondominiumId == condo.Id)
+                       .ToListAsync();
         }
 
         public List<SelectListItem> GetExpenseTypeList()
