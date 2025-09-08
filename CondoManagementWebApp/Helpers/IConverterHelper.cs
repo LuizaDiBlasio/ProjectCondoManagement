@@ -45,5 +45,11 @@ namespace CondoManagementWebApp.Helpers
         List<SelectListItem> ToCondosSelectList(List<CondominiumDto> condominiumList);
 
         MeetingDto ToNewMeetingDto(CreateMeetingViewModel model);
+
+        List<SelectListItem> ToOccurrenceSelectList(List<OccurrenceDto> occurrenceList);
+
+        EditMeetingViewModel ToEditMeetingViewModel(MeetingDto meeting);
+
+        MeetingDto ToEditedMeetingDto(EditMeetingViewModel model);
     }
 }

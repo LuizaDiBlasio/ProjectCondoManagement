@@ -21,11 +21,7 @@ namespace CondoManagementWebApp.Controllers
             _converterHelper = converterHelper;
         }
 
-        //GET Index
-        //TODO fazer index
-        //my invoices
-        //condo invoices
-        //condoMembers invoices
+        
 
         //GET Invoice/InvoiceDetails/5
         [HttpGet("InvoiceDetails/{id}")]

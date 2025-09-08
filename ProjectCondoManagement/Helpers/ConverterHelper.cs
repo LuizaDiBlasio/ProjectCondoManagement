@@ -561,11 +561,33 @@ namespace ProjectCondoManagement.Helpers
                 Id = meeting.Id,
                 CondominiumId = meeting.CondominiumId,
                 DateAndTime = meeting.DateAndTime,
-                CondoMembersDto = meeting.CondoMembers.Select(c => ToCondoMemberDto(c, false)).ToList() ?? new List<CondoMemberDto>(),
-                OccurencesDto = meeting.Occurences.Select(o => ToOccurrenceDto(o, false)).ToList() ?? new List<OccurrenceDto>(),
+                Title = meeting.Title,
+                Description = meeting.Description,
+                CondoMembersDto = meeting.CondoMembers?.Select(c => ToCondoMemberDto(c, false)).ToList() ?? new List<CondoMemberDto>(),
+                OccurencesDto = meeting.Occurences?.Select(o => ToOccurrenceDto(o, false)).ToList() ?? new List<OccurrenceDto>(),
+                MeetingLink = meeting.MeetingLink,
+                IsExtraMeeting = meeting.IsExtraMeeting,
+                //DocumentDto = ToDocumentDto(meeting.Document)
 
             };
             return meetingDto;
+        }
+
+        public Meeting ToMeeting(MeetingDto meetingDto, bool isNew)
+        {
+            var meeting = new Meeting()
+            {
+                Id = isNew ? 0 : meetingDto.Id,
+                CondominiumId = meetingDto.CondominiumId,
+                DateAndTime = meetingDto.DateAndTime,
+                Title = meetingDto.Title,
+                Description = meetingDto.Description,
+                CondoMembers = meetingDto.CondoMembersDto?.Select(c => ToCondoMember(c)).ToList()?? new List<CondoMember>(),
+                Occurences = meetingDto.OccurencesDto?.Select(o => ToOccurrence(o,false)).ToList() ?? new List<Occurrence>(),
+                MeetingLink=meetingDto.MeetingLink,
+                IsExtraMeeting = meetingDto.IsExtraMeeting,
+            };
+            return meeting; 
         }
     }
     

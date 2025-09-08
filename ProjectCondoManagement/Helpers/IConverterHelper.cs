@@ -69,5 +69,7 @@ namespace ProjectCondoManagement.Helpers
 
         MeetingDto ToMeetingDto(Meeting meeting);
 
+        Meeting ToMeeting(MeetingDto meetingDto, bool isNew);
+
     }
 }

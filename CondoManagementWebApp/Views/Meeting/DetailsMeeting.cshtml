@@ -1,0 +1,150 @@
+﻿@model CondoManagementWebApp.Models.MeetingDetailsViewModel
+
+@{
+	ViewData["Title"] = "Meeting Details";
+}
+
+<div class="content-body">
+	<div class="container-fluid">
+		<div class="row page-titles mx-0">
+			<div class="col-sm-6 p-md-0">
+				<div class="welcome-text">
+					<h4>Meeting Details</h4>
+				</div>
+			</div>
+			<div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+					<li class="breadcrumb-item active"><a href="javascript:void(0)">Meeting Details</a></li>
+				</ol>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xl-12 col-xxl-12">
+				<div class="card">
+					<div class="card-header">
+						<h4 class="card-title">Meeting Info</h4>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-md-6 mb-3">
+								<label>Subject</label>
+								<p>@Html.DisplayFor(model => model.MeetingDto.Title)</p>
+							</div>
+							<div class="col-md-6 mb-3">
+								<label>Condominium</label>
+								<p>@Html.DisplayFor(model => model.CondominiumDto.CondoName)</p>
+							</div>
+							<div class="col-md-6 mb-3">
+								<label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.MeetingDto.DateAndTime)</label>
+								<p>@Model.MeetingDto.DateAndTime.ToString("MM/dd/yyyy HH:mm")</p>
+							</div>
+							<div class="col-md-6 mb-3">
+								<label class="form-label font-weight-bold">Meeting Type</label>
+								@if (Model.MeetingDto.IsExtraMeeting)
+								{
+									<p>Extra</p>
+								}
+								else
+								{
+									<p>Regular</p>
+								}
+								
+							</div>
+							<div class="col-md-12 mb-3">
+								<label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.MeetingDto.Description)</label>
+								<p>@Html.DisplayFor(model => model.MeetingDto.Description)</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-12 col-xxl-12 mt-4">
+				<div class="card">
+					<div class="card-header">
+						<h4 class="card-title">Attending Members</h4>
+					</div>
+					<div class="card-body">
+						@if (!Model.MeetingDto.CondoMembersDto.Any())
+						{
+							<p>No members were invited to this meeting.</p>
+						}
+						else
+						{
+							<div class="table-responsive">
+								<table class="table table-striped table-hover">
+									<thead>
+										<tr>
+											<th></th>
+											<th>Name</th>
+											<th>Email</th>
+										</tr>
+									</thead>
+									<tbody>
+										@foreach (var member in Model.MeetingDto.CondoMembersDto)
+										{
+											<tr>
+												<td><img src="@(member.ImageFullPath)" alt="User Image" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" /></td>
+												<td>@member.FullName</td>
+												<td>@member.Email</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-12 col-xxl-12 mt-4">
+				<div class="card">
+					<div class="card-header">
+						<h4 class="card-title">Associated Occurrences</h4>
+					</div>
+					<div class="card-body">
+						@if (!Model.MeetingDto.OccurencesDto.Any())
+						{
+							<p>No occurrences were associated with this meeting.</p>
+						}
+						else
+						{
+							<div class="table-responsive">
+								<table class="table table-striped table-hover">
+									<thead>
+										<tr>
+											<th>Subject</th>
+											<th>Date</th>
+										</tr>
+									</thead>
+									<tbody>
+										@foreach (var occurrence in Model.MeetingDto.OccurencesDto)
+										{
+											<tr>
+												<td>@occurrence.Subject</td>
+												<td>@occurrence.DateAndTime.ToShortDateString())</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="d-flex justify-content-start mt-3">
+			<a asp-action="Edit" asp-route-id="@Model.MeetingDto.Id" class="btn btn-primary me-2">Edit</a>
+			<a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+		</div>
+	</div>
+
+</div>
+
+@section Scripts {
+	@{await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+}

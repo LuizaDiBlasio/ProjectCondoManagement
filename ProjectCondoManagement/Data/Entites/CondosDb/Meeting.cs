@@ -20,8 +20,12 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public List<Occurrence> Occurences { get; set; }
 
-        public bool MeetingType { get; set; }  // (regular = false/ extra = true)
+        public bool IsExtraMeeting { get; set; }  // (regular = false/ extra = true)
 
-        public string MeetingLink { get; set; } 
+        public string MeetingLink { get; set; }
+
+        //public Document? Report { get; set; }
+
+        //public Voting Voting { get; set; }  
     }
 }

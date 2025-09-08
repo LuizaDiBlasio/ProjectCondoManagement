@@ -20,17 +20,17 @@ namespace ClassLibrary.DtoModels
 
         public DateTime DateAndTime { get; set; }
 
-        public DocumentDto Report { get; set; }
+        //public DocumentDto? Report { get; set; }
 
         public List<CondoMemberDto> CondoMembersDto { get; set; }
 
-        public VotingDto? Voting { get; set; }
+        //public VotingDto? Voting { get; set; }
 
-        public int? VotingId { get; set; }
+        //public int? VotingId { get; set; }
 
         public List<OccurrenceDto> OccurencesDto { get; set; }
 
-        public bool MeetingType { get; set; }  // (regular/extra)
+        public bool IsExtraMeeting { get; set; }  // (regular/extra)
 
         public string MeetingLink { get; set; }
     }

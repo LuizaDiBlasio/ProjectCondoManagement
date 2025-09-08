@@ -289,12 +289,21 @@ namespace CondoManagementWebApp.Helpers
             }).ToList();
         }
 
+        public List<SelectListItem> ToOccurrenceSelectList(List<OccurrenceDto> occurrenceList)
+        {
+            return occurrenceList.Select(o => new SelectListItem
+            {
+                Value = o.Id.ToString(),
+                Text = o.Subject.ToString()
+            }).ToList();
+        }
+
         public MeetingDto ToNewMeetingDto(CreateMeetingViewModel model)
         {
             var meetignDto = new MeetingDto()
             {
                 Id = 0, 
-                CondominiumId = model.CondominiumId,    
+                CondominiumId = model.CondominiumId.Value,    
                 DateAndTime = model.DateAndTime.Value, 
                 Title = model.Title,
                 Description = model.Description,
@@ -302,5 +311,33 @@ namespace CondoManagementWebApp.Helpers
             };
             return meetignDto;  
         }
+
+        public EditMeetingViewModel ToEditMeetingViewModel(MeetingDto meeting)
+        {
+            var model = new EditMeetingViewModel()
+            {
+                Id = meeting.Id,
+                CondominiumId = meeting.CondominiumId,
+                DateAndTime = meeting.DateAndTime,
+                Title = meeting.Title,  
+                Description = meeting.Description,  
+                MeetingType = meeting.IsExtraMeeting,
+            };
+            return model;   
+        }
+
+        public MeetingDto ToEditedMeetingDto(EditMeetingViewModel model)
+        {
+            var meetingDto = new MeetingDto()
+            {
+                Id = model.Id,
+                CondominiumId = model.CondominiumId.Value,
+                DateAndTime = model.DateAndTime.Value,
+                Title = model.Title,    
+                Description = model.Description,    
+                IsExtraMeeting = model.MeetingType,
+            };
+            return meetingDto;  
+        }  
     }
 }

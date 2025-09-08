@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Repositories.Condos;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
 
@@ -20,14 +21,19 @@ namespace ProjectCondoManagement.Controllers
         private readonly IConverterHelper _converterHelper;
         private readonly IUserHelper _userHelper;
         private readonly IUnitRepository _unitRepository;
+        private readonly ICondominiumRepository _condominiumRepository;
+        private readonly DataContextCondos _dataContextCondos;
 
-        public CondoMembersController(DataContextCondos context, ICondoMemberRepository condoMemberRepository, IConverterHelper converterHelper, IUserHelper userHelper,IUnitRepository unitRepository)
+        public CondoMembersController(DataContextCondos context, ICondoMemberRepository condoMemberRepository, IConverterHelper converterHelper, IUserHelper userHelper,IUnitRepository unitRepository,
+                                        ICondominiumRepository condominiumRepository, DataContextCondos dataContextCondos)
         {
             _context = context;
             _condoMemberRepository = condoMemberRepository;
             _converterHelper = converterHelper;
             _userHelper = userHelper;
             _unitRepository = unitRepository;
+            _condominiumRepository = condominiumRepository;
+            _dataContextCondos = dataContextCondos;
         }
 
         // GET: api/CondoMembers
@@ -265,6 +271,39 @@ namespace ProjectCondoManagement.Controllers
             return Ok(memberDtos);
         }
 
+
+        [HttpGet("ByManager")]
+        public async Task<ActionResult<List<CondoMemberDto>>> GetMembersByManager()
+        {
+            var email = this.User.Identity?.Name;
+
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+
+            var condominiums = _condominiumRepository.GetAll(_dataContextCondos).Where(c => c.ManagerUserId == user.Id).ToList();
+            if (condominiums == null)
+            {
+                return new List<CondoMemberDto>();
+            }
+
+            var condominiumIds = condominiums.Select(c => c.Id).ToList();
+
+            //buscar  members que contenham o id do condominio iguais aos da lista de ids
+
+            var members = new List<CondoMember>();
+
+            foreach (var id in condominiumIds)
+            {
+               members = await _condoMemberRepository.GetAll(_context)
+              .Include(m => m.Units)
+                  .ThenInclude(u => u.Condominium)
+              .Where(m => m.Units.Any(u => u.CondominiumId == id))
+              .ToListAsync();
+            }
+
+            var membersDto = members.Select(m => _converterHelper.ToCondoMemberDto(m)).ToList();
+
+            return membersDto;
+        }
 
     }
 }
