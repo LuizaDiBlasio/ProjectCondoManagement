@@ -2,6 +2,8 @@
 using ClassLibrary.DtoModels;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
 {
@@ -16,6 +18,8 @@ namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
         Task UpdateCondominiumsCompanyId(Company company);
 
         Task<List<CondoMember>> GetCondoCondomembers(int condoId);
+
+        Task<Response<object>> LinkFinancialAccountWithTransactions(List<CondominiumDto> condominiums);
 
         Task<Response<object>> LinkFinancialAccount(List<CondominiumDto> condominiums);
     }

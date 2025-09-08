@@ -5,9 +5,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Finances;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
+using ProjectCondoManagement.Migrations.CondosDb;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -22,13 +27,21 @@ namespace ProjectCondoManagement.Controllers
         private readonly IUserHelper _userHelper;
         private readonly ICondominiumHelper _condominiumHelper;
         private readonly IFinancialAccountRepository _financialAccountRepository;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly DataContextFinances _dataContextFinances;
+        private readonly ICondoMemberRepository _condoMemberRepository;
+        private readonly IInvoiceRepository _invoiceRepository;
 
         public CondominiumsController(DataContextCondos context,
                                       ICondominiumRepository condominiumRepository,
                                       IConverterHelper converterHelper,
                                       IUserHelper userHelper,
                                       ICondominiumHelper condominiumHelper,
-                                      IFinancialAccountRepository financialAccounRepository)
+                                      IFinancialAccountRepository financialAccounRepository,
+                                      IPaymentRepository paymentRepository,
+                                      DataContextFinances dataContextFinances,
+                                      ICondoMemberRepository condoMemberRepository,
+                                      IInvoiceRepository invoiceRepository)
         {
             _context = context;
             _condominiumRepository = condominiumRepository;
@@ -36,7 +49,10 @@ namespace ProjectCondoManagement.Controllers
             _userHelper = userHelper;
             _condominiumHelper = condominiumHelper;
             _financialAccountRepository = financialAccounRepository;
-
+            _paymentRepository = paymentRepository;
+            _dataContextFinances = dataContextFinances;
+            _condoMemberRepository = condoMemberRepository;
+            _invoiceRepository = invoiceRepository;
         }
 
         // GET: api/Condominiums
@@ -61,8 +77,7 @@ namespace ProjectCondoManagement.Controllers
                 return new List<CondominiumDto>();
             }
 
-
-            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c)).ToList();
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList();
 
             if (condominiumsDtos == null)
             {
@@ -88,7 +103,7 @@ namespace ProjectCondoManagement.Controllers
                 return NotFound();
             }
 
-            var condominiumDto = _converterHelper.ToCondominiumDto(condominium);
+            var condominiumDto = _converterHelper.ToCondominiumDto(condominium, false);
             if (condominiumDto == null)
             {
                 return NotFound();
@@ -225,6 +240,67 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
+
+        [HttpGet("GetCondoManagerCondominiumsWithPayments/{email}")]
+        public async Task<ActionResult<List<CondominiumWithPaymentsDto>>> GetCondoManagerCondominiumsWithPayments(string email)
+        {
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+
+            var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.ManagerUserId == user.Id).ToListAsync();
+            if (condominiums == null)
+            {
+                return new List<CondominiumWithPaymentsDto>();
+            }
+
+
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList();
+
+            if (condominiumsDtos == null)
+            {
+                return new List<CondominiumWithPaymentsDto>();
+            }
+
+            // FinancialAccountIds de todos os condomínios
+            var condominiumFinancialAccountIds = condominiums.Select(c => c.FinancialAccountId)
+                                                             .Where(id => id.HasValue)
+                                                             .Select(id => id.Value)
+                                                             .ToList();
+
+            // Buscar todos os pagamentos onde  Fin. acc Id do pagante == Fin. acc Id Condo.
+            var allPayments = await _paymentRepository.GetAll(_dataContextFinances)
+                .Where(p => condominiumFinancialAccountIds.Contains(p.PayerFinancialAccountId))
+                .Include(p => p.Transaction)
+                .Include(p => p.Expenses)
+                .ToListAsync();
+
+            // Converter 
+            var allPaymentsDto = allPayments.Select(p => _converterHelper.ToPaymentDto(p, false)).ToList();
+
+            //Lista a ser populada
+            var condosWithPaymentsDtoList = new List<CondominiumWithPaymentsDto>();
+
+            foreach (var condo in condominiums)
+            {
+                // Buscar pagamentos para o condomínio atual, pelo FinancialAccountId
+                var condoPaymentsDto = allPaymentsDto
+                    .Where(p => p.PayerFinancialAccountId == condo.FinancialAccountId)
+                    .ToList();
+
+                
+                var condominiumWithPaymentsDto = new CondominiumWithPaymentsDto()
+                {
+                    CondominiumId = condo.Id,
+                    CondoName = condo.CondoName,
+                    CondoPayments = condoPaymentsDto
+                };
+
+                condosWithPaymentsDtoList.Add(condominiumWithPaymentsDto);
+            }
+
+            return condosWithPaymentsDtoList;
+
+        }
+
         // GET: api/Condominiums/ByManager
         [HttpGet("ByManager")]
         public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetManagerCondos()
@@ -257,30 +333,23 @@ namespace ProjectCondoManagement.Controllers
 
 
 
-
-
-
-        //Metodo auxiliar para expenses
-        [HttpPost("GetCondoManagerCondominiumDto")]
-        public async Task<IActionResult> GetCondoManagerCondominiumDto([FromBody] string condoManagerEmail)
+        [HttpGet("ByCondoMember")]
+        public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetCondoMemberCondos()
         {
-            var user = await _userHelper.GetUserByEmailAsync(condoManagerEmail);
+            var email = this.User.Identity?.Name;
 
-            if (user == null)
+            var condoMember = await _condoMemberRepository.GetCondoMemberByEmailAsync(email);
+
+            var condominiums = condoMember.Units.Select(u => u.Condominium).ToList();
+            if (condominiums == null)
             {
-                return NotFound();
+                return new List<CondominiumDto>();
             }
 
-            var condoManagerCondo = await _condominiumRepository.GetCondoManagerCondominium(user.Id);
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList();
 
-            if (condoManagerCondo == null)
-            {
-                return NotFound();
-            }
 
-            var condoManagerCondoDto = _converterHelper.ToCondominiumDto(condoManagerCondo);
-
-            return Ok(condoManagerCondoDto);
+            return condominiumsDtos;
         }
 
     }

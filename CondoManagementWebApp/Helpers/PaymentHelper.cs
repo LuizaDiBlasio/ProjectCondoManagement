@@ -9,7 +9,6 @@ namespace CondoManagementWebApp.Helpers
         {
             var selectList = new List<SelectListItem>
             {
-                new SelectListItem{Value = "0", Text = "Select a payment method"},
                 new SelectListItem{Value = "1", Text = "MbWay"},
                 new SelectListItem{Value = "2", Text = "Credit card"},
                 new SelectListItem{Value = "3", Text = "Omah Wallet"}
@@ -39,14 +38,12 @@ namespace CondoManagementWebApp.Helpers
 
             if (userRole == "CondoMember")
             {
-                selectList.Add(new SelectListItem { Value = "0", Text = "Select a recipient type" });
                 selectList.Add(new SelectListItem { Value = "1", Text = "Condominium" });
                 selectList.Add(new SelectListItem { Value = "3", Text = "External recipient" });
             }
 
             if (userRole == "CondoManager")
             {
-                selectList.Add(new SelectListItem { Value = "0", Text = "Select a recipient type" });
                 selectList.Add(new SelectListItem { Value = "2", Text = "Company" });
                 selectList.Add(new SelectListItem { Value = "3", Text = "External recipient" });
 

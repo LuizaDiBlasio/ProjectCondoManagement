@@ -17,5 +17,7 @@ namespace CondoManagementWebApp.Models
 
         public PaymentDto Payment { get; set; }
 
+        public int CondominiumFinancialAccountId { get; set; } 
+
     }
 }

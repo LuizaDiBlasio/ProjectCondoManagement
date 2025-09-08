@@ -92,6 +92,7 @@
                             <ul aria-expanded="false">
                                 <li><a asp-controller="Condominium" asp-action="Index">Condominiums</a></li>
                                 <li><a asp-controller="CondoMember" asp-action="Index">Condo Members</a></li>
+                                <li><a asp-controller="Occurrence" asp-action="IndexOccurrences">Occurrences</a></li>
                             </ul>
                         </li>
                         <li>
@@ -103,6 +104,7 @@
                                 <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
                                 <li><a asp-controller="Payment" asp-action="IndexCondominiumPayments">Payments</a></li>
                                 <li><a asp-controller="Expense" asp-action="IndexExpenses">Expenses</a></li>
+                                <li><a asp-controller="Invoice" asp-action="IndexCondominiumInvoices">Invoices</a></li>
                                 <li><a asp-controller="FinancialAccounts" asp-action="CondoAccounts" asp-route-email="@User.FindFirst(ClaimTypes.Name)?.Value">Condominiums Accounts</a></li>
                             </ul>
                         </li>
@@ -133,6 +135,7 @@
                                <ul aria-expanded="false">
                                    <li><a asp-controller="Condominium" asp-action="Index">Condominiums</a></li>
                                    <li><a asp-controller="CondoMember" asp-action="Index">Condo Members</a></li>
+                                   <li><a asp-controller="Company" asp-action="Edit">Manage condos</a></li>
                                </ul>
                            </li>
 
@@ -178,7 +181,7 @@
                             <ul aria-expanded="false">
                                 <li><a asp-controller="Units" asp-action="MemberUnits">My Units</a></li>                                
                                 <li><a asp-controller="Condominium" asp-action="MyCondos">My Condos</a></li>
-
+                                <li><a asp-controller="Occurrence" asp-action="IndexOccurrences">Occurrences</a></li>
                             </ul>
                         </li>
 
@@ -192,8 +195,9 @@
                                 </a>
                                 <ul aria-expanded="false">
                                     <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
-                                    <li><a asp-controller="Payment" asp-action="IndexCondoMemberPayments">My Payments</a></li>
-                                    <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Financial Account</a></li>
+                                    <li><a asp-controller="Payment" asp-action="IndexCondoMemberPayments">Payments</a></li>
+                                    <li><a asp-controller="Invoice" asp-action="IndexCondoMemberInvoices">Invoices</a></li>
+                                     <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Financial Account</a></li>
                                 </ul>
                             </li>
 

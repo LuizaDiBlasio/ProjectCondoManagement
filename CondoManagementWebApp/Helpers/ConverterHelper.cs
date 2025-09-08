@@ -197,17 +197,7 @@ namespace CondoManagementWebApp.Helpers
             return messageDto;
         }
 
-        public ExpenseDto ToExpenseDto(CreateEditExpenseViewModel model)
-        {
-            var expenseDto = new ExpenseDto()
-            {
-                Id = model.Id,
-                Amount = model.Amount,
-                Detail = model.Detail,
-                ExpenseTypeDto = model.ExpenseTypeDto,
-            };
-            return expenseDto;  
-        }
+       
 
         public PaymentDto FromOneTimeToPaymentDto(CreateOneTimePaymentViewModel model)
         {
@@ -215,22 +205,12 @@ namespace CondoManagementWebApp.Helpers
             {
                 DueDate = model.DueDate.Value,
                 PayerFinancialAccountId = model.PayerFinancialAccountId,
-                CondominiumId = model.CondominiumId,
+                CondominiumId = model.CondominiumId.Value,
             };
             return paymentDto;
         }
 
-        public PaymentDto FromRecurringToPaymentDto(CreateRecurringPaymentViewModel model)
-        {
-            var paymentDto = new PaymentDto()
-            {
-                DueDate = model.DueDate.Value,
-                PayerFinancialAccountId = model.PayerFinancialAccountId,
-                CondominiumId = model.CondominiumId,
-                SelectedExpensesIds = model.SelectedExpensesIds,
-            };
-            return paymentDto;  
-        }
+        
 
 
         public UnitDto ToUnitDto(UnitDtoViewModel model)
@@ -246,5 +226,125 @@ namespace CondoManagementWebApp.Helpers
 
             return unitDto;
         }
+
+        public OccurrenceDto ToOccurenceDto(CreateOccurrenceViewModel model)
+        {
+            var ocurrenceDto = new OccurrenceDto()
+            {
+                Id = 0,
+                Details = model.Details,
+                DateAndTime = model.DateAndTime.Value,
+                Subject = model.Subject,
+                CondominiumId = model.CondominiumId.Value
+            };
+            return ocurrenceDto;    
+        }
+
+        public OccurrenceDto ToEditedOccurrenceDto(EditOccurrenceViewModel model)
+        {
+            var occurrenceDto = new OccurrenceDto()
+            {
+                Id = model.Id,
+                Details = model.Details,
+                DateAndTime = model.DateAndTime.Value,
+                Subject = model.Subject,  
+                CondominiumId= model.CondominiumId.Value    
+            };
+            return occurrenceDto;   
+        }
+
+        public EditOccurrenceViewModel ToEditOccurrenceView(OccurrenceDto occurrenceDto, List<int> selectedIds)
+        {
+           
+            var model = new EditOccurrenceViewModel()
+            {
+                Details = occurrenceDto.Details,
+                Subject = occurrenceDto.Subject,
+                SelectedUnitIds = selectedIds,
+                IsResolved = occurrenceDto.IsResolved,
+                DateAndTime = occurrenceDto.DateAndTime,
+                Id = occurrenceDto.Id,
+                CondominiumId = occurrenceDto.CondominiumId,    
+            };
+            return model;
+        }
+
+        public List<SelectListItem> ToCondoMembersSelectList(List<CondoMemberDto> condomembersList)
+        {
+            return condomembersList.Select(cm => new SelectListItem
+            {
+                Value = cm.Id.ToString(),
+                Text = cm.ToString()
+            }).ToList();
+        }
+
+        public List<SelectListItem> ToOccurrrencesSelectList(List<OccurrenceDto> occurrencesList)
+        {
+            return occurrencesList.Select(o => new SelectListItem
+            {
+                Value = o.Id.ToString(),
+                Text = o.ToString()
+            }).ToList();
+        }
+
+        public List<SelectListItem> ToCondosSelectList(List<CondominiumDto> condominiumList)
+        {
+            return condominiumList.Select(cm => new SelectListItem
+            {
+                Value = cm.Id.ToString(),
+                Text = cm.CondoName.ToString()
+            }).ToList();
+        }
+
+        public List<SelectListItem> ToOccurrenceSelectList(List<OccurrenceDto> occurrenceList)
+        {
+            return occurrenceList.Select(o => new SelectListItem
+            {
+                Value = o.Id.ToString(),
+                Text = o.Subject.ToString()
+            }).ToList();
+        }
+
+        public MeetingDto ToNewMeetingDto(CreateMeetingViewModel model)
+        {
+            var meetignDto = new MeetingDto()
+            {
+                Id = 0, 
+                CondominiumId = model.CondominiumId.Value,    
+                DateAndTime = model.DateAndTime.Value, 
+                Title = model.Title,
+                Description = model.Description,
+
+            };
+            return meetignDto;  
+        }
+
+        public EditMeetingViewModel ToEditMeetingViewModel(MeetingDto meeting)
+        {
+            var model = new EditMeetingViewModel()
+            {
+                Id = meeting.Id,
+                CondominiumId = meeting.CondominiumId,
+                DateAndTime = meeting.DateAndTime,
+                Title = meeting.Title,  
+                Description = meeting.Description,  
+                MeetingType = meeting.IsExtraMeeting,
+            };
+            return model;   
+        }
+
+        public MeetingDto ToEditedMeetingDto(EditMeetingViewModel model)
+        {
+            var meetingDto = new MeetingDto()
+            {
+                Id = model.Id,
+                CondominiumId = model.CondominiumId.Value,
+                DateAndTime = model.DateAndTime.Value,
+                Title = model.Title,    
+                Description = model.Description,    
+                IsExtraMeeting = model.MeetingType,
+            };
+            return meetingDto;  
+        }  
     }
 }

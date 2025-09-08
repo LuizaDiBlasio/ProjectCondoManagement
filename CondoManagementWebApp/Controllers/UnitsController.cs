@@ -668,5 +668,12 @@ namespace CondoManagementWebApp.Controllers
             return existingUnits.Any(u => u.Floor == floor && u.Door.Equals(door, StringComparison.OrdinalIgnoreCase));
         }
 
+       
+        [HttpGet("GetCondoUnitsList/{id}")]
+        public async Task<List<SelectListItem>> GetCondoUnits(int id)
+        {
+            return await _apiCallService.GetAsync<List<SelectListItem>>($"api/Units/GetCondoUnitsList/{id}");
+        }
+
     }
 }

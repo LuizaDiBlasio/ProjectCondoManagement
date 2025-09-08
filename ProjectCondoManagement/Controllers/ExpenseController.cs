@@ -3,8 +3,10 @@ using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Finances;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
 using System.Text.Json;
@@ -24,9 +26,10 @@ namespace ProjectCondoManagement.Controllers
         private readonly ICondominiumRepository _condominiumRepository;
         private readonly IExpenseRepository _expensesRepository;
         private readonly IPaymentRepository _paymentsRepository;
+        private readonly DataContextCondos _dataContextCondos;
 
         public ExpenseController(DataContextFinances dataContextFinances, IConverterHelper converterHelper, IUserHelper userHelper, ICondominiumRepository condominiumRepository,
-            IExpenseRepository expenseRepository, IPaymentRepository paymentsRepository)
+            IExpenseRepository expenseRepository, IPaymentRepository paymentsRepository, DataContextCondos dataContextCondos)
         {
             _dataContextFinances = dataContextFinances;
             _converterHelper = converterHelper;
@@ -34,39 +37,45 @@ namespace ProjectCondoManagement.Controllers
             _condominiumRepository = condominiumRepository;
             _expensesRepository = expenseRepository;
             _paymentsRepository = paymentsRepository;
+            _dataContextCondos = dataContextCondos;
         }
 
 
         // GET: Expense/GetExpensesFromCondominium
-        [Microsoft.AspNetCore.Mvc.HttpPost("GetExpensesFromCondominium")]
-        public async Task<ActionResult<List<ExpenseDto>>> GetExpensesFromCondominium([FromBody] JsonElement condoManagerEmail)
+        [Microsoft.AspNetCore.Mvc.HttpGet("GetExpensesFromCondominiums")]
+        public async Task<ActionResult<List<CondominiumWithExpensesDto>>> GetExpensesFromCondominiums()
         {
-            var email = condoManagerEmail.GetString();
+            var email = this.User.Identity?.Name;
 
-            var user = await _userHelper.GetUserByEmailAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
 
-            if (user == null)
+            var condominiums =  _condominiumRepository.GetAll(_dataContextCondos).Where(c => c.ManagerUserId == user.Id).ToList();
+            if (condominiums == null)
             {
-                return NotFound();
+                return new List<CondominiumWithExpensesDto>();
             }
 
-            var condoManagerCondo = await _condominiumRepository.GetCondoManagerCondominium(user.Id);
+            var condosWithExpensesDto = new List<CondominiumWithExpensesDto>();
 
-            if (condoManagerCondo == null)
+            foreach (var condo in condominiums)
             {
-                return NotFound();
+                var condoExpenses = await _expensesRepository.GetExpensesFromCondominium(condo);
+
+                var condoExpensesDto = condoExpenses?.Select(e => _converterHelper.ToExpenseDto(e, false)).ToList() ?? new List<ExpenseDto>();
+
+
+                var condoWithExpensessDto = new CondominiumWithExpensesDto()
+                {
+                    CondominiumId = condo.Id,
+                    CondoName = condo.CondoName,
+                    ExpensesDto = condoExpensesDto
+                };
+
+                condosWithExpensesDto.Add(condoWithExpensessDto);
             }
 
-            var condominiumExpenses = await _expensesRepository.GetExpensesFromCondominium(condoManagerCondo);
 
-            if (condominiumExpenses == null)
-            {
-                return NotFound();
-            }
-
-            var condominiumExpensesDto = condominiumExpenses?.Select(e => _converterHelper.ToExpenseDto(e, false)) ?? new List<ExpenseDto>();
-
-            return Ok(condominiumExpensesDto);
+            return Ok(condosWithExpensesDto);
 
         }
 
@@ -112,65 +121,6 @@ namespace ProjectCondoManagement.Controllers
                 return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to enter expense due to error" });
             }
         }
-
-
-
-        // POST: Expense/Edit/5
-        [Microsoft.AspNetCore.Mvc.HttpPost("EditExpense")]
-        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> EditExpense([FromBody] ExpenseDto expenseDto)
-        {
-            if (expenseDto == null)
-            {
-                return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to modify, expense not found" });
-            }
-
-            try
-            {
-                var expense = _converterHelper.ToExpense(expenseDto, false);
-
-                if (expense.PaymentId != null)
-                {
-                    return Ok(new Response<object> { IsSuccess = false, Message = "Unable to modify, expense posted in a payment" });
-                }
-
-                await _expensesRepository.UpdateAsync(expense, _dataContextFinances);
-
-                return Ok(new Response<object>() { IsSuccess = true });
-            }
-            catch
-            {
-                return BadRequest(new Response<object>() { IsSuccess = false, Message = "Unable to modify expense due to error" });
-            }
-        }
-
-        // GET: Expense/Delete/5
-        [Microsoft.AspNetCore.Mvc.HttpPost("Delete")]
-        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Delete([FromBody] int id)
-        {
-            try
-            {
-                var expense = await _expensesRepository.GetByIdAsync(id, _dataContextFinances);
-
-                if (expense == null)
-                {
-                    return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to delete, expensa not found" });
-                }
-
-                if (expense.PaymentId != null)
-                {
-                    return Ok(new Response<object> { IsSuccess = false, Message = "Unable to delete, expense posted in a payment" });
-                }
-
-                await _expensesRepository.DeleteAsync(expense, _dataContextFinances);
-
-                return Ok(new Response<object>() { IsSuccess = true });
-            }
-            catch
-            {
-                return BadRequest(new Response<object> { IsSuccess = false, Message = "Unable to delete due to server error" });
-            }
-        }
-
 
 
 

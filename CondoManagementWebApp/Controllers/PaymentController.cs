@@ -5,6 +5,7 @@ using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Shared;
 using System.Threading.Tasks;
 using Vereyon.Web;
 
@@ -30,21 +31,20 @@ namespace CondoManagementWebApp.Controllers
 
         // GET: PaymentController
         [HttpGet("IndexCondominiumPayments")]
-        public async Task<ActionResult<List<PaymentDto>>> IndexCondominiumPayments()
+        public async Task<ActionResult<List<CondominiumWithPaymentsDto>>> IndexCondominiumPayments()
         {
             try
             {
                 //achar o condominio do condoManager
-                var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-                if (condoManagerCondo == null)
+                var condosWithPayments = await _apiCallService.GetAsync<List<CondominiumWithPaymentsDto>>($"api/Condominiums/GetCondoManagerCondominiumsWithPayments/{this.User.Identity.Name}") ;
+                if (condosWithPayments == null)
                 {
                     _flashMessage.Danger("You are not managing any condominiums currently");
                     return View(new List<PaymentDto>());
                 }
+   
 
-                var condoPayments = await _apiCallService.GetByQueryAsync<List<PaymentDto>>("api/Payment/GetCondoPayments", $"{condoManagerCondo.Id}");
-
-                return View(condoPayments);
+                return View(condosWithPayments);
 
             }
             catch
@@ -60,15 +60,7 @@ namespace CondoManagementWebApp.Controllers
         {
             try
             {
-                //achar o condominio do condoManager
-                var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-                if (condoManagerCondo == null)
-                {
-                    _flashMessage.Danger("You are not managing any condominiums currently");
-                    return View(new List<PaymentDto>());
-                }
-
-                var allCondoMemeberPayments = await _apiCallService.GetByQueryAsync<List<PaymentDto>>("api/Payment/GetAllCondoMemberPayments", $"{condoManagerCondo.Id}");
+                var allCondoMemeberPayments = await _apiCallService.GetAsync<List<CondominiumWithPaymentsDto>>("api/Payment/GetAllCondoMembersPayments");
 
                 return View(allCondoMemeberPayments);
             }
@@ -85,7 +77,7 @@ namespace CondoManagementWebApp.Controllers
         {
             try
             {
-                var condoMemberPayments = await _apiCallService.GetByQueryAsync<List<PaymentDto>>("api/Condominiums/GetCondoMemberPayments", this.User.Identity.Name);
+                var condoMemberPayments = await _apiCallService.GetByQueryAsync<List<PaymentDto>>("api/Payment/GetCondoMemberPayments", this.User.Identity.Name);
 
                 if (condoMemberPayments == null)
                 {
@@ -104,6 +96,8 @@ namespace CondoManagementWebApp.Controllers
         // GET: PaymentController/Details/5
         public async Task<ActionResult> Details(int id)
         {
+            var model = new PaymentDetailsViewModel();
+
             //puxar a list de expenses
             var paymentDto = await _apiCallService.GetAsync<PaymentDto>($"api/Payment/GetPaymentDetails/{id}");
             if(paymentDto == null)
@@ -112,33 +106,11 @@ namespace CondoManagementWebApp.Controllers
                 return View(new PaymentDto());  
             }
 
+            model.PaymentDto = paymentDto;  
 
-
-            return View(paymentDto);
-        }
-
-
-        [HttpGet("CreateRecurrentPayment")]
-        // GET: PaymentController/CreateRecurringPayment
-        public async Task<ActionResult> CreateRecurrentPayment() 
-        {
-            var model = new CreateRecurringPaymentViewModel();
-
-            var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-            if (condoManagerCondo == null)
-            {
-                _flashMessage.Danger("You are not managing any condominiums currently");
-                return View(new CreateRecurringPaymentViewModel());
-            }
-
-            var expensesList = await _apiCallService.GetAsync<List<SelectListItem>>($"api/Expense/GetExpensesList/{condoManagerCondo.Id}");
-
-            if (expensesList.Any())
-            {
-                model.ExpensesToSelect = expensesList;
-            }
-
-            model.CondominiumId = condoManagerCondo.Id;
+            var condoFinancialAccount = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{paymentDto.CondominiumId}");   
+            
+            model.CondominiumFinancialAccountId = condoFinancialAccount.Id;
 
             return View(model);
         }
@@ -149,11 +121,17 @@ namespace CondoManagementWebApp.Controllers
         {
             var model = new CreateOneTimePaymentViewModel();
 
-            var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-            if (condoManagerCondo == null)
+            var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
+            if (condoManagerCondos != null && !condoManagerCondos.Any())
             {
                 _flashMessage.Danger("You are not managing any condominiums currently");
-                return View(new CreateOneTimePaymentViewModel());
+                return View("CreateOneTimePayment", new CreateOneTimePaymentViewModel());
+            }
+
+            var condosToSelectList = _converterHelper.ToCondosSelectList(condoManagerCondos);
+            if (condosToSelectList.Any())
+            {
+                model.CondosToSelect = condosToSelectList;  
             }
 
             var expenseTypeList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
@@ -162,8 +140,6 @@ namespace CondoManagementWebApp.Controllers
             {
                 model.ExpenseTypesList = expenseTypeList;
             }
-
-            model.CondominiumId = condoManagerCondo.Id;
 
             return View(model);
         }
@@ -181,14 +157,12 @@ namespace CondoManagementWebApp.Controllers
             try
             {
                 //PREENCHER MODEL (propriedades fora da view)
-                var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-                if (condoManagerCondo == null)
+                var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
+                if (condoManagerCondos != null && !condoManagerCondos.Any())
                 {
                     _flashMessage.Danger("You are not managing any condominiums currently");
                     return View("CreateOneTimePayment", new CreateOneTimePaymentViewModel());
                 }
-
-                //model.CondominiumId = condoManagerCondo.Id;
 
                 var expenseTypeList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
 
@@ -204,8 +178,8 @@ namespace CondoManagementWebApp.Controllers
                 {
                     Amount = model.ExpenseAmount,
                     Detail = model.ExpenseDetail,
-                    ExpenseTypeDto = new EnumDto() { Value = model.ExpenseTypeValue, Name = expenseType.Text },
-                    CondominiumId = model.CondominiumId,
+                    ExpenseTypeDto = new EnumDto() { Value = model.ExpenseTypeValue.Value, Name = expenseType.Text },
+                    CondominiumId = model.CondominiumId.Value,
                 };
 
 
@@ -220,9 +194,11 @@ namespace CondoManagementWebApp.Controllers
 
                 var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/CreateOneTimePayment", paymentDto);
 
-                if (apiCall.IsSuccess)
+                if (apiCall.IsSuccess && condoManagerCondos != null)
                 {
-                    if(condoManagerCondo.FinancialAccountId == paymentDto.PayerFinancialAccountId)
+                    var isCondoPayment = condoManagerCondos.Any(c => c.FinancialAccountId == paymentDto.PayerFinancialAccountId);
+
+                    if (isCondoPayment)
                     {
                         return RedirectToAction(nameof(IndexCondominiumPayments));
                     }
@@ -230,62 +206,11 @@ namespace CondoManagementWebApp.Controllers
                     {
                         return RedirectToAction(nameof(IndexAllCondoMembersPayments));
                     }
+
                 }
 
                 _flashMessage.Danger("Unable to issue payment");
                 return View("CreateOneTimePayment", model);
-            }
-            catch
-            {
-                return View("Error");
-            }
-        }
-
-        // POST: PaymentController/RequestCreateRecurringPayment
-        [HttpPost("RequestCreateRecurrentPayment")] 
-        public async Task<ActionResult> RequestCreateRecurrentPayment(CreateRecurringPaymentViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                _flashMessage.Danger("Unable to issue one time payment");
-                return View("CreateOneTimePayment", model);
-            }
-
-            try
-            {
-
-                //PREENCHER MODEL (propriedades fora da view)
-                var condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
-                if (condoManagerCondo == null)
-                {
-                    _flashMessage.Danger("You are not managing any condominiums currently");
-                    return View("CreateRecurringPayment", new CreateRecurringPaymentViewModel());
-                }
-
-                model.CondominiumId = condoManagerCondo.Id;
-
-                //CONVERTER PARA PAYMENT DTO
-                var paymentDto = _converterHelper.FromRecurringToPaymentDto(model);
-
-                //atribur propriedade fora do view model
-                paymentDto.IssueDate = DateTime.Now;
-
-                var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/CreateRecurringPayment", paymentDto);
-
-                if (apiCall.IsSuccess)
-                {
-                    if (condoManagerCondo.FinancialAccountId == paymentDto.PayerFinancialAccountId)
-                    {
-                        return RedirectToAction(nameof(IndexCondominiumPayments));
-                    }
-                    else
-                    {
-                        return RedirectToAction(nameof(IndexAllCondoMembersPayments));
-                    }
-                }
-
-                _flashMessage.Danger("Unable to issue payment");
-                return View("CreateRecurringPayment", model);
             }
             catch
             {
@@ -364,9 +289,13 @@ namespace CondoManagementWebApp.Controllers
                 }
 
             }
+            else if (model.SelectedPaymentMethodId == 0)
+            {
+                ModelState.AddModelError("SelectedPaymentMethodId", "You must select a payment method");
+            }
 
             //validação manual para account id ou external bank account
-            if(model.SelectedBeneficiaryId != 3)
+            if (model.SelectedBeneficiaryId != 3)
             {
                 if (model.BeneficiaryAccountId == null)
                 {
@@ -374,9 +303,13 @@ namespace CondoManagementWebApp.Controllers
                 }
 
             }
+            else if (model.SelectedBeneficiaryId == 0)
+            {
+                ModelState.AddModelError("SelectedBeneficiaryId", "You must select a recipient type");
+            }
             else
             {
-                if(model.ExternalRecipientBankAccount == null)
+                if (model.ExternalRecipientBankAccount == null)
                 {
                     ModelState.AddModelError("ExternalRecipientBankAccount", "Recipient's bank account is required");
                 }
@@ -431,7 +364,7 @@ namespace CondoManagementWebApp.Controllers
                 //caso seja um beneficiario externo , não atribuir a conta Omah e atribuir a conta de banco externa
                 if (model.SelectedBeneficiaryId == 3)
                 {
-                    model.BeneficiaryAccountId = null;   
+                    model.BeneficiaryAccountId = null;  
                 }
                 else //caso seja pagamento interno ver se a account do beneficiary está válida
                 {
@@ -442,6 +375,7 @@ namespace CondoManagementWebApp.Controllers
                         _flashMessage.Danger("Payment failed, recipient's Omah Wallet is inactive");
                         return View("MakePayment", model);
                     }
+
                 }
 
                     //criar transaction
@@ -506,10 +440,13 @@ namespace CondoManagementWebApp.Controllers
                     
                     return RedirectToAction("InvoiceDetails", "Invoice", new { id = paidPayment.InvoiceId });
                 }
-
-                _flashMessage.Confirmation(apiCall.Message); 
-                return View("MakePayment", model);
+                else
+                {
+                    _flashMessage.Danger(apiCall.Message);
+                    return View("MakePayment", model);
+                }
             }
+                    
             catch
             {
                 return View("Error");
@@ -582,5 +519,9 @@ namespace CondoManagementWebApp.Controllers
                 return View("Error");
             }
         }
+
+
+        
+
     }
 }

@@ -8,9 +8,7 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public int MeetingId { get; set; }
 
-        public Meeting Meeting { get; set; }
-
-        public IEnumerable<Vote> Votes { get; set; }
+        public List<Vote> Votes { get; set; }
 
         public bool Result { get; set; }
 

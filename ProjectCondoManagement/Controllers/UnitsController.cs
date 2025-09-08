@@ -1,6 +1,7 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Repositories.Condos;
@@ -185,8 +186,16 @@ namespace ProjectCondoManagement.Controllers
             return NoContent();
         }
 
+        //GetCondoUnitsList
+        [HttpGet("GetCondoUnitsList/{id}")]
+        public async Task<ActionResult<List<SelectListItem>>> GetCondoUnitsList(int id)
+        {
+            var condoUnits = await _unitRepository.GetCondoUnitsList(id);
 
-    
+            return Ok(condoUnits);  
+        }
+
+
 
 
     }

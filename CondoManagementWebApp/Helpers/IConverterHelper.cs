@@ -30,11 +30,26 @@ namespace CondoManagementWebApp.Helpers
 
         MessageDto ToMessageDto(CreateMessageViewModel model, DateTime date, string email, EnumDto status);
 
-        ExpenseDto ToExpenseDto(CreateEditExpenseViewModel model);
-
         PaymentDto FromOneTimeToPaymentDto(CreateOneTimePaymentViewModel model);
 
-        PaymentDto FromRecurringToPaymentDto(CreateRecurringPaymentViewModel model);
         UnitDto ToUnitDto(UnitDtoViewModel model);
+
+        OccurrenceDto ToOccurenceDto(CreateOccurrenceViewModel model);
+
+        OccurrenceDto ToEditedOccurrenceDto(EditOccurrenceViewModel model);
+
+        EditOccurrenceViewModel ToEditOccurrenceView(OccurrenceDto occurrenceDto, List<int> selectedIds);
+
+        List<SelectListItem> ToCondoMembersSelectList(List<CondoMemberDto> condomembersList);
+
+        List<SelectListItem> ToCondosSelectList(List<CondominiumDto> condominiumList);
+
+        MeetingDto ToNewMeetingDto(CreateMeetingViewModel model);
+
+        List<SelectListItem> ToOccurrenceSelectList(List<OccurrenceDto> occurrenceList);
+
+        EditMeetingViewModel ToEditMeetingViewModel(MeetingDto meeting);
+
+        MeetingDto ToEditedMeetingDto(EditMeetingViewModel model);
     }
 }

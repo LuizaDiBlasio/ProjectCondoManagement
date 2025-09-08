@@ -24,6 +24,14 @@ namespace ProjectCondoManagement.Data.Repositories.Finances
                                 .FirstOrDefaultAsync(p => p.Id == id);     
         }
 
-       
+        public async Task<Payment?> GetPaymentWithExpensesAndTransaction(int id)
+        {
+            return await _dataContextFinances.Payments
+                            .Include(p => p.Expenses)
+                            .Include(p => p.OneTimeExpense)
+                            .Include(p => p.Transaction)
+                            .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
     }
 }

@@ -75,7 +75,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
                 return new Response<object>
                 {
                     IsSuccess = true,
-                    Message = "Mangers linked successfully"
+                    Message = "Managers linked successfully"
                 };
             }
             catch (Exception ex)
@@ -180,6 +180,57 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
                         .ToList();
 
         }
+
+        public async Task<Response<object>> LinkFinancialAccountWithTransactions(List<CondominiumDto> condominiums)
+        {
+            try
+            {
+                IEnumerable<FinancialAccount> accounts = await _financialAccountRepository
+                                                                .GetAll(_dataContextFinances)
+                                                                .Include(fa => fa.TransactionsAsPayer)
+                                                                .Include(fa => fa.TransactionsAsBeneficiary)
+                                                                .ToListAsync();
+
+                if (accounts == null || !accounts.Any())
+                {
+                    return new Response<object>
+                    {
+                        IsSuccess = false,
+                        Message = "No accounts found"
+                    };
+                }
+
+
+                foreach (CondominiumDto condominium in condominiums)
+                {
+                    var account = accounts.FirstOrDefault(m => m.Id == condominium.FinancialAccountId);
+                    if (account != null)
+                    {
+                        var accountDto = _converterHelper.ToFinancialAccountDto(account, false);
+
+                        condominium.FinancialAccountDto = accountDto;
+                    }
+                }
+
+                return new Response<object>
+                {
+                    IsSuccess = true,
+                    Message = "Accounts linked successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+
+                return new Response<object>
+                {
+                    IsSuccess = false,
+                    Message = $"Error linking Account: {ex.Message}"
+                };
+            }
+        }
+
+
+        
 
        
     }

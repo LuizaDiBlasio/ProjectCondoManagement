@@ -40,7 +40,7 @@ namespace ClassLibrary.DtoModels
 
         public IEnumerable<MeetingDto>? Meetings { get; set; }
 
-        public IEnumerable<OccurrenceDto>? Occurrences { get; set; }
+        public List<OccurrenceDto>? Occurrences { get; set; }
 
     }
 }

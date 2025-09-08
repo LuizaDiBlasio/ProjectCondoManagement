@@ -28,7 +28,7 @@ namespace ProjectCondoManagement.Helpers
 
         Company ToCompany(CompanyDto companyDto, bool isNew);
 
-        CondominiumDto ToCondominiumDto(Condominium condominium);    
+        CondominiumDto ToCondominiumDto(Condominium condominium, bool includeOccurrence);    
 
         Condominium ToCondominium(CondominiumDto condominiumDto, bool isNew);
 
@@ -63,6 +63,13 @@ namespace ProjectCondoManagement.Helpers
 
         Transaction ToTransaction(TransactionDto transactionDto, bool isNew);
 
-        public FinancialAccount ToFinancialAccount(FinancialAccountDto financialAccountDto, bool isNew);
+        FinancialAccount ToFinancialAccount(FinancialAccountDto financialAccountDto, bool isNew);
+
+        OccurrenceDto ToOccurrenceDto(Occurrence occurrence, bool isNew);
+
+        MeetingDto ToMeetingDto(Meeting meeting);
+
+        Meeting ToMeeting(MeetingDto meetingDto, bool isNew);
+
     }
 }

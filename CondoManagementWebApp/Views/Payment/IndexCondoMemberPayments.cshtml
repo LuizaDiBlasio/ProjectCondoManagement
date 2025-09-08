@@ -29,16 +29,13 @@
             <div class="row">
                 <div class="col-xl-12 col-xxl-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title">Payments List</h4>
-                        </div>
+                        
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover">
                                     <thead>
                                         <tr>
                                             <th>@Html.DisplayNameFor(model => model.Id)</th>
-                                            <th>@Html.DisplayNameFor(model => model.IssueDate)</th>
                                             <th>@Html.DisplayNameFor(model => model.DueDate)</th>
                                             <th>@Html.DisplayNameFor(model => model.TotalAmount)</th>
                                             <th>Payment date</th>
@@ -50,8 +47,7 @@
                                         {
                                             <tr>
                                                 <td>@Html.DisplayFor(modelItem => item.Id)</td>
-                                                <td>@Html.DisplayFor(modelItem => item.IssueDate)</td>
-                                                <td>@Html.DisplayFor(modelItem => item.DueDate)</td>
+                                                <td>@item.DueDate.ToShortDateString()</td>
                                                 <td>@Html.DisplayFor(modelItem => item.TotalAmount)</td>
                                                 <td>
                                                     @if (!item.IsPaid)
@@ -60,7 +56,7 @@
                                                     }
                                                     else
                                                     {
-                                                        <span>@item.TransactionDto.DateAndTime</span>
+                                                        <span>@item.TransactionDto.DateAndTime.ToShortDateString()</span>
                                                     }
                                                 </td>
                                                 <td>

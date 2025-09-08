@@ -24,9 +24,20 @@
 
                             @*escolher o método de pagamento*@
                             <div class="form-group mb-3">
-                                <label asp-for="SelectedPaymentMethodId" class="form-label font-weight-bold text-purple">Payment method</label>
-                                <select asp-for="SelectedPaymentMethodId" asp-items="Model.PaymentMethods" class="form-control" id="paymentMethodSelect" style="width: auto;">
-                                </select>
+                                <label class="form-label font-weight-bold text-purple">Payment method</label><br />
+                                @if (Model.PaymentMethods != null)
+                                {
+                                    @foreach (var method in Model.PaymentMethods)
+                                    {
+                                        <div class="form-check">
+                                            <input class="form-check-input payment-method-radio" type="radio"
+                                            asp-for="SelectedPaymentMethodId"
+                                            value="@method.Value"
+                                            id="pm-@method.Value" />
+                                            <label class="form-check-label" for="pm-@method.Value">@method.Text</label>
+                                        </div>
+                                    }
+                                }
                                 <span asp-validation-for="SelectedPaymentMethodId" class="text-danger"></span>
                             </div>
 
@@ -62,9 +73,20 @@
 
                             @*Escolher o tipo de recipiente*@
                             <div class="form-group mb-3">
-                                <label asp-for="SelectedBeneficiaryId" class="form-label font-weight-bold text-purple">Recipient</label>
-                                <select asp-for="SelectedBeneficiaryId" asp-items="Model.BeneficiaryTypeList" class="form-control" id="beneficiaryTypeSelect" style="width: auto;">
-                                </select>
+                                <label class="form-label font-weight-bold text-purple">Recipient</label><br />
+                                @if (Model.BeneficiaryTypeList != null)
+                                {
+                                    @foreach (var beneficiary in Model.BeneficiaryTypeList)
+                                    {
+                                        <div class="form-check">
+                                            <input class="form-check-input beneficiary-type-radio" type="radio"
+                                            asp-for="SelectedBeneficiaryId"
+                                            value="@beneficiary.Value"
+                                            id="ben-@beneficiary.Value" />
+                                            <label class="form-check-label" for="ben-@beneficiary.Value">@beneficiary.Text</label>
+                                        </div>
+                                    }
+                                }
                                 <span asp-validation-for="SelectedBeneficiaryId" class="text-danger"></span>
                             </div>
 
@@ -87,7 +109,14 @@
                             </div>
 
                             <div class="d-flex justify-content-between mt-3">
-                                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                                @if (this.User.IsInRole("CondoManager"))
+                                {
+                                    <a asp-controller="Payment" asp-action="IndexCondominiumPayments" class="btn btn-secondary">Back to List</a>
+                                }
+                                else if (this.User.IsInRole("CondoMember"))
+                                {
+                                    <a asp-controller="Payment" asp-action="IndexCondoMemberPayments" class="btn btn-secondary">Back to List</a>
+                                }
                                 <input type="submit" value="Pay" class="btn btn-primary" />
                             </div>
                         </form>
@@ -105,39 +134,39 @@
     <script>
         $(document).ready(function() {
             // Lógica para o método de pagamento
-            $('#paymentMethodSelect').on('change', function () {
-                var selectedValue = $(this).val();
+                   $('.payment-method-radio').on('change', function () {
+            var selectedValue = $(this).val();
 
-                // Oculta todos os campos primeiro
-                $('#creditCardFields').hide();
-                $('#mbwayFields').hide();
-                $('#payerAccountFields').hide();
+            // Oculta todos os campos primeiro
+            $('#creditCardFields').hide();
+            $('#mbwayFields').hide();
+            $('#payerAccountFields').hide();
 
-                // Mostra o campo correspondente ao valor selecionado
-                if (selectedValue === "2") { // ID para Cartão de Crédito
-                    $('#creditCardFields').show();
-                } else if (selectedValue === "1") { // ID para MbWay
-                    $('#mbwayFields').show();
-                } else if (selectedValue === "3") { // ID para Omah Wallet
-                    $('#payerAccountFields').show();
-                }
-            });
+            // Mostra o campo correspondente ao valor selecionado
+            if (selectedValue === "2") { // ID para Cartão de Crédito
+                $('#creditCardFields').show();
+            } else if (selectedValue === "1") { // ID para MbWay
+                $('#mbwayFields').show();
+            } else if (selectedValue === "3") { // ID para Omah Wallet
+                $('#payerAccountFields').show();
+            }
+        });
 
             // Lógica para o tipo de beneficiário
-            $('#beneficiaryTypeSelect').on('change', function () {
-                var selectedValue = $(this).val();
+                         $('.beneficiary-type-radio').on('change', function () {
+            var selectedValue = $(this).val();
 
-                // Oculta todos os campos de beneficiário primeiro
-                $('#beneficiaryAccountIdFields').hide();
-                $('#externalRecipientFields').hide();
+            // Oculta todos os campos de beneficiário primeiro
+            $('#beneficiaryAccountIdFields').hide();
+            $('#externalRecipientFields').hide();
 
-                // Mostra o campo correspondente ao valor selecionado
-                if (selectedValue === "1" || selectedValue === "2") {
-                    $('#beneficiaryAccountIdFields').show();
-                } else if (selectedValue === "3") {
-                    $('#externalRecipientFields').show();
-                }
-            });
+            // Mostra o campo correspondente ao valor selecionado
+            if (selectedValue === "1" || selectedValue === "2") {
+                $('#beneficiaryAccountIdFields').show();
+            } else if (selectedValue === "3") {
+                $('#externalRecipientFields').show();
+            }
+        });
         });
     </script>
 }

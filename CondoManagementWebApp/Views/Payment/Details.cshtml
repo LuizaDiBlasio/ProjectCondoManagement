@@ -1,4 +1,4 @@
-﻿@model ClassLibrary.DtoModels.PaymentDto
+﻿@model CondoManagementWebApp.Models.PaymentDetailsViewModel
 
 @{
     ViewData["Title"] = "Payment Details";
@@ -29,25 +29,25 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.IssueDate)</label>
-                                <p>@Html.DisplayFor(model => model.IssueDate)</p>
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.PaymentDto.IssueDate)</label>
+                                @Model.PaymentDto.IssueDate?.ToShortDateString();
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.DueDate)</label>
-                                <p>@Html.DisplayFor(model => model.DueDate)</p>
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.PaymentDto.DueDate)</label>
+                                <p>@Model.PaymentDto.DueDate.ToShortDateString()</p>
                             </div>
-                            @if (Model.PaymentMethod != null)
+                            @if (Model.PaymentDto.PaymentMethod != null)
                             {
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.PaymentMethod)</label>
-                                    <p>@Html.DisplayFor(model => model.PaymentMethod)</p>
+                                    <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.PaymentDto.PaymentMethod)</label>
+                                    <p>@Html.DisplayFor(model => model.PaymentDto.PaymentMethod)</p>
                                 </div>
                             }
                             <div class="col-md-6 mb-3">
                                 <label class="form-label font-weight-bold">Status</label>
-                                @if (Model.IsPaid)
+                                @if (Model.PaymentDto.IsPaid)
                                 {
-                                    <p>Paid</p>
+                                    <p>Paid </p>
                                 }
                                 else
                                 {
@@ -55,8 +55,8 @@
                                 }
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.TotalAmount)</label>
-                                <p>@Html.DisplayFor(model => model.TotalAmount)</p>
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.PaymentDto.TotalAmount)</label>
+                                <p>@Html.DisplayFor(model => model.PaymentDto.TotalAmount)</p>
                             </div>
                         </div>
                     </div>
@@ -66,10 +66,10 @@
             <div class="col-xl-12 col-xxl-12 mt-4">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Associated Expenses</h4>
+                        <h4 class="card-title">Associated Expense</h4>
                     </div>
                     <div class="card-body">
-                        @if (!Model.ExpensesDto.Any())
+                        @if (!Model.PaymentDto.ExpensesDto.Any())
                         {
                             <p>No expenses associated with this payment.</p>
                         }
@@ -85,7 +85,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (var item in Model.ExpensesDto)
+                                        @foreach (var item in Model.PaymentDto.ExpensesDto)
                                         {
                                             <tr>
                                                 <td>@Html.DisplayFor(modelItem => item.ExpenseTypeDto.Name)</td>
@@ -103,12 +103,28 @@
         </div>
 
         <div class="d-flex justify-content-start mt-3">
-            @Html.ActionLink("Pay", "MakePayment", new { id = Model.Id }, new { @class = "btn btn-primary me-2" })
-            @if (User.IsInRole("CondoManager"))
+
+            @if (Model.PaymentDto.PayerFinancialAccountId == Model.CondominiumFinancialAccountId && Model.PaymentDto.IsPaid == false)
             {
-                @Html.ActionLink("Cancel", "Delete", new { id = Model.Id }, new { @class = "btn btn-outline-danger" })
+                @Html.ActionLink("Pay", "MakePayment", new { id = Model.PaymentDto.Id }, new { @class = "btn btn-primary me-2" })
             }
-            <a asp-action="IndexPayments" class="btn btn-outline-secondary ms-2">Back to List</a>
+
+            @if (User.IsInRole("CondoManager") && Model.PaymentDto.IsPaid == false)
+            {
+                <a href="#" class="btn btn-outline-danger ms-2 delete-btn" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@Model.PaymentDto.Id">Cancel Payment</a>
+               
+            }
+
+            @if (Model.PaymentDto.PayerFinancialAccountId == Model.CondominiumFinancialAccountId)
+            {
+                <a asp-action="IndexCondominiumPayments" class="btn btn-outline-secondary ms-2">Back to List</a>
+            }
+            else
+            {
+                <a asp-action="IndexAllCondoMembersPayments" class="btn btn-outline-secondary ms-2">Back to List</a>
+            }
+
+            
         </div>
     </div>
 </div>
