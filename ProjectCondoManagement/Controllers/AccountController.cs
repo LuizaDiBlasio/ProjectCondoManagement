@@ -664,17 +664,51 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("GetUsersWithCompany")]
+        public async Task<IActionResult> GetUsersWithCompanyAsync([FromQuery] string role )
+        {
+
+            var users = await _userHelper.GetUsersWithCompanyAsync();
+
+            var filteredUsers = new List<User>();
+
+            foreach (var user in users)
+            {
+                if (await _userHelper.IsUserInRoleAsync(user,role))
+                {
+                    filteredUsers.Add(user);
+                }
+            }
+
+            users = filteredUsers;
+
+            if (users == null || !users.Any())
+                return NotFound("No users found");
+
+            var usersDto = users.Select(u => _converterHelper.ToUserDto(u)).ToList();
+            return Ok(usersDto);
+        }
+
+
         [HttpGet("GetManagers")]
         public async Task<IActionResult> GetManagers()
         {
-            var managers = await _userHelper.GetUsersByRoleAsync("CondoManager");
 
-            if (managers == null || !managers.Any())
-            {
-                return NotFound(new { Message = "No Condo Managers found." });
-            }
+            var user = await _userHelper.GetUserByEmailAsync(this.User.Identity?.Name);
 
-            var managersDto = managers.Select(m => _converterHelper.ToUserDto((User)m)).ToList();
+            var allManagers = await _userHelper.GetUsersByRoleAsync("CondoManager");
+
+            var managers = new List<User>();
+
+            managers = allManagers
+            .Where(m => m.CompanyId == user.CompanyId)
+            .ToList();
+
+
+            var managersDto = managers
+                .Select(m => _converterHelper.ToUserDto((User)m))
+                .ToList();
 
             return Ok(managersDto);
         }

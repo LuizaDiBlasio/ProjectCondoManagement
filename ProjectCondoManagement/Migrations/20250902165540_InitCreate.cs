@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ProjectCondoManagement.Migrations
 {
     /// <inheritdoc />
-    public partial class InitCreateFinances : Migration
+    public partial class InitCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,7 @@ namespace ProjectCondoManagement.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Deposit = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    OwnerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CardNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -27,23 +27,6 @@ namespace ProjectCondoManagement.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_FinancialAccounts", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Expenses",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Detail = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CondominiumId = table.Column<int>(type: "int", nullable: false),
-                    ExpenseType = table.Column<int>(type: "int", nullable: false),
-                    PaymentId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Expenses", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -59,16 +42,40 @@ namespace ProjectCondoManagement.Migrations
                     CondominiumId = table.Column<int>(type: "int", nullable: false),
                     IsPaid = table.Column<bool>(type: "bit", nullable: false),
                     InvoiceId = table.Column<int>(type: "int", nullable: true),
-                    OneTimeExpenseId = table.Column<int>(type: "int", nullable: true),
-                    TransactionId = table.Column<int>(type: "int", nullable: true)
+                    TransactionId = table.Column<int>(type: "int", nullable: true),
+                    MbwayNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreditCard = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Payments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Expenses",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Detail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CondominiumId = table.Column<int>(type: "int", nullable: false),
+                    PaymentId = table.Column<int>(type: "int", nullable: true),
+                    ExpenseType = table.Column<int>(type: "int", nullable: false),
+                    PaymentId1 = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Expenses", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Payments_Expenses_OneTimeExpenseId",
-                        column: x => x.OneTimeExpenseId,
-                        principalTable: "Expenses",
+                        name: "FK_Expenses_Payments_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "Payments",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Expenses_Payments_PaymentId1",
+                        column: x => x.PaymentId1,
+                        principalTable: "Payments",
                         principalColumn: "Id");
                 });
 
@@ -117,7 +124,9 @@ namespace ProjectCondoManagement.Migrations
                     PayerAccountId = table.Column<int>(type: "int", nullable: true),
                     BeneficiaryAccountId = table.Column<int>(type: "int", nullable: true),
                     ExternalRecipientBankAccount = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PaymentId = table.Column<int>(type: "int", nullable: false)
+                    PaymentId = table.Column<int>(type: "int", nullable: true),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    CompanyId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -147,6 +156,13 @@ namespace ProjectCondoManagement.Migrations
                 column: "PaymentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Expenses_PaymentId1",
+                table: "Expenses",
+                column: "PaymentId1",
+                unique: true,
+                filter: "[PaymentId1] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Invoices_BeneficiaryFinancialAccountId",
                 table: "Invoices",
                 column: "BeneficiaryFinancialAccountId");
@@ -163,11 +179,6 @@ namespace ProjectCondoManagement.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payments_OneTimeExpenseId",
-                table: "Payments",
-                column: "OneTimeExpenseId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Transactions_BeneficiaryAccountId",
                 table: "Transactions",
                 column: "BeneficiaryAccountId");
@@ -181,22 +192,15 @@ namespace ProjectCondoManagement.Migrations
                 name: "IX_Transactions_PaymentId",
                 table: "Transactions",
                 column: "PaymentId",
-                unique: true);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Expenses_Payments_PaymentId",
-                table: "Expenses",
-                column: "PaymentId",
-                principalTable: "Payments",
-                principalColumn: "Id");
+                unique: true,
+                filter: "[PaymentId] IS NOT NULL");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Expenses_Payments_PaymentId",
-                table: "Expenses");
+            migrationBuilder.DropTable(
+                name: "Expenses");
 
             migrationBuilder.DropTable(
                 name: "Invoices");
@@ -209,9 +213,6 @@ namespace ProjectCondoManagement.Migrations
 
             migrationBuilder.DropTable(
                 name: "Payments");
-
-            migrationBuilder.DropTable(
-                name: "Expenses");
         }
     }
 }

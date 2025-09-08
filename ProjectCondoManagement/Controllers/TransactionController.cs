@@ -1,4 +1,5 @@
-﻿using ClassLibrary.DtoModels;
+﻿using ClassLibrary;
+using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
@@ -61,7 +62,59 @@ namespace ProjectCondoManagement.Controllers
             return transactionsDtos;
         }
 
-       
+
+
+        // POST: api/Condominiums
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<IActionResult> PostTransaction([FromBody] TransactionDto transactionDto)
+        {
+            if (transactionDto == null)
+            {
+                return BadRequest("Request body is null.");
+            }
+
+            try
+            {
+
+                var transaction = _converterHelper.ToTransaction(transactionDto, true);
+
+                if (transaction == null)
+                {
+                    return BadRequest("Conversion failed. Invalid data.");
+                }
+
+
+                await _transactionRepository.CreateAsync(transaction, _context);
+
+                return Ok(new Response<object> { IsSuccess = true, Message = "Transaction created successfully." });
+            }
+
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"An error occurred: {ex.Message}");
+            }
+        }
+
+
+
+
+        // GET: api/Transaction/ByFinancialAccount/5
+        [HttpGet("ByFinancialAccount/{id}")]
+        public async Task<ActionResult<IEnumerable<TransactionDto>>> GetTransactionsByFinancialAccountId(int id)
+        {
+            var transactions = await _transactionRepository.GetByFinancialAccountIdAsync(id);
+
+
+            var transactionDtos = transactions.Select(t => _converterHelper.ToTransactionDto(t, false)).ToList();
+
+            return transactionDtos;
+        }
+
+
+
+
     }
 }
 

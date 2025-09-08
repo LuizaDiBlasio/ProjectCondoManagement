@@ -7,7 +7,7 @@ using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
-using ProjectCondoManagement.Migrations.FinancesDb;
+
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -30,8 +30,8 @@ namespace ProjectCondoManagement.Controllers
             _context = context;
         }
 
-        public IFinancialAccountRepository FinancialAccount { get; }
-        public IConverterHelper ConverterHelper { get; }
+        //public IFinancialAccountRepository FinancialAccount { get; }
+        //public IConverterHelper ConverterHelper { get; }
 
         // GET api/FinancialAccounts/5
         [HttpGet("{id}")]

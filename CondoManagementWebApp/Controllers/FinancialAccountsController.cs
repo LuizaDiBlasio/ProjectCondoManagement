@@ -171,7 +171,7 @@ namespace CondoManagementWebApp.Controllers
                     }
 
                     _flashMessage.Confirmation("Financial details updated.");
-                    if (User.IsInRole("CondoMember"))
+                    if (User.IsInRole("CondoMember") || User.IsInRole("CompanyAdmin"))
                     {
                         return RedirectToAction(nameof(Details), new { email });
                     }
@@ -203,6 +203,8 @@ namespace CondoManagementWebApp.Controllers
                 return NotFound();
             }
 
+            
+
 
             ViewBag.Email = email;
 
@@ -219,6 +221,7 @@ namespace CondoManagementWebApp.Controllers
                     OwnerId = financialAccountDto.Id,
                     DepositValue = 0, 
                 };
+
 
                 return View(model);
 
@@ -301,6 +304,21 @@ namespace CondoManagementWebApp.Controllers
             try
             {
 
+                var transaction = new TransactionDto
+                {
+                    DateAndTime = DateTime.Now,
+                    BeneficiaryAccountId = financialAccountDto.Id,
+                    ExternalRecipientBankAccount = $"{financialAccountDto.OwnerName}'s Wallet",
+                    Amount = model.DepositValue
+                };
+
+                var resultTransaction = await _apiCallService.PostAsync<TransactionDto, Response<object>>("api/Transaction", transaction);
+                if (!resultTransaction.IsSuccess)
+                {
+                    _flashMessage.Danger("Error creating transaction");
+                    return View(model);
+                }
+
                 financialAccountDto.Balance += model.DepositValue;
 
                 var result = await _apiCallService.PostAsync<FinancialAccountDto, Response<object>>($"api/FinancialAccounts/Edit/{id}", financialAccountDto);
@@ -311,16 +329,7 @@ namespace CondoManagementWebApp.Controllers
                 }
 
 
-                //var transaction = new TransactionDto
-                //{
-                //    DateAndTime = DateTime.Now,
-                //    PayerAccountId = financialAccountDto.Id,
-                //    ExternalRecipientBankAccount = financialAccountDto.OwnerName,
-                //    Amount = model.DepositValue,
-                //};
-
-
-
+           
                 _flashMessage.Confirmation("Deposit successfull.");
                 return RedirectToAction(nameof(Details), new { id = id, email = email });
             }
@@ -332,6 +341,134 @@ namespace CondoManagementWebApp.Controllers
             return View(model);
 
         }
+
+
+        // GET: FinancialAccountsController/Withdrawal/5
+        [HttpGet]
+        public async Task<IActionResult> Withdrawal(int? id, string? email)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            if (email == null)
+            {
+                return NotFound();
+            }
+
+
+
+
+            ViewBag.Email = email;
+
+            try
+            {
+                var financialAccountDto = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{id.Value}");
+                if (financialAccountDto == null)
+                {
+                    return NotFound();
+                }
+
+                var model = new DepositViewModel
+                {
+                    OwnerId = financialAccountDto.Id,
+                    DepositValue = 0,
+                };
+
+
+                return View(model);
+
+            }
+            catch (Exception)
+            {
+                _flashMessage.Danger("Error retrieving account to withdrawal.");
+                return NotFound();
+            }
+
+        }
+
+
+        // POST: FinancialAccountsController/Withdrawal/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Withdrawal(int? id, string? email, DepositViewModel model)
+        {
+            if (id != model.OwnerId)
+                return NotFound();
+
+            if (email == null)
+                return NotFound();
+
+            ViewBag.Email = email;
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var financialAccountDto = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{model.OwnerId}");
+
+            if (model.DepositValue <= 0)
+            {
+                ModelState.AddModelError("DepositValue", "Withdrawal amount must be greater than 0.");
+                return View(model);
+            }
+
+            if (model.DepositValue > financialAccountDto.Balance)
+            {
+                ModelState.AddModelError("DepositValue", "Insufficient funds for this withdrawal.");
+                return View(model);
+            }
+
+            if (financialAccountDto.IsActive == false)
+            {
+                ModelState.AddModelError("AssociatedBankAccount", "No Account associated");
+                return View(model);
+            }
+
+            model.SelectedPaymentMethodId = 3;
+            model.CreditCardNumber = financialAccountDto.CardNumber;
+
+            try
+            {
+                var transaction = new TransactionDto
+                {
+                    DateAndTime = DateTime.Now,
+                    PayerAccountId = financialAccountDto.Id,
+                    ExternalRecipientBankAccount = financialAccountDto.OwnerName,
+                    Amount = model.DepositValue
+                };
+
+                var resultTransaction = await _apiCallService.PostAsync<TransactionDto, Response<object>>("api/Transaction", transaction);
+                if (!resultTransaction.IsSuccess)
+                {
+                    _flashMessage.Danger("Error creating transaction");
+                    return View(model);
+                }
+
+                financialAccountDto.Balance -= model.DepositValue;
+
+                var result = await _apiCallService.PostAsync<FinancialAccountDto, Response<object>>($"api/FinancialAccounts/Edit/{id}", financialAccountDto);
+                if (!result.IsSuccess)
+                {
+                    _flashMessage.Danger("Error making withdrawal!");
+                    return View(model);
+                }
+
+                _flashMessage.Confirmation("Withdrawal successfull.");
+                return RedirectToAction(nameof(Details), new { id = id, email = email });
+            }
+            catch (Exception)
+            {
+                _flashMessage.Danger("Error making withdrawal!");
+            }
+
+            return View(model);
+        }
+
+
+
+
+
 
 
         public async Task<IActionResult> CondoAccounts(string? email)
@@ -366,6 +503,47 @@ namespace CondoManagementWebApp.Controllers
 
 
         }
+
+
+
+
+
+        // GET: FinancialAccountsController/Transactions/5
+        public async Task<IActionResult> Transactions(int? id, string? email)
+        {
+            if(id == null)
+            {
+                return NotFound();
+            }
+            var transactions = new List<TransactionDto>();
+
+            ViewBag.Email = email;
+            ViewBag.AccountId = id;
+
+            try
+            {
+                transactions = await _apiCallService.GetAsync<List<TransactionDto>>($"api/Transaction/ByFinancialAccount/{id}");
+
+                if (transactions == null || !transactions.Any())
+                {
+                    _flashMessage.Info("No transactions found for this account.");
+                    return View(transactions);
+                }
+
+                return View(transactions);
+            }
+
+            catch (Exception ex)
+            {
+                _flashMessage.Danger($"Error fetching transactions");
+                return RedirectToAction("Details", "FinancialAccounts", new { id = id, email = email });
+            }
+
+
+
+
+        }
+
 
 
     }

@@ -743,6 +743,11 @@ namespace CondoManagementWebApp.Controllers
                 }
 
                 var editedModel = _converterHelper.ToProfileViewModel(userDto2);
+                if (this.User.IsInRole("CondoMember"))
+                {
+                    _flashMessage.Confirmation("Profile updated successfully.");
+                    return RedirectToAction("Dashboard", "CondoMember");
+                }
 
                 return View("Profile", editedModel);
             }
@@ -776,7 +781,7 @@ namespace CondoManagementWebApp.Controllers
                     model.CondoMembers = usersCondoMembers;
                 }
 
-                var usersCondoManagers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoManager");
+                var usersCondoManagers = await _apiCallService.GetAsync<IEnumerable<UserDto>>($"api/Account/GetUsersWithCompany?role=CondoManager");
 
                 if (usersCondoManagers.Any())
                 {
@@ -794,7 +799,7 @@ namespace CondoManagementWebApp.Controllers
                 return View(model);
 
             }
-            catch(Exception)
+            catch(Exception ex)
             {
                 return View(new SysAdminDashboardViewModel());
             }
@@ -867,7 +872,7 @@ namespace CondoManagementWebApp.Controllers
          /// An IActionResult that redirects to the EditUserDetails view on success.
          /// Returns the same view with an error message on failure or validation errors.
          /// </returns>
-        [Authorize(Roles = "SysAdmin")]
+     
         public async Task<IActionResult> RequestEditUserDetails(EditUserDetailsViewModel model)
         {
             if (!ModelState.IsValid)
@@ -914,9 +919,13 @@ namespace CondoManagementWebApp.Controllers
                                 return View("EditUserDetails", model2);
                             }
 
-                            var editedUserDetailsViewModel = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, company.Name);
+                            //var editedUserDetailsViewModel = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, company.Name);
 
-                            return View("EditUserDetails", editedUserDetailsViewModel);
+                            //return View("EditUserDetails", editedUserDetailsViewModel);
+
+                            _flashMessage.Confirmation("User details updated successfully!");
+                            return RedirectToAction(nameof(SysAdminDashboard));
+
                         }
 
                         var model3 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, null);
@@ -1055,6 +1064,123 @@ namespace CondoManagementWebApp.Controllers
         {
             return View();
         }
+
+
+
+
+
+        public async Task<IActionResult> AssignCompany(string? email)
+        {
+
+            if (email == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                var user = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", email);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                var companies = await _apiCallService.GetAsync<IEnumerable<CompanyDto>>("api/Company/GetCompanies");
+                if (companies == null)
+                {
+                    companies = new List<CompanyDto>();
+                }
+
+
+                var model = new AssignCompanyViewModel
+                {
+                    Id = user.Id,
+                    CompanyId = user.CompanyId,
+                    Address = user.Address,
+                    FullName = user.FullName,                    
+                    Companies = companies.ToList(),
+                    FinancialAccountId = user.FinancialAccountId
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+
+                string userMessage = ex.InnerException?.Message ?? ex.Message;
+
+                if (userMessage.Contains("Detalhes:"))
+                {
+                    userMessage = userMessage.Split("Detalhes:")[1].Trim();
+                }
+
+                _flashMessage.Danger($"{userMessage}");
+                return RedirectToAction(nameof(SysAdminDashboard));
+            }
+
+
+        }
+
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignCompany(string? email,AssignCompanyViewModel model)
+        {
+ 
+            if(email == null)
+            {
+                return NotFound();
+            }
+
+
+            if(model.CompanyId == null)
+            {
+                _flashMessage.Danger("select one company.");
+                return View(model);
+            }
+
+            var user = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.CompanyId = model.CompanyId;
+
+            try
+            {
+                var editUserDto = new EditUserDetailsDto
+                {
+                    Id = user.Id,
+                    CompanyId = model.CompanyId,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    Address = user.Address,
+                    PhoneNumber = user.PhoneNumber,
+                    ImageUrl = user.ImageUrl,
+                    BirthDate = user.BirthDate,
+                    FinancialAccountId = user.FinancialAccountId,
+                    IsActive = user.IsActive,
+                    Uses2FA = user.Uses2FA
+                };
+
+                var result = await _apiCallService.PostAsync<EditUserDetailsDto, ClassLibrary.Response<object>>("api/Account/EditUserDetails", editUserDto);
+                
+                _flashMessage.Confirmation("Company assigned successfully!");
+                return RedirectToAction(nameof(SysAdminDashboard));
+            }
+            catch (Exception)
+            {
+                _flashMessage.Danger("Error assigning Company!");
+            }
+
+            return RedirectToAction(nameof(SysAdminDashboard));
+
+        }
+
+
     }
 }
 

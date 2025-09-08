@@ -4,6 +4,15 @@
     ViewData["Title"] = "Financial Account Details";
 }
 
+  @if(this.User.IsInRole("CondoManager"))
+{
+    <a asp-action="CondoAccounts"
+        asp-route-email="@ViewBag.Email"
+        class="btn btn-outline-primary">
+        Back to List
+    </a>
+}
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -71,7 +80,24 @@
                            class="btn btn-outline-success">
                             Make Deposit
                         </a>
+
+                         <a asp-action="Withdrawal"
+                           asp-route-id="@Model.Id"
+                           asp-route-email="@ViewBag.Email"
+                           class="btn btn-outline-danger">
+                            Make Withdrawal
+                        </a>
+
+                        <a asp-action="Transactions"
+                           asp-route-id="@Model.Id"
+                           asp-route-email="@ViewBag.Email"
+                           class="btn btn-outline-info me-2">
+                            View Transactions
+                        </a>
+
                     }
+
+
 
                     <div>
                         <a asp-action="Edit"
@@ -83,14 +109,7 @@
                             Edit
                         </a>
 
-                        @if(this.User.IsInRole("CondoManager"))
-                        {
-                        <a asp-action="CondoAccounts"
-                           asp-route-email="@ViewBag.Email"
-                           class="btn btn-outline-primary">
-                            Back to List
-                        </a>
-                        }
+                      
                         
                     </div>
                 </div>

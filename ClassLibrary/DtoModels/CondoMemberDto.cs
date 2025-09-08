@@ -18,6 +18,7 @@ namespace ClassLibrary.DtoModels
         public string FullName { get; set; }
 
 
+
         [EmailAddress(ErrorMessage = "Invalid email address format.")]
         [Required(ErrorMessage = "Email is required.")]
         public string Email { get; set; }
@@ -40,6 +41,9 @@ namespace ClassLibrary.DtoModels
         public string PhoneNumber { get; set; }
 
         public IEnumerable<UnitDto>? Units { get; set; }
+
+
+        public int CompanyId { get; set; }
 
 
         public string? ImageUrl { get; set; }

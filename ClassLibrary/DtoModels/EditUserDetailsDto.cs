@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace ClassLibrary.DtoModels
 {
-    public class EditUserDetailsDto
+    public class EditUserDetailsDto : UserDto
     {
+
         public string FullName { get; set; }
 
         public DateTime? BirthDate { get; set; }

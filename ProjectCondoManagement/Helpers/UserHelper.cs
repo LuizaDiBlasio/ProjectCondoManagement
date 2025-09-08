@@ -451,8 +451,12 @@ namespace ProjectCondoManagement.Helpers
             return new List<User>();
         }
 
-
-
-
+        public async Task<List<User>> GetUsersWithCompanyAsync()
+        {
+          
+            return await _userManager.Users
+                .Include(u => u.Company)
+                .ToListAsync();
+        }
     }
 }

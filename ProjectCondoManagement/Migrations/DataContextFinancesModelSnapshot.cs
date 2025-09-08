@@ -176,8 +176,6 @@ namespace ProjectCondoManagement.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OneTimeExpenseId");
-
                     b.ToTable("Payments");
                 });
 
@@ -208,9 +206,6 @@ namespace ProjectCondoManagement.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("PaymentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PaymentId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -254,15 +249,6 @@ namespace ProjectCondoManagement.Migrations
                     b.Navigation("BeneficiaryFinancialAccount");
 
                     b.Navigation("PayerFinancialAccount");
-                });
-
-            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.FinancesDb.Payment", b =>
-                {
-                    b.HasOne("ProjectCondoManagement.Data.Entites.FinancesDb.Expense", "OneTimeExpense")
-                        .WithMany()
-                        .HasForeignKey("OneTimeExpenseId");
-
-                    b.Navigation("OneTimeExpense");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.FinancesDb.Transaction", b =>

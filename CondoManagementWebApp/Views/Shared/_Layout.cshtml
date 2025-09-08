@@ -82,6 +82,7 @@
             <div class="deznav">
                 <div class="deznav-scroll">
                     <ul class="metismenu" id="menu">
+       
 
                         <li>
                             <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
@@ -90,7 +91,6 @@
                             </a>
                             <ul aria-expanded="false">
                                 <li><a asp-controller="Condominium" asp-action="Index">Condominiums</a></li>
-                                <li><a asp-controller="Units" asp-action="Index">Units</a></li>
                                 <li><a asp-controller="CondoMember" asp-action="Index">Condo Members</a></li>
                             </ul>
                         </li>
@@ -118,9 +118,24 @@
 
          else if (User.IsInRole("CompanyAdmin"))
          {
+
+            
+
            <div class="deznav">
                     <div class="deznav-scroll">
                         <ul class="metismenu" id="menu">
+
+                           <li>
+                               <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                   <i class="flaticon-381-user-7"></i>
+                                   <span class="nav-text">Condos</span>
+                               </a>
+                               <ul aria-expanded="false">
+                                   <li><a asp-controller="Condominium" asp-action="Index">Condominiums</a></li>
+                                   <li><a asp-controller="CondoMember" asp-action="Index">Condo Members</a></li>
+                               </ul>
+                           </li>
+
                             <li>
                                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                                     <i class="fas fa-dollar-sign"></i>
@@ -146,6 +161,30 @@
                 <div class="deznav">
                     <div class="deznav-scroll">
                         <ul class="metismenu" id="menu">
+
+                         <li>
+                            <a class="ai-icon" asp-controller="CondoMember" asp-action="Dashboard">
+                                <i class="flaticon-dashboard-1"></i>
+                                <span class="nav-text">Personal Space</span>
+                            </a>
+
+                        </li>
+
+                             <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="flaticon-381-user-7"></i>
+                                <span class="nav-text">Condos</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="Units" asp-action="MemberUnits">My Units</a></li>                                
+                                <li><a asp-controller="Condominium" asp-action="MyCondos">My Condos</a></li>
+
+                            </ul>
+                        </li>
+
+
+
+
                             <li>
                                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                                     <i class="fas fa-dollar-sign"></i>

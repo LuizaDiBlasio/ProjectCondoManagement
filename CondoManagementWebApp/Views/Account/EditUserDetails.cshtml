@@ -46,6 +46,8 @@
 									<input type="hidden" asp-for="Email" />
 									<input type="hidden" asp-for="ImageUrl" />
 									<input type="hidden" asp-for="CompanyId" />
+									<input type="hidden" asp-for="Id" />
+									<input type="hidden" asp-for="FinancialAccountId" />
 
 									<div class="row">
 										<div class="col-md-6 mb-3">
@@ -105,14 +107,7 @@
 										</div>
 									</div>
 
-									<div class="row">
-										<div class="col-md-6 mb-3">
-											<div class="form-group">
-												<label asp-for="FinancialAccountId" class="form-label">Financial Account Id</label>
-												<input asp-for="FinancialAccountId" class="form-control" readonly/>
-												<span asp-validation-for="FinancialAccountId" class="text-danger"></span>
-											</div>
-										</div>
+								
 
 										@if (Model.CompanyName != null)
 										{
@@ -124,7 +119,6 @@
 												</div>
 											</div>
 										}
-									</div>
 
 									
 									

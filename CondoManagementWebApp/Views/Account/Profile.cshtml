@@ -41,7 +41,7 @@
                                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                     <input type="hidden" asp-for="Email" />
                                     <input type="hidden" asp-for="ImageUrl" />
-                                    <input type="hidden" asp-for="Email" />
+                                    <input type="hidden" asp-for="Id" />
 
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -87,10 +87,22 @@
                                         </div>
                                     </div>
 
+                                    @if(this.User.IsInRole("CondoMember"))
+                                    {
                                     <div class="form-group mt-3 d-flex justify-content-start align-items-center">
                                         <input type="submit" value="Save" class="btn btn-primary me-2" />
-                                        <a asp-action="SysAdminDashboard" asp-controller="Account" class="btn btn-outline-secondary">Back to DashBoard</a>
+                                        <a asp-action="Dashboard" asp-controller="CondoMember" class="btn btn-outline-secondary">Back to DashBoard</a>
                                     </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="form-group mt-3 d-flex justify-content-start align-items-center">
+                                            <input type="submit" value="Save" class="btn btn-primary me-2" />
+                                            <a asp-action="SysAdminDashboard" asp-controller="Account" class="btn btn-outline-secondary">Back to DashBoard</a>
+                                        </div>
+                                    }
+
+                                    
                                     @if (ViewBag.ErrorMessage != null)
                                     {
                                         <div class="alert alert-danger mt-3" role="alert">

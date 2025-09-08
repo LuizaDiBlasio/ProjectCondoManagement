@@ -38,7 +38,12 @@
     </dl>
 </div>
 <div>
-    @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
+    @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null && ViewBag.ReturnUrl != null)
+    {
+        <a asp-action="@ViewBag.ReturnUrl" asp-route-condoId="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName" class="btn btn-outline-primary">Back to List</a>
+    }
+
+    else if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
     {
         <a asp-action="Index" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName" class="btn btn-outline-primary">Back to List</a>
     }

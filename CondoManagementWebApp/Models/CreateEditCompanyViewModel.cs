@@ -34,6 +34,9 @@ namespace CondoManagementWebApp.Models
         [Required]
         public string Address { get; set; }
 
+        [Required]
+        public int FinancialAccountId { get; set; }
+
 
         [Required]
         [Display(Name="Phone Number")]

@@ -56,15 +56,8 @@
                             }
                         </tbody>
                     </table>
-                }
-                else
-                {
-                    <div class="alert alert-warning">
-                        No members available. Please create members accounts first.
-                    </div>
-                }
-            </div>
 
+                    
             <div class="mt-4">
                 <button type="submit" class="btn btn-success">Update Members</button>
                 @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
@@ -77,6 +70,23 @@
                 }
                 
             </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        No members available. Please create members accounts first.
+                    </div>
+                      @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
+                {
+                    <a asp-action="Index" class="btn btn-outline-danger" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Cancel</a>
+                }
+                else
+                {
+                    <a asp-action="Index" class="btn btn-outline-danger">Cancel</a>
+                }
+                }
+            </div>
+
         </form>
     </div>
 </div>

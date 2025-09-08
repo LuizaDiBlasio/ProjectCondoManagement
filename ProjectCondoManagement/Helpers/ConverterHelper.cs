@@ -32,6 +32,7 @@ namespace ProjectCondoManagement.Helpers
                 FullName = condoMemberDto.FullName,
                 Email = condoMemberDto.Email,
                 Address = condoMemberDto.Address,
+                CompanyId = condoMemberDto.CompanyId,
                 BirthDate = condoMemberDto.BirthDate,
                 PhoneNumber = condoMemberDto.PhoneNumber,
                 ImageUrl = condoMemberDto.ImageUrl
@@ -46,6 +47,7 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = condoMember.Id,
                 FullName = condoMember.FullName,
+                CompanyId = condoMember.CompanyId,
                 Email = condoMember.Email,
                 Address = condoMember.Address,
                 BirthDate = condoMember.BirthDate,
@@ -93,6 +95,7 @@ namespace ProjectCondoManagement.Helpers
                 Address = user.Address,
                 ImageUrl = user.ImageUrl,
                 IsActive = user.IsActive,
+                CompanyDto = user.Company == null ? null : ToCompanyDto(user.Company),
                 Email = user.Email,
                 CompanyId = user.CompanyId,
                 FinancialAccountId = user.FinancialAccountId,
@@ -170,6 +173,7 @@ namespace ProjectCondoManagement.Helpers
             condoMember.FullName = user.FullName;
             condoMember.PhoneNumber = user.PhoneNumber;
             condoMember.Address = user.Address;
+            condoMember.CompanyId = user?.CompanyId ?? 0;
             condoMember.ImageUrl = user.ImageUrl;
             condoMember.BirthDate = user.BirthDate;
 
@@ -183,6 +187,7 @@ namespace ProjectCondoManagement.Helpers
                 Id = company.Id,
                 Name = company.Name,
                 CondominiumDtos = company.Condominiums?.Select(c => ToCondominiumDto(c)).ToList() ?? new List<CondominiumDto>(),
+                CondoMemberDtos = company.CondoMembers?.Select(cm => ToCondoMemberDto(cm, true)).ToList() ?? new List<CondoMemberDto>(),
                 Email = company.Email,
                 Address = company.Address,
                 PhoneNumber = company.PhoneNumber,
@@ -439,7 +444,11 @@ namespace ProjectCondoManagement.Helpers
                 //AccountPayerDto = ToFinancialAccountDto(transaction.AccountPayer, false),   
                 BeneficiaryAccountId = transaction.BeneficiaryAccountId,
                 //AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
-                
+                Amount = transaction.Amount,
+                CompanyId = transaction?.CompanyId,
+                ExternalRecipientBankAccount = transaction.ExternalRecipientBankAccount
+
+
             };
             
             return transactionDto;  
@@ -509,6 +518,8 @@ namespace ProjectCondoManagement.Helpers
                 PayerAccountId = transactionDto.PayerAccountId,
                 BeneficiaryAccountId = transactionDto.BeneficiaryAccountId,
                 PaymentId = transactionDto.PaymentId,
+                Amount = transactionDto.Amount,
+                CompanyId = transactionDto?.CompanyId,
                 ExternalRecipientBankAccount = transactionDto.ExternalRecipientBankAccount,
             };
 

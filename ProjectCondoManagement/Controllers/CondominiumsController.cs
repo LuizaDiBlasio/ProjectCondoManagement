@@ -44,8 +44,6 @@ namespace ProjectCondoManagement.Controllers
         public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetCondominiums()
         {
 
-            //TODO: no final so preencher os condominios com o id da company
-
             var email = this.User.Identity?.Name;
 
             var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
@@ -63,16 +61,6 @@ namespace ProjectCondoManagement.Controllers
                 return new List<CondominiumDto>();
             }
 
-
-
-
-
-
-            //var condominiums = await _condominiumRepository.GetAll(_context).ToListAsync();
-            //if (condominiums == null)
-            //{
-            //    return new List<CondominiumDto>();
-            //}
 
             var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c)).ToList();
 
@@ -235,6 +223,42 @@ namespace ProjectCondoManagement.Controllers
             }
             return NoContent();
         }
+
+
+        // GET: api/Condominiums/ByManager
+        [HttpGet("ByManager")]
+        public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetManagerCondos()
+        {
+            var email = this.User.Identity?.Name;
+
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+
+            var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.ManagerUserId == user.Id).ToListAsync();
+            if (condominiums == null)
+            {
+                return new List<CondominiumDto>();
+            }
+
+
+
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c)).ToList();
+
+            if (condominiumsDtos == null)
+            {
+                return new List<CondominiumDto>();
+            }
+
+            await _condominiumRepository.LinkManager(condominiumsDtos);
+            await _condominiumRepository.LinkFinancialAccount(condominiumsDtos);
+
+            return condominiumsDtos;
+        }
+
+
+
+
+
+
 
         //Metodo auxiliar para expenses
         [HttpPost("GetCondoManagerCondominiumDto")]
