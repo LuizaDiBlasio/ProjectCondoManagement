@@ -5,5 +5,6 @@ namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
 {
     public interface IMeetingRepository : IGenericRepository<Meeting, DataContextCondos>
     {
+        Task<Meeting> GetMeetingWithCondomembersAndOccurrences(int id);
     }
 }

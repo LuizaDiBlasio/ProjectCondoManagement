@@ -68,7 +68,9 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
 
         public async Task<CondoMember> GetCondoMemberByEmailAsync(string email)
         {
-            var condoMember = await GetAll(_context).Include(c => c.Units).ThenInclude(u => u.Condominium).FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
+            var condoMember = await GetAll(_context).Include(c => c.Units)
+                                            .ThenInclude(u => u.Condominium)
+                                            .FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
             
             if (condoMember == null)
             {

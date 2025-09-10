@@ -99,7 +99,7 @@ namespace ProjectCondoManagement.Controllers
 
             var user = await _userHelper.GetUserByEmailAsync(email);
 
-            var condominiums = condoMember.Units.Select(u => u.Condominium).ToList();
+            var condominiums = condoMember.Units.Select(u => u.Condominium).DistinctBy(c => c.Id).ToList();
             if (condominiums == null)
             {
                 return new List<CondominiumWithInvoicesDto>();

@@ -16,7 +16,7 @@ namespace ClassLibrary.DtoModels
         public string Address { get; set; }
 
 
-        [Display(Name = "Condo Name")]
+        [Display(Name = "Condominium")]
         [Required(ErrorMessage = "Condo name is required.")]
         public string CondoName { get; set; }
 

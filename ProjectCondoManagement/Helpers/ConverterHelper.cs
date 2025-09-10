@@ -260,7 +260,9 @@ namespace ProjectCondoManagement.Helpers
                 DateAndTime = occurrence.DateAndTime,
                 UnitDtos = occurrence.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),
                 IsResolved = occurrence.IsResolved,
-                CondominiumId = occurrence.CondominiumId,   
+                CondominiumId = occurrence.CondominiumId,  
+                Subject = occurrence.Subject,
+                
             };
 
             return occurrenceDto;

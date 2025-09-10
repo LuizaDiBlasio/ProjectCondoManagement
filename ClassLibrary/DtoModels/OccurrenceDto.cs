@@ -37,5 +37,10 @@ namespace ClassLibrary.DtoModels
         public MeetingDto? Meeting { get; set; }
 
         public int? MeetingId { get; set; }
+
+        public override string ToString()
+        {
+            return Subject;
+        }
     }
 }

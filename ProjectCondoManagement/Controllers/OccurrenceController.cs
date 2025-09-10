@@ -84,6 +84,20 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
+        [HttpGet("GetCondoOccurrences/{id}")]
+        public async Task<ActionResult<List<OccurrenceDto>>> GetCondoOccurrences(int id)
+        {
+            
+
+            //buscar  ocorrencias que contenham o id do condominio iguais aos da lista de ids
+            var allCondosOccurrences = await _occurrenceRepository.GetAll(_dataContextCondos)
+                                                        .Where(o => o.CondominiumId == id)
+                                                        .ToListAsync();
+
+            return allCondosOccurrences.Select(o => _converterHelper.ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>();
+        }
+
+
         [HttpGet("GetOccurrenceWithUnits/{id}")]
         // GET: OccurrenceController/Details/5
         public async Task<OccurrenceDto?> GetOccurrenceWithUnits(int id)
@@ -225,7 +239,7 @@ namespace ProjectCondoManagement.Controllers
 
             var occurrencesDto = occurrences?.Select(o => _converterHelper.ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>();
 
-            var condominiums = condoMember.Units.Select(u => u.Condominium).ToList();
+            var condominiums = condoMember.Units.Select(u => u.Condominium).DistinctBy(c => c.Id).ToList();
 
             var condosWithOccurrencesDto = new List<CondominiumWithOccurrencesDto>();
 

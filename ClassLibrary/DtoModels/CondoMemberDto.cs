@@ -48,5 +48,11 @@ namespace ClassLibrary.DtoModels
           string.IsNullOrWhiteSpace(ImageUrl)
           ? "https://res.cloudinary.com/ddnkq9dyb/image/upload/v1754230681/noimage_q8mayx.jpg"
           : ImageUrl;
+
+        public override string ToString()
+        {
+            return FullName;
+        }
+
     }
 }

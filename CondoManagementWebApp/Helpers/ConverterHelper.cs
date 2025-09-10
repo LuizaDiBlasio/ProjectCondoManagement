@@ -291,11 +291,17 @@ namespace CondoManagementWebApp.Helpers
 
         public List<SelectListItem> ToOccurrenceSelectList(List<OccurrenceDto> occurrenceList)
         {
-            return occurrenceList.Select(o => new SelectListItem
+            var selectList = occurrenceList.Select(o => new SelectListItem
             {
                 Value = o.Id.ToString(),
                 Text = o.Subject.ToString()
             }).ToList();
+
+            selectList.Add(new SelectListItem() {Value = "0", Text = "Others" });
+
+            selectList.OrderByDescending(o => o.Value).ToList();
+
+            return selectList;
         }
 
         public MeetingDto ToNewMeetingDto(CreateMeetingViewModel model)
@@ -307,6 +313,7 @@ namespace CondoManagementWebApp.Helpers
                 DateAndTime = model.DateAndTime.Value, 
                 Title = model.Title,
                 Description = model.Description,
+                IsExtraMeeting = model.IsExtraMeeting,
 
             };
             return meetignDto;  
@@ -326,18 +333,18 @@ namespace CondoManagementWebApp.Helpers
             return model;   
         }
 
-        public MeetingDto ToEditedMeetingDto(EditMeetingViewModel model)
+
+        public void SetEditedMeetingProperties(MeetingDto meetingDto, List<CondoMemberDto> condoMembersDto, List<OccurrenceDto> occurrencesDto, EditMeetingViewModel model)
         {
-            var meetingDto = new MeetingDto()
-            {
-                Id = model.Id,
-                CondominiumId = model.CondominiumId.Value,
-                DateAndTime = model.DateAndTime.Value,
-                Title = model.Title,    
-                Description = model.Description,    
-                IsExtraMeeting = model.MeetingType,
-            };
-            return meetingDto;  
-        }  
+            meetingDto.CondoMembersDto = condoMembersDto;
+            meetingDto.OccurencesDto = occurrencesDto;
+            meetingDto.Title = model.Title;
+            meetingDto.IsExtraMeeting = model.MeetingType;
+            meetingDto.CondominiumId = model.CondominiumId.Value;
+            meetingDto.DateAndTime = model.DateAndTime.Value;
+            meetingDto.Description = model.Description;
+          
+        }
+
     }
 }

@@ -50,6 +50,6 @@ namespace CondoManagementWebApp.Helpers
 
         EditMeetingViewModel ToEditMeetingViewModel(MeetingDto meeting);
 
-        MeetingDto ToEditedMeetingDto(EditMeetingViewModel model);
+        void SetEditedMeetingProperties(MeetingDto meetingDto, List<CondoMemberDto> condoMembersDto, List<OccurrenceDto> occurrencesDto, EditMeetingViewModel model);
     }
 }

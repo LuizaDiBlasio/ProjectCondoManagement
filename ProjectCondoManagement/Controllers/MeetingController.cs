@@ -1,5 +1,6 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,9 @@ using Twilio.Rest.Iam.V1;
 
 namespace ProjectCondoManagement.Controllers
 {
+    [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
+    [ApiController]
+    //[Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MeetingController : Controller
     {
         private readonly IMeetingRepository _meetingRepository;
@@ -37,7 +41,7 @@ namespace ProjectCondoManagement.Controllers
 
 
         [HttpGet("GetCondosWithMeetings")]
-        public async Task<ActionResult<List<CondominiumWithMeetingsDto>>> GetCondosWithMeetings(int id)
+        public async Task<ActionResult<List<CondominiumWithMeetingsDto>>> GetCondosWithMeetings()
         {
             var email = this.User.Identity?.Name;
 
@@ -86,7 +90,7 @@ namespace ProjectCondoManagement.Controllers
 
             var user = await _userHelper.GetUserByEmailAsync(email);
 
-            var condominiums = condoMember.Units.Select(u => u.Condominium).ToList();
+            var condominiums = condoMember.Units.Select(u => u.Condominium).DistinctBy(c => c.Id).ToList(); //distinctBy para evitar repetição de condos
             if (condominiums == null)
             {
                 return new List<CondominiumWithMeetingsDto>();
@@ -96,17 +100,20 @@ namespace ProjectCondoManagement.Controllers
 
             //buscar  ocorrencias que contenham o id do condominio iguais aos da lista de ids
             var allCondosMeetings = await _meetingRepository.GetAll(_dataContextCondos)
+                                                        .Include(m => m.CondoMembers)
                                                         .Where(m => condominiumIds
                                                         .Contains(m.CondominiumId))
                                                         .ToListAsync();
 
-            var allCondosMeetingsDto = allCondosMeetings.Select(m => _converterHelper.ToMeetingDto(m)).ToList() ?? new List<MeetingDto>();
+            var meetingsWithInvitation = allCondosMeetings.Where(c => c.CondoMembers.Any(cm => cm.Id == condoMember.Id));
+
+            var meetingsWithInvitationDto = meetingsWithInvitation.Select(m => _converterHelper.ToMeetingDto(m)).ToList() ?? new List<MeetingDto>();
 
             var condosWithMeetingsDto = new List<CondominiumWithMeetingsDto>();
 
             foreach (var condo in condominiums)
             {
-                var condoMeetings = allCondosMeetingsDto.Where(m => m.CondominiumId == condo.Id)
+                var condoMeetings = meetingsWithInvitationDto.Where(m => m.CondominiumId == condo.Id)
                                                              .ToList();
 
                 var condoWithMeetings = new CondominiumWithMeetingsDto()
@@ -126,10 +133,8 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet("GetMeetingWithMembersAndOccurrences/{id}")]
         public async Task<ActionResult<MeetingDto?>> GetMeeting(int id)
         {
-            var meeting =  _meetingRepository.GetAll(_dataContextCondos)
-                                             .Include(m => m.Occurences)
-                                             .Include(m => m.CondoMembers)
-                                             .FirstOrDefault(m => m.Id == id);
+            var meeting = await _meetingRepository.GetMeetingWithCondomembersAndOccurrences(id);
+
             if (meeting == null)
             {
                 return null;
@@ -158,6 +163,11 @@ namespace ProjectCondoManagement.Controllers
         [HttpPost("GetSelectedOccurrences")]
         public async Task<ActionResult<List<OccurrenceDto>>> GetSelectedOccurrences([FromBody] List<int> occurrencesIds)
         {
+            if(occurrencesIds.Count == 0)
+            {
+                return Ok(new List<OccurrenceDto>());    
+            }
+
             var occurrences = await _occurrenceRepository.GetAll(_dataContextCondos)
                                                        .Where(o => occurrencesIds
                                                        .Contains(o.Id))
@@ -218,7 +228,8 @@ namespace ProjectCondoManagement.Controllers
                 meetingToUpdate.CondominiumId = meetingDto.CondominiumId;   
                 meetingToUpdate.DateAndTime = meetingDto.DateAndTime;
                 meetingToUpdate.Description = meetingDto.Description;
-                meetingToUpdate.IsExtraMeeting = meetingDto.IsExtraMeeting;   
+                meetingToUpdate.IsExtraMeeting = meetingDto.IsExtraMeeting; 
+                meetingToUpdate.Title = meetingDto.Title;
 
                 // buscar lista de occurrences selecionados
                 var selectedOccurrenceIds = meetingDto.OccurencesDto.Select(o => o.Id).ToList();
@@ -290,18 +301,22 @@ namespace ProjectCondoManagement.Controllers
             }
         }
 
-        // POST: MeetingController/Delete/5
-        [HttpPost("DeleteMeeting/{id}")]
-        public async Task<ActionResult> Delete(int id)
+        // DELETE: MeetingController/Delete/5
+        [HttpDelete("DeleteMeeting/{id}")]
+        public async Task<ActionResult> DeleteMeeting(int id)
         {
             try
             {
-                var meeting = await _meetingRepository.GetByIdAsync(id, _dataContextCondos);
+                var meeting = await _meetingRepository.GetMeetingWithCondomembersAndOccurrences(id);
 
                 if (meeting == null)
                 {
                     return Ok(new Response<object>() { IsSuccess = false, Message = "Delete action failed. Meeting not found in the system." });
                 }
+
+                //desfazer relações
+                meeting.CondoMembers.Clear();
+                meeting.Occurences.Clear();
 
                 await _meetingRepository.DeleteAsync(meeting, _dataContextCondos);
 

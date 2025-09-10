@@ -5,24 +5,30 @@ using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Syncfusion.EJ2.Layouts;
 using System.Threading.Tasks;
 using Vereyon.Web;
 
 namespace CondoManagementWebApp.Controllers
 {
+    [Route("[controller]")]
     public class MeetingController : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly IApiCallService _apiCallService;
         private readonly IFlashMessage _flashMessage;
         private readonly IConverterHelper _converterHelper;
 
+     
         public MeetingController(IApiCallService apiCallService, IFlashMessage flashMessage, IConverterHelper converterHelper)
         {
             _apiCallService = apiCallService;
             _flashMessage = flashMessage;
             _converterHelper = converterHelper;
         }
+
+
         // GET: MeetingController
+        [HttpGet("IndexMeetings")]
         public async Task<ActionResult<List<CondominiumWithMeetingsDto>>> IndexMeetings()
         {
             try
@@ -54,11 +60,12 @@ namespace CondoManagementWebApp.Controllers
         }
 
         // GET: MeetingController/Details/5
+        [HttpGet("DetailsMeeting/{id}")]
         public async Task<ActionResult<MeetingDetailsViewModel>> DetailsMeeting(int id)
         {
             try
             {
-                var model = new MeetingDetailsViewModel(); 
+                var model = new MeetingDetailsViewModel();
 
                 var meetingDto = await _apiCallService.GetAsync<MeetingDto>($"api/Meeting/GetMeetingWithMembersAndOccurrences/{id}");
 
@@ -71,7 +78,17 @@ namespace CondoManagementWebApp.Controllers
 
                 var condominium = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{meetingDto.CondominiumId}");
 
-                return View(meetingDto);
+                if(condominium == null)
+                {
+                    _flashMessage.Danger("Unable to retrieve meeting");
+
+                    return RedirectToAction(nameof(IndexMeetings));
+                }
+
+                model.CondominiumDto = condominium;
+                model.MeetingDto = meetingDto;  
+
+                return View(model);
             }
             catch
             {
@@ -81,6 +98,7 @@ namespace CondoManagementWebApp.Controllers
         }
 
         // GET: MeetingController/Create
+        [HttpGet("CreateMeeting")]
         [Authorize(Roles = "CondoManager")]
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> CreateMeeting()
         {
@@ -110,12 +128,12 @@ namespace CondoManagementWebApp.Controllers
 
 
         // chamadas ajax
-        
+
         //para condomembers list
-        [Microsoft.AspNetCore.Mvc.HttpGet]
-        public async Task<List<SelectListItem>> GetCondoMembersFromCondo(int condoId)
+        [Microsoft.AspNetCore.Mvc.HttpGet("GetCondoMembersFromCondo/{id}")]
+        public async Task<List<SelectListItem>> GetCondoMembersFromCondo(int id)
         {
-            var condoMembersList = await _apiCallService.GetAsync<List<CondoMemberDto>>($"api/CondoMembers/{condoId}") ?? new List<CondoMemberDto>();
+            var condoMembersList = await _apiCallService.GetAsync<List<CondoMemberDto>>($"api/CondoMembers/ByCondo/{id}") ?? new List<CondoMemberDto>();
 
             var selectListCondoMembers = _converterHelper.ToCondoMembersSelectList(condoMembersList);
 
@@ -124,10 +142,10 @@ namespace CondoManagementWebApp.Controllers
 
 
         //para occurrences list
-        [Microsoft.AspNetCore.Mvc.HttpGet]
-        public async Task<List<SelectListItem>> GetOccurencesFromCondo(int condoId)
+        [Microsoft.AspNetCore.Mvc.HttpGet("GetOccurencesFromCondo/{id}")]
+        public async Task<List<SelectListItem>> GetOccurencesFromCondo(int id)
         {
-            var occurrencesList = await _apiCallService.GetAsync<List<OccurrenceDto>>($"api/Occurrence/GetAllCondoOccurrences/{condoId}");
+            var occurrencesList = await _apiCallService.GetAsync<List<OccurrenceDto>>($"api/Occurrence/GetCondoOccurrences/{id}");
 
             var selectListOccurrrences = _converterHelper.ToOccurrenceSelectList(occurrencesList);
 
@@ -136,16 +154,34 @@ namespace CondoManagementWebApp.Controllers
 
 
         // POST: MeetingController/Create
-        [Microsoft.AspNetCore.Mvc.HttpPost]
+        [Microsoft.AspNetCore.Mvc.HttpPost("RequestCreateMeeting")]
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> RequestCreateMeeting(CreateMeetingViewModel model)
         {
+            
+
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    var managerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
+
+                    var managerCondosList = _converterHelper.ToCondosSelectList(managerCondos);
+
+                    model.CondosToSelect = managerCondosList;   
+
+                    return View("CreateMeeting", model);
+                }
+
                 var meetingDto = _converterHelper.ToNewMeetingDto(model);
 
                 //buscar listas com itens selecionados
 
                 var selectedCondomembersDto = await _apiCallService.PostAsync<List<int>, List<CondoMemberDto>>("api/Meeting/GetSelectedCondoMembers", model.SelectedCondoMembersIds);
+
+                if(model.SelectedOccurrencesIds != null)
+                {
+                    model.SelectedOccurrencesIds.RemoveAll(id => id == 0);
+                }
 
                 var selectedOccurrencesDto = await _apiCallService.PostAsync<List<int>, List<OccurrenceDto>>("api/Meeting/GetSelectedOccurrences", model.SelectedOccurrencesIds);
 
@@ -184,12 +220,13 @@ namespace CondoManagementWebApp.Controllers
 
 
         // GET: MeetingController/Edit/5
-        public async Task<ActionResult> Edit(int id)
+        [HttpGet("EditMeeting/{id}")]
+        public async Task<ActionResult> EditMeeting(int id)
         {
 
             try
             {
-                var meetingDto = await _apiCallService.GetAsync<MeetingDto>($"api/Meeting/GetMeeting/{id}");
+                var meetingDto = await _apiCallService.GetAsync<MeetingDto>($"api/Meeting/GetMeetingWithMembersAndOccurrences/{id}");
 
                 if (meetingDto == null)
                 {
@@ -199,13 +236,13 @@ namespace CondoManagementWebApp.Controllers
                 }
 
                 //buscar meeting
-                var model = _converterHelper.ToEditMeetingViewModel(meetingDto);    
+                var model = _converterHelper.ToEditMeetingViewModel(meetingDto);
 
-                
-                //Mander listas  para o model
-                
+
+                //Mandar listas  para o model
+
                 var occurrencesList = await GetOccurencesFromCondo(meetingDto.CondominiumId);
-                
+
                 model.OccurrencesToSelect = occurrencesList;
 
                 var condmembersList = await GetCondoMembersFromCondo(meetingDto.CondominiumId);
@@ -242,19 +279,35 @@ namespace CondoManagementWebApp.Controllers
         {
             try
             {
-                var meetingDto = _converterHelper.ToEditedMeetingDto(model);
+                var meetingDto = await _apiCallService.GetAsync<MeetingDto>($"api/Meeting/GetMeetingWithMembersAndOccurrences/{model.Id}");
+                if(meetingDto == null)
+                {
+                    _flashMessage.Danger("Meeting not found in the system, unable to modify");
+                    return View("EditMeeting", model);
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    await LoadLists(model, meetingDto);
+
+                    return View("EditMeeting", model);
+                }
 
                 //buscar listas com itens selecionados
 
                 var selectedCondomembersDto = await _apiCallService.PostAsync<List<int>, List<CondoMemberDto>>("api/Meeting/GetSelectedCondoMembers", model.SelectedCondoMembersIds);
 
+                if (model.SelectedOccurrencesIds != null)
+                {
+                    model.SelectedOccurrencesIds.RemoveAll(id => id == 0);
+                }
+
                 var selectedOccurrencesDto = await _apiCallService.PostAsync<List<int>, List<OccurrenceDto>>("api/Meeting/GetSelectedOccurrences", model.SelectedOccurrencesIds);
 
-                meetingDto.CondoMembersDto = selectedCondomembersDto;
-
-                meetingDto.OccurencesDto = selectedOccurrencesDto;
-
-
+                //atribuir propriedades
+                _converterHelper.SetEditedMeetingProperties(meetingDto, selectedCondomembersDto, selectedOccurrencesDto, model);
+                
+     
                 var apiCall = await _apiCallService.PostAsync<MeetingDto, Response<object>>("api/Meeting/EditMeeting", meetingDto);
                 if (apiCall.IsSuccess)
                 {
@@ -275,21 +328,22 @@ namespace CondoManagementWebApp.Controllers
 
 
 
-        // POST: MeetingController/Delete/5    Cancel Meeting
-        [Microsoft.AspNetCore.Mvc.HttpPost]
-        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> DeleteMeeting(int id)
+        //  DELETE: MeetingController/Delete/5    Cancel Meeting
+        [Microsoft.AspNetCore.Mvc.HttpDelete("RequestDeleteMeeting/{id}")]
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> RequestDeleteMeeting(int id)
         {
             try
             {
-                var apiCall = await _apiCallService.PostAsync<int, Response<object>>($"api/Meeting/DeleteMeeting", id);
-                if (apiCall.IsSuccess)
+                var apiCall = await _apiCallService.DeleteAsync($"api/Meeting/DeleteMeeting/{id}");
+
+                if (apiCall.IsSuccessStatusCode)
                 {
-                    return RedirectToAction(nameof(IndexMeetings));
+                    return Ok(new { success = true });
                 }
                 else
                 {
-                    _flashMessage.Danger(apiCall.Message);
-                    return RedirectToAction(nameof(IndexMeetings));
+                    _flashMessage.Danger("Unable to cancel meeting due to server error");
+                    return BadRequest(new { success = false, message = "Unable to cancel meeting due to server error " });
                 }
             }
             catch
@@ -297,5 +351,35 @@ namespace CondoManagementWebApp.Controllers
                 return View("Error");
             }
         }
+
+        //metodo auxiliar
+        public async Task LoadLists(EditMeetingViewModel model, MeetingDto meetingDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                var occurrencesList = await GetOccurencesFromCondo(meetingDto.CondominiumId);
+
+                model.OccurrencesToSelect = occurrencesList;
+
+                var condmembersList = await GetCondoMembersFromCondo(meetingDto.CondominiumId);
+
+                model.CondoMembersToSelect = condmembersList;
+
+                var managerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
+
+                var managerCondosList = _converterHelper.ToCondosSelectList(managerCondos);
+
+                model.CondosToSelect = managerCondosList;
+
+
+                //buscar os ids selecionados
+
+                model.SelectedCondoMembersIds = meetingDto.CondoMembersDto.Select(cm => cm.Id).ToList();
+
+                model.SelectedOccurrencesIds = meetingDto.OccurencesDto.Select(o => o.Id).ToList();
+            }
+        }
+
+       
     }
 }
