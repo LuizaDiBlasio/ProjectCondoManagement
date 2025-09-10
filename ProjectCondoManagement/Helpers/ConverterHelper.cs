@@ -30,6 +30,7 @@ namespace ProjectCondoManagement.Helpers
             var condoMember = new CondoMember
             {
                 Id = condoMemberDto.Id,
+                FinancialAccountId = condoMemberDto.FinancialAccountId,               
                 FullName = condoMemberDto.FullName,
                 Email = condoMemberDto.Email,
                 Address = condoMemberDto.Address,
@@ -48,6 +49,7 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = condoMember.Id,
                 FullName = condoMember.FullName,
+                FinancialAccountId = condoMember.FinancialAccountId,
                 CompanyId = condoMember.CompanyId,
                 Email = condoMember.Email,
                 Address = condoMember.Address,
@@ -73,10 +75,12 @@ namespace ProjectCondoManagement.Helpers
             var condoMemberDto = new CondoMemberDto
             {
                 FullName = user.FullName,
+                FinancialAccountId = user.FinancialAccountId ?? 0,
                 Email = user.Email,
                 Address = user.Address,
                 BirthDate = user.BirthDate,
                 PhoneNumber = user.PhoneNumber,
+                CompanyId = user.CompanyId ?? 0,
                 ImageUrl = user.ImageUrl,
             };
             return condoMemberDto;
@@ -247,6 +251,7 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = condominium.Id,
                 CondoName = condominium.CondoName,
+                CondoMembers = condominium.CondoMembers?.Select(c => ToCondoMemberDto(c, false)).ToList() ?? new List<CondoMemberDto>(),
                 CompanyId = condominium.CompanyId,
                 Address = condominium.Address,
                 FinancialAccountId = condominium.FinancialAccountId,
@@ -395,6 +400,11 @@ namespace ProjectCondoManagement.Helpers
                 Id = isNew ? 0 : payment.Id,
                 IssueDate = payment.IssueDate,
                 DueDate = payment.DueDate,  
+                ExpenseType = payment.ExpenseType,
+                Payer = payment.Payer,
+                BeneficiaryAccountId = payment.BeneficiaryAccountId,
+                SelectedBeneficiaryId = payment.SelectedBeneficiaryId,
+                ExternalRecipientBankAccount = payment.ExternalRecipientBankAccount,
                 PaymentMethod = payment.PaymentMethod,  
                 CondominiumId = payment.CondominiumId,
                 IsPaid = payment.IsPaid,    
@@ -407,6 +417,8 @@ namespace ProjectCondoManagement.Helpers
                 TransactionId = payment.TransactionId, 
                 MbwayNumber = payment.MbwayNumber,  
                 CreditCard= payment.CreditCard, 
+                Recipient = payment.Recipient,
+                Amount = payment.Amount,
             };  
            
             return paymentDto;
@@ -451,11 +463,9 @@ namespace ProjectCondoManagement.Helpers
                 DateAndTime = transaction.DateAndTime,
                 PayerAccountId = transaction.PayerAccountId,  
                 //AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
+                BeneficiaryAccountId = transaction.BeneficiaryAccountId,
                 Amount = transaction.Amount,
                 CompanyId = transaction?.CompanyId,
-                ExternalRecipientBankAccount = transaction.ExternalRecipientBankAccount
-
-
                 ExternalRecipientBankAccount = transaction.ExternalRecipientBankAccount,
                 PaymentId = transaction.PaymentId,  
                 
@@ -503,7 +513,12 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = isNew ? 0 : paymentDto.Id,
                 IssueDate = paymentDto.IssueDate.Value,
+                ExpenseType = paymentDto.ExpenseType,
+                Payer = paymentDto.Payer,
                 DueDate = paymentDto.DueDate,
+                SelectedBeneficiaryId = paymentDto.SelectedBeneficiaryId,
+                ExternalRecipientBankAccount = paymentDto.ExternalRecipientBankAccount,
+                BeneficiaryAccountId = paymentDto.BeneficiaryAccountId,
                 PaymentMethod = isNew ? null : paymentDto.PaymentMethod,
                 PayerFinancialAccountId = paymentDto.PayerFinancialAccountId,
                 IsPaid = isNew ? false : paymentDto.IsPaid,
@@ -515,6 +530,8 @@ namespace ProjectCondoManagement.Helpers
                 InvoiceId = paymentDto.InvoiceId,
                 MbwayNumber = paymentDto.MbwayNumber,
                 CreditCard = paymentDto.CreditCard, 
+                Recipient = paymentDto.Recipient,
+                Amount = paymentDto.Amount
             };
 
             return payment; 

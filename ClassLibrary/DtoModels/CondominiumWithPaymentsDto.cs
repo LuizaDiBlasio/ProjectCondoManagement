@@ -12,6 +12,11 @@ namespace ClassLibrary.DtoModels
 
         public string CondoName { get; set; }  
 
+        public string? PayerName { get; set; }
+
+
+        public string? RecipientName { get; set; }
+
         public List<PaymentDto> CondoPayments { get; set; } 
     }
 }

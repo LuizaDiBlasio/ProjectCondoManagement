@@ -85,6 +85,24 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
 
         }
 
+        public async Task<bool> AssociateFinancialAccountAsync(string? email, int? financialAccountId)
+        {
+            var member = GetAll(_context).FirstOrDefault(c => c.Email == email);
+            if (member == null)
+            {
+                return false;
+            }
+                
+
+            member.FinancialAccountId = financialAccountId ?? 0;
+
+            _context.CondoMembers.Update(member);
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
 
     }
 }

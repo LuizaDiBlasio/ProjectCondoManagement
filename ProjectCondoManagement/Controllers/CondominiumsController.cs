@@ -292,6 +292,7 @@ namespace ProjectCondoManagement.Controllers
                     CondominiumId = condo.Id,
                     CondoName = condo.CondoName,
                     CondoPayments = condoPaymentsDto
+
                 };
 
                 condosWithPaymentsDtoList.Add(condominiumWithPaymentsDto);
@@ -317,7 +318,7 @@ namespace ProjectCondoManagement.Controllers
 
 
 
-            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c)).ToList();
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList();
 
             if (condominiumsDtos == null)
             {

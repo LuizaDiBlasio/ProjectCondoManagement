@@ -770,9 +770,12 @@ namespace CondoManagementWebApp.Controllers
         [Authorize(Roles = "SysAdmin")]
         public async Task<IActionResult> SysAdminDashboard()
         {
+
+            var model = new SysAdminDashboardViewModel();
+
             try
             {
-                var model = new SysAdminDashboardViewModel();
+                
 
                 var usersCondoMembers = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CondoMember");
 
@@ -780,6 +783,15 @@ namespace CondoManagementWebApp.Controllers
                 {
                     model.CondoMembers = usersCondoMembers;
                 }
+
+                var usersCompanyAdmin = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CompanyAdmin");
+
+                if (usersCompanyAdmin.Any())
+                {
+                    model.CompanyAdmins = usersCompanyAdmin;
+                }
+
+
 
                 var usersCondoManagers = await _apiCallService.GetAsync<IEnumerable<UserDto>>($"api/Account/GetUsersWithCompany?role=CondoManager");
 
@@ -789,19 +801,13 @@ namespace CondoManagementWebApp.Controllers
                 }
 
 
-                var usersCompanyAdmin = await _apiCallService.GetByQueryAsync<IEnumerable<UserDto>>("api/Account/GetAllUsersByRole", "CompanyAdmin");
-
-                if (usersCompanyAdmin.Any())
-                {
-                    model.CompanyAdmins = usersCompanyAdmin;
-                }
-
+              
                 return View(model);
 
             }
             catch(Exception ex)
             {
-                return View(new SysAdminDashboardViewModel());
+                return View(model);
             }
 
         }

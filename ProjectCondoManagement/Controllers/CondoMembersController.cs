@@ -391,21 +391,7 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-        [HttpGet("ByCondo/{condoId}")]
-        public async Task<ActionResult<IEnumerable<CondoMemberDto>>> GetMembersByCondo(int condoId)
-        {
-            var members = await _condoMemberRepository.GetAll(_context)
-               .Include(m => m.Units)
-                   .ThenInclude(u => u.Condominium)
-               .Where(m => m.Units.Any(u => u.CondominiumId == condoId))
-               .ToListAsync();
-
-            var memberDtos = members
-                .Select(m => _converterHelper.ToCondoMemberDto(m))
-                .ToList();
-
-            return Ok(memberDtos);
-        }
+  
 
 
         [HttpGet("ByManager")]

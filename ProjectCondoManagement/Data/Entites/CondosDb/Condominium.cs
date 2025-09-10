@@ -19,6 +19,9 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public string CondoName { get; set; }
 
+        [NotMapped]
+        public List<CondoMember>? CondoMembers { get; set; }
+
         public string? ManagerUserId { get; set; }
 
         [NotMapped]

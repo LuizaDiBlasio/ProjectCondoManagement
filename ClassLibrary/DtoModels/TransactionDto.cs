@@ -12,6 +12,7 @@ namespace ClassLibrary.DtoModels
 
         public DateTime DateAndTime { get; set; }
 
+
         public int? PayerAccountId { get; set; } //FK para TransactionsAsPayer
 
         public FinancialAccountDto? AccountPayerDto { get; set; }

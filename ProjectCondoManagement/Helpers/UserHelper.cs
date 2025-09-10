@@ -100,20 +100,7 @@ namespace ProjectCondoManagement.Helpers
             }
 
             //se for condoMember adicionanr uma financial account
-
-            if(await IsUserInRoleAsync(user, "CondoMember"))
-            {
-                var financialAccount = new FinancialAccount()
-                {
-                    Balance = 0,
-                    OwnerName = user.FullName,
-                };
-
-                await _financialAccountRepository.CreateAsync(financialAccount, _dataContextFinances); //add FinAcc na Bd
-
-                user.FinancialAccountId = financialAccount.Id; 
-                user.FinancialAccount = financialAccount;
-            }
+    
 
             ////TODO Tirar o if e essa atribuição de bool quando publicar, manter só o método de ativação
             //user.Uses2FA = true;

@@ -201,12 +201,22 @@ namespace CondoManagementWebApp.Helpers
 
         public PaymentDto FromOneTimeToPaymentDto(CreateOneTimePaymentViewModel model)
         {
-            var paymentDto = new PaymentDto()
+            if (model.SelectedPayerType == "Condominium")
             {
-                DueDate = model.DueDate.Value,
-                PayerFinancialAccountId = model.PayerFinancialAccountId,
-                CondominiumId = model.CondominiumId.Value,
-            };
+                string Recipient = model.Recipient ?? string.Empty;
+            }
+
+
+
+                var paymentDto = new PaymentDto()
+                {
+                    DueDate = model.DueDate.Value,
+                    PayerFinancialAccountId = model.PayerFinancialAccountId.Value,
+                    CondominiumId = model.CondominiumId.Value,
+                    Recipient = model.Recipient,
+                    Amount = model.ExpenseAmount,
+                };
+
             return paymentDto;
         }
 

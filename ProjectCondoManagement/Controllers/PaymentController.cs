@@ -331,7 +331,7 @@ namespace ProjectCondoManagement.Controllers
                     return Ok(new Response<object>() { IsSuccess = false, Message = "Insufficient balance" });
                 }
 
-                financialAccount.Balance = financialAccount.Balance - deductDto.TotalAmount;
+                financialAccount.Balance -= deductDto.TotalAmount;
 
                 // update da financial account
                 await _financialAccountRepository.UpdateAsync(financialAccount, _dataContextFinances);
@@ -353,7 +353,7 @@ namespace ProjectCondoManagement.Controllers
                 var financialAccount = await _financialAccountRepository.GetByIdAsync(incomeDto.AccountId, _dataContextFinances);
 
                 // deduzir pagamento
-                financialAccount.Balance = financialAccount.Balance + incomeDto.TotalAmount;
+                financialAccount.Balance += incomeDto.TotalAmount;
 
                 // update da financial account
                 await _financialAccountRepository.UpdateAsync(financialAccount, _dataContextFinances);

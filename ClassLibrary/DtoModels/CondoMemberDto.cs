@@ -18,6 +18,9 @@ namespace ClassLibrary.DtoModels
         public string FullName { get; set; }
 
 
+        public int FinancialAccountId { get; set; }
+
+
 
         [EmailAddress(ErrorMessage = "Invalid email address format.")]
         [Required(ErrorMessage = "Email is required.")]

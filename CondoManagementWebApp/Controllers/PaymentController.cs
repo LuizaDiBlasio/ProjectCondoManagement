@@ -5,6 +5,8 @@ using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis.FlowAnalysis.DataFlow;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Shared;
 using System.Threading.Tasks;
 using Vereyon.Web;
@@ -41,8 +43,8 @@ namespace CondoManagementWebApp.Controllers
                 {
                     _flashMessage.Danger("You are not managing any condominiums currently");
                     return View(new List<PaymentDto>());
-                }
-   
+                }                            
+
 
                 return View(condosWithPayments);
 
@@ -128,6 +130,8 @@ namespace CondoManagementWebApp.Controllers
                 return View("CreateOneTimePayment", new CreateOneTimePaymentViewModel());
             }
 
+            model.CondoMembers = new SelectList(new List<CondoMemberDto>(), "Id", "FullName");
+
             var condosToSelectList = _converterHelper.ToCondosSelectList(condoManagerCondos);
             if (condosToSelectList.Any())
             {
@@ -141,7 +145,62 @@ namespace CondoManagementWebApp.Controllers
                 model.ExpenseTypesList = expenseTypeList;
             }
 
+            //descobrir o role do user
+
+            string userRole = string.Empty;
+
+            if (User.IsInRole("CondoManager"))
+            {
+                userRole = "CondoManager";
+            }
+
+            if (User.IsInRole("CondoMember"))
+            {
+                userRole = "CondoMember";
+            }
+
+            model.BeneficiaryTypeList = _paymentHelper.GetBeneficiaryTypesList(userRole);
+
+
+
             return View(model);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetMembersByCondo(int condoId)
+        {
+
+            try
+            {
+                var condo = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{condoId}");
+                if (condo == null || condo.CondoMembers == null)
+                {
+                    return Json(new List<object>());
+                }
+
+                condo.CondoMembers = await _apiCallService.GetAsync<List<CondoMemberDto>>($"api/CondoMembers/ByCondo/{condoId}");
+
+                var members = condo.CondoMembers.Select(m => new
+                {
+                    id = m.Id,
+                    name = m.FullName,
+                });
+
+                return Json(members);
+            }
+
+            catch (Exception)
+            {
+                var emptyMember = new List<object>
+                {
+                    new { id = 0, name = "No members found", financialAccountId = (int?)null }
+                };
+
+                return Json(new SelectList(emptyMember, "id", "name"));
+            }
+
+            
         }
 
         // POST: PaymentController/RequestCreateOneTimePaymentCondo
@@ -154,10 +213,36 @@ namespace CondoManagementWebApp.Controllers
                 return View("CreateOneTimePayment", model); 
             }
 
+            if (model.SelectedBeneficiaryId == 3)
+            {
+                if (string.IsNullOrWhiteSpace(model.Recipient) || string.IsNullOrWhiteSpace(model.ExternalRecipientBankAccount))
+                {
+                    _flashMessage.Danger("Please enter recipient name and bank account.");
+                    return View("CreateOneTimePayment", model);
+                }
+            }
             try
             {
-                //PREENCHER MODEL (propriedades fora da view)
-                var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
+
+
+                // Se for empresa, preenche automaticamente
+                if (model.SelectedBeneficiaryId == 2)
+                {
+                    var company = await _apiCallService.GetAsync<CompanyDto>("api/Company/GetCompanyByUser");
+
+                    model.BeneficiaryAccountId = company.FinancialAccountId;
+
+                    if (string.IsNullOrWhiteSpace(model.Recipient))
+                    {
+                        model.Recipient = company.Name;
+                    }
+
+                }
+                
+
+
+                    //PREENCHER MODEL (propriedades fora da view)
+                    var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
                 if (condoManagerCondos != null && !condoManagerCondos.Any())
                 {
                     _flashMessage.Danger("You are not managing any condominiums currently");
@@ -183,14 +268,59 @@ namespace CondoManagementWebApp.Controllers
                 };
 
 
+                int? payerFinancialAccountId = null;
+                string? payerName = null;
+
+                if (model.SelectedPayerType == "Condominium")
+                {
+                    var condo = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{model.CondominiumId}");
+                    payerFinancialAccountId = condo?.FinancialAccountId;
+                    payerName = condo?.CondoName;
+
+
+
+                }
+                else if (model.SelectedPayerType == "Member" && model.SelectedCondoMemberId.HasValue)
+                {
+
+                    var member = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{model.SelectedCondoMemberId.Value}");
+                    payerFinancialAccountId = member?.FinancialAccountId;
+                    payerName = member?.FullName;
+
+                }
+
+                if (!payerFinancialAccountId.HasValue)
+                {
+                    _flashMessage.Danger("Unable to resolve financial account.");
+                    return View("CreateOneTimePayment", model);
+                }
+
+
+                model.PayerFinancialAccountId = payerFinancialAccountId;
+              
+
                 //CONVERTER PARA PAYMENT DTO
                 var paymentDto = _converterHelper.FromOneTimeToPaymentDto(model);
 
                 //atribur propriedades fora do view model
 
                 paymentDto.IssueDate = DateTime.Now;
+                paymentDto.Amount = model.ExpenseAmount;
+                paymentDto.Payer = payerName;
+                paymentDto.ExpenseType = expenseType.Text;
 
                 paymentDto.OneTimeExpenseDto = expenseDto;
+                if (model.SelectedBeneficiaryId == 2)
+                {
+                    paymentDto.BeneficiaryAccountId = model.BeneficiaryAccountId.Value;
+
+                }
+                else
+                {
+                  paymentDto.ExternalRecipientBankAccount = model.ExternalRecipientBankAccount;
+                }
+
+                    paymentDto.SelectedBeneficiaryId = model.SelectedBeneficiaryId;
 
                 var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/CreateOneTimePayment", paymentDto);
 
@@ -232,24 +362,11 @@ namespace CondoManagementWebApp.Controllers
                 model.PaymentMethods = paymentMethodList;
             }
 
+            model.Payment = await _apiCallService.GetAsync<PaymentDto>($"api/Payment/GetPaymentDetails/{id}");
+
             model.SelectedPaymentMethodId = 0;
 
-            //descobrir o role do user
-
-            string userRole = string.Empty;
-
-            if (User.IsInRole("CondoManager"))
-            {
-                userRole = "CondoManager";
-            }
-
-            if (User.IsInRole("CondoMember"))
-            {
-                userRole = "CondoMember";
-            }
-
-
-            model.BeneficiaryTypeList = _paymentHelper.GetBeneficiaryTypesList(userRole);
+                      
 
             //atribuir id do pagamento
             model.Id = id;   
@@ -263,8 +380,11 @@ namespace CondoManagementWebApp.Controllers
 
         // POST: PaymentController/Edit/5
         [HttpPost("RequestMakePayment")]
-        public async Task<ActionResult> RequestMakePayment(MakePaymentViewModel model) //ID HIDDEN
+        public async Task<ActionResult> RequestMakePayment(MakePaymentViewModel model) 
         {
+
+            var paymentDto = await _apiCallService.GetAsync<PaymentDto>($"api/Payment/GetPaymentDetails/{model.Id}");
+
             //validação hard code dos campos das opções de pagamento
             if (model.SelectedPaymentMethodId == 2) // Cartão de Crédito
             {
@@ -283,7 +403,22 @@ namespace CondoManagementWebApp.Controllers
             }
             else if(model.SelectedPaymentMethodId == 3)//omah wallet
             {
-                if(model.PayerFinancialAccountId == 0)
+                if (this.User.IsInRole("CondoMember"))
+                {
+                    var user = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={this.User.Identity?.Name}");
+
+
+                    model.PayerFinancialAccountId = user.FinancialAccountId;
+                }
+                else if (this.User.IsInRole("CondoManager"))
+                {
+                                        
+                    var condo = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{paymentDto.CondominiumId}");
+
+                    model.PayerFinancialAccountId = condo.FinancialAccountId;
+                }
+
+                    if (model.PayerFinancialAccountId == 0)
                 {
                     ModelState.AddModelError("OmahWalletNumber", "Omah wallet number is required");
                 }
@@ -294,26 +429,26 @@ namespace CondoManagementWebApp.Controllers
                 ModelState.AddModelError("SelectedPaymentMethodId", "You must select a payment method");
             }
 
-            //validação manual para account id ou external bank account
-            if (model.SelectedBeneficiaryId != 3)
-            {
-                if (model.BeneficiaryAccountId == null)
-                {
-                    ModelState.AddModelError("BeneficiaryAccountId", "Beneficiary Account Id is required");
-                }
+            ////validação manual para account id ou external bank account
+            //if (model.SelectedBeneficiaryId != 3)
+            //{
+            //    if (model.BeneficiaryAccountId == null)
+            //    {
+            //        ModelState.AddModelError("BeneficiaryAccountId", "Beneficiary Account Id is required");
+            //    }
 
-            }
-            else if (model.SelectedBeneficiaryId == 0)
-            {
-                ModelState.AddModelError("SelectedBeneficiaryId", "You must select a recipient type");
-            }
-            else
-            {
-                if (model.ExternalRecipientBankAccount == null)
-                {
-                    ModelState.AddModelError("ExternalRecipientBankAccount", "Recipient's bank account is required");
-                }
-            }
+            //}
+            //else if (model.SelectedBeneficiaryId == 0)
+            //{
+            //    ModelState.AddModelError("SelectedBeneficiaryId", "You must select a recipient type");
+            //}
+            //else
+            //{
+            //    if (model.ExternalRecipientBankAccount == null)
+            //    {
+            //        ModelState.AddModelError("ExternalRecipientBankAccount", "Recipient's bank account is required");
+            //    }
+            //}
 
 
             if (!ModelState.IsValid)
@@ -325,7 +460,6 @@ namespace CondoManagementWebApp.Controllers
             {
 
                 //buscar metodo de pagamento
-                var paymentDto = await _apiCallService.GetAsync<PaymentDto>($"api/Payment/GetPaymentDetails/{model.Id}");
 
                 var paymentMethod = _paymentHelper.GetSelectedPaymentMethod(model.SelectedPaymentMethodId);
 
@@ -362,13 +496,13 @@ namespace CondoManagementWebApp.Controllers
                 }
 
                 //caso seja um beneficiario externo , não atribuir a conta Omah e atribuir a conta de banco externa
-                if (model.SelectedBeneficiaryId == 3)
+                if (paymentDto.SelectedBeneficiaryId == 3)
                 {
-                    model.BeneficiaryAccountId = null;  
+                    paymentDto.BeneficiaryAccountId = null;  
                 }
                 else //caso seja pagamento interno ver se a account do beneficiary está válida
                 {
-                    var financialAccountDto = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{model.BeneficiaryAccountId}");
+                    var financialAccountDto = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{paymentDto.BeneficiaryAccountId}");
 
                     if (!financialAccountDto.IsActive)
                     {
@@ -384,13 +518,14 @@ namespace CondoManagementWebApp.Controllers
                         PaymentId = paymentDto.Id,
                         DateAndTime = DateTime.Now,
                         PayerAccountId = paymentDto.PayerFinancialAccountId,
-                        BeneficiaryAccountId = model.BeneficiaryAccountId,
-                        ExternalRecipientBankAccount = model.ExternalRecipientBankAccount,
+                        BeneficiaryAccountId = paymentDto.BeneficiaryAccountId,
+                        ExternalRecipientBankAccount = paymentDto.ExternalRecipientBankAccount,
+                        Amount = paymentDto.TotalAmount
                     };
 
                 //subtrair de account caso method payment seja omahWallet
 
-                if(model.SelectedPaymentMethodId == 3)
+                if(model.SelectedPaymentMethodId== 3)
                 {
                     var deductDto = new CashFlowDto()
                     {
@@ -407,16 +542,18 @@ namespace CondoManagementWebApp.Controllers
                     }
                 }
 
-                //adicionar ao account do beneficiario
-                if (model.SelectedBeneficiaryId != 3) // se não for externo
+           
+                if (paymentDto.SelectedBeneficiaryId != 3) // se não for externo
                 {
+            
+
                     var incomeDto = new CashFlowDto()
                     {
                         TotalAmount = paymentDto.TotalAmount,
-                        AccountId = paymentDto.TransactionDto.BeneficiaryAccountId.Value,
+                        AccountId = paymentDto.BeneficiaryAccountId.Value,
                     };
 
-                    if (model.BeneficiaryAccountId != 0)
+                    if (paymentDto.BeneficiaryAccountId != 0)
                     {
                         var incomePay = await _apiCallService.PostAsync<CashFlowDto, Response<object>>("api/Payment/IncomePayment", incomeDto);
 
@@ -426,6 +563,11 @@ namespace CondoManagementWebApp.Controllers
                             return View("MakePayment", model);
                         }
                     }
+
+
+
+
+
                 }
                
 

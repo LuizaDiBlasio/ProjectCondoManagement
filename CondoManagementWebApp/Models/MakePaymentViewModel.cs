@@ -8,14 +8,13 @@ namespace CondoManagementWebApp.Models
     {
         public int Id { get; set; }
 
+        public PaymentDto? Payment { get; set; }
+
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "You must select a payment method")]
         public int SelectedPaymentMethodId { get; set; }
 
-        public List<SelectListItem>? PaymentMethods { get; set; } = new List<SelectListItem>();
-
-
-        public List<SelectListItem>? BeneficiaryTypeList { get; set; }
+        public List<SelectListItem>? PaymentMethods { get; set; } = new List<SelectListItem>();      
 
 
         public int SelectedBeneficiaryId { get; set; }
@@ -48,8 +47,6 @@ namespace CondoManagementWebApp.Models
         public string? PhoneNumber { get; set; }
 
 
-        //Campo para Omah Wallet
-        [Display(Name = "My Omah Wallet Number")]
         public int? PayerFinancialAccountId { get; set; }
 
         //campo para beneficiário externo

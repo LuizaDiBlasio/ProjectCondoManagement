@@ -272,7 +272,8 @@ namespace ProjectCondoManagement.Controllers
                 return StatusCode(500, new { Message = "Internal server error: User not registered" });
             }
 
-          
+            await _condoMemberRepository.AssociateFinancialAccountAsync(user.Email, user.FinancialAccountId);
+            
 
             string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
 
@@ -284,6 +285,8 @@ namespace ProjectCondoManagement.Controllers
 
             if (response.IsSuccess) //se conseguiu enviar o email
             {
+
+
                 return StatusCode(200, new Response<object> { Message = "User registered, a confirmation email has been sent", IsSuccess = true});
             }
 
@@ -675,18 +678,16 @@ namespace ProjectCondoManagement.Controllers
 
             foreach (var user in users)
             {
-                if (await _userHelper.IsUserInRoleAsync(user,role))
+                if (await _userHelper.IsUserInRoleAsync(user, role))
                 {
                     filteredUsers.Add(user);
                 }
             }
 
-            users = filteredUsers;
+            
+            var usersDto = filteredUsers.Select(u => _converterHelper.ToUserDto(u)).ToList();
 
-            if (users == null || !users.Any())
-                return NotFound("No users found");
-
-            var usersDto = users.Select(u => _converterHelper.ToUserDto(u)).ToList();
+           
             return Ok(usersDto);
         }
 

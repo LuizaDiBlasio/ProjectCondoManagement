@@ -10,6 +10,8 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public DateTime? BirthDate { get; set; }
 
+        public int FinancialAccountId { get; set; }
+
         public string PhoneNumber { get; set; }
 
         public string Address { get; set; }

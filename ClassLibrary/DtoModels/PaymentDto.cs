@@ -16,7 +16,21 @@ namespace ClassLibrary.DtoModels
 
         public string? PaymentMethod { get; set; }
 
+        public int SelectedBeneficiaryId { get; set; }
+
+        public string? ExternalRecipientBankAccount { get; set; }
+
+        public int? BeneficiaryAccountId { get; set; }
+
         public int PayerFinancialAccountId { get; set; }
+
+        public string? ExpenseType { get; set; }
+
+        public string? Recipient { get; set; }
+
+        public string? Payer { get; set; }
+
+        public decimal? Amount { get; set; }
 
         public int CondominiumId { get; set; }
 

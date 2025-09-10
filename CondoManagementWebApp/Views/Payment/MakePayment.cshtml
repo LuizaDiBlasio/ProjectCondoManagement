@@ -8,6 +8,7 @@
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-xl-8 col-xxl-8">
+
                 <div class="card">
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center w-100">
@@ -16,13 +17,36 @@
                     </div>
 
                     <div class="card-body">
+
+                        <!-- 🔹 Payment Information Section -->
+                        <h5 class="mb-3">Payment Information</h5>
+                        <dl class="row mb-4">
+                            <dt class="col-sm-4">Recipient</dt>
+                            <dd class="col-sm-8">@Model.Payment?.Recipient</dd>
+
+                            <dt class="col-sm-4">Payer</dt>
+                            <dd class="col-sm-8">@Model.Payment?.Payer</dd>
+
+                            <dt class="col-sm-4">Amount</dt>
+                            <dd class="col-sm-8">@Model.Payment?.Amount?.ToString("C2")</dd>
+
+                            <dt class="col-sm-4">Expense Type</dt>
+                            <dd class="col-sm-8">@Model.Payment?.ExpenseType</dd>
+
+                            <dt class="col-sm-4">Due Date</dt>
+                            <dd class="col-sm-8">@Model.Payment?.DueDate.ToString("dd/MM/yyyy")</dd>
+                        </dl>
+
+                        <hr />
+
+                        <!-- 🔹 Payment Form -->
                         <form asp-action="RequestMakePayment">
                             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                             <input type="hidden" asp-for="Id" />
                             <input type="hidden" asp-for="IsPaid" />
 
-                            @*escolher o método de pagamento*@
+                            <!-- Payment Method -->
                             <div class="form-group mb-3">
                                 <label class="form-label font-weight-bold text-purple">Payment method</label><br />
                                 @if (Model.PaymentMethods != null)
@@ -30,10 +54,10 @@
                                     @foreach (var method in Model.PaymentMethods)
                                     {
                                         <div class="form-check">
-                                            <input class="form-check-input payment-method-radio" type="radio"
-                                            asp-for="SelectedPaymentMethodId"
-                                            value="@method.Value"
-                                            id="pm-@method.Value" />
+                                            <input class="form-check-input" type="radio"
+                                                   asp-for="SelectedPaymentMethodId"
+                                                   value="@method.Value"
+                                                   id="pm-@method.Value" />
                                             <label class="form-check-label" for="pm-@method.Value">@method.Text</label>
                                         </div>
                                     }
@@ -41,15 +65,16 @@
                                 <span asp-validation-for="SelectedPaymentMethodId" class="text-danger"></span>
                             </div>
 
-                            @*uma dessas opções aparecem depois de escolher o método de pagamento*@
-                            <div id="payerAccountFields" style="display:none;">
+                            <!-- MbWay Fields -->
+                            <div id="mbwayFields" style="display:none;">
                                 <div class="form-group mb-3">
-                                    <label asp-for="PayerFinancialAccountId" class="control-label"></label>
-                                    <input asp-for="PayerFinancialAccountId" class="form-control" />
-                                    <span asp-validation-for="PayerFinancialAccountId" class="text-danger"></span>
+                                    <label asp-for="PhoneNumber" class="control-label"></label>
+                                    <input asp-for="PhoneNumber" class="form-control" />
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                                 </div>
                             </div>
 
+                            <!-- Credit Card Fields -->
                             <div id="creditCardFields" style="display:none;">
                                 <div class="form-group mb-3">
                                     <label asp-for="CreditCardNumber" class="control-label"></label>
@@ -63,51 +88,11 @@
                                 </div>
                             </div>
 
-                            <div id="mbwayFields" style="display:none;">
-                                <div class="form-group mb-3">
-                                    <label asp-for="PhoneNumber" class="control-label"></label>
-                                    <input asp-for="PhoneNumber" class="form-control" />
-                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                                </div>
-                            </div>
+                            <!-- Hidden Fields -->
+                            <input type="hidden" asp-for="PayerFinancialAccountId" />
+                            <input type="hidden" asp-for="BeneficiaryAccountId" value="@ViewBag.AccountId" />
 
-                            @*Escolher o tipo de recipiente*@
-                            <div class="form-group mb-3">
-                                <label class="form-label font-weight-bold text-purple">Recipient</label><br />
-                                @if (Model.BeneficiaryTypeList != null)
-                                {
-                                    @foreach (var beneficiary in Model.BeneficiaryTypeList)
-                                    {
-                                        <div class="form-check">
-                                            <input class="form-check-input beneficiary-type-radio" type="radio"
-                                            asp-for="SelectedBeneficiaryId"
-                                            value="@beneficiary.Value"
-                                            id="ben-@beneficiary.Value" />
-                                            <label class="form-check-label" for="ben-@beneficiary.Value">@beneficiary.Text</label>
-                                        </div>
-                                    }
-                                }
-                                <span asp-validation-for="SelectedBeneficiaryId" class="text-danger"></span>
-                            </div>
-
-                            @*uma dessas opções aparece depois de escolher o tipo de recipiente*@
-
-                            <div id="beneficiaryAccountIdFields" style="display:none;">
-                                <div class="form-group mb-3">
-                                    <label asp-for="BeneficiaryAccountId" class="control-label"></label>
-                                    <input asp-for="BeneficiaryAccountId" class="form-control" />
-                                    <span asp-validation-for="BeneficiaryAccountId" class="text-danger"></span>
-                                </div>
-                            </div>
-
-                            <div id="externalRecipientFields" style="display:none;">
-                                <div class="form-group mb-3">
-                                    <label asp-for="ExternalRecipientBankAccount" class="control-label"></label>
-                                    <input asp-for="ExternalRecipientBankAccount" class="form-control" />
-                                    <span asp-validation-for="ExternalRecipientBankAccount" class="text-danger"></span>
-                                </div>
-                            </div>
-
+                            <!-- Actions -->
                             <div class="d-flex justify-content-between mt-3">
                                 @if (this.User.IsInRole("CondoManager"))
                                 {
@@ -122,51 +107,26 @@
                         </form>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
+
     <script>
-        $(document).ready(function() {
-            // Lógica para o método de pagamento
-                   $('.payment-method-radio').on('change', function () {
-            var selectedValue = $(this).val();
+        function togglePaymentFields() {
+            let selected = document.querySelector('input[name="SelectedPaymentMethodId"]:checked')?.value;
+            document.getElementById("mbwayFields").style.display = (selected === "1") ? "block" : "none";
+            document.getElementById("creditCardFields").style.display = (selected === "2") ? "block" : "none";
+        }
 
-            // Oculta todos os campos primeiro
-            $('#creditCardFields').hide();
-            $('#mbwayFields').hide();
-            $('#payerAccountFields').hide();
-
-            // Mostra o campo correspondente ao valor selecionado
-            if (selectedValue === "2") { // ID para Cartão de Crédito
-                $('#creditCardFields').show();
-            } else if (selectedValue === "1") { // ID para MbWay
-                $('#mbwayFields').show();
-            } else if (selectedValue === "3") { // ID para Omah Wallet
-                $('#payerAccountFields').show();
-            }
+        document.querySelectorAll('input[name="SelectedPaymentMethodId"]').forEach(radio => {
+            radio.addEventListener('change', togglePaymentFields);
         });
 
-            // Lógica para o tipo de beneficiário
-                         $('.beneficiary-type-radio').on('change', function () {
-            var selectedValue = $(this).val();
-
-            // Oculta todos os campos de beneficiário primeiro
-            $('#beneficiaryAccountIdFields').hide();
-            $('#externalRecipientFields').hide();
-
-            // Mostra o campo correspondente ao valor selecionado
-            if (selectedValue === "1" || selectedValue === "2") {
-                $('#beneficiaryAccountIdFields').show();
-            } else if (selectedValue === "3") {
-                $('#externalRecipientFields').show();
-            }
-        });
-        });
+        togglePaymentFields();
     </script>
 }

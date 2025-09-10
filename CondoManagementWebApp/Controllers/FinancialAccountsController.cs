@@ -517,6 +517,9 @@ namespace CondoManagementWebApp.Controllers
             }
             var transactions = new List<TransactionDto>();
 
+
+
+
             ViewBag.Email = email;
             ViewBag.AccountId = id;
 

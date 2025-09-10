@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 
@@ -11,9 +12,11 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 namespace ProjectCondoManagement.Migrations
 {
     [DbContext(typeof(DataContextFinances))]
-    partial class DataContextFinancesModelSnapshot : ModelSnapshot
+    [Migration("20250909122306_UpdatePayment2")]
+    partial class UpdatePayment2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -147,7 +150,7 @@ namespace ProjectCondoManagement.Migrations
                     b.Property<decimal?>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("BeneficiaryAccountId")
+                    b.Property<int>("BeneficiaryAccountId")
                         .HasColumnType("int");
 
                     b.Property<int>("CondominiumId")
@@ -158,9 +161,6 @@ namespace ProjectCondoManagement.Migrations
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("ExpenseType")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ExternalRecipientBankAccount")
                         .HasColumnType("nvarchar(max)");
@@ -175,9 +175,6 @@ namespace ProjectCondoManagement.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("MbwayNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Payer")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PayerFinancialAccountId")
