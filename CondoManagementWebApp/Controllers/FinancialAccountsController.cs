@@ -434,7 +434,7 @@ namespace CondoManagementWebApp.Controllers
                 {
                     DateAndTime = DateTime.Now,
                     PayerAccountId = financialAccountDto.Id,
-                    ExternalRecipientBankAccount = financialAccountDto.OwnerName,
+                    RecipientName = financialAccountDto.OwnerName,
                     Amount = model.DepositValue
                 };
 

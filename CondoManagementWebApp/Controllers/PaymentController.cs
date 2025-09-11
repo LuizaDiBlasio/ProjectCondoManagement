@@ -238,9 +238,8 @@ namespace CondoManagementWebApp.Controllers
                     }
 
                 }
-                
 
-
+               
                     //PREENCHER MODEL (propriedades fora da view)
                     var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
                 if (condoManagerCondos != null && !condoManagerCondos.Any())
@@ -283,9 +282,15 @@ namespace CondoManagementWebApp.Controllers
                 else if (model.SelectedPayerType == "Member" && model.SelectedCondoMemberId.HasValue)
                 {
 
+
                     var member = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{model.SelectedCondoMemberId.Value}");
                     payerFinancialAccountId = member?.FinancialAccountId;
                     payerName = member?.FullName;
+
+                    var condo = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{model.CondominiumId}");
+
+                    model.BeneficiaryAccountId = condo.FinancialAccountId;
+                    model.Recipient = condo.CondoName;
 
                 }
 
@@ -418,7 +423,7 @@ namespace CondoManagementWebApp.Controllers
                     model.PayerFinancialAccountId = condo.FinancialAccountId;
                 }
 
-                    if (model.PayerFinancialAccountId == 0)
+                if (model.PayerFinancialAccountId == 0)
                 {
                     ModelState.AddModelError("OmahWalletNumber", "Omah wallet number is required");
                 }
@@ -517,6 +522,7 @@ namespace CondoManagementWebApp.Controllers
                     {
                         PaymentId = paymentDto.Id,
                         DateAndTime = DateTime.Now,
+                        RecipientName = paymentDto.Recipient,
                         PayerAccountId = paymentDto.PayerFinancialAccountId,
                         BeneficiaryAccountId = paymentDto.BeneficiaryAccountId,
                         ExternalRecipientBankAccount = paymentDto.ExternalRecipientBankAccount,

@@ -48,8 +48,8 @@
                                 </div>
                             </div>
 
-                            <!-- Beneficiary Type -->
-                            <div class="form-group mb-3">
+                            <!-- Beneficiary Type (só visível se payerCondo for escolhido) -->
+                            <div class="form-group mb-3" id="beneficiaryTypeWrapper">
                                 <label class="form-label font-weight-bold text-purple">Recipient Type</label><br />
                                 @if (Model.BeneficiaryTypeList != null)
                                 {
@@ -141,16 +141,20 @@
             const memberSelectWrapper = document.getElementById("memberSelectWrapper");
             const memberSelect = document.getElementById("SelectedCondoMemberId");
             const condoSelect = document.getElementById("CondominiumId");
+            const beneficiaryWrapper = document.getElementById("beneficiaryTypeWrapper");
 
             function toggleMemberSelect() {
                 memberSelectWrapper.style.display = payerMember.checked ? "block" : "none";
+            }
+
+            function toggleBeneficiaryType() {
+                beneficiaryWrapper.style.display = payerCondo.checked ? "block" : "none";
             }
 
             function loadCondoMembers() {
                 const condoId = condoSelect.value;
 
                 if (condoId) {
-                    // habilita o radio "Member"
                     payerMember.disabled = false;
 
                     const url = '@Url.Action("GetMembersByCondo", "Payment")' + `?condoId=${condoId}`;
@@ -167,11 +171,11 @@
                         })
                         .catch(err => console.error("Erro:", err));
                 } else {
-                    // desabilita novamente o radio "Member" e limpa lista
                     payerMember.checked = false;
                     payerCondo.checked = true;
                     payerMember.disabled = true;
                     toggleMemberSelect();
+                    toggleBeneficiaryType();
                     memberSelect.innerHTML = '<option value="">-- Select Member --</option>';
                 }
             }
@@ -196,18 +200,25 @@
                 });
             });
 
-            payerCondo.addEventListener("change", toggleMemberSelect);
-            payerMember.addEventListener("change", toggleMemberSelect);
+            payerCondo.addEventListener("change", () => {
+                toggleMemberSelect();
+                toggleBeneficiaryType();
+            });
+            payerMember.addEventListener("change", () => {
+                toggleMemberSelect();
+                toggleBeneficiaryType();
+            });
             condoSelect.addEventListener("change", loadCondoMembers);
 
             // Initialize
             toggleMemberSelect();
+            toggleBeneficiaryType();
+
             const selectedBeneficiary = document.querySelector('.beneficiary-type-radio:checked');
             if (selectedBeneficiary) {
                 updateBeneficiaryFields(selectedBeneficiary.value);
             }
 
-            // inicializa: radio "Member" começa desabilitado
             payerMember.disabled = !condoSelect.value;
         });
     </script>
