@@ -5,25 +5,19 @@
 namespace ProjectCondoManagement.Migrations
 {
     /// <inheritdoc />
-    public partial class ChangesPaymentTransaction : Migration
+    public partial class UpdateDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "CompanyId",
-                table: "Transactions",
-                type: "int",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "CreditCard",
+            migrationBuilder.AddColumn<decimal>(
+                name: "Amount",
                 table: "Payments",
-                type: "nvarchar(max)",
+                type: "decimal(18,2)",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
-                name: "MbwayNumber",
+                name: "Recipient",
                 table: "Payments",
                 type: "nvarchar(max)",
                 nullable: true);
@@ -33,15 +27,11 @@ namespace ProjectCondoManagement.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "CompanyId",
-                table: "Transactions");
-
-            migrationBuilder.DropColumn(
-                name: "CreditCard",
+                name: "Amount",
                 table: "Payments");
 
             migrationBuilder.DropColumn(
-                name: "MbwayNumber",
+                name: "Recipient",
                 table: "Payments");
         }
     }

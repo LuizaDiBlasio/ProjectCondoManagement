@@ -40,7 +40,18 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CondoMemberDto>>> GetCondoMembers()
         {
-            var condoMembers = await _condoMemberRepository.GetAll(_context).Include(c => c.Units).ThenInclude(u => u.Condominium).ToListAsync();
+
+            var email = this.User.Identity?.Name;
+
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+
+            var condoMembers = await _condoMemberRepository.GetAll(_context).Where(c => c.CompanyId == user.CompanyId).Include(c => c.Units).ThenInclude(u => u.Condominium).ToListAsync();
 
             if (condoMembers == null)
             {
@@ -59,10 +70,24 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<CondoMemberDto>> GetCondoMember(int id)
         {
+            var email = this.User.Identity?.Name;
+
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
             var condoMember = await _condoMemberRepository.GetByIdWithIncludeAsync(id, _context);
             if (condoMember == null)
             {
                 return NotFound();
+            }
+
+            if(condoMember.CompanyId != user.CompanyId)
+            {
+                return BadRequest("You do not have access to this condo member.");
             }
 
             var condoMembers = new List<CondoMember> { condoMember };// Create a list with the single condo member for linking images
@@ -84,20 +109,71 @@ namespace ProjectCondoManagement.Controllers
                 return BadRequest();
             }
 
+            var userEmail = this.User.Identity?.Name;
+
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(userEmail);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+
             var condoMember = await _condoMemberRepository.GetAll(_context).Include(c => c.Units).ThenInclude(u => u.Condominium)
                 .FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
 
-            var condoMembers = new List<CondoMember> { condoMember };// Create a list with the single condo member for linking images
-            await _condoMemberRepository.LinkImages(condoMembers); // Link images to the single condo member
 
             if (condoMember == null)
             {
                 return null;
             }
 
+            if (condoMember.CompanyId != user.CompanyId)
+            {
+                return BadRequest("You do not have access to this condo member.");
+            }
+
+            var condoMembers = new List<CondoMember> { condoMember };// Create a list with the single condo member for linking images
+            await _condoMemberRepository.LinkImages(condoMembers); // Link images to the single condo member
+
+            
+
             var condoMemberDto = _converterHelper.ToCondoMemberDto(condoMember);
 
             return condoMemberDto;
+        }
+
+
+        [HttpGet("ByCondo/{condoId}")]
+        public async Task<ActionResult<IEnumerable<CondoMemberDto>>> GetMembersByCondo(int condoId)
+        {
+
+
+            var userEmail = this.User.Identity?.Name;
+
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(userEmail);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var members = await _condoMemberRepository.GetAll(_context)
+               .Include(m => m.Units)
+                   .ThenInclude(u => u.Condominium) 
+               .Where(m => m.Units.Any(u => u.CondominiumId == condoId))
+               .ToListAsync();
+
+            var memberDtos = members
+                .Select(m => _converterHelper.ToCondoMemberDto(m))
+                .ToList();
+
+            if (memberDtos.Any(m => m.CompanyId != user.CompanyId))
+            {
+                return BadRequest("You do not have access to these condo members.");
+            }
+
+            return Ok(memberDtos);
         }
 
 
@@ -107,6 +183,16 @@ namespace ProjectCondoManagement.Controllers
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> EditCondoMember(int id, [FromBody] CondoMemberDto condoMemberDto)
         {
+
+            var userEmail = this.User.Identity?.Name;
+
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(userEmail);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
             if (id != condoMemberDto.Id)
             {
                 return BadRequest();
@@ -119,6 +205,10 @@ namespace ProjectCondoManagement.Controllers
                 return NotFound();
             }
 
+            if (condoMemberDto.CompanyId != user.CompanyId)
+            {
+                return BadRequest("You do not have access to edit this condo member.");
+            }
 
             var condoMember = _converterHelper.ToCondoMember(condoMemberDto);
 
@@ -176,10 +266,26 @@ namespace ProjectCondoManagement.Controllers
         [HttpPost("{memberId}/Units/{unitId}")]
         public async Task<IActionResult> AddUnitToMember(int memberId, int unitId)
         {
+
+            var userEmail = this.User.Identity?.Name;
+
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(userEmail);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+
             var member = await _condoMemberRepository.GetByIdWithIncludeAsync(memberId, _context);
             if (member == null)
             {
                 return NotFound();
+            }
+
+            if(member.CompanyId != user.CompanyId)
+            {
+                return BadRequest("You do not have access to edit this condo member.");
             }
 
             var unit = await _unitRepository.GetByIdAsync(unitId, _context);
@@ -206,11 +312,26 @@ namespace ProjectCondoManagement.Controllers
         [HttpDelete("{memberId}/Units/{unitId}")]
         public async Task<IActionResult> RemoveMemberFromUnit(int memberId, int unitId)
         {
+            var userEmail = this.User.Identity?.Name;
+
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(userEmail);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+
             var member = await _condoMemberRepository.GetByIdWithIncludeAsync(memberId, _context);
 
             if (member == null)
             {
                 return NotFound();
+            }
+
+            if (member.CompanyId != user.CompanyId)
+            {
+                return BadRequest("You do not have access to edit this condo member.");
             }
 
             var unitToRemove = member.Units.FirstOrDefault(u => u.Id == unitId);
@@ -231,10 +352,25 @@ namespace ProjectCondoManagement.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCondoMemberAndDeactivateUser(int id)
         {
+            var userEmail = this.User.Identity?.Name;
+
+            var user2 = await _userHelper.GetUserByEmailWithCompanyAsync(userEmail);
+
+            if (user2 == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+
             var condoMember = await _condoMemberRepository.GetByIdAsync(id, _context);
             if (condoMember == null)
             {
                 return NotFound();
+            }
+
+            if(condoMember.CompanyId != user2.CompanyId)
+            {
+                return BadRequest("You do not have access to delete this condo member.");
             }
 
             var user = await _userHelper.GetUserByEmailAsync(condoMember.Email);
@@ -264,12 +400,7 @@ namespace ProjectCondoManagement.Controllers
                .Where(m => m.Units.Any(u => u.CondominiumId == id))
                .ToListAsync();
 
-            var memberDtos = members
-                .Select(m => _converterHelper.ToCondoMemberDto(m))
-                .ToList();
-
-            return Ok(memberDtos);
-        }
+  
 
 
         [HttpGet("ByManager")]

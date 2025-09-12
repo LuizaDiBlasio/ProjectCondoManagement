@@ -4,9 +4,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
+
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -22,13 +25,20 @@ namespace ProjectCondoManagement.Controllers
         private readonly IMailHelper _mailHelper;
         private readonly ICondoMemberRepository _condoMemberRepository;
         private readonly DataContextCondos _dataContextCondos;
+        private readonly DataContextFinances _dataContextFinances;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly ISmsHelper _smsHelper;
+        private readonly IFinancialAccountRepository _financialAccountRepository;
         private readonly IWebHostEnvironment _env;
 
+
+
+
+
+
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
-                               IMailHelper mailHelper, DataContextCondos dataContextCondos, IJwtTokenService jwtTokenService, ICondoMemberRepository condoMemberRepository
-                             , ISmsHelper smsHelper, IWebHostEnvironment env)
+                               IMailHelper mailHelper, DataContextCondos dataContextCondos, DataContextFinances dataContextFinances, IJwtTokenService jwtTokenService,
+                               ICondoMemberRepository condoMemberRepository , ISmsHelper smsHelper, IFinancialAccountRepository financialAccountRepository, IWebHostEnvironment env)
         {
             _userHelper = userHelper;
             _httpClient = httpClient;
@@ -36,9 +46,11 @@ namespace ProjectCondoManagement.Controllers
             _converterHelper = converterHelper;
             _mailHelper = mailHelper;
             _dataContextCondos = dataContextCondos;
+            _dataContextFinances = dataContextFinances;
             _jwtTokenService = jwtTokenService;
             _condoMemberRepository = condoMemberRepository;
             _smsHelper = smsHelper;
+            _financialAccountRepository = financialAccountRepository;
             _env = env;
         }
 
@@ -260,6 +272,9 @@ namespace ProjectCondoManagement.Controllers
                 return StatusCode(500, new { Message = "Internal server error: User not registered" });
             }
 
+            await _condoMemberRepository.AssociateFinancialAccountAsync(user.Email, user.FinancialAccountId);
+            
+
             string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
 
             // gera um link de confirmção para o email
@@ -270,7 +285,9 @@ namespace ProjectCondoManagement.Controllers
 
             if (response.IsSuccess) //se conseguiu enviar o email
             {
-                return StatusCode(200, new Response<object> { Message = "User registered, a confirmation email has been sent", IsSuccess = true });
+
+
+                return StatusCode(200, new Response<object> { Message = "User registered, a confirmation email has been sent", IsSuccess = true});
             }
 
             //se não conseguiu enviar email:
@@ -302,7 +319,7 @@ namespace ProjectCondoManagement.Controllers
                 var newUser = await _userHelper.CreateUser(registerDtoModel);
 
                 if (newUser == null)//se retorna null, CreateUser foi mal sucedido 
-                {
+                {                   
                     return StatusCode(500, new { Message = "Internal server error: User not registered" });
                 }
 
@@ -468,6 +485,33 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
+
+        /// <summary>
+        /// Retrieves a user's DTO (Data Transfer Object) based on their email.
+        /// This endpoint requires a valid JWT token.
+        /// </summary>
+        /// <param name="email">The email of the user to retrieve.</param>
+        /// <returns>
+        /// An <see cref="IActionResult"/> with the user's DTO if the user is found,
+        /// otherwise, a 404 Not Found response.
+        /// </returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("GetUserByEmail2")]
+        public async Task<IActionResult> GetUserByEmail2([FromQuery] string email)
+        {
+            var user = await _userHelper.GetUserByEmailAsync(email);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var userDto = _converterHelper.ToUserDto(user);
+
+            return Ok(userDto);
+        }
+
+
         /// <summary>
         /// Allows a logged-in user to update their profile information.
         /// </summary>
@@ -623,17 +667,49 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("GetUsersWithCompany")]
+        public async Task<IActionResult> GetUsersWithCompanyAsync([FromQuery] string role )
+        {
+
+            var users = await _userHelper.GetUsersWithCompanyAsync();
+
+            var filteredUsers = new List<User>();
+
+            foreach (var user in users)
+            {
+                if (await _userHelper.IsUserInRoleAsync(user, role))
+                {
+                    filteredUsers.Add(user);
+                }
+            }
+
+            
+            var usersDto = filteredUsers.Select(u => _converterHelper.ToUserDto(u)).ToList();
+
+           
+            return Ok(usersDto);
+        }
+
+
         [HttpGet("GetManagers")]
         public async Task<IActionResult> GetManagers()
         {
-            var managers = await _userHelper.GetUsersByRoleAsync("CondoManager");
 
-            if (managers == null || !managers.Any())
-            {
-                return NotFound(new { Message = "No Condo Managers found." });
-            }
+            var user = await _userHelper.GetUserByEmailAsync(this.User.Identity?.Name);
 
-            var managersDto = managers.Select(m => _converterHelper.ToUserDto((User)m)).ToList();
+            var allManagers = await _userHelper.GetUsersByRoleAsync("CondoManager");
+
+            var managers = new List<User>();
+
+            managers = allManagers
+            .Where(m => m.CompanyId == user.CompanyId)
+            .ToList();
+
+
+            var managersDto = managers
+                .Select(m => _converterHelper.ToUserDto((User)m))
+                .ToList();
 
             return Ok(managersDto);
         }

@@ -137,8 +137,8 @@ namespace ProjectCondoManagement.Controllers
 
                 var financialAccount = new FinancialAccount()
                 {
-                    Deposit = 0, // depósito inicial vai ser sempre 0
-                    Balance = 0
+                    OwnerName = company.Name,
+                    Balance = 0 // depósito inicial vai ser sempre 0
                 };
 
                 await _financialAccountRepository.CreateAsync(financialAccount, _contextFinances);
@@ -349,6 +349,25 @@ namespace ProjectCondoManagement.Controllers
             var companyAdminUserDto = _converterHelper.ToUserDto(companyAdminUser);
 
             return Ok(companyAdminUserDto);
+        }
+
+        [HttpGet("GetCompanyByUser")]
+        public async Task<ActionResult<CompanyDto?>> GetCompanyByUser()
+        {
+            var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
+            if (user == null || user.CompanyId == null)
+            {
+                return Ok(null);
+            }
+
+            var company = await _companyRepository.GetByIdAsync(user.CompanyId.Value, _contextUsers);
+            if (company == null)
+            {
+                return Ok(null);
+            }
+
+            var companyDto = _converterHelper.ToCompanyDto(company);
+            return Ok(companyDto);
         }
 
 

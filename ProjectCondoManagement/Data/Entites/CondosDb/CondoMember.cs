@@ -10,6 +10,8 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public DateTime? BirthDate { get; set; }
 
+        public int FinancialAccountId { get; set; }
+
         public string PhoneNumber { get; set; }
 
         public string Address { get; set; }
@@ -19,6 +21,9 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
         public string? IdDocument { get; set; }
 
         public string? TaxIdNumber { get; set; }
+
+
+        public int CompanyId { get; set; }
 
         public IEnumerable<Meeting>? MeetingsAttended { get; set; }
 

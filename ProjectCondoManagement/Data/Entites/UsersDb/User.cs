@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 
 namespace ProjectCondoManagement.Data.Entites.UsersDb
 {
@@ -17,6 +18,8 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
         public Company? Company { get; set; }
 
         public int? FinancialAccountId { get; set; }
+
+        public FinancialAccount? FinancialAccount { get; set; }
 
         public bool IsActive { get; set; }  = true; 
 

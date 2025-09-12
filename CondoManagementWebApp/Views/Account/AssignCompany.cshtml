@@ -1,0 +1,76 @@
+﻿@model CondoManagementWebApp.Models.AssignCompanyViewModel
+@{
+    ViewData["Title"] = "Assign Company";
+}
+
+<h1 class="mb-4">Assign Company</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="AssignCompany" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="FinancialAccountId" />
+            <input type="hidden" name="email" value="@Context.Request.Query["email"]" />
+
+            <div class="mb-4">
+                <h5>User Info</h5>
+                <p><strong>Name:</strong> @Model.FullName</p>
+                <p><strong>Address:</strong> @Model.Address</p>
+            </div>
+
+            <br />
+
+            <div class="mb-3">
+                <h5>Select Company</h5>
+                @if (Model.Companies != null && Model.Companies.Any())
+                {
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px;"></th>
+                                <th>Name</th>
+                                <th>Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var company in Model.Companies)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="radio"
+                                               name="CompanyId"
+                                               value="@company.Id"
+                                               id="company_@company.Id"
+                                               @(Model.CompanyId == company.Id ? "checked" : "") />
+                                    </td>
+                                    <td>
+                                        <label for="company_@company.Id">@company.Name</label>
+                                    </td>
+                                    <td>@company.Address</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        No companies available. Please create companies first.
+                    </div>
+                }
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">Assign Company</button>
+                <a asp-action="SysAdminDashboard" class="btn btn-outline-danger">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -54,6 +54,7 @@ namespace CondoManagementWebApp.Helpers
                 Email = condoMember.Email,
                 Address = condoMember.Address,
                 BirthDate = condoMember.BirthDate,
+                CompanyId = condoMember.CompanyId,
                 PhoneNumber = condoMember.PhoneNumber,
                 ImageUrl = condoMember.ImageUrl
             };
@@ -75,6 +76,7 @@ namespace CondoManagementWebApp.Helpers
         {
             var userDto = new UserDto()
             {
+                Id = model.Id,
                 FullName = model.FullName,
                 BirthDate = model.BirthDate,
                 PhoneNumber = model.PhoneNumber,
@@ -91,6 +93,7 @@ namespace CondoManagementWebApp.Helpers
         {
             var model = new ProfileViewModel()
             {
+                Id = userDto.Id,
                 FullName = userDto.FullName,
                 BirthDate = userDto.BirthDate,
                 PhoneNumber = userDto.PhoneNumber,
@@ -106,6 +109,7 @@ namespace CondoManagementWebApp.Helpers
         {
             var model = new EditUserDetailsViewModel()
             {
+                Id = userDto.Id,
                 FullName = userDto.FullName,
                 BirthDate = userDto.BirthDate,
                 PhoneNumber = userDto.PhoneNumber,
@@ -125,6 +129,7 @@ namespace CondoManagementWebApp.Helpers
         {
             var editUserDetailsDto = new EditUserDetailsDto()
             {
+                Id = model.Id,
                 FullName = model.FullName,
                 BirthDate = model.BirthDate,
                 PhoneNumber = model.PhoneNumber,
@@ -150,6 +155,7 @@ namespace CondoManagementWebApp.Helpers
                 CompanyAdminId = model.SelectedCompanyAdminId,
                 SelectedCondominiumIds = model.SelectedCondominiumIds,
                 Email = model.Email,
+                FinancialAccountId = model.FinancialAccountId,
                 Address = model.Address,
                 PhoneNumber= model.PhoneNumber, 
                 TaxIdDocument = model.TaxIdDocument,    
@@ -167,6 +173,7 @@ namespace CondoManagementWebApp.Helpers
                 SelectedCondominiumIds = editedCompany.SelectedCondominiumIds,
                 Email = editedCompany.Email,
                 Address = editedCompany.Address,
+                FinancialAccountId = editedCompany.FinancialAccountId, 
                 PhoneNumber = editedCompany.PhoneNumber,
                 TaxIdDocument = editedCompany.TaxIdDocument
             };
@@ -194,12 +201,22 @@ namespace CondoManagementWebApp.Helpers
 
         public PaymentDto FromOneTimeToPaymentDto(CreateOneTimePaymentViewModel model)
         {
-            var paymentDto = new PaymentDto()
+            if (model.SelectedPayerType == "Condominium")
             {
-                DueDate = model.DueDate.Value,
-                PayerFinancialAccountId = model.PayerFinancialAccountId,
-                CondominiumId = model.CondominiumId.Value,
-            };
+                string Recipient = model.Recipient ?? string.Empty;
+            }
+
+
+
+                var paymentDto = new PaymentDto()
+                {
+                    DueDate = model.DueDate.Value,
+                    PayerFinancialAccountId = model.PayerFinancialAccountId.Value,
+                    CondominiumId = model.CondominiumId.Value,
+                    Recipient = model.Recipient,
+                    Amount = model.ExpenseAmount,
+                };
+
             return paymentDto;
         }
 

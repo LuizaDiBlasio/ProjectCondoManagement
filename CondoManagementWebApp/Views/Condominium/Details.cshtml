@@ -38,5 +38,13 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+    @if(ViewBag.ReturnUrl != null)
+    {
+        <a asp-action="@ViewBag.ReturnUrl" class="btn btn-outline-primary">Back to List</a>
+    }
+    else
+    {
+        <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+    }
+    
 </div>

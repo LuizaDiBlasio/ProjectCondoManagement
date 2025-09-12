@@ -1,6 +1,7 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
 using CondoManagementWebApp.Helpers;
+using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -39,6 +40,51 @@ namespace CondoManagementWebApp.Controllers
 
         }
 
+
+        public async Task<ActionResult> MembersFromCondo (int condoId, string? condoName)
+        {
+            if(condoName != null)
+            {
+                ViewBag.CondoName = condoName;
+            }
+
+            try
+            {
+                var condoMembers = await _apiCallService.GetAsync<IEnumerable<CondoMemberDto>>($"api/CondoMembers/ByCondo/{condoId}") ?? new List<CondoMemberDto>();
+                return View(condoMembers);
+            }
+            catch (Exception)
+            {
+                _flashMessage.Danger($"An error occurred while fetching condo members for the specified condominium.");
+                return View(new List<CondoMemberDto>());
+            }
+        }
+
+
+        public async Task<ActionResult<CondoMemberDashboardViewModel>> Dashboard()
+        {
+            var email = User.Identity?.Name;
+
+            var model = new CondoMemberDashboardViewModel();
+
+            var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{email}");
+            var user = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email}");
+
+            model.CondoMemberDto = condoMember;
+
+            model.UnitDtos = condoMember?.Units?.ToList() ?? new List<UnitDto>();
+
+            model.FinancialAccountDto = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{user.FinancialAccountId}");
+
+            model.MessageDtos = await _apiCallService.GetAsync<List<MessageDto>>($"api/Message/Received/{email}") ?? new List<MessageDto>();
+
+
+            return View(model);
+
+        }
+
+
+
         // GET: CondoMemberController/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -62,8 +108,13 @@ namespace CondoManagementWebApp.Controllers
         }
 
         // GET: CondoMemberController/Create
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
+            var email = User.Identity?.Name;
+            var user = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email}");
+
+            ViewBag.CompanyId = user.CompanyId;
+
             return View();
         }
 
@@ -80,6 +131,10 @@ namespace CondoManagementWebApp.Controllers
             if (condoMemberDto.BirthDate > DateTime.Today)
             {
                 ModelState.AddModelError("BirthDate", "Birth date cannot be in the future.");
+                var email1 = User.Identity?.Name;
+                var user1 = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email1}");
+
+                ViewBag.CompanyId = user1.CompanyId;
                 return View(condoMemberDto);
             }
 
@@ -89,6 +144,10 @@ namespace CondoManagementWebApp.Controllers
                 if (!result.IsSuccess)
                 {
                     _flashMessage.Danger($"An error occurred while creating the condo member.");
+                    var email3 = User.Identity?.Name;
+                    var user3 = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email3}");
+
+                    ViewBag.CompanyId = user3.CompanyId;
                     return View(condoMemberDto);
                 }
 
@@ -115,11 +174,19 @@ namespace CondoManagementWebApp.Controllers
                 await _apiCallService.DeleteAsync($"api/CondoMembers/{createdMember.Id}");
 
                 _flashMessage.Danger($"An error occurred while creating the condo member.");
+                var email2 = User.Identity?.Name;
+                var user2 = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email2}");
+
+                ViewBag.CompanyId = user2.CompanyId;
                 return View(condoMemberDto);
             }
 
 
             _flashMessage.Danger($"An error occurred while creating the condo member.");
+            var email = User.Identity?.Name;
+            var user = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email}");
+
+            ViewBag.CompanyId = user.CompanyId;
             return View(condoMemberDto);
 
         }

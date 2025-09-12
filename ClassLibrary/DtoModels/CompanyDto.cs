@@ -20,6 +20,8 @@ namespace ClassLibrary.DtoModels
 
         public IEnumerable<CondominiumDto>? CondominiumDtos { get; set; }
 
+        public IEnumerable<CondoMemberDto>? CondoMemberDtos { get; set; }
+
         public List<int>? SelectedCondominiumIds { get; set; }  = new List<int>(); 
 
         public string Email { get; set; }

@@ -1,5 +1,6 @@
 ﻿using ClassLibrary;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.Enums;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 
@@ -18,5 +19,17 @@ namespace ProjectCondoManagement.Data.Repositories.Users
                              }).ToList();
   
         }
+
+
+
+        public async Task<IEnumerable<Message>> GetReceivedMessagesAsync(string receiverEmail, DataContextUsers context)
+        {
+            return await context.Messages
+                .Where(m => m.ReceiverEmail == receiverEmail && !m.DeletedByReceiver)
+                .ToListAsync();
+        }
+
+
+
     }
 }

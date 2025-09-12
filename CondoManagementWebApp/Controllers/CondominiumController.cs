@@ -31,8 +31,16 @@ namespace CondoManagementWebApp.Controllers
 
             try
             {
-                condominiums = await _apiCallService.GetAsync<IEnumerable<CondominiumDto>>("api/Condominiums");
+                if (this.User.IsInRole("CondoManager"))
+                {
+                    condominiums = await _apiCallService.GetAsync<IEnumerable<CondominiumDto>>($"api/Condominiums/ByManager");
+                }
+                else
+                {
+                    condominiums = await _apiCallService.GetAsync<IEnumerable<CondominiumDto>>("api/Condominiums");
+                }
 
+                  
                 return View(condominiums);
             }
             catch (Exception ex)
@@ -46,12 +54,54 @@ namespace CondoManagementWebApp.Controllers
             return View(condominiums);
         }
 
+
+
+        public async Task<IActionResult> MyCondos()
+        {
+
+            var email = User.Identity?.Name;
+            
+            var condominiums = new List<CondominiumDto>();
+            var model = new MyCondosViewModel();
+
+            try
+            {
+                var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{email}");
+
+                var units = condoMember?.Units?.ToList() ?? new List<UnitDto>();
+
+                condominiums = units
+                 .Where(u => u.CondominiumDto != null)
+                 .Select(u => u.CondominiumDto!)
+                 .DistinctBy(c => c.Id)  
+                 .ToList();
+
+
+                model.MyCondos = condominiums;
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _flashMessage.Danger($"Error loading condominiums!");
+                return View(model);
+            }
+            
+            
+        }
+
+
+
         // GET: ConduminiumController/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? returnUrl)
         {
             if (id == null)
             {
                 return NotFound();
+            }
+            if(returnUrl != null)
+            {
+                ViewBag.ReturnUrl = returnUrl;
             }
 
             try
@@ -275,6 +325,7 @@ namespace CondoManagementWebApp.Controllers
                     Address = condominium.Address,
                     CondoName = condominium.CondoName,
                     ManagerUserId = condominium.ManagerUserId,
+                    FinancialAccountId = condominium.FinancialAccountId,
                     Managers = managers
                 };
 
@@ -282,7 +333,15 @@ namespace CondoManagementWebApp.Controllers
             }
             catch (Exception ex)
             {
-                _flashMessage.Danger("Error retrieving condominium.");
+
+                string userMessage = ex.InnerException?.Message ?? ex.Message;
+
+                if (userMessage.Contains("Detalhes:"))
+                {
+                    userMessage = userMessage.Split("Detalhes:")[1].Trim();
+                }
+
+                _flashMessage.Danger($"{userMessage}");
                 return RedirectToAction(nameof(Index));
             }
 
@@ -312,6 +371,7 @@ namespace CondoManagementWebApp.Controllers
                 CompanyId = model.CompanyId,
                 Address = model.Address,
                 CondoName = model.CondoName,
+                FinancialAccountId = model.FinancialAccountId,
                 ManagerUserId = model.ManagerUserId
             };
 
@@ -334,6 +394,10 @@ namespace CondoManagementWebApp.Controllers
             return View(model);
 
         }
+
+
+       
+
 
 
 

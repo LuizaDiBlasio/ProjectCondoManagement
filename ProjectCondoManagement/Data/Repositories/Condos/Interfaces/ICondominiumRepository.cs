@@ -2,6 +2,8 @@
 using ClassLibrary.DtoModels;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
 {

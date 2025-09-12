@@ -52,6 +52,28 @@ namespace ProjectCondoManagement.Controllers
 
         }
 
+
+        // GET: api/Message/Received/{email}
+        [HttpGet("Received/{email}")]
+        public async Task<ActionResult<IEnumerable<MessageDto>>> GetReceivedMessages(string email)
+        {
+            var messages = await _messageRepository.GetReceivedMessagesAsync(email, _dataContextUsers);
+
+            if (messages == null || !messages.Any())
+            {
+                return Ok(new List<MessageDto>()); 
+            }
+
+            var messagesDto = messages
+                .Select(m => _converterHelper.ToMessageDto(m, null))
+                .ToList();
+
+            return Ok(messagesDto);
+        }
+
+
+
+
         // GET: MessageController/MessageDetails/5
         [HttpGet("MessageDetails/{id}")]
         public async Task<ActionResult> MessageDetails(int id)

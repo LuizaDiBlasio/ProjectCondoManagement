@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ClassLibrary.DtoModels
 {
@@ -24,9 +25,10 @@ namespace ClassLibrary.DtoModels
         [Display(Name = "Condo Manager")]
         public string? ManagerUserId { get; set; }
 
-        public int? FinancialAccountId { get; set; } 
-        
+        [NotMapped]
         public FinancialAccountDto? FinancialAccountDto { get; set; }
+
+        public int? FinancialAccountId { get; set; }     
 
         public UserDto? ManagerUser { get; set; }
 

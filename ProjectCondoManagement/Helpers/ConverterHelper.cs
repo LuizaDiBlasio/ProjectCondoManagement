@@ -6,6 +6,7 @@ using ProjectCondoManagement.Data.Entites.Enums;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Helpers
@@ -29,9 +30,11 @@ namespace ProjectCondoManagement.Helpers
             var condoMember = new CondoMember
             {
                 Id = condoMemberDto.Id,
+                FinancialAccountId = condoMemberDto.FinancialAccountId,               
                 FullName = condoMemberDto.FullName,
                 Email = condoMemberDto.Email,
                 Address = condoMemberDto.Address,
+                CompanyId = condoMemberDto.CompanyId,
                 BirthDate = condoMemberDto.BirthDate,
                 PhoneNumber = condoMemberDto.PhoneNumber,
                 ImageUrl = condoMemberDto.ImageUrl
@@ -46,6 +49,8 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = condoMember.Id,
                 FullName = condoMember.FullName,
+                FinancialAccountId = condoMember.FinancialAccountId,
+                CompanyId = condoMember.CompanyId,
                 Email = condoMember.Email,
                 Address = condoMember.Address,
                 BirthDate = condoMember.BirthDate,
@@ -70,10 +75,12 @@ namespace ProjectCondoManagement.Helpers
             var condoMemberDto = new CondoMemberDto
             {
                 FullName = user.FullName,
+                FinancialAccountId = user.FinancialAccountId ?? 0,
                 Email = user.Email,
                 Address = user.Address,
                 BirthDate = user.BirthDate,
                 PhoneNumber = user.PhoneNumber,
+                CompanyId = user.CompanyId ?? 0,
                 ImageUrl = user.ImageUrl,
             };
             return condoMemberDto;
@@ -95,6 +102,7 @@ namespace ProjectCondoManagement.Helpers
                 Address = user.Address,
                 ImageUrl = user.ImageUrl,
                 IsActive = user.IsActive,
+                CompanyDto = user.Company == null ? null : ToCompanyDto(user.Company),
                 Email = user.Email,
                 CompanyId = user.CompanyId,
                 FinancialAccountId = user.FinancialAccountId,
@@ -172,6 +180,7 @@ namespace ProjectCondoManagement.Helpers
             condoMember.FullName = user.FullName;
             condoMember.PhoneNumber = user.PhoneNumber;
             condoMember.Address = user.Address;
+            condoMember.CompanyId = user?.CompanyId ?? 0;
             condoMember.ImageUrl = user.ImageUrl;
             condoMember.BirthDate = user.BirthDate;
 
@@ -185,6 +194,7 @@ namespace ProjectCondoManagement.Helpers
                 Id = company.Id,
                 Name = company.Name,
                 CondominiumDtos = company.Condominiums?.Select(c => ToCondominiumDto(c, false)).ToList() ?? new List<CondominiumDto>(),
+                //CondoMemberDtos = company.CondoMembers?.Select(cm => ToCondoMemberDto(cm, true)).ToList() ?? new List<CondoMemberDto>(),
                 Email = company.Email,
                 Address = company.Address,
                 PhoneNumber = company.PhoneNumber,
@@ -241,6 +251,7 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = condominium.Id,
                 CondoName = condominium.CondoName,
+                CondoMembers = condominium.CondoMembers?.Select(c => ToCondoMemberDto(c, false)).ToList() ?? new List<CondoMemberDto>(),
                 CompanyId = condominium.CompanyId,
                 Address = condominium.Address,
                 FinancialAccountId = condominium.FinancialAccountId,
@@ -312,7 +323,7 @@ namespace ProjectCondoManagement.Helpers
             if (includeCondoMembers)
             {
                 dto.CondoMemberDtos = unit.CondoMembers?
-                    .Select(cm => ToCondoMemberDto(cm, includeUnits: false)) // ⚠️ corta aqui
+                    .Select(cm => ToCondoMemberDto(cm, includeUnits: false))
                     .ToList() ?? new List<CondoMemberDto>();
             }
 
@@ -391,6 +402,11 @@ namespace ProjectCondoManagement.Helpers
                 Id = isNew ? 0 : payment.Id,
                 IssueDate = payment.IssueDate,
                 DueDate = payment.DueDate,  
+                ExpenseType = payment.ExpenseType,
+                Payer = payment.Payer,
+                BeneficiaryAccountId = payment.BeneficiaryAccountId,
+                SelectedBeneficiaryId = payment.SelectedBeneficiaryId,
+                ExternalRecipientBankAccount = payment.ExternalRecipientBankAccount,
                 PaymentMethod = payment.PaymentMethod,  
                 CondominiumId = payment.CondominiumId,
                 IsPaid = payment.IsPaid,    
@@ -403,6 +419,8 @@ namespace ProjectCondoManagement.Helpers
                 TransactionId = payment.TransactionId, 
                 MbwayNumber = payment.MbwayNumber,  
                 CreditCard= payment.CreditCard, 
+                Recipient = payment.Recipient,
+                Amount = payment.Amount,
             };  
            
             return paymentDto;
@@ -446,9 +464,13 @@ namespace ProjectCondoManagement.Helpers
                 Id = isNew ? 0 : transaction.Id,
                 DateAndTime = transaction.DateAndTime,
                 PayerAccountId = transaction.PayerAccountId,  
+                //AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
                 BeneficiaryAccountId = transaction.BeneficiaryAccountId,
+                Amount = transaction.Amount,
+                CompanyId = transaction?.CompanyId,
                 ExternalRecipientBankAccount = transaction.ExternalRecipientBankAccount,
                 PaymentId = transaction.PaymentId,  
+                
                 
             };
             
@@ -460,7 +482,7 @@ namespace ProjectCondoManagement.Helpers
             var financialAccountDto = new FinancialAccountDto()
             {
                 Id = isNew ? 0 : financialAccount.Id,
-                Deposit = financialAccount.Deposit,
+                OwnerName= financialAccount.OwnerName,
                 Balance = financialAccount.Balance,
                 IsActive = financialAccount.IsActive,
                 CardNumber = financialAccount.CardNumber,
@@ -493,7 +515,12 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = isNew ? 0 : paymentDto.Id,
                 IssueDate = paymentDto.IssueDate.Value,
+                ExpenseType = paymentDto.ExpenseType,
+                Payer = paymentDto.Payer,
                 DueDate = paymentDto.DueDate,
+                SelectedBeneficiaryId = paymentDto.SelectedBeneficiaryId,
+                ExternalRecipientBankAccount = paymentDto.ExternalRecipientBankAccount,
+                BeneficiaryAccountId = paymentDto.BeneficiaryAccountId,
                 PaymentMethod = isNew ? null : paymentDto.PaymentMethod,
                 PayerFinancialAccountId = paymentDto.PayerFinancialAccountId,
                 IsPaid = isNew ? false : paymentDto.IsPaid,
@@ -505,6 +532,8 @@ namespace ProjectCondoManagement.Helpers
                 InvoiceId = paymentDto.InvoiceId,
                 MbwayNumber = paymentDto.MbwayNumber,
                 CreditCard = paymentDto.CreditCard, 
+                Recipient = paymentDto.Recipient,
+                Amount = paymentDto.Amount
             };
 
             return payment; 
@@ -519,6 +548,8 @@ namespace ProjectCondoManagement.Helpers
                 PayerAccountId = transactionDto.PayerAccountId,
                 BeneficiaryAccountId = transactionDto.BeneficiaryAccountId,
                 PaymentId = transactionDto.PaymentId,
+                Amount = transactionDto.Amount,
+                CompanyId = transactionDto?.CompanyId,
                 ExternalRecipientBankAccount = transactionDto.ExternalRecipientBankAccount,
             };
 
@@ -530,7 +561,7 @@ namespace ProjectCondoManagement.Helpers
             var financialAccount = new FinancialAccount()
             {
                 Id = isNew ? 0 : financialAccountDto.Id,
-                Deposit = financialAccountDto.Deposit,
+                OwnerName = financialAccountDto.OwnerName,
                 Balance = financialAccountDto.Balance,
                 IsActive = financialAccountDto.IsActive,
                 CardNumber = financialAccountDto.CardNumber,

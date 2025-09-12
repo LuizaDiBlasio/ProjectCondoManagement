@@ -148,6 +148,8 @@
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Status</th>
+                                <th>Company</th>
+
                                 <th></th>
                             </tr>
                         </thead>
@@ -163,7 +165,17 @@
                                     <td>
                                         <label class="form-check-label" for="memberSwitch_@manager.Email">@(manager.IsActive ? "Active" : "Inactive")</label>
                                     </td>
+                                    @if(manager.CompanyId == null)
+                                    {
+                                        <td style="color: red; font-weight: bold;">No Company Assigned</td>
+                                    }
+                                    else
+                                    {
+                                        <td>@manager.CompanyDto.Name</td>
+                                    }
                                     <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@manager.Email">Edit Details</a></td>
+                                    <td><a class="btn btn-outline-secondary" asp-controller="Account" asp-action="AssignCompany" asp-route-email="@manager.Email">Assign Company</a></td>
+
                                 </tr>
                             }
                         </tbody>

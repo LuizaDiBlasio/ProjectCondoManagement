@@ -1,0 +1,46 @@
+﻿@model IEnumerable<ClassLibrary.DtoModels.UnitDto>
+
+@{
+    ViewData["Title"] = "UnitsFromCondo";
+}
+
+<h2>My Units From @ViewBag.CondoName</h2>
+
+<br />
+<a asp-controller="Condominium" asp-action="MyCondos" class="btn btn-outline-primary">Back to My Condos</a>
+<br />
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Floor)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Bedrooms)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Door)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Floor)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Bedrooms)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Door)
+            </td>
+            <td>
+                    <a class="btn btn-outline-primary" asp-action="Details" asp-route-returnUrl="UnitsFromCondo" asp-route-id="@item.Id" asp-route-condoId="@item.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Details</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

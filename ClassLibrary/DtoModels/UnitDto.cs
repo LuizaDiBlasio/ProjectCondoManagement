@@ -14,6 +14,7 @@ namespace ClassLibrary.DtoModels
         [Display(Name ="Condominium")]
         public CondominiumDto? CondominiumDto { get; set; }
 
+        [Display(Name = "Condominium")]
         public int CondominiumId { get; set; }
 
         public string Floor { get; set; }

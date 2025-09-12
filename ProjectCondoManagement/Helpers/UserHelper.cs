@@ -49,6 +49,8 @@ namespace ProjectCondoManagement.Helpers
                 return null; //já existe o user --> resposta negativa (null)
             }
 
+            
+
             user = new User
             {
                 FullName = registerDtoModel.FullName,
@@ -61,6 +63,20 @@ namespace ProjectCondoManagement.Helpers
                 CompanyId = registerDtoModel.CompanyId,
                 FinancialAccountId = null,
             };
+
+            if (registerDtoModel.SelectedRole == "CondoMember")
+            {
+                var financialAccount = new FinancialAccount
+                {
+                    Balance = 0,
+                    OwnerName = registerDtoModel.FullName
+                };
+
+                await _financialAccountRepository.CreateAsync(financialAccount, _dataContextFinances);
+
+                user.FinancialAccountId = financialAccount.Id;
+            }
+
 
             var result = await AddUserAsync(user, "123456"); //add user depois de criado
 
@@ -84,27 +100,15 @@ namespace ProjectCondoManagement.Helpers
             }
 
             //se for condoMember adicionanr uma financial account
+    
 
-            if(await IsUserInRoleAsync(user, "CondoMember"))
-            {
-                var financialAccount = new FinancialAccount()
-                {
-                    Deposit = 0, // depósito inicial vai ser sempre 0
-                    Balance = 0
-                };
+            ////TODO Tirar o if e essa atribuição de bool quando publicar, manter só o método de ativação
+            //user.Uses2FA = true;
 
-                await _financialAccountRepository.CreateAsync(financialAccount, _dataContextFinances); //add FinAcc na Bd
-
-                user.FinancialAccountId = financialAccount.Id;  
-            }
-
-            //TODO Tirar o if e essa atribuição de bool quando publicar, manter só o método de ativação
-            user.Uses2FA = true;
-
-            if (user.Uses2FA == true)
-            {
-                var activation2FA = await EnableTwoFactorAuthenticationAsync(user, true);
-            }
+            //if (user.Uses2FA == true)
+            //{
+            //    var activation2FA = await EnableTwoFactorAuthenticationAsync(user, true);
+            //}
 
 
             return user;
@@ -434,8 +438,12 @@ namespace ProjectCondoManagement.Helpers
             return new List<User>();
         }
 
-
-
-
+        public async Task<List<User>> GetUsersWithCompanyAsync()
+        {
+          
+            return await _userManager.Users
+                .Include(u => u.Company)
+                .ToListAsync();
+        }
     }
 }

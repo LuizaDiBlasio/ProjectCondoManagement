@@ -1,0 +1,119 @@
+﻿@model ClassLibrary.DtoModels.FinancialAccountDto
+
+@{
+    ViewData["Title"] = "Financial Account Details";
+}
+
+  @if(this.User.IsInRole("CondoManager"))
+{
+    <a asp-action="CondoAccounts"
+        asp-route-email="@ViewBag.Email"
+        class="btn btn-outline-primary">
+        Back to List
+    </a>
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <div class="card shadow-lg border-0 rounded-4">
+       
+                <div class="card-header bg-primary text-center rounded-top-4">
+                    <h3 class="mb-0 fw-bold text-white">
+                        @Model.OwnerName's Financial Account
+                    </h3>
+                </div>
+
+                <div class="card-body p-4">
+
+         
+                    <div class="text-center mb-4">
+                        <h5 class="fw-bold text-muted">Current Balance</h5>
+                        <h1 class="fw-bold text-success">
+                            @Model.Balance.ToString("C")
+                        </h1>
+                    </div>
+
+                    <hr class="my-4" />
+
+              
+                    <div class="mb-3 text-center">
+                        <h6 class="fw-bold">Card Number</h6>
+                        <p class="@(string.IsNullOrEmpty(Model.CardNumber) ? "text-danger fw-semibold" : "fw-semibold")">
+                            @(string.IsNullOrEmpty(Model.CardNumber)
+                                                        ? "Not Provided"
+                                                        : Model.CardNumber)
+                        </p>
+                    </div>
+
+           
+                    <div class="mb-3 text-center">
+                        <h6 class="fw-bold">Bank Account</h6>
+                        <p class="@(string.IsNullOrEmpty(Model.AssociatedBankAccount) ? "text-danger fw-semibold" : "fw-semibold")">
+                            @(string.IsNullOrEmpty(Model.AssociatedBankAccount)
+                                                        ? "Not Provided"
+                                                        : Model.AssociatedBankAccount)
+                        </p>
+                    </div>
+
+             
+                    <div class="mb-3 text-center">
+                        <h6 class="fw-bold">Bank Name</h6>
+                        <p class="@(string.IsNullOrEmpty(Model.BankName) ? "text-danger fw-semibold" : "fw-semibold")">
+                            @(string.IsNullOrEmpty(Model.BankName)
+                                                        ? "Not Provided"
+                                                        : Model.BankName)
+                        </p>
+                    </div>
+
+                </div>
+
+
+
+                <div class="card-footer d-flex justify-content-between">
+                    @if (Model.IsActive)
+                    {
+                        <a asp-action="Deposit"
+                           asp-route-id="@Model.Id"
+                           asp-route-email="@ViewBag.Email"
+                           class="btn btn-outline-success">
+                            Make Deposit
+                        </a>
+
+                         <a asp-action="Withdrawal"
+                           asp-route-id="@Model.Id"
+                           asp-route-email="@ViewBag.Email"
+                           class="btn btn-outline-danger">
+                            Make Withdrawal
+                        </a>
+
+                        <a asp-action="Transactions"
+                           asp-route-id="@Model.Id"
+                           asp-route-email="@ViewBag.Email"
+                           class="btn btn-outline-info me-2">
+                            View Transactions
+                        </a>
+
+                    }
+
+
+
+                    <div>
+                        <a asp-action="Edit"
+                           asp-route-id="@Model.Id"
+                           asp-route-email="@ViewBag.Email"
+                           asp-route-returnUrl="Details"
+                           asp-route-returnId="@Model.Id"
+                           class="btn btn-outline-secondary me-2">
+                            Edit
+                        </a>
+
+                      
+                        
+                    </div>
+                </div>
+
+        </div>
+    </div>
+</div>

@@ -82,9 +82,15 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FinancialAccountId")
+                        .HasColumnType("int");
 
                     b.Property<string>("FullName")
                         .IsRequired()

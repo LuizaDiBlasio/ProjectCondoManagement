@@ -1,0 +1,51 @@
+﻿@model IEnumerable<ClassLibrary.DtoModels.FinancialAccountDto>
+
+@{
+    ViewData["Title"] = "CondoAccounts";
+}
+
+<h1>Condominium Accounts</h1>
+
+
+<table class="table">
+    <thead>
+        <tr>
+
+            <th>
+                @Html.DisplayNameFor(model => model.OwnerName)
+            </th>
+
+            <th>
+                Account Status
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+
+            <td>
+                @Html.DisplayFor(modelItem => item.OwnerName)
+            </td>
+            <td>
+                    @if(item.IsActive == true)
+                    {
+                        
+                        <span class="badge bg-success">Active</span>
+                    }
+
+                    else 
+                    {
+                        <span class="badge bg-danger">Inactive</span>
+					}	                
+            </td>
+             
+            <td>
+                    <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id" asp-route-email="@ViewBag.Email" asp-route-returnUrl="CondoAccounts">Edit</a>
+                    <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id" asp-route-email="@ViewBag.Email">Account</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

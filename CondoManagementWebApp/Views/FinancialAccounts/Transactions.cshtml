@@ -1,0 +1,42 @@
+﻿@model IEnumerable<ClassLibrary.DtoModels.TransactionDto>
+
+@{
+    ViewData["Title"] = "Transactions";
+}
+
+<h1 class="mb-4">Transactions</h1>
+
+<a asp-action="Details" asp-route-email="@ViewBag.Email" asp-route-id="@ViewBag.AccountId" class="btn btn-outline-primary mb-3">
+    Back to Account
+</a>
+
+<table class="table table-hover table-bordered shadow-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Recipient</th>
+        </tr>
+    </thead>
+    <tbody>
+
+
+        @{
+            int accountId = Convert.ToInt32(ViewBag.AccountId);
+        }
+
+        @foreach (var item in Model)
+        {
+            var isMyAccount = item.BeneficiaryAccountId == accountId;
+            var amountClass = isMyAccount ? "text-success" : "text-danger";
+
+            <tr>
+                <td>@item.DateAndTime.ToString("dd/MM/yyyy HH:mm")</td>
+                <td class="fw-bold @amountClass">
+                    @(item.Amount.HasValue? item.Amount.Value.ToString("C") : "—")
+                </td>
+                <td>@(item.ExternalRecipientBankAccount ?? "—")</td>
+            </tr>
+        }
+    </tbody>
+</table>

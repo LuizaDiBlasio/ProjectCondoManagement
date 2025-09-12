@@ -1,0 +1,53 @@
+﻿@model IEnumerable<ClassLibrary.DtoModels.CondoMemberDto>
+
+@{
+    ViewData["Title"] = "MembersFromCondo";
+}
+
+<h1>Members from @ViewBag.CondoName</h1>
+<br />
+
+<a class="btn btn-outline-primary" asp-controller="Condominium" asp-action="MyCondos">Back to My Condos</a>
+<br />
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.FullName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PhoneNumber)
+            </th>
+      
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+                <td>
+                    <img src="@item.ImageFullPath" alt="Member Image" class="img-fluid rounded border shadow" style="max-height: 100px;" />
+                </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FullName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PhoneNumber)
+            </td>
+         
+            <td>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

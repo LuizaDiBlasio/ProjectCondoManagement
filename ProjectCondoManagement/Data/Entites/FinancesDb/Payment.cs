@@ -12,7 +12,20 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public string? PaymentMethod { get; set; }
 
+
+        public string? ExpenseType { get; set; } 
+
+        public int? BeneficiaryAccountId { get; set; }
+
+        public string? ExternalRecipientBankAccount { get; set; }
+
+        public int SelectedBeneficiaryId { get; set; }
+
         public int PayerFinancialAccountId { get; set; } 
+
+        public string? Payer { get; set; }
+
+        public string? Recipient { get; set; }
 
         public int CondominiumId {  get; set; }
 
@@ -25,6 +38,8 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
         public List<Expense> Expenses { get; set; } = new List<Expense>();   
 
         public Expense? OneTimeExpense { get; set; }
+
+        public decimal? Amount { get; set; } 
 
         public decimal TotalAmount => Expenses.Sum(e => e.Amount);
 

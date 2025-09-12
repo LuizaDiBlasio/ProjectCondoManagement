@@ -41,10 +41,12 @@ else
                                 <table class="table table-striped table-hover">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
                                             <th>Due Date</th>
                                             <th>Payment Date</th>
+                                            <th>Recipient</th>
+                                            <th>Payer</th>
                                             <th>Total Amount</th>
+                                            <th>Expense</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -52,7 +54,6 @@ else
                                         @foreach (var payment in condo.CondoPayments)
                                         {
                                             <tr>
-                                                <td>@Html.DisplayFor(modelItem => payment.Id)</td>
                                                 <td>@payment.DueDate.ToShortDateString()</td>
                                                 <td>
                                                     @if (!payment.IsPaid)
@@ -64,7 +65,10 @@ else
                                                         <span>@payment.TransactionDto?.DateAndTime.ToShortDateString()</span>
                                                     }
                                                 </td>
+                                                <td>@payment.Recipient</td>
+                                                <td>@payment.Payer</td>
                                                 <td>@Html.DisplayFor(modelItem => payment.TotalAmount)</td>
+                                                <td>@payment.ExpenseType</td>
                                                 <td>
                                                     @Html.ActionLink("Details", "Details", new { id = payment.Id }, new { @class = "btn btn-outline-info ms-2" })
                                                     <a href="#" class="btn btn-outline-danger ms-2 delete-btn" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@payment.Id">Cancel Payment</a>

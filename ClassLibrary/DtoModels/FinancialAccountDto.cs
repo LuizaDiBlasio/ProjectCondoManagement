@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,9 +11,10 @@ namespace ClassLibrary.DtoModels
     {
         public int Id { get; set; }
 
-        public decimal Deposit { get; set; }
+        [Display(Name ="Account's Owner")]
+        public string OwnerName { get; set; }
 
-        public decimal Balance { get; set; }    
+        public decimal Balance { get; set; }
 
         public bool IsActive { get; set; } = false;
 

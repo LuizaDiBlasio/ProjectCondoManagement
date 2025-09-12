@@ -8,9 +8,21 @@
 
 
 <p>
-        <a asp-action="Create" class="btn btn-success" asp-route-memberId="@ViewBag.MemberId">Add Unit</a>
-        <a asp-controller="CondoMember" asp-action="Index" class="btn btn-outline-primary" >Back to Condo Members</a>
+        
+
+        @if (!this.User.IsInRole("CondoMember"))
+        {
+             @if (this.User.IsInRole("CondoManager"))
+             {
+                 <a asp-action="Create" class="btn btn-success" asp-route-memberId="@ViewBag.MemberId">Add Unit</a>
+             }
+            
+
+             <a asp-controller="CondoMember" asp-action="Index" class="btn btn-outline-primary">Back to Condo Members</a>
+        }
+    
 </p>
+
 <table class="table">
     <thead>
         <tr>
@@ -48,7 +60,11 @@
                     @Html.DisplayFor(modelItem => item.Bedrooms)
                 </td>
                 <td>
-                    <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id" asp-route-memberId="@ViewBag.MemberId">Edit</a>
+                    @if (this.User.IsInRole("CondoManager"))
+                    {
+                        <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id" asp-route-memberId="@ViewBag.MemberId">Edit</a>
+                    }
+                    
                     <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id" asp-route-memberId="@ViewBag.MemberId">Details</a>
                 </td>
             </tr>

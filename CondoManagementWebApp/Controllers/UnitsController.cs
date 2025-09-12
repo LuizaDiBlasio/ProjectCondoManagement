@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Syncfusion.EJ2.Charts;
+using System.Web.Helpers;
 using Vereyon.Web;
 
 namespace CondoManagementWebApp.Controllers
@@ -64,29 +66,45 @@ namespace CondoManagementWebApp.Controllers
         // GET: UnitsController
         public async Task<IActionResult> MemberUnits(int? id)
         {
-            if(id == null)
+            if (!this.User.IsInRole("CondoMember"))
             {
-                return NotFound();
+                if (id == null)
+                {
+                    return NotFound();
+                }
             }
+           
 
          
             IEnumerable<UnitDto> units = new List<UnitDto>();
 
             try
             {
-                var condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id}");
+                var condoMember = new CondoMemberDto();
+
+                if (this.User.IsInRole("CondoMember"))
+                {
+                    var email = this.User.Identity?.Name;
+
+                   condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{email}");
+                }
+                else
+                {
+                    condoMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{id}");
+                }
+
                 if (condoMember == null)
                 {
                     return NotFound();
                 }
 
-                if(condoMember.Units != null)
+                if (condoMember.Units != null)
                 {
                     units = condoMember.Units;
                 }
 
                 ViewBag.MemberName = condoMember.FullName;
-                ViewBag.MemberId = id;
+                ViewBag.MemberId = condoMember.Id;
 
                 return View(units);
             }
@@ -103,7 +121,7 @@ namespace CondoManagementWebApp.Controllers
 
 
         // GET: UnitsController/Details/5
-        public async Task<IActionResult> Details(int? id, int? condoId, string? condoName, int? memberId)
+        public async Task<IActionResult> Details(int? id, int? condoId, string? condoName, int? memberId, string? returnUrl)
         {
             if (id == null)
             {
@@ -124,6 +142,12 @@ namespace CondoManagementWebApp.Controllers
                     ViewBag.CondoName = condoName;
 
                 }
+
+                if(returnUrl != null)
+                {
+                    ViewBag.ReturnUrl = returnUrl;
+                }
+
                 if (memberId != null)
                 {
                     ViewBag.MemberId = memberId;
@@ -134,6 +158,11 @@ namespace CondoManagementWebApp.Controllers
             catch (Exception ex)
             {
                 _flashMessage.Danger($"Error fetching unit");
+
+                if(returnUrl != null & condoId != null && condoName != null)
+                {
+                    return RedirectToAction(nameof(UnitsFromCondo), new { condoId = condoId, condoName = condoName });
+                }
 
                 if (condoId != null && condoName != null)
                 {
@@ -598,6 +627,39 @@ namespace CondoManagementWebApp.Controllers
             
 
         }
+
+        public async Task<IActionResult> UnitsFromCondo(int? condoId, string? condoName)
+        {
+            if(condoId == null|| condoName == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.CondoName = condoName;
+
+            var units = new List<UnitDto>();
+
+            try
+            {
+                units = await _apiCallService.GetAsync<List<UnitDto>>($"api/Units/condo/{condoId.Value}");
+
+                return View(units);
+
+            }
+
+            catch (Exception ex)
+            {
+                _flashMessage.Danger($"Error fetching units");
+                return View(units);
+            }
+
+
+
+
+        }
+
+
+
 
         private async Task<bool> IsDuplicateUnitAsync(int condoId, string floor, string door)
         {

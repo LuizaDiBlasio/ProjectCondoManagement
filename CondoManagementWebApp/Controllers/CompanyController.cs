@@ -192,8 +192,17 @@ namespace CondoManagementWebApp.Controllers
         [Microsoft.AspNetCore.Mvc.HttpPost]
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> RequestEdit(CreateEditCompanyViewModel model)
         {
+
+            //TODO: o reload das selectLists nao esta funcionar , veem vazias
+
+
             if (!ModelState.IsValid)
             {
+                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosLists");
+
+                model.CondominiumsToSelect = selectLists.Condos;
+                model.CompanyAdminsToSelect = selectLists.Admins;
+
                 return View("Edit", model);
             }
 
@@ -207,21 +216,28 @@ namespace CondoManagementWebApp.Controllers
                 {
                     _flashMessage.Danger(apiCall.Message);
 
+                    //Buscar selectList de condominiums 
+                    var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosLists");
+
+                    model.CondominiumsToSelect = selectLists.Condos;
+                    model.CompanyAdminsToSelect = selectLists.Admins;
+
                     return View("Edit", model);
                 }
 
-                //Buscar selectList de condominiums 
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosLists");
 
-                model.CondominiumsToSelect = selectLists.Condos;
-                model.CompanyAdminsToSelect = selectLists.Admins;
 
                 _flashMessage.Confirmation(apiCall.Message);
-                return View("Edit", model);
+
+               return RedirectToAction(nameof(IndexCompanies));
             }
             catch
             {
                 _flashMessage.Danger("Unable to update company information due to error");
+                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosLists");
+
+                model.CondominiumsToSelect = selectLists.Condos;
+                model.CompanyAdminsToSelect = selectLists.Admins;
                 return View("Edit", model);
             }
         }

@@ -19,7 +19,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
         private readonly DataContextFinances _dataContextFinances;
         private readonly IFinancialAccountRepository _financialAccountRepository;
 
-        public CondominiumRepository(IUserHelper userHelper, IConverterHelper converterHelper, DataContextCondos dataContextCondos, DataContextFinances dataContextFinances, IFinancialAccountRepository financialAccountRepository) 
+        public CondominiumRepository(IUserHelper userHelper, IConverterHelper converterHelper, DataContextCondos dataContextCondos, DataContextFinances dataContextFinances,IFinancialAccountRepository financialAccountRepository) 
         {
             _userHelper = userHelper;
             _converterHelper = converterHelper;
@@ -75,7 +75,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
                 return new Response<object>
                 {
                     IsSuccess = true,
-                    Message = "Images linked successfully"
+                    Message = "Managers linked successfully"
                 };
             }
             catch (Exception ex)
@@ -84,12 +84,57 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
                 return new Response<object>
                 {
                     IsSuccess = false,
-                    Message = $"Error linking images: {ex.Message}"
+                    Message = $"Error linking manager: {ex.Message}"
                 };
             }
 
 
         }
+
+        public async Task<Response<object>> LinkFinancialAccount(List<CondominiumDto> condominiums)
+        {
+            try
+            {
+                IEnumerable<FinancialAccount> accounts = await _financialAccountRepository.GetAll(_dataContextFinances).ToListAsync();
+                if (accounts == null || !accounts.Any())
+                {
+                    return new Response<object>
+                    {
+                        IsSuccess = false,
+                        Message = "No accounts found"
+                    };
+                }
+
+
+                foreach (CondominiumDto condominium in condominiums)
+                {
+                    var account = accounts.FirstOrDefault(m => m.Id == condominium.FinancialAccountId);
+                    if (account != null)
+                    {
+                        var accountDto = _converterHelper.ToFinancialAccountDto(account, false);
+
+                        condominium.FinancialAccountDto = accountDto;
+                    }
+                }
+
+                return new Response<object>
+                {
+                    IsSuccess = true,
+                    Message = "Accounts linked successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+
+                return new Response<object>
+                {
+                    IsSuccess = false,
+                    Message = $"Error linking Account: {ex.Message}"
+                };
+            }
+        }
+
+
 
         public async Task UpdateCondominiumsCompanyId(Company company)
         {
@@ -185,48 +230,8 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
         }
 
 
-        public async Task<Response<object>> LinkFinancialAccount(List<CondominiumDto> condominiums)
-        {
-            try
-            {
-                IEnumerable<FinancialAccount> accounts = await _financialAccountRepository.GetAll(_dataContextFinances).ToListAsync();
-                if (accounts == null || !accounts.Any())
-                {
-                    return new Response<object>
-                    {
-                        IsSuccess = false,
-                        Message = "No accounts found"
-                    };
-                }
+        
 
-
-                foreach (CondominiumDto condominium in condominiums)
-                {
-                    var account = accounts.FirstOrDefault(m => m.Id == condominium.FinancialAccountId);
-                    if (account != null)
-                    {
-                        var accountDto = _converterHelper.ToFinancialAccountDto(account, false);
-
-                        condominium.FinancialAccountDto = accountDto;
-                    }
-                }
-
-                return new Response<object>
-                {
-                    IsSuccess = true,
-                    Message = "Accounts linked successfully"
-                };
-            }
-            catch (Exception ex)
-            {
-
-                return new Response<object>
-                {
-                    IsSuccess = false,
-                    Message = $"Error linking Account: {ex.Message}"
-                };
-            }
-        }
-
+       
     }
 }

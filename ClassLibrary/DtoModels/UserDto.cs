@@ -23,7 +23,11 @@ namespace ClassLibrary.DtoModels
 
         public int? CompanyId { get; set; }
 
+        public CompanyDto? CompanyDto { get; set; }
+
         public int? FinancialAccountId { get; set; } 
+
+        public FinancialAccountDto? FinancialAccountDto { get; set; }
 
         public bool IsActive { get; set; } = true;
 

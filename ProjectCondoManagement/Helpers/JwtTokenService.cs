@@ -22,8 +22,14 @@ namespace ProjectCondoManagement.Helpers
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.Role, role), // Adiciona a role diretamente
-                new Claim(ClaimTypes.Name, user.Email) 
+                new Claim(ClaimTypes.Name, user.Email),
+
             };
+
+            if (user.FinancialAccountId != null)
+            {
+                claims.Add(new Claim("FinancialAccountId", user.FinancialAccountId.Value.ToString()));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

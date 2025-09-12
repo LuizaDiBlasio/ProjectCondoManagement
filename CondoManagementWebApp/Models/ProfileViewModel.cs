@@ -5,7 +5,7 @@ namespace CondoManagementWebApp.Models
 {
     public class ProfileViewModel
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
 
 
         [Required]

@@ -1,4 +1,5 @@
 ﻿using ClassLibrary;
+using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using System.Security.Principal;
@@ -14,11 +15,11 @@ namespace ProjectCondoManagement.Data.Repositories.Finances
             _dataContextFinances = dataContextFinances;
         }
 
-        public async Task<FinancialAccount> CreateFinancialAccountAsync()
+        public async Task<FinancialAccount> CreateFinancialAccountAsync(string name)
         {
             var financialAccount = new FinancialAccount()
             {
-                Deposit = 0, // depósito inicial vai ser sempre 0
+                OwnerName = name,
                 Balance = 0
             };
 

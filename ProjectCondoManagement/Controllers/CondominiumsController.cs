@@ -11,6 +11,8 @@ using ProjectCondoManagement.Data.Repositories.Finances;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
 using ProjectCondoManagement.Migrations.CondosDb;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -58,31 +60,18 @@ namespace ProjectCondoManagement.Controllers
         public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetCondominiums()
         {
 
-            //TODO: no final so preencher os condominios com o id da company
+            var email = this.User.Identity?.Name;
 
-            //var email = this.User.Identity?.Name;
+            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
 
-            //var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
-
-            //if (user == null)
-            //{
-            //    return BadRequest("User not found.");
-            //}
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
 
 
 
-            //var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.CompanyId == user.CompanyId).ToListAsync();
-            //if (condominiums == null)
-            //{
-            //    return new List<CondominiumDto>();
-            //}
-
-
-
-
-
-
-            var condominiums = await _condominiumRepository.GetAll(_context).ToListAsync();
+            var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.CompanyId == user.CompanyId).ToListAsync();
             if (condominiums == null)
             {
                 return new List<CondominiumDto>();
@@ -96,6 +85,7 @@ namespace ProjectCondoManagement.Controllers
             }
 
             await _condominiumRepository.LinkManager(condominiumsDtos);
+            await _condominiumRepository.LinkFinancialAccount(condominiumsDtos);
 
             return condominiumsDtos;
         }
@@ -209,7 +199,7 @@ namespace ProjectCondoManagement.Controllers
 
 
                 //Atribuir financial account
-                var financialAccount = await _financialAccountRepository.CreateFinancialAccountAsync();
+                var financialAccount = await _financialAccountRepository.CreateFinancialAccountAsync(condominium.CondoName);
 
                 condominium.FinancialAccountId = financialAccount.Id;
 
@@ -302,6 +292,7 @@ namespace ProjectCondoManagement.Controllers
                     CondominiumId = condo.Id,
                     CondoName = condo.CondoName,
                     CondoPayments = condoPaymentsDto
+
                 };
 
                 condosWithPaymentsDtoList.Add(condominiumWithPaymentsDto);
@@ -311,10 +302,9 @@ namespace ProjectCondoManagement.Controllers
 
         }
 
-
-        // GET: api/Condominiums/ByManager/{managerId}
+        // GET: api/Condominiums/ByManager
         [HttpGet("ByManager")]
-        public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetMangerCondos()
+        public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetManagerCondos()
         {
             var email = this.User.Identity?.Name;
 
@@ -340,6 +330,8 @@ namespace ProjectCondoManagement.Controllers
 
             return condominiumsDtos;
         }
+
+
 
 
         [HttpGet("ByCondoMember")]

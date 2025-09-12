@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -13,7 +14,7 @@
     <link rel="stylesheet" href="~/CondoManagementWebApp.styles.css" asp-append-version="true" />
     <link href="https://cdn.syncfusion.com/ej2/30.2.4/bootstrap5.css" rel="stylesheet"   />
     <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon.png" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-***********" crossorigin="anonymous" referrerpolicy="no-referrer" /> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-*" crossorigin="anonymous" referrerpolicy="no-referrer" /> 
 
 </head>
 <body>
@@ -81,6 +82,7 @@
             <div class="deznav">
                 <div class="deznav-scroll">
                     <ul class="metismenu" id="menu">
+       
 
                         <li>
                             <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
@@ -89,7 +91,6 @@
                             </a>
                             <ul aria-expanded="false">
                                 <li><a asp-controller="Condominium" asp-action="Index">Condominiums</a></li>
-                                <li><a asp-controller="Units" asp-action="Index">Units</a></li>
                                 <li><a asp-controller="CondoMember" asp-action="Index">Condo Members</a></li>
                                 <li><a asp-controller="Occurrence" asp-action="IndexOccurrences">Occurrences</a></li>
                                 <li><a asp-controller="Meeting" asp-action="IndexMeetings">Meetings</a></li>
@@ -105,7 +106,7 @@
                                 <li><a asp-controller="Payment" asp-action="IndexCondominiumPayments">Payments</a></li>
                                 <li><a asp-controller="Expense" asp-action="IndexExpenses">Expenses</a></li>
                                 <li><a asp-controller="Invoice" asp-action="IndexCondominiumInvoices">Invoices</a></li>
-                                <li><a asp-controller="FinancialAccount" asp-action="ActivateFinancialAccount">Activate account</a></li>
+                                <li><a asp-controller="FinancialAccounts" asp-action="CondoAccounts" asp-route-email="@User.FindFirst(ClaimTypes.Name)?.Value">Condominiums Accounts</a></li>
                             </ul>
                         </li>
 
@@ -120,9 +121,25 @@
 
          else if (User.IsInRole("CompanyAdmin"))
          {
+
+            
+
            <div class="deznav">
                     <div class="deznav-scroll">
                         <ul class="metismenu" id="menu">
+
+                           <li>
+                               <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                   <i class="flaticon-381-user-7"></i>
+                                   <span class="nav-text">Condos</span>
+                               </a>
+                               <ul aria-expanded="false">
+                                   <li><a asp-controller="Condominium" asp-action="Index">Condominiums</a></li>
+                                   <li><a asp-controller="CondoMember" asp-action="Index">Condo Members</a></li>
+                               </ul>
+                           </li>
+
+                            <li>
                         <li>
                             <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                                 <i class="flaticon-dashboard-1"></i>
@@ -137,6 +154,7 @@
                                 </a>
                                 <ul aria-expanded="false">
                                     <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
+                                    <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Financial Account</a></li>
                                 </ul>
                             </li>
 
@@ -155,16 +173,30 @@
                     <div class="deznav-scroll">
                         <ul class="metismenu" id="menu">
 
-                        <li>
+                         <li>
+                            <a class="ai-icon" asp-controller="CondoMember" asp-action="Dashboard">
+                                <i class="flaticon-dashboard-1"></i>
+                                <span class="nav-text">Personal Space</span>
+                            </a>
+
+                        </li>
+
+                             <li>
                             <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                                 <i class="flaticon-381-user-7"></i>
-                                <span class="nav-text">My Condo</span>
+                                <span class="nav-text">Condos</span>
                             </a>
                             <ul aria-expanded="false">
+                                <li><a asp-controller="Units" asp-action="MemberUnits">My Units</a></li>                                
+                                <li><a asp-controller="Condominium" asp-action="MyCondos">My Condos</a></li>
                                 <li><a asp-controller="Occurrence" asp-action="IndexOccurrences">Occurrences</a></li>
                                 <li><a asp-controller="Meeting" asp-action="IndexMeetings">Meetings</a></li>
                             </ul>
                         </li>
+
+
+
+
                             <li>
                                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                                     <i class="fas fa-dollar-sign"></i>
@@ -174,7 +206,7 @@
                                     <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
                                     <li><a asp-controller="Payment" asp-action="IndexCondoMemberPayments">Payments</a></li>
                                     <li><a asp-controller="Invoice" asp-action="IndexCondoMemberInvoices">Invoices</a></li>
-                                    <li><a asp-controller="FinancialAccount" asp-action="ActivateFinancialAccount">Activate Financial Account</a></li>
+                                     <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Financial Account</a></li>
                                 </ul>
                             </li>
 
