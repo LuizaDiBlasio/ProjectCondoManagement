@@ -196,11 +196,18 @@ namespace CondoManagementWebApp.Controllers
             {
                 var condos = await _apiCallService.GetAsync<IEnumerable<CondominiumDto>>("api/Condominiums");
 
+                if (condos == null || !condos.Any())
+                {
+                    return RedirectToAction("MemberUnits", new { id = memberId});
+                }
+
                 model.Condos = condos.Select(c => new SelectListItem
                 {
                     Value = c.Id.ToString(), 
                     Text = c.CondoName              
                 }).ToList();
+
+                
             }
 
             if (memberId != null)

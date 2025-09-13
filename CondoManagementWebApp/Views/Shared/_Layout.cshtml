@@ -82,6 +82,15 @@
             <div class="deznav">
                 <div class="deznav-scroll">
                     <ul class="metismenu" id="menu">
+
+
+                        <li>
+                            <a class="ai-icon" asp-controller="Account" asp-action="CondoManagerDashboard">
+                                <i class="flaticon-dashboard-1"></i>
+                                <span class="nav-text">Personal Space</span>
+                            </a>
+
+                        </li>
        
 
                         <li>
@@ -127,6 +136,17 @@
                     <div class="deznav-scroll">
                         <ul class="metismenu" id="menu">
 
+
+                         <li>
+                            <a class="ai-icon" asp-controller="Account" asp-action="CompanyAdminDashboard">
+                                <i class="flaticon-dashboard-1"></i>
+                                <span class="nav-text">Personal Space</span>
+                            </a>
+
+                        </li>
+
+
+
                            <li>
                                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                                    <i class="flaticon-381-user-7"></i>
@@ -135,7 +155,6 @@
                                <ul aria-expanded="false">
                                    <li><a asp-controller="Condominium" asp-action="Index">Condominiums</a></li>
                                    <li><a asp-controller="CondoMember" asp-action="Index">Condo Members</a></li>
-                                   <li><a asp-controller="Company" asp-action="Edit">Manage condos</a></li>
                                </ul>
                            </li>
 
@@ -145,7 +164,6 @@
                                     <span class="nav-text">Finances</span>
                                 </a>
                                 <ul aria-expanded="false">
-                                    <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
                                     <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Financial Account</a></li>
                                 </ul>
                             </li>
@@ -165,7 +183,7 @@
                     <div class="deznav-scroll">
                         <ul class="metismenu" id="menu">
 
-                         <li>
+                        <li>
                             <a class="ai-icon" asp-controller="CondoMember" asp-action="Dashboard">
                                 <i class="flaticon-dashboard-1"></i>
                                 <span class="nav-text">Personal Space</span>

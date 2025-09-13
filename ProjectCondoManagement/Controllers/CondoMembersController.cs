@@ -125,7 +125,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (condoMember == null)
             {
-                return null;
+                return NotFound(new { Message = $"Condo member with email '{email}' not found." });
             }
 
             if (condoMember.CompanyId != user.CompanyId)
@@ -425,6 +425,33 @@ namespace ProjectCondoManagement.Controllers
             var membersDto = members.Select(m => _converterHelper.ToCondoMemberDto(m)).ToList();
 
             return membersDto;
+        }
+
+
+        // GET: api/CondoMembers/Exists?email=someone@email.com
+        [HttpGet("Exists")]
+        public async Task<ActionResult<bool>> ExistsByEmail([FromQuery] string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return BadRequest("Email is required.");
+            }
+
+            try
+            {
+                // Verifica se existe no repositório de CondoMembers
+                var existsCondoMember = await _condoMemberRepository.ExistByEmailAsync(email);
+
+                // Verifica também se já existe como usuário (opcional)
+                var existsUser = await _userHelper.ExistsAsync(email);
+
+                return Ok(existsCondoMember || existsUser);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"An error occurred: {ex.Message}");
+            }
         }
 
     }

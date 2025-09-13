@@ -4,6 +4,7 @@ using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Vereyon.Web;
 
@@ -137,9 +138,23 @@ namespace CondoManagementWebApp.Controllers
                 ViewBag.CompanyId = user1.CompanyId;
                 return View(condoMemberDto);
             }
+            
 
             try
             {
+
+
+                bool checkEmailExists = await _apiCallService.GetAsync<bool>($"api/CondoMembers/Exists?email={condoMemberDto.Email}");
+                if (checkEmailExists)
+                {
+                    ModelState.AddModelError("Email", "Email already in use!");
+
+                    var email4 = User.Identity?.Name;
+                    var user4 = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email4}");
+                    ViewBag.CompanyId = user4.CompanyId;
+                    return View(condoMemberDto);
+                }
+
                 var result = await _apiCallService.PostAsync<CondoMemberDto, Response<object>>("api/CondoMembers", condoMemberDto);
                 if (!result.IsSuccess)
                 {
@@ -165,11 +180,12 @@ namespace CondoManagementWebApp.Controllers
             }
             catch (Exception)
             {
-                var createdMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{condoMemberDto.Email}");
-                if (createdMember == null)
+                var createdMemberExists = await _apiCallService.GetAsync<bool>($"api/CondoMembers/Exists?email={condoMemberDto.Email}");
+                if (!createdMemberExists)
                 {
                     return NotFound("Condo member not found after creation.");
                 }
+                var createdMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{condoMemberDto.Email}");
 
                 await _apiCallService.DeleteAsync($"api/CondoMembers/{createdMember.Id}");
 
@@ -309,5 +325,13 @@ namespace CondoManagementWebApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+
+
+
+
+     
+
+
     }
 }

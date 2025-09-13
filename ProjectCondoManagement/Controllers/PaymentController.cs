@@ -399,8 +399,26 @@ namespace ProjectCondoManagement.Controllers
             }
         }
 
-        
 
-        
+
+        [Microsoft.AspNetCore.Mvc.HttpGet("GetPaymentsByFinancialAccount")]
+        public async Task<ActionResult<List<PaymentDto>>> GetPaymentsByFinancialAccount([FromQuery] int financialAccountId)
+        {
+            var payments = await _paymentRepository.GetAll(_dataContextFinances)
+                .Where(p => p.PayerFinancialAccountId == financialAccountId
+                         || p.BeneficiaryAccountId == financialAccountId)
+                .Include(p => p.Expenses)
+                .Include(p => p.Transaction)
+                .ToListAsync();
+
+            var paymentsDto = payments
+                .Select(p => _converterHelper.ToPaymentDto(p, false))
+                .ToList();
+
+            return Ok(paymentsDto); 
+        }
+
+
+
     }
 }

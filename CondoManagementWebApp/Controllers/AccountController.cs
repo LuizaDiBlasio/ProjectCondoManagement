@@ -1187,6 +1187,74 @@ namespace CondoManagementWebApp.Controllers
         }
 
 
+
+        [Authorize(Roles="CondoManager")]
+        public async Task<ActionResult<CondoManagerDashboardViewModel>> CondoManagerDashboard()
+        {
+            var email = User.Identity?.Name;
+
+            var model = new CondoManagerDashboardViewModel();
+
+            var user = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email}");
+            model.CondoManager = user;
+
+            var condominiums = await _apiCallService.GetAsync<List<CondominiumDto>>($"api/Condominiums/ByManager") ?? new List<CondominiumDto>();
+            model.Condominiums = condominiums;
+
+            model.Occurrences.AddRange(condominiums.SelectMany(c => c.Occurrences ?? new List<OccurrenceDto>()));
+            model.Payments.AddRange(condominiums.SelectMany(c => c.Payments ?? new List<PaymentDto>()));
+            model.Meetings.AddRange(condominiums.SelectMany(c => (c.Meetings ?? new List<MeetingDto>())
+                .Where(m => m.DateAndTime > DateTime.Now)));
+
+            model.Messages = await _apiCallService.GetAsync<List<MessageDto>>($"api/Message/Received/{email}")
+                              ?? new List<MessageDto>();
+
+            return View(model);
+
+        }
+
+        [Authorize(Roles = "CompanyAdmin")]
+        public async Task<ActionResult<CompanyAdminDashboardViewModel>> CompanyAdminDashboard()
+        {
+            var email = User.Identity?.Name;
+            var model = new CompanyAdminDashboardViewModel();
+
+            try
+            {
+                
+                var user = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email}");
+                var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompanyByUser?includeCondominiums=true");
+
+                model.CompanyAdmin = user;
+
+                model.FinancialAccount = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{company.FinancialAccountId}");
+                model.Payments = await _apiCallService.GetAsync<List<PaymentDto>>($"api/Payment/GetPaymentsByFinancialAccount?financialAccountId={model.FinancialAccount.Id}") ?? new List<PaymentDto>();
+                model.Condominiums = company.CondominiumDtos?.ToList() ?? new List<CondominiumDto>();
+                model.CondoManagers = await _apiCallService.GetAsync<List<UserDto>>($"api/Account/GetManagers") ?? new List<UserDto>();
+
+                model.Messages = await _apiCallService.GetAsync<List<MessageDto>>($"api/Message/Received/{email}") ?? new List<MessageDto>();
+
+
+
+                foreach (var condo in model.Condominiums)
+                {
+                    condo.ManagerUser = model.CondoManagers.FirstOrDefault(m => m.Id == condo.ManagerUserId);
+                }
+
+                return View(model);
+
+            }
+            catch (Exception ex)
+            {
+
+                return View(model);
+            }
+
+            
+
+        }
+
+
     }
 }
 

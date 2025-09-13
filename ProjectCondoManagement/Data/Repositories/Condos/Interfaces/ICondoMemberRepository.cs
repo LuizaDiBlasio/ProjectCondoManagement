@@ -10,5 +10,6 @@ namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
         public Task<CondoMember> GetCondoMemberByEmailAsync(string email);
         public Task<CondoMember?> GetByIdWithIncludeAsync(int id, DataContextCondos context);
         public Task<bool> AssociateFinancialAccountAsync(string? email, int? financialAccountId);
+        Task<bool> ExistByEmailAsync(string email);
     }
 }

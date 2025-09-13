@@ -47,7 +47,7 @@ namespace ProjectCondoManagement.Helpers
         Message ToMessage(MessageDto messageDto, bool isNew);
 
         PaymentDto ToPaymentDto(Payment payment, bool isNew);
-        UnitDto ToUnitDto(Unit unit, bool includeCondoMembers = true);
+        UnitDto ToUnitDto(Unit unit, bool includeCondoMembers = true, bool includeCondominium = true);
 
         InvoiceDto ToInvoiceDto(Invoice invoice, bool isNew);
 

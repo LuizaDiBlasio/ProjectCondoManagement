@@ -59,7 +59,12 @@ namespace ProjectCondoManagement.Helpers
 
         Task<IEnumerable<User>> GetUsersByRoleAsync(string role);
 
-        public Task<List<User>> GetUsersByFullName(string cleanedFullName);
-        public  Task<List<User>> GetUsersWithCompanyAsync();
+        Task<List<User>> GetUsersByFullName(string cleanedFullName);
+        Task<List<User>> GetUsersWithCompanyAsync();
+
+        Task<bool> ExistsAsync(string email);
+
+
+        Task<User> GetUserByFinancialAccountIdAsync(int financialAccountId);
     }
 }

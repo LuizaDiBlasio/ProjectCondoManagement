@@ -104,5 +104,15 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
         }
 
 
+
+        public async Task<bool> ExistByEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return false;
+            }
+
+            return await _context.CondoMembers.AnyAsync(c => c.Email.ToLower() == email.ToLower());
+        }
     }
 }

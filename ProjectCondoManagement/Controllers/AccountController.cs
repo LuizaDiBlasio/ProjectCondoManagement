@@ -266,7 +266,14 @@ namespace ProjectCondoManagement.Controllers
         [Microsoft.AspNetCore.Mvc.HttpPost("AssociateUser")]
         public async Task<IActionResult> AssociateUser([FromBody] RegisterUserDto registerDtoModel)
         {
-            var user = await _userHelper.CreateUser(registerDtoModel);
+            var user = await _userHelper.GetUserByEmailAsync(registerDtoModel.Email); //buscar user  
+
+            if (user != null)
+            {
+                return StatusCode(409, new Response<object> { Message = "User already exists, try registering wih new credentials", IsSuccess = false });
+            }
+
+            user = await _userHelper.CreateUser(registerDtoModel);
             if (user == null)
             {
                 return StatusCode(500, new { Message = "Internal server error: User not registered" });
@@ -278,7 +285,7 @@ namespace ProjectCondoManagement.Controllers
             string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
 
             // gera um link de confirmção para o email
-            string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/ResetPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
+            string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/ResetPassword?userId={user.Id}&tokenEmail={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
             Response<object> response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
            $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link
@@ -695,20 +702,13 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet("GetManagers")]
         public async Task<IActionResult> GetManagers()
         {
-
-            var user = await _userHelper.GetUserByEmailAsync(this.User.Identity?.Name);
+            var user = await _userHelper.GetUserByEmailAsync(User.Identity?.Name);
 
             var allManagers = await _userHelper.GetUsersByRoleAsync("CondoManager");
 
-            var managers = new List<User>();
-
-            managers = allManagers
-            .Where(m => m.CompanyId == user.CompanyId)
-            .ToList();
-
-
-            var managersDto = managers
-                .Select(m => _converterHelper.ToUserDto((User)m))
+            var managersDto = allManagers
+                .Where(m => m.CompanyId == user.CompanyId)
+                .Select(m => _converterHelper.ToUserDto(m))
                 .ToList();
 
             return Ok(managersDto);

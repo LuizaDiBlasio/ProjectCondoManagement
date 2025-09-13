@@ -194,7 +194,7 @@ namespace ProjectCondoManagement.Helpers
                 Id = company.Id,
                 Name = company.Name,
                 CondominiumDtos = company.Condominiums?.Select(c => ToCondominiumDto(c, false)).ToList() ?? new List<CondominiumDto>(),
-                //CondoMemberDtos = company.CondoMembers?.Select(cm => ToCondoMemberDto(cm, true)).ToList() ?? new List<CondoMemberDto>(),
+                CondoMemberDtos = company.CondoMembers?.Select(cm => ToCondoMemberDto(cm, true)).ToList() ?? new List<CondoMemberDto>(),
                 Email = company.Email,
                 Address = company.Address,
                 PhoneNumber = company.PhoneNumber,
@@ -254,6 +254,7 @@ namespace ProjectCondoManagement.Helpers
                 CondoMembers = condominium.CondoMembers?.Select(c => ToCondoMemberDto(c, false)).ToList() ?? new List<CondoMemberDto>(),
                 CompanyId = condominium.CompanyId,
                 Address = condominium.Address,
+                Units = condominium.Units?.Select(c => ToUnitDto(c, false, false)).ToList() ?? new List<UnitDto>(),
                 FinancialAccountId = condominium.FinancialAccountId,
                 ManagerUserId = condominium.ManagerUserId,
                 Occurrences = IncludeOccurrence == true? condominium.Occurrences?.Select(o => ToOccurrenceDto(o, false)).ToList() ?? new List<OccurrenceDto>() : null
@@ -306,7 +307,7 @@ namespace ProjectCondoManagement.Helpers
             return unit;
         }
 
-        public UnitDto ToUnitDto(Unit unit, bool includeCondoMembers = true)
+        public UnitDto ToUnitDto(Unit unit, bool includeCondoMembers = true, bool includeCondominium = true)
         {
             var dto = new UnitDto
             {
@@ -315,7 +316,7 @@ namespace ProjectCondoManagement.Helpers
                 CondominiumId = unit.CondominiumId,
                 Floor = unit.Floor,
                 Door = unit.Door,
-                CondominiumDto = ToCondominiumDto(unit.Condominium, false)
+                CondominiumDto = includeCondominium ? ToCondominiumDto(unit.Condominium, false) : null
             };
 
             if (includeCondoMembers)

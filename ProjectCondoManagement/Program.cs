@@ -155,6 +155,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+
+app.MapGet("/", () => Results.Ok("Condo Management API is running"));
+
 using (var scope = app.Services.CreateScope())
 {
     var seeder = scope.ServiceProvider.GetRequiredService<SeedDb>();

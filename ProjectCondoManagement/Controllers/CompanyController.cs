@@ -352,7 +352,7 @@ namespace ProjectCondoManagement.Controllers
         }
 
         [HttpGet("GetCompanyByUser")]
-        public async Task<ActionResult<CompanyDto?>> GetCompanyByUser()
+        public async Task<ActionResult<CompanyDto?>> GetCompanyByUser([FromQuery] bool includeCondominiums = false)
         {
             var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
             if (user == null || user.CompanyId == null)
@@ -367,6 +367,12 @@ namespace ProjectCondoManagement.Controllers
             }
 
             var companyDto = _converterHelper.ToCompanyDto(company);
+            if (includeCondominiums)
+            {
+                companyDto.CondominiumDtos = await _condominiumRepository.GetCondominiumsByCompanyIdAsync(company.Id);
+            }
+
+
             return Ok(companyDto);
         }
 

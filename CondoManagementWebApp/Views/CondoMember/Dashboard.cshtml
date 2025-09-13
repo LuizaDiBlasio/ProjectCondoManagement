@@ -4,9 +4,8 @@
     ViewData["Title"] = "Dashboard";
 }
 
-
 <div class="container mt-4 text-dark">
-  
+
     <!-- Member profile -->
     <div class="d-flex align-items-center mb-4">
         <img src="@Model.CondoMemberDto?.ImageFullPath"
@@ -61,7 +60,7 @@
         <div class="accordion-item mb-2 rounded shadow-sm">
             <h2 class="accordion-header" id="headingMessages">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMessages" aria-expanded="false" aria-controls="collapseMessages">
-                    Messages
+                    Recent Messages
                 </button>
             </h2>
             <div id="collapseMessages" class="accordion-collapse collapse" aria-labelledby="headingMessages" data-bs-parent="#dashboardAccordion">
@@ -71,7 +70,9 @@
                             @if (Model.MessageDtos != null && Model.MessageDtos.Any())
                             {
                                 <div class="list-group">
-                                    @foreach (var msg in Model.MessageDtos)
+                                    @foreach (var msg in Model.MessageDtos
+                                                                    .OrderByDescending(m => m.PostingDate)
+                                                                    .Take(5))
                                     {
                                         <a href="#" class="list-group-item list-group-item-action text-dark">
                                             <div class="d-flex w-100 justify-content-between">
@@ -97,7 +98,7 @@
         <div class="accordion-item mb-2 rounded shadow-sm">
             <h2 class="accordion-header" id="headingFinance">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFinance" aria-expanded="false" aria-controls="collapseFinance">
-                    Financial Account
+                    My Financial Account
                 </button>
             </h2>
             <div id="collapseFinance" class="accordion-collapse collapse" aria-labelledby="headingFinance" data-bs-parent="#dashboardAccordion">
