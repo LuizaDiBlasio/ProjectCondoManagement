@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations
+namespace ProjectCondoManagement.Migrations.FinancesDb
 {
     /// <inheritdoc />
-    public partial class InitCreate : Migration
+    public partial class InitCreateFinances : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -38,10 +38,17 @@ namespace ProjectCondoManagement.Migrations
                     IssueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PaymentMethod = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ExpenseType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BeneficiaryAccountId = table.Column<int>(type: "int", nullable: true),
+                    ExternalRecipientBankAccount = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SelectedBeneficiaryId = table.Column<int>(type: "int", nullable: false),
                     PayerFinancialAccountId = table.Column<int>(type: "int", nullable: false),
+                    Payer = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Recipient = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CondominiumId = table.Column<int>(type: "int", nullable: false),
                     IsPaid = table.Column<bool>(type: "bit", nullable: false),
                     InvoiceId = table.Column<int>(type: "int", nullable: true),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     TransactionId = table.Column<int>(type: "int", nullable: true),
                     MbwayNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreditCard = table.Column<string>(type: "nvarchar(max)", nullable: true)

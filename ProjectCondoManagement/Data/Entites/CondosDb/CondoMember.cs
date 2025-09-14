@@ -22,9 +22,6 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public string? TaxIdNumber { get; set; }
 
-
-        public int CompanyId { get; set; }
-
         public IEnumerable<Meeting>? MeetingsAttended { get; set; }
 
         public ICollection<Unit> Units { get; set; } = new List<Unit>();

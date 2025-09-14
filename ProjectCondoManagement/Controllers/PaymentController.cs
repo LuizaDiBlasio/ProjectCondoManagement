@@ -112,7 +112,7 @@ namespace ProjectCondoManagement.Controllers
         public async Task<List<CondominiumWithPaymentsDto>> GetAllCondoMemberPayments()
         {
             var email = this.User.Identity?.Name;
-            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
 
             // buscar todos os condomínios do manager
             var condominiums = await _condominiumRepository.GetAll(_dataContextCondos)

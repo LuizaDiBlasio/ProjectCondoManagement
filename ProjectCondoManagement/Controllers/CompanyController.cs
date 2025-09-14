@@ -52,11 +52,11 @@ namespace ProjectCondoManagement.Controllers
          /// <returns>A collection of CompanyDto objects representing all companies.</returns>
         //GET: CompanyController
         [HttpGet("GetCompanies")]
-        public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompanies()
+        public async Task<ActionResult<List<CompanyDto>>> GetCompanies()
         {
-           var companies = _companyRepository.GetAll(_contextUsers).ToList();
+           var companies = _companyRepository.GetAll(_contextUsers).Include(c => c.Users).ToList();
 
-            var companiesDtos = companies.Select(c => _converterHelper.ToCompanyDto(c)).ToList();
+            var companiesDtos = companies.Select(c => _converterHelper.ToCompanyDto(c, true)).ToList();
 
             return companiesDtos;
         }
@@ -71,14 +71,14 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet("GetCompany/{id}")]
         public async Task<CompanyDto?> GetCompany(int id)
         {
-            var company = await _companyRepository.GetByIdAsync(id, _contextUsers);
+            var company = await _companyRepository.GetCompanyWithCondosAndUsers(id);
 
             if (company == null)
             {
                 return null;
             }
 
-            var companyDto = _converterHelper.ToCompanyDto(company);
+            var companyDto = _converterHelper.ToCompanyDto(company, true);
 
             return companyDto;
         }
@@ -104,23 +104,10 @@ namespace ProjectCondoManagement.Controllers
 
             try
             {
-                if (companyDto.CompanyAdminId != null)
-                {
-                    //atribuir  user companyAdmin à company
-
-                    var companyAdminUser = await _userHelper.GetUserByIdAsync(companyDto.CompanyAdminId);
-
-                    if (companyAdminUser == null)
-                    {
-                        return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
-                    }
-
-                }
-
-
+               
                 //converter para company
 
-                var company = _converterHelper.ToCompany(companyDto, true);
+                var company = _converterHelper.ToCompany(companyDto, true, true);
 
                 if (company == null)
                 {
@@ -150,41 +137,6 @@ namespace ProjectCondoManagement.Controllers
 
                 await _companyRepository.CreateAsync(company, _contextUsers);
 
-
-               
-
-                //atribuir company à condos 
-
-                if (company.CondominiumIds != null && company.CondominiumIds.Any())
-                {
-                    var companyCondos = await _condominiumRepository.GetCompanyCondominiums(company.CondominiumIds);
-
-                    if (companyCondos.Any())
-                    {
-                        foreach (var condo in companyCondos)
-                        {
-                            condo.CompanyId = company.Id;
-                        }
-                    }
-                }
-
-
-                //atribuir company ao user company admin
-
-                if (company.CompanyAdminId != null)
-                {
-                    var companyAdminUser = await _userHelper.GetUserByIdAsync(company.CompanyAdminId);
-
-                    if (companyAdminUser == null)
-                    {
-                        return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
-                    }
-
-                    companyAdminUser.CompanyId = company.Id;
-
-                    await _userHelper.UpdateUserAsync(companyAdminUser);
-                }
-
                 return Ok(new Response<object> { IsSuccess = true});
             }
             catch (Exception ex)
@@ -212,14 +164,7 @@ namespace ProjectCondoManagement.Controllers
 
             try
             {
-
-                //buscar entidades selecionadas com base nos ids selecionados
-                var selectedAdminAdnCondosDto = await _companyRepository.SelectedAdminAndCondos(companyDto);
-
-                companyDto.CondominiumDtos = selectedAdminAdnCondosDto.SelectedCondos;
-                companyDto.CompanyAdmin = selectedAdminAdnCondosDto.SelectedAdmin;
-
-                var company = _converterHelper.ToCompany(companyDto, false);
+                var company = _converterHelper.ToCompany(companyDto, false, true);
 
                 if (company == null)
                 {
@@ -237,14 +182,11 @@ namespace ProjectCondoManagement.Controllers
                         return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
                     }
 
-                    companyAdminUser.CompanyId = company.Id;
+                    companyAdminUser.Companies.Add(company);
+
 
                     await _userHelper.UpdateUserAsync(companyAdminUser);
                 }
-
-                // Atualizar CompanyId de Condominiums
-
-                await _condominiumRepository.UpdateCondominiumsCompanyId(company);
 
                 await _companyRepository.UpdateAsync(company, _contextUsers);
 
@@ -271,19 +213,24 @@ namespace ProjectCondoManagement.Controllers
         [HttpDelete("DeleteCompany/{id}")]
         public async Task<IActionResult> DeleteCompany(int id)
         {
-           
-
             try
             {
-                var company = await _companyRepository.GetByIdAsync(id, _contextUsers);
+                var company = await _companyRepository.GetCompanyWithCondosAndUsers(id);
 
                 if (company == null)
                 {
                     return NotFound();
                 }
 
-                if ((company.CondominiumIds == null || !company.CondominiumIds.Any()) && company.CompanyAdminId == null)
+                if (!company.Condominiums.Any())
                 {
+                    //desfazer relação com admin
+                    var admin = await _userHelper.GetUserByIdAsync(company.CompanyAdminId);
+                    if (admin != null)
+                    {
+                        company.CompanyAdminId = null;
+                    }
+
                     await _companyRepository.DeleteAsync(company, _contextUsers);
                     return Ok();
                 }
@@ -302,37 +249,23 @@ namespace ProjectCondoManagement.Controllers
 
         //Metodos auxiliares
 
-        [HttpGet("LoadAdminsAndCondosLists")]
-        public async Task<IActionResult> LoadAdminsAndCondosLists()
+        [HttpGet("LoadAdmins")]
+        public async Task<IActionResult> LoadAdmins()
         {
-            var condosList = await _companyRepository.GetCondosSelectListAsync(_contextCondos);
-
             var adminsList = await _companyRepository.GetCompanyAdminsSelectListAsync();
 
-            return Ok(new AdminsAndCondosDto { Admins = adminsList, Condos = condosList});
+            return Ok(adminsList);
         }
 
 
-        [HttpGet("LoadAdminsAndCondosToEdit/{id}")]
-        public async Task<IActionResult> LoadAdminsAndCondosToEdit(int id)
+        [HttpGet("LoadAdminsToEdit/{id}")]
+        public async Task<IActionResult> LoadAdminsToEdit(int id)
         {
-            var condosList = await _companyRepository.GetCondosSelectListAsync(_contextCondos);
-
             var adminsList = await _companyRepository.GetCompanyAdminsSelectListToEdit(id);
 
-            return Ok(new AdminsAndCondosDto { Admins = adminsList, Condos = condosList });
+            return Ok(adminsList);
         }
 
-
-        [HttpGet("LoadAdminsAndCondosToCreate")]
-        public async Task<IActionResult> LoadAdminsAndCondosToCreate()
-        {
-            var condosList = await _companyRepository.GetCondosSelectListAsyncToCreate(_contextCondos);
-
-            var adminsList = await _companyRepository.GetCompanyAdminsSelectListAsync();
-
-            return Ok(new AdminsAndCondosDto { Admins = adminsList, Condos = condosList });
-        }
 
 
 
@@ -346,7 +279,7 @@ namespace ProjectCondoManagement.Controllers
                 return Ok(null);  
             }
 
-            var companyAdminUserDto = _converterHelper.ToUserDto(companyAdminUser);
+            var companyAdminUserDto = _converterHelper.ToUserDto(companyAdminUser, true);
 
             return Ok(companyAdminUserDto);
         }
@@ -354,38 +287,11 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet("GetCompanyByUser")]
         public async Task<ActionResult<CompanyDto?>> GetCompanyByUser()
         {
-            var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
-            if (user == null || user.CompanyId == null)
-            {
-                return Ok(null);
-            }
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(this.User.Identity.Name);
+   
+            var companiesDto = user.Companies?.Select(c => _converterHelper.ToCompanyDto(c,false));
 
-            var company = await _companyRepository.GetByIdAsync(user.CompanyId.Value, _contextUsers);
-            if (company == null)
-            {
-                return Ok(null);
-            }
-
-            var companyDto = _converterHelper.ToCompanyDto(company);
-            return Ok(companyDto);
+            return Ok(companiesDto);
         }
-
-
-        [HttpPost("GetCompanyCondominiums")]
-
-        public async Task<IActionResult> GetCompanyCondominiums([FromBody] CompanyDto companyDto)
-        {
-            var companyCondominiums = await _condominiumRepository.GetCompanyCondominiums(companyDto.SelectedCondominiumIds);
-
-            var companyCondominiumsDtos = companyCondominiums?.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList() ?? new List<CondominiumDto>();
-
-
-            return Ok(companyCondominiumsDtos); 
-        }
-
-
-        
-
-
     }
 }

@@ -47,7 +47,7 @@ namespace ProjectCondoManagement.Controllers
         {
             var email = this.User.Identity?.Name;
 
-            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
 
             var condominiums =  _condominiumRepository.GetAll(_dataContextCondos).Where(c => c.ManagerUserId == user.Id).ToList();
             if (condominiums == null)

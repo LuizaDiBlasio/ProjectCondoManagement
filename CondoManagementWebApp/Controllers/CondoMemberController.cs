@@ -113,7 +113,6 @@ namespace CondoManagementWebApp.Controllers
             var email = User.Identity?.Name;
             var user = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email}");
 
-            ViewBag.CompanyId = user.CompanyId;
 
             return View();
         }
@@ -134,7 +133,6 @@ namespace CondoManagementWebApp.Controllers
                 var email1 = User.Identity?.Name;
                 var user1 = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email1}");
 
-                ViewBag.CompanyId = user1.CompanyId;
                 return View(condoMemberDto);
             }
 
@@ -143,11 +141,10 @@ namespace CondoManagementWebApp.Controllers
                 var result = await _apiCallService.PostAsync<CondoMemberDto, Response<object>>("api/CondoMembers", condoMemberDto);
                 if (!result.IsSuccess)
                 {
-                    _flashMessage.Danger($"An error occurred while creating the condo member.");
+                    _flashMessage.Danger(result.Message);
                     var email3 = User.Identity?.Name;
                     var user3 = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email3}");
 
-                    ViewBag.CompanyId = user3.CompanyId;
                     return View(condoMemberDto);
                 }
 
@@ -177,7 +174,6 @@ namespace CondoManagementWebApp.Controllers
                 var email2 = User.Identity?.Name;
                 var user2 = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email2}");
 
-                ViewBag.CompanyId = user2.CompanyId;
                 return View(condoMemberDto);
             }
 
@@ -186,7 +182,6 @@ namespace CondoManagementWebApp.Controllers
             var email = User.Identity?.Name;
             var user = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email}");
 
-            ViewBag.CompanyId = user.CompanyId;
             return View(condoMemberDto);
 
         }

@@ -54,7 +54,6 @@ namespace CondoManagementWebApp.Helpers
                 Email = condoMember.Email,
                 Address = condoMember.Address,
                 BirthDate = condoMember.BirthDate,
-                CompanyId = condoMember.CompanyId,
                 PhoneNumber = condoMember.PhoneNumber,
                 ImageUrl = condoMember.ImageUrl
             };
@@ -105,7 +104,7 @@ namespace CondoManagementWebApp.Helpers
             return model;   
         }
 
-        public EditUserDetailsViewModel ToEditUserDetailsViewModel (UserDto userDto, string? companyName)
+        public EditUserDetailsViewModel ToEditUserDetailsViewModel (UserDto userDto, List<SelectListItem> companiesList, List<int>? selectedCompaniesIds, int? companyId)
         {
             var model = new EditUserDetailsViewModel()
             {
@@ -117,15 +116,16 @@ namespace CondoManagementWebApp.Helpers
                 ImageUrl = userDto.ImageUrl,
                 IsActive = userDto.IsActive,
                 Email = userDto.Email,
-                CompanyName = companyName,
-                CompanyId = userDto.CompanyId,
-                FinancialAccountId = userDto.FinancialAccountId
+                AvailableCompanies = companiesList,
+                FinancialAccountId = userDto.FinancialAccountId,
+                SelectedCompaniesIds = selectedCompaniesIds,
+                SelectedCompanyId = companyId
             };
 
             return model;
         }
 
-        public EditUserDetailsDto ToEditUserDetailsDto (EditUserDetailsViewModel model, string? companyName)
+        public EditUserDetailsDto ToEditUserDetailsDto (EditUserDetailsViewModel model)
         {
             var editUserDetailsDto = new EditUserDetailsDto()
             {
@@ -137,9 +137,8 @@ namespace CondoManagementWebApp.Helpers
                 Email = model.Email,
                 IsActive = model.IsActive,
                 ImageUrl = model.ImageUrl,
-                CompanyName = model.CompanyName,
                 FinancialAccountId = model.FinancialAccountId, 
-                CompanyId = model.CompanyId 
+               
             };
 
             return editUserDetailsDto;
@@ -152,8 +151,6 @@ namespace CondoManagementWebApp.Helpers
             {
                 Id = model.Id,
                 Name = model.Name, 
-                CompanyAdminId = model.SelectedCompanyAdminId,
-                SelectedCondominiumIds = model.SelectedCondominiumIds,
                 Email = model.Email,
                 FinancialAccountId = model.FinancialAccountId,
                 Address = model.Address,
@@ -169,8 +166,6 @@ namespace CondoManagementWebApp.Helpers
             var model = new CreateEditCompanyViewModel()
             {
                 Name = editedCompany.Name,
-                SelectedCompanyAdminId = editedCompany.CompanyAdminId,
-                SelectedCondominiumIds = editedCompany.SelectedCondominiumIds,
                 Email = editedCompany.Email,
                 Address = editedCompany.Address,
                 FinancialAccountId = editedCompany.FinancialAccountId, 
@@ -361,6 +356,15 @@ namespace CondoManagementWebApp.Helpers
             meetingDto.DateAndTime = model.DateAndTime.Value;
             meetingDto.Description = model.Description;
           
+        }
+
+        public List<SelectListItem> ToCompaniesSelectList(List<CompanyDto> companies)
+        {
+            return companies.Select(cm => new SelectListItem
+            {
+                Value = cm.Id.ToString(),
+                Text = cm.Name.ToString()
+            }).ToList();
         }
 
     }

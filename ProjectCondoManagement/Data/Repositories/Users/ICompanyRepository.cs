@@ -9,17 +9,14 @@ namespace ProjectCondoManagement.Data.Repositories.Users
 {
     public interface ICompanyRepository : IGenericRepository<Company, DataContextUsers>
     {
-
-        Task<List<SelectListItem>> GetCondosSelectListAsync(DataContextCondos contextCondos);
-
         Task<List<SelectListItem>> GetCompanyAdminsSelectListAsync();
 
         Task<bool> ExistingCompany(Company company);
 
-        Task<SelectedAdminAndCondosDto> SelectedAdminAndCondos(CompanyDto companyDto);
-
-        Task<List<SelectListItem>> GetCondosSelectListAsyncToCreate(DataContextCondos contextCondos);
+        Task<UserDto> SelectedAdmin(CompanyDto companyDto);
 
         Task<List<SelectListItem>> GetCompanyAdminsSelectListToEdit(int id);
+
+        Task<Company?> GetCompanyWithCondosAndUsers(int id);
     }
 }

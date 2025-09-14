@@ -1,18 +1,12 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
-using ProjectCondoManagement.Data.Repositories.Finances;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
-using ProjectCondoManagement.Migrations.CondosDb;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -62,16 +56,18 @@ namespace ProjectCondoManagement.Controllers
 
             var email = this.User.Identity?.Name;
 
-            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
 
             if (user == null)
             {
                 return BadRequest("User not found.");
             }
 
+            var userCompanyIds = user.Companies.Select(c => c.Id).ToList();
 
-
-            var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.CompanyId == user.CompanyId).ToListAsync();
+            var condominiums = await _condominiumRepository.GetAll(_context)
+                                                           .Where(c => userCompanyIds.Contains(c.CompanyId))
+                                                           .ToListAsync();
             if (condominiums == null)
             {
                 return new List<CondominiumDto>();
@@ -90,7 +86,7 @@ namespace ProjectCondoManagement.Controllers
             return condominiumsDtos;
         }
 
-        
+
 
         // GET: api/Condominiums/5
         [HttpGet("{id}")]
@@ -175,16 +171,18 @@ namespace ProjectCondoManagement.Controllers
 
                 var email = this.User.Identity?.Name;
 
-                var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+                var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
 
                 if (user == null)
                 {
                     return BadRequest("User not found.");
                 }
 
-                condominiumDto.CompanyId = user.Company.Id;
+                var userCompanyIds = user.Companies.Select(c => c.Id).ToList();
 
-                if (user.Company == null)
+                condominiumDto.CompanyId = userCompanyIds.First();
+
+                if (user.Companies == null)
                 {
                     return BadRequest("User does not belong to a company.");
                 }
@@ -244,7 +242,7 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet("GetCondoManagerCondominiumsWithPayments/{email}")]
         public async Task<ActionResult<List<CondominiumWithPaymentsDto>>> GetCondoManagerCondominiumsWithPayments(string email)
         {
-            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
 
             var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.ManagerUserId == user.Id).ToListAsync();
             if (condominiums == null)
@@ -286,7 +284,7 @@ namespace ProjectCondoManagement.Controllers
                     .Where(p => p.PayerFinancialAccountId == condo.FinancialAccountId)
                     .ToList();
 
-                
+
                 var condominiumWithPaymentsDto = new CondominiumWithPaymentsDto()
                 {
                     CondominiumId = condo.Id,
@@ -308,7 +306,7 @@ namespace ProjectCondoManagement.Controllers
         {
             var email = this.User.Identity?.Name;
 
-            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
 
             var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.ManagerUserId == user.Id).ToListAsync();
             if (condominiums == null)

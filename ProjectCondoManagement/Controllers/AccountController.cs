@@ -8,6 +8,7 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Users;
 using ProjectCondoManagement.Helpers;
 
 
@@ -30,15 +31,13 @@ namespace ProjectCondoManagement.Controllers
         private readonly ISmsHelper _smsHelper;
         private readonly IFinancialAccountRepository _financialAccountRepository;
         private readonly IWebHostEnvironment _env;
-
-
-
-
-
+        private readonly DataContextUsers _dataContextUsers;
+        private readonly ICompanyRepository _companyRepository;
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
                                IMailHelper mailHelper, DataContextCondos dataContextCondos, DataContextFinances dataContextFinances, IJwtTokenService jwtTokenService,
-                               ICondoMemberRepository condoMemberRepository , ISmsHelper smsHelper, IFinancialAccountRepository financialAccountRepository, IWebHostEnvironment env)
+                               ICondoMemberRepository condoMemberRepository , ISmsHelper smsHelper, IFinancialAccountRepository financialAccountRepository, IWebHostEnvironment env,
+                               DataContextUsers dataContextUsers, ICompanyRepository companyRepository)
         {
             _userHelper = userHelper;
             _httpClient = httpClient;
@@ -52,6 +51,8 @@ namespace ProjectCondoManagement.Controllers
             _smsHelper = smsHelper;
             _financialAccountRepository = financialAccountRepository;
             _env = env;
+            _dataContextUsers = dataContextUsers;
+            _companyRepository = companyRepository;
         }
 
 
@@ -283,6 +284,7 @@ namespace ProjectCondoManagement.Controllers
             Response<object> response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
            $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link
 
+
             if (response.IsSuccess) //se conseguiu enviar o email
             {
 
@@ -312,7 +314,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (user != null)
             {
-                return StatusCode(409, new Response<object> { Message = "User already exists, try registering wih new credentials", IsSuccess = false });
+                return Ok(new Response<object> { Message = "User already exists, try registering wih new credentials", IsSuccess = false });
             }
             else //criar user caso não exista
             {
@@ -321,6 +323,18 @@ namespace ProjectCondoManagement.Controllers
                 if (newUser == null)//se retorna null, CreateUser foi mal sucedido 
                 {                   
                     return StatusCode(500, new { Message = "Internal server error: User not registered" });
+                }
+
+
+                //atualizar company admin Ids das companies
+                if(await _userHelper.IsUserInRoleAsync(newUser, "CompanyAdmin"))
+                {
+                    foreach(var company in newUser.Companies)
+                    {
+                        company.CompanyAdminId = newUser.Id;
+
+                        await _companyRepository.UpdateAsync(company, _dataContextUsers);
+                    }
                 }
 
                 var isCondoMember = await _userHelper.IsUserInRoleAsync(newUser, "CondoMember");
@@ -334,7 +348,8 @@ namespace ProjectCondoManagement.Controllers
                         Address = newUser.Address,
                         PhoneNumber = newUser.PhoneNumber,
                         ImageUrl = newUser.ImageUrl,
-                        BirthDate = newUser.BirthDate
+                        BirthDate = newUser.BirthDate,
+                        FinancialAccountId = newUser.FinancialAccountId.Value
                     };
 
                     await _condoMemberRepository.CreateAsync(condoMember, _dataContextCondos);
@@ -472,14 +487,14 @@ namespace ProjectCondoManagement.Controllers
 
         public async Task<IActionResult> GetUserByEmail([FromBody] string email)
         {
-            var user = await _userHelper.GetUserByEmailAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
 
             if (user == null)
             {
                 return NotFound(null);
             }
 
-            var userDto = _converterHelper.ToUserDto(user);
+            var userDto = _converterHelper.ToUserDto(user, true);
 
             return Ok(userDto);
         }
@@ -506,7 +521,7 @@ namespace ProjectCondoManagement.Controllers
                 return NotFound();
             }
 
-            var userDto = _converterHelper.ToUserDto(user);
+            var userDto = _converterHelper.ToUserDto(user, true);
 
             return Ok(userDto);
         }
@@ -539,7 +554,7 @@ namespace ProjectCondoManagement.Controllers
             {
                 var editedUser = await _userHelper.GetUserByEmailAsync(userDto.Email);
 
-                var editedUserDto = _converterHelper.ToUserDto(editedUser);
+                var editedUserDto = _converterHelper.ToUserDto(editedUser, true);
 
                 if (await _userHelper.IsUserInRoleAsync(user, "CondoMember"))
                 {
@@ -562,28 +577,7 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        //[HttpPost("EditUserDetails")]
-        //public async Task<IActionResult> EditUserDetails([FromBody] EditUserDetailsDto editUserDetailsDto)
-        //{
-        //    var user = await _userHelper.GetUserByEmailAsync(editUserDetailsDto.Email);
-
-        //    if (user == null)
-        //    {
-        //        return NotFound(null);  
-        //    }
-
-        //    await _userHelper.UpdateUserAsync(user);
-
-        //    var editedUser = await _userHelper.GetUserByEmailAsync(user.Email);
-
-        //    if (user == null)
-        //    {
-        //        return NotFound(null);
-        //    }
-
-        //    return Ok(editedUser);
-        //}
+       
 
 
         /// <summary>
@@ -604,7 +598,7 @@ namespace ProjectCondoManagement.Controllers
 
             var users = await _userHelper.GetUsersByFullName(cleanedFullName);
 
-            var usersDto = users.Select(u => _converterHelper.ToUserDto(u)).ToList();
+            var usersDto = users.Select(u => _converterHelper.ToUserDto(u, true)).ToList();
 
             return usersDto;
         }
@@ -622,7 +616,7 @@ namespace ProjectCondoManagement.Controllers
         [HttpPost("EditUserDetails")]
         public async Task<IActionResult> EditUserDetails([FromBody] EditUserDetailsDto editUserDetailsDto)
         {
-            var editedUser = await _converterHelper.ToEditedUser(editUserDetailsDto);
+            var editedUser = await _converterHelper.ToEditedUser(editUserDetailsDto, true);
 
             if (editedUser == null)
             {
@@ -660,7 +654,7 @@ namespace ProjectCondoManagement.Controllers
         {
             var users = await _userHelper.GetUsersByRoleAsync($"{role}");
 
-            var usersDto = users.Select(u => _converterHelper.ToUserDto(u)).ToList();
+            var usersDto = users.Select(u => _converterHelper.ToUserDto(u, true)).ToList();
 
             return usersDto;
 
@@ -685,7 +679,7 @@ namespace ProjectCondoManagement.Controllers
             }
 
             
-            var usersDto = filteredUsers.Select(u => _converterHelper.ToUserDto(u)).ToList();
+            var usersDto = filteredUsers.Select(u => _converterHelper.ToUserDto(u, true)).ToList();
 
            
             return Ok(usersDto);
@@ -695,24 +689,25 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet("GetManagers")]
         public async Task<IActionResult> GetManagers()
         {
-
-            var user = await _userHelper.GetUserByEmailAsync(this.User.Identity?.Name);
-
-            var allManagers = await _userHelper.GetUsersByRoleAsync("CondoManager");
-
-            var managers = new List<User>();
-
-            managers = allManagers
-            .Where(m => m.CompanyId == user.CompanyId)
-            .ToList();
-
+            var managers = await _userHelper.GetUsersWithCompanyByRoleAsync("CondoManager");
 
             var managersDto = managers
-                .Select(m => _converterHelper.ToUserDto((User)m))
+                .Select(m => _converterHelper.ToUserDto((User)m, true))
                 .ToList();
 
             return Ok(managersDto);
         }
+
+        [HttpGet("GetUserRole")]
+        public async Task<string> GetUserRole([FromQuery]string email)
+        {
+            var user = await _userHelper.GetUserByEmailAsync(email);
+
+            var userRoles = await _userHelper.GetRolesAsync(user);
+
+            return userRoles.FirstOrDefault();
+        }
+
 
     }
 }

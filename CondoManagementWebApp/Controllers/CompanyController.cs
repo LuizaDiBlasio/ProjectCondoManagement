@@ -2,13 +2,9 @@
 using ClassLibrary.DtoModels;
 using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Net;
-using System.Threading.Tasks;
-using System.Web.Mvc;
 using Vereyon.Web;
+using SelectListItem = Microsoft.AspNetCore.Mvc.Rendering.SelectListItem;
 
 namespace CondoManagementWebApp.Controllers
 {
@@ -22,7 +18,7 @@ namespace CondoManagementWebApp.Controllers
         {
             _apiCallService = apiCallService;
             _flashMessage = flashMessage;
-            _converterHelper = converterHelper; 
+            _converterHelper = converterHelper;
         }
 
         // GET: Company/IndexCompanies
@@ -62,43 +58,17 @@ namespace CondoManagementWebApp.Controllers
 
                 model.CompanyDto = companyDto;
 
-                if(companyDto.CompanyAdminId != null)
+                if (companyDto.CompanyAdminId != null)
                 {
                     var companyAdmin = await _apiCallService.GetAsync<UserDto>($"api/Company/GetCompanyAdmin/{companyDto.CompanyAdminId}");
 
                     model.CompanyAdmin = companyAdmin;
                 }
 
-                if(companyDto.CondominiumDtos != null)
+                if (companyDto.CondominiumDtos != null)
                 {
-                    var companyCondominiums = await _apiCallService.PostAsync<CompanyDto, List<CondominiumDto>>("api/Company/GetCompanyCondominiums", companyDto);
-
-                    model.CondominiumDtos = companyCondominiums;
+                    model.CondominiumDtos = companyDto.CondominiumDtos;
                 }
-
-                return View(model);    
-            }
-            catch
-            {
-                return View("Error");
-            }
-            
-        }
-
-
-        // GET: Company/Create
-        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Create()
-        {
-            try
-            {
-                //Buscar selectList de condominiums 
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosToCreate");
-
-                var model = new CreateEditCompanyViewModel()
-                {
-                    CondominiumsToSelect = selectLists.Condos,
-                    CompanyAdminsToSelect = selectLists.Admins
-                };
 
                 return View(model);
             }
@@ -106,7 +76,17 @@ namespace CondoManagementWebApp.Controllers
             {
                 return View("Error");
             }
-           
+
+        }
+
+
+        // GET: Company/Create
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Create()
+        {
+                var model = new CreateEditCompanyViewModel();
+               
+                return View(model);
+            
         }
 
 
@@ -121,9 +101,9 @@ namespace CondoManagementWebApp.Controllers
             }
             try
             {
-                var companyDto = _converterHelper.ToCompanyDto( model);
+                var companyDto = _converterHelper.ToCompanyDto(model);
 
-                var apiCall = await _apiCallService.PostAsync<CompanyDto, Response<object>>("api/Company/PostCompany",companyDto);
+                var apiCall = await _apiCallService.PostAsync<CompanyDto, Response<object>>("api/Company/PostCompany", companyDto);
 
                 if (apiCall.IsSuccess)
                 {
@@ -133,7 +113,7 @@ namespace CondoManagementWebApp.Controllers
                 _flashMessage.Danger(apiCall.Message);
 
                 return View("Create", model);
-                
+
             }
             catch
             {
@@ -141,14 +121,14 @@ namespace CondoManagementWebApp.Controllers
             }
         }
 
-        
-       
+
+
 
         // GET: Company/Edit/5
-        public async  Task<Microsoft.AspNetCore.Mvc.ActionResult> Edit(int id)
+        public async Task<Microsoft.AspNetCore.Mvc.ActionResult> Edit(int id)
         {
             try
-            {  
+            {
                 var companyDto = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{id}");
 
                 if (companyDto == null)
@@ -156,28 +136,7 @@ namespace CondoManagementWebApp.Controllers
                     return View("NotFound");
                 }
 
-                //Buscar selectList de condominiums 
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>($"api/Company/LoadAdminsAndCondosToEdit/{id}");
-
-                //buscar condos que contenham a id desta company com CompanyId
-
-                var condos = await _apiCallService.GetAsync<IEnumerable<CondominiumDto>>("api/Condominiums");
-
-                if (condos.Any())
-                {
-                    foreach (var condo in condos)
-                    {
-                        if(condo.CompanyId == companyDto.Id)
-                        {
-                            companyDto.SelectedCondominiumIds.Add(condo.Id);
-                        }
-                    }
-                }
-
                 var model = _converterHelper.ToCreateEditCompanyViewModel(companyDto);
-
-                model.CondominiumsToSelect = selectLists.Condos;
-                model.CompanyAdminsToSelect = selectLists.Admins;
 
                 return View(model);
             }
@@ -198,11 +157,7 @@ namespace CondoManagementWebApp.Controllers
 
             if (!ModelState.IsValid)
             {
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosLists");
-
-                model.CondominiumsToSelect = selectLists.Condos;
-                model.CompanyAdminsToSelect = selectLists.Admins;
-
+                
                 return View("Edit", model);
             }
 
@@ -216,12 +171,6 @@ namespace CondoManagementWebApp.Controllers
                 {
                     _flashMessage.Danger(apiCall.Message);
 
-                    //Buscar selectList de condominiums 
-                    var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosLists");
-
-                    model.CondominiumsToSelect = selectLists.Condos;
-                    model.CompanyAdminsToSelect = selectLists.Admins;
-
                     return View("Edit", model);
                 }
 
@@ -229,15 +178,10 @@ namespace CondoManagementWebApp.Controllers
 
                 _flashMessage.Confirmation(apiCall.Message);
 
-               return RedirectToAction(nameof(IndexCompanies));
+                return RedirectToAction(nameof(IndexCompanies));
             }
             catch
             {
-                _flashMessage.Danger("Unable to update company information due to error");
-                var selectLists = await _apiCallService.GetAsync<AdminsAndCondosDto>("api/Company/LoadAdminsAndCondosLists");
-
-                model.CondominiumsToSelect = selectLists.Condos;
-                model.CompanyAdminsToSelect = selectLists.Admins;
                 return View("Edit", model);
             }
         }
@@ -245,7 +189,7 @@ namespace CondoManagementWebApp.Controllers
 
 
         // POST: Company/RequestDelete/5
-        [Microsoft.AspNetCore.Mvc.HttpDelete("Company/RequestDelete/{id}")] 
+        [Microsoft.AspNetCore.Mvc.HttpDelete("Company/RequestDelete/{id}")]
         public async Task<Microsoft.AspNetCore.Mvc.ActionResult> RequestDelete(int id)
         {
             try
@@ -264,7 +208,7 @@ namespace CondoManagementWebApp.Controllers
                 return Json(new { success = false, message = responseBody?.Message ?? "Unable to delete company due to error" });
 
             }
-            catch(HttpRequestException ex) //buscar o tipo de exceção para ver se tem conflito
+            catch (HttpRequestException ex) //buscar o tipo de exceção para ver se tem conflito
             {
                 if (ex.StatusCode == HttpStatusCode.Conflict)
                 {
@@ -272,7 +216,7 @@ namespace CondoManagementWebApp.Controllers
                 }
                 else
                 {
-                    
+
                     return Json(new { success = false, message = "An HTTP error occurred. Please try again later." });
                 }
             }

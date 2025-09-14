@@ -14,8 +14,6 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public DateTime DateAndTime { get; set; }
 
-        public Document? Report { get; set; }
-
         public List<CondoMember> CondoMembers { get; set; }
 
         public List<Occurrence> Occurences { get; set; }
@@ -24,8 +22,5 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public string MeetingLink { get; set; }
 
-        //public Document? Report { get; set; }
-
-        //public Voting Voting { get; set; }  
     }
 }

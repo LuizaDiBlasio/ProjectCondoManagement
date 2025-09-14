@@ -20,11 +20,6 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public DbSet<Unit> Units { get; set; }
 
-        public DbSet<Vote> Votes { get; set; }
-
-        public DbSet<Voting> Voting { get; set; }
-
-        public DbSet<Document> Documents { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

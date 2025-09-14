@@ -130,7 +130,7 @@
 
                            <li>
                                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                                   <i class="flaticon-381-user-7"></i>
+                                    <i class="flaticon-dashboard-1"></i>
                                    <span class="nav-text">Condos</span>
                                </a>
                                <ul aria-expanded="false">
@@ -140,20 +140,11 @@
                            </li>
 
                             <li>
-                        <li>
-                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                                <i class="flaticon-dashboard-1"></i>
-                                <span class="nav-text">Manage Company</span>
-                            </a>
-                        </li>
-                        <li>
-                            <li>
                                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                                     <i class="fas fa-dollar-sign"></i>
                                     <span class="nav-text">Finances</span>
                                 </a>
                                 <ul aria-expanded="false">
-                                    <li><a asp-controller="FinancialAccount" asp-action="GetBalance">Check Balance</a></li>
                                     <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Financial Account</a></li>
                                 </ul>
                             </li>

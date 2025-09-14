@@ -12,21 +12,6 @@ namespace CondoManagementWebApp.Models
         [Required]
         public string Name { get; set; }
 
-
-       
-        [Display(Name="Company Admin")]
-        public string? SelectedCompanyAdminId { get; set; }  
-
-        public IEnumerable<SelectListItem>? CompanyAdminsToSelect { get; set; }
-
-
-     
-        [Display (Name="Select Company Condominiums")]
-        public List<int>? SelectedCondominiumIds { get; set; }  
-        
-        public IEnumerable<SelectListItem>? CondominiumsToSelect { get; set; }
-
-
         [Required]
         public string Email { get; set; }
 

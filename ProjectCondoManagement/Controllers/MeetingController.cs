@@ -1,16 +1,10 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
-using ProjectCondoManagement.Data.Repositories.Condos;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
-using ProjectCondoManagement.Migrations.CondosDb;
-using System.Threading.Tasks;
-using Twilio.Rest.Iam.V1;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -45,7 +39,7 @@ namespace ProjectCondoManagement.Controllers
         {
             var email = this.User.Identity?.Name;
 
-            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
 
             var condominiums = _condominiumRepository.GetAll(_dataContextCondos).Where(c => c.ManagerUserId == user.Id).ToList();
             if (condominiums == null)
@@ -83,8 +77,8 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-        [HttpGet ("GetCondoMemberMeetings/{email}")]
-        public async Task<ActionResult<List<CondominiumWithMeetingsDto>>> GetCondoMemberMeetings (string email)
+        [HttpGet("GetCondoMemberMeetings/{email}")]
+        public async Task<ActionResult<List<CondominiumWithMeetingsDto>>> GetCondoMemberMeetings(string email)
         {
             var condoMember = await _condoMemberRepository.GetCondoMemberByEmailAsync(email);
 
@@ -141,7 +135,7 @@ namespace ProjectCondoManagement.Controllers
             }
 
             var meetingDto = _converterHelper.ToMeetingDto(meeting);
-            
+
             return Ok(meetingDto);
         }
 
@@ -154,18 +148,18 @@ namespace ProjectCondoManagement.Controllers
                                                        .Contains(m.Id))
                                                        .ToListAsync();
 
-            var condoMembersDto = condoMembers.Select(c => _converterHelper.ToCondoMemberDto(c)).ToList();  
+            var condoMembersDto = condoMembers.Select(c => _converterHelper.ToCondoMemberDto(c)).ToList();
 
-            return Ok(condoMembersDto); 
+            return Ok(condoMembersDto);
         }
 
 
         [HttpPost("GetSelectedOccurrences")]
         public async Task<ActionResult<List<OccurrenceDto>>> GetSelectedOccurrences([FromBody] List<int> occurrencesIds)
         {
-            if(occurrencesIds.Count == 0)
+            if (occurrencesIds.Count == 0)
             {
-                return Ok(new List<OccurrenceDto>());    
+                return Ok(new List<OccurrenceDto>());
             }
 
             var occurrences = await _occurrenceRepository.GetAll(_dataContextCondos)
@@ -178,7 +172,7 @@ namespace ProjectCondoManagement.Controllers
             return Ok(occurrencesDto);
         }
 
-       
+
 
         // POST: MeetingController/Create
         [HttpPost("CreateMeeting")]
@@ -225,10 +219,10 @@ namespace ProjectCondoManagement.Controllers
                 }
 
                 // Atualizar as propriedades 
-                meetingToUpdate.CondominiumId = meetingDto.CondominiumId;   
+                meetingToUpdate.CondominiumId = meetingDto.CondominiumId;
                 meetingToUpdate.DateAndTime = meetingDto.DateAndTime;
                 meetingToUpdate.Description = meetingDto.Description;
-                meetingToUpdate.IsExtraMeeting = meetingDto.IsExtraMeeting; 
+                meetingToUpdate.IsExtraMeeting = meetingDto.IsExtraMeeting;
                 meetingToUpdate.Title = meetingDto.Title;
 
                 // buscar lista de occurrences selecionados
@@ -297,7 +291,7 @@ namespace ProjectCondoManagement.Controllers
             }
             catch
             {
-                return BadRequest();    
+                return BadRequest();
             }
         }
 
@@ -320,7 +314,7 @@ namespace ProjectCondoManagement.Controllers
 
                 await _meetingRepository.DeleteAsync(meeting, _dataContextCondos);
 
-                return Ok(new Response<object>() {IsSuccess = true });
+                return Ok(new Response<object>() { IsSuccess = true });
             }
             catch
             {

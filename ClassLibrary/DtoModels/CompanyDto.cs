@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-
-namespace ClassLibrary.DtoModels
+﻿namespace ClassLibrary.DtoModels
 {
     public class CompanyDto
     {
@@ -14,15 +6,13 @@ namespace ClassLibrary.DtoModels
 
         public string Name { get; set; }
 
-        public UserDto? CompanyAdmin { get; set; }
+        public List<UserDto>? Users { get; set; }
 
         public string? CompanyAdminId { get; set; }
 
         public IEnumerable<CondominiumDto>? CondominiumDtos { get; set; }
 
         public IEnumerable<CondoMemberDto>? CondoMemberDtos { get; set; }
-
-        public List<int>? SelectedCondominiumIds { get; set; }  = new List<int>(); 
 
         public string Email { get; set; }
 
@@ -32,6 +22,6 @@ namespace ClassLibrary.DtoModels
 
         public string TaxIdDocument { get; set; }
 
-        public int FinancialAccountId { get; set; } 
+        public int FinancialAccountId { get; set; }
     }
 }

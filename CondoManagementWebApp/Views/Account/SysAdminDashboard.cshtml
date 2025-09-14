@@ -113,6 +113,7 @@
                                         <label class="form-check-label" for="memberSwitch_@admin.Email">@(admin.IsActive ? "Active" : "Inactive")</label>
                                     </td>
                                     <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@admin.Email">Edit Details</a></td>
+                                    <td><a class="btn btn-outline-secondary" asp-controller="Account" asp-action="AssignCompany" asp-route-email="@admin.Email">Change Company</a></td>
                                 </tr>
                             }
                         </tbody>
@@ -165,16 +166,16 @@
                                     <td>
                                         <label class="form-check-label" for="memberSwitch_@manager.Email">@(manager.IsActive ? "Active" : "Inactive")</label>
                                     </td>
-                                    @if(manager.CompanyId == null)
+                                    @if(!manager.CompaniesDto.Any())
                                     {
                                         <td style="color: red; font-weight: bold;">No Company Assigned</td>
                                     }
                                     else
                                     {
-                                        <td>@manager.CompanyDto.Name</td>
+                                        <td>@manager.CompaniesDto.First().Name</td>
                                     }
                                     <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@manager.Email">Edit Details</a></td>
-                                    <td><a class="btn btn-outline-secondary" asp-controller="Account" asp-action="AssignCompany" asp-route-email="@manager.Email">Assign Company</a></td>
+                                    <td><a class="btn btn-outline-secondary" asp-controller="Account" asp-action="AssignCompany" asp-route-email="@manager.Email">Change Company</a></td>
 
                                 </tr>
                             }

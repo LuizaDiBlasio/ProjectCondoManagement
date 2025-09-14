@@ -38,12 +38,12 @@ else
             {
                 <tr>
                     <td>
-                        <img src="@item.ImageFullPath" alt="Member Image" class="img-fluid rounded border shadow" style="max-height: 100px;" />
+                        <img src="@(item.ImageFullPath)" alt="User Image" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
                     </td>
                     <td>@item.FullName</td>
                     <td>@item.Email</td>
                     <td>@item.Address</td>
-                    <td>@item.BirthDate?.ToString("dd/MM/yyyy")</td>
+                    <td>@item.BirthDate?.ToString("MM/dd/yyyy")</td>
                     <td>@item.PhoneNumber</td>
                     <td>
                         <a class="btn btn-outline-secondary" asp-controller="Units" asp-action="MemberUnits" asp-route-id="@item.Id">Units</a>

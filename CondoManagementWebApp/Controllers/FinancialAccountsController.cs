@@ -34,7 +34,7 @@ namespace CondoManagementWebApp.Controllers
             {
                 var user = await _apiCallService.PostAsync<string, UserDto>("api/Account/GetUserByEmail", email);
 
-                var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{user.CompanyId}");
+                var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{user.CompaniesDto.First().Id}");
 
                 id = company.FinancialAccountId;
 

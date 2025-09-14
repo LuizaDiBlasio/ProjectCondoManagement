@@ -105,6 +105,13 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             return true;
         }
 
+        public async Task<List<CondoMember>> GetCondoMembersByEmailsAsync(List<string> emails)
+        {
+            return await _context.CondoMembers
+                .Where(cm => emails.Contains(cm.Email))
+                .ToListAsync();
+        }
+
 
     }
 }
