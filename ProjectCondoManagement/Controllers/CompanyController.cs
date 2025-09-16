@@ -164,29 +164,19 @@ namespace ProjectCondoManagement.Controllers
 
             try
             {
-                var company = _converterHelper.ToCompany(companyDto, false, true);
+                var company = await _companyRepository.GetByIdAsync(companyDto.Id, _contextUsers);
 
                 if (company == null)
                 {
-                    return BadRequest(new Response<object> { IsSuccess = false, Message = "Unable to edit company, record not found." });
+                    return Ok(new Response<object> { IsSuccess = false, Message = "Unable to edit company, record not found." });
                 }
 
-                //atualizar companyId no user
-
-                if (company.CompanyAdminId != null)
-                {
-                    var companyAdminUser = await _userHelper.GetUserByIdAsync(company.CompanyAdminId);
-
-                    if (companyAdminUser == null)
-                    {
-                        return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to assing company admin, user not found" });
-                    }
-
-                    companyAdminUser.Companies.Add(company);
-
-
-                    await _userHelper.UpdateUserAsync(companyAdminUser);
-                }
+                //atualizar propriedades
+                company.Name = companyDto.Name; 
+                company.Email = companyDto.Email;
+                company.PhoneNumber = companyDto.PhoneNumber;
+                company.TaxIdDocument = companyDto.TaxIdDocument;
+                company.Address = companyDto.Address;   
 
                 await _companyRepository.UpdateAsync(company, _contextUsers);
 
@@ -194,7 +184,7 @@ namespace ProjectCondoManagement.Controllers
             }
             catch (Exception)
             {
-                return BadRequest(new Response<object> { IsSuccess = false, Message = "Unable to edit company due to internal error" });
+                return Ok(new Response<object> { IsSuccess = false, Message = "Unable to edit company due to internal error" });
             }
         }
 
@@ -285,11 +275,23 @@ namespace ProjectCondoManagement.Controllers
         }
 
         [HttpGet("GetCompanyByUser")]
-        public async Task<ActionResult<CompanyDto?>> GetCompanyByUser()
+        public async Task<ActionResult<CompanyDto?>> GetCompanyByUser([FromQuery] bool includeCondominiums = false)
         {
             var user = await _userHelper.GetUserByEmailWithCompaniesAsync(this.User.Identity.Name);
-   
-            var companiesDto = user.Companies?.Select(c => _converterHelper.ToCompanyDto(c,false));
+
+
+            var companiesDto = user.Companies?.Select(c => _converterHelper.ToCompanyDto(c, false));
+
+            if (includeCondominiums && companiesDto != null)
+            {
+                foreach (var companyDto in companiesDto)
+                {
+                    if (companyDto != null)
+                    {
+                        companyDto.CondominiumDtos = await _condominiumRepository.GetCondominiumsByCompanyIdAsync(companyDto.Id);
+                    }
+                }
+            }
 
             return Ok(companiesDto);
         }

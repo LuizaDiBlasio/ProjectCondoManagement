@@ -344,6 +344,14 @@ namespace ProjectCondoManagement.Helpers
         }
 
 
+        public async Task<User> GetUserByIdWithCompaniesAsync(string id)
+        {
+            return await _userManager.Users
+                .Include(u => u.Companies)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+
         /// <summary>
         /// Asynchronously resets a user's password using a password reset token.
         /// </summary>
@@ -441,7 +449,16 @@ namespace ProjectCondoManagement.Helpers
         {
             if (await _roleManager.RoleExistsAsync(role))
             {
-                return await _userManager.GetUsersInRoleAsync(role);
+                var usersInRole = await _userManager.GetUsersInRoleAsync(role);
+
+                var usersIds = usersInRole.Select(u => u.Id).ToList();
+
+                var usersWithCompanies = _userManager.Users
+                                         .Include(u => u.Companies)
+                                         .Where(u => usersIds.Contains(u.Id))
+                                         .ToListAsync();
+                
+                return await usersWithCompanies;
             }
 
             return new List<User>();

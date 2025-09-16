@@ -192,9 +192,22 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             }
         }
 
-
-        
-
        
+        public Task<IEnumerable<CondominiumDto>?> GetCondominiumsByCompanyIdAsync(int id)
+        {
+            var condos = _dataContextCondos.Condominiums
+                            .Where(c => c.CompanyId == id).Include(c => c.Units).Include(c => c.Occurrences).Include(c => c.Meetings);
+
+            var condosDto = condos.Select(c => _converterHelper.ToCondominiumDto(c, false));
+
+            return condosDto.Any() ? Task.FromResult<IEnumerable<CondominiumDto>?>(condosDto) : Task.FromResult<IEnumerable<CondominiumDto>?>(null);
+
+        }
+
+        public Task<Condominium> GetCondominiumByFinancialAccountIdAsync(int id)
+        {
+            return _dataContextCondos.Condominiums.FirstOrDefaultAsync(c => c.FinancialAccountId == id);
+        }
+
     }
 }

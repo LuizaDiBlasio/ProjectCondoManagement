@@ -69,6 +69,17 @@
                                 <li><a asp-controller="Account" asp-action="SysAdminDashboard">Manage Users</a></li>
                             </ul>
                         </li>
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="fas fa-envelope"></i>
+                                <span class="nav-text">Messages</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="Message" asp-action="IndexReceived">Inbox</a></li>
+                                <li><a asp-controller="Message" asp-action="IndexSent">Sent</a></li>
+                                <li><a asp-controller="Message" asp-action="CreateMessage">Compose</a></li>
+                            </ul>
+                        </li>
                     </ul>
                     <div class="copyright">
                         <p><strong>Omah</strong> © <span class="current-year">2025</span> All Rights Reserved</p>
@@ -107,6 +118,17 @@
                                 <li><a asp-controller="Expense" asp-action="IndexExpenses">Expenses</a></li>
                                 <li><a asp-controller="Invoice" asp-action="IndexCondominiumInvoices">Invoices</a></li>
                                 <li><a asp-controller="FinancialAccounts" asp-action="CondoAccounts" asp-route-email="@User.FindFirst(ClaimTypes.Name)?.Value">Condominiums Accounts</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="fas fa-envelope"></i>
+                                <span class="nav-text">Messages</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="Message" asp-action="IndexReceived">Inbox</a></li>
+                                <li><a asp-controller="Message" asp-action="IndexSent">Sent</a></li>
+                                <li><a asp-controller="Message" asp-action="CreateMessage">Compose</a></li>
                             </ul>
                         </li>
 
@@ -148,6 +170,17 @@
                                     <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Financial Account</a></li>
                                 </ul>
                             </li>
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="fas fa-envelope"></i>
+                                <span class="nav-text">Messages</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="Message" asp-action="IndexReceived">Inbox</a></li>
+                                <li><a asp-controller="Message" asp-action="IndexSent">Sent</a></li>
+                                <li><a asp-controller="Message" asp-action="CreateMessage">Compose</a></li>
+                            </ul>
+                        </li>
 
                         </ul>
                         <div class="copyright">
@@ -200,6 +233,17 @@
                                      <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Financial Account</a></li>
                                 </ul>
                             </li>
+                        <li>
+                            <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                                <i class="fas fa-envelope"></i>
+                                <span class="nav-text">Messages</span>
+                            </a>
+                            <ul aria-expanded="false">
+                                <li><a asp-controller="Message" asp-action="IndexReceived">Inbox</a></li>
+                                <li><a asp-controller="Message" asp-action="IndexSent">Sent</a></li>
+                                <li><a asp-controller="Message" asp-action="CreateMessage">Compose</a></li>
+                            </ul>
+                        </li>
 
                         </ul>
                         <div class="copyright">

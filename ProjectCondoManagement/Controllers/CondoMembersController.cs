@@ -125,7 +125,7 @@ namespace ProjectCondoManagement.Controllers
         {
             if (string.IsNullOrWhiteSpace(email))
             {
-                return Ok(new Response<object>() { IsSuccess = false, Message = "Unable to retrive member" });
+                return NotFound();
             }
 
             var userEmail = this.User.Identity?.Name;
@@ -134,7 +134,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (user == null)
             {
-                return Ok(new Response<object>() { IsSuccess = false, Message = "Member not found." });
+                return NotFound();
             }
 
 
@@ -144,20 +144,23 @@ namespace ProjectCondoManagement.Controllers
 
             if (condoMember == null)
             {
-                return null;
+                return NotFound();
             }
 
-            var userCompanyIds = user.Companies.Select(c => c.Id).ToList();
-
-            var condoMemberUser = await _userHelper.GetUserByEmailWithCompaniesAsync(condoMember.Email);
-
-            var condoMemberCompanyIds = condoMemberUser.Companies.Select(c => c.Id);
-
-            if (!userCompanyIds.Any(id => condoMemberCompanyIds.Contains(id))) //caso não haja match de empresa
+            if (!this.User.IsInRole("SysAdmin"))
             {
-                return Ok(new Response<object>() { IsSuccess = false, Message = "You do not have access to these members." });
-            }
+                var userCompanyIds = user.Companies.Select(c => c.Id).ToList();
 
+                var condoMemberUser = await _userHelper.GetUserByEmailWithCompaniesAsync(condoMember.Email);
+
+                var condoMemberCompanyIds = condoMemberUser.Companies.Select(c => c.Id);
+
+                if (!userCompanyIds.Any(id => condoMemberCompanyIds.Contains(id))) //caso não haja match de empresa
+                {
+                    return Conflict();
+                }
+            }
+           
             var condoMembers = new List<CondoMember> { condoMember };// Create a list with the single condo member for linking images
             await _condoMemberRepository.LinkImages(condoMembers); // Link images to the single condo member
 
@@ -167,6 +170,8 @@ namespace ProjectCondoManagement.Controllers
 
             return condoMemberDto;
         }
+
+      
 
 
         [HttpGet("ByCondo/{condoId}")]

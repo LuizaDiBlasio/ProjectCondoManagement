@@ -3,6 +3,7 @@ using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MimeKit;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
@@ -10,6 +11,7 @@ using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Users;
 using ProjectCondoManagement.Helpers;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 
 namespace ProjectCondoManagement.Controllers
@@ -279,11 +281,12 @@ namespace ProjectCondoManagement.Controllers
             string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
 
             // gera um link de confirmção para o email
-            string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/ResetPassword?userId={user.Id}&token={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
+            string tokenLink = $"{_configuration["WebAppSettings:BaseUrl"]}/Account/ResetPassword?userId={user.Id}&tokenEmail={Uri.EscapeDataString(myToken)}"; // garante que o token seja codificado corretamente mesmo com caracteres especiais
 
             Response<object> response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
            $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link
 
+            
 
             if (response.IsSuccess) //se conseguiu enviar o email
             {
@@ -643,6 +646,110 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("AssignCompanyToMember")]
+        public async Task<IActionResult> AssingCompanyToMember([FromBody] UserDto userDto)
+        {
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(userDto.Email);
+            
+            if (user == null)
+            {
+                NotFound();
+            }
+
+            var userCompaniesIds = userDto.CompaniesDto.Select(c => c.Id).ToList();
+
+            var userCompanies = new List<Company>();
+
+            foreach(var companyId in userCompaniesIds)
+            {
+                var company = _dataContextUsers.Companies.FirstOrDefault(c => c.Id == companyId);
+                userCompanies.Add(company);
+            }
+
+            user.Companies.Clear();
+
+            user.Companies = userCompanies;
+
+            await _userHelper.UpdateUserAsync(user);
+
+            return Ok(new Response<object> { IsSuccess = true });
+        }
+
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("AssignCompanyToAdminOrManager")]
+        public async Task<IActionResult> AssingCompanyToAdminOrManager([FromBody] AssignmentDto assignmentDto)
+        {
+            try
+            {
+                if (assignmentDto.CompanyDto == null)
+                {
+                    return BadRequest("Request body is null.");
+                }
+
+                //buscar company antes de fazer assign 
+
+                var company = await _companyRepository.GetCompanyWithCondosAndUsers(assignmentDto.CompanyDto.Id);
+                if (company == null)
+                {
+                    return Ok(new Response<object> { IsSuccess = false, Message = "Unable to assing user, company not found" });
+                }
+
+                // ver se user é condoManager ou company admin  
+
+                var user = await _userHelper.GetUserByEmailWithCompaniesAsync(assignmentDto.UserDto.Email);
+
+                if (await _userHelper.IsUserInRoleAsync(user, "CompanyAdmin"))
+                {
+                    if (company.CompanyAdminId != null)
+                    {
+                        var oldCompanyAdminUser = await _userHelper.GetUserByIdWithCompaniesAsync(company.CompanyAdminId);
+
+                        //atualizar dados do novo admin
+                        if (oldCompanyAdminUser != null && oldCompanyAdminUser.Id != user.Id)
+                        {
+                            user.Companies.Clear();
+                            user.Companies.Add(company);
+
+                          
+                            company.CompanyAdminId = user.Id;
+
+                            await _userHelper.UpdateUserAsync(user); 
+                            await _companyRepository.UpdateAsync(company, _dataContextUsers);
+                        }
+                        else
+                        {
+                            return Ok(new Response<object> { IsSuccess = false, Message = "User already assigned to this company" });
+                        }
+                    }
+                    else
+                    {
+                        company.CompanyAdminId = assignmentDto.CompanyDto.CompanyAdminId;
+
+                        company.Users.Add(user);
+
+                        await _companyRepository.UpdateAsync(company, _dataContextUsers);
+                    }
+                }
+                else //será condo manager, relação 1:N (1 company - N users), atualizar pelo lado de users
+                {
+                    user.Companies.Clear();
+                    user.Companies.Add(company);
+
+                    await _userHelper.UpdateUserAsync(user);
+                }
+
+                return Ok(new Response<object> { IsSuccess = true, Message = "User assigned successfully" });
+            }
+            catch
+            {
+                return Ok(new Response<object> { IsSuccess = false, Message = "Unable to assing user due to server error" });
+            }
+     
+        }
+
+
         /// <summary>
          /// Retrieves a list of all users assigned to a specific role.
          /// </summary>
@@ -691,21 +798,42 @@ namespace ProjectCondoManagement.Controllers
         {
             var managers = await _userHelper.GetUsersWithCompanyByRoleAsync("CondoManager");
 
+            if (!this.User.IsInRole("SysAdmin"))
+            {
+                var currentUserEmail = User.Identity?.Name;
+                var currentUser = await _userHelper.GetUserByEmailAsync(currentUserEmail);
+                if (currentUser == null)
+                {
+                    return Unauthorized(new { Message = "Current user not found." });
+                }
+
+                var userCompaniesIds = currentUser.Companies.Select(c => c.Id).ToList();
+
+                managers = managers.Where(m => m.Companies.Any(c => userCompaniesIds.Contains(c.Id))).ToList();
+
+            }
+
             var managersDto = managers
                 .Select(m => _converterHelper.ToUserDto((User)m, true))
                 .ToList();
 
             return Ok(managersDto);
+
         }
 
         [HttpGet("GetUserRole")]
-        public async Task<string> GetUserRole([FromQuery]string email)
+        public async Task<ActionResult<string>> GetUserRole([FromQuery]string email)
         {
             var user = await _userHelper.GetUserByEmailAsync(email);
 
             var userRoles = await _userHelper.GetRolesAsync(user);
 
-            return userRoles.FirstOrDefault();
+            var userRole = new UserRoleDto()
+            {
+                Role = userRoles.First()
+            };
+
+            return Ok(userRole);
         }
 
 

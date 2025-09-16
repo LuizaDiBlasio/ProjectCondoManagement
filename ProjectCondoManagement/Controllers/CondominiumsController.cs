@@ -66,7 +66,7 @@ namespace ProjectCondoManagement.Controllers
             var userCompanyIds = user.Companies.Select(c => c.Id).ToList();
 
             var condominiums = await _condominiumRepository.GetAll(_context)
-                                                           .Where(c => userCompanyIds.Contains(c.CompanyId))
+                                                           .Where(c => userCompanyIds.Contains(c.CompanyId.Value))
                                                            .ToListAsync();
             if (condominiums == null)
             {
@@ -347,6 +347,26 @@ namespace ProjectCondoManagement.Controllers
 
             var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList();
 
+
+            return condominiumsDtos;
+        }
+
+        [HttpGet("ManagerCondos/{id}")]
+        public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetManagerCondosById(string id)
+        {
+
+            var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.ManagerUserId == id).ToListAsync();
+            if (condominiums == null)
+            {
+                return new List<CondominiumDto>();
+            }
+
+            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList();
+
+            if (condominiumsDtos == null)
+            {
+                return new List<CondominiumDto>();
+            }
 
             return condominiumsDtos;
         }

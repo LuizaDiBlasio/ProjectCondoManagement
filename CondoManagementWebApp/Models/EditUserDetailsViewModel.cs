@@ -36,12 +36,6 @@ namespace CondoManagementWebApp.Models
         [Display(Name = "Financial Account number")]
         public int? FinancialAccountId { get; set; }
 
-        public List<SelectListItem> AvailableCompanies { get; set; } 
-
-        public List<int>? SelectedCompaniesIds { get; set; } 
-
-        public int? SelectedCompanyId { get; set; } 
-
         public bool IsActive { get; set; }  
 
 
@@ -55,6 +49,5 @@ namespace CondoManagementWebApp.Models
                      $"https://res.cloudinary.com/ddnkq9dyb/image/upload/v1754230681/noimage_q8mayx.jpg" // caminho relativo ao Url no image
                      : ImageUrl;
 
-        public string UserRole { get; set; }
     }
 }

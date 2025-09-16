@@ -63,5 +63,7 @@ namespace ProjectCondoManagement.Helpers
         public Task<List<User>> GetUsersWithCompanyAsync();
 
         Task<List<User>> GetUsersWithCompanyByRoleAsync(string role);
+
+        Task<User> GetUserByIdWithCompaniesAsync(string id);
     }
 }

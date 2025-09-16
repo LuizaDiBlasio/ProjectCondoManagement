@@ -136,7 +136,6 @@ namespace ProjectCondoManagement.Helpers
             user.ImageUrl = editUserDetailsDto.ImageUrl;
             user.Email = editUserDetailsDto.Email;
             user.IsActive = editUserDetailsDto.IsActive;
-            user.Companies = withCompanies? editUserDetailsDto.CompaniesDto?.Select(c => ToCompany(c, false, false)).ToList() ?? new List<Company>() : new List<Company>();
             user.FinancialAccountId = editUserDetailsDto.FinancialAccountId;
 
             return user;
@@ -186,6 +185,7 @@ namespace ProjectCondoManagement.Helpers
                 Id = company.Id,
                 Name = company.Name,
                 CondominiumDtos = company.Condominiums?.Select(c => ToCondominiumDto(c, false)).ToList() ?? new List<CondominiumDto>(),
+                CondoMemberDtos = company.CondoMembers?.Select(cm => ToCondoMemberDto(cm, true)).ToList() ?? new List<CondoMemberDto>(),
                 Email = company.Email,
                 Address = company.Address,
                 PhoneNumber = company.PhoneNumber,

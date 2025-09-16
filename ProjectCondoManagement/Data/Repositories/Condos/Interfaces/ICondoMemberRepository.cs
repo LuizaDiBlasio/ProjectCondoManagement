@@ -7,7 +7,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
     {
         Task<Response<object>> LinkImages(IEnumerable<CondoMember> condoMembers);
 
-        Task<CondoMember> GetCondoMemberByEmailAsync(string email);
+        Task<CondoMember> GetCondoMemberByEmailAsync(string email, bool includeUnitsAndCondominums = true);
 
         Task<CondoMember?> GetByIdWithIncludeAsync(int id, DataContextCondos context);
 

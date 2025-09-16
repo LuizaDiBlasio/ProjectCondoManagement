@@ -104,7 +104,7 @@ namespace CondoManagementWebApp.Helpers
             return model;   
         }
 
-        public EditUserDetailsViewModel ToEditUserDetailsViewModel (UserDto userDto, List<SelectListItem> companiesList, List<int>? selectedCompaniesIds, int? companyId)
+        public EditUserDetailsViewModel ToEditUserDetailsViewModel (UserDto userDto)
         {
             var model = new EditUserDetailsViewModel()
             {
@@ -115,11 +115,7 @@ namespace CondoManagementWebApp.Helpers
                 Address = userDto.Address,
                 ImageUrl = userDto.ImageUrl,
                 IsActive = userDto.IsActive,
-                Email = userDto.Email,
-                AvailableCompanies = companiesList,
-                FinancialAccountId = userDto.FinancialAccountId,
-                SelectedCompaniesIds = selectedCompaniesIds,
-                SelectedCompanyId = companyId
+                Email = userDto.Email
             };
 
             return model;
@@ -129,7 +125,6 @@ namespace CondoManagementWebApp.Helpers
         {
             var editUserDetailsDto = new EditUserDetailsDto()
             {
-                Id = model.Id,
                 FullName = model.FullName,
                 BirthDate = model.BirthDate,
                 PhoneNumber = model.PhoneNumber,

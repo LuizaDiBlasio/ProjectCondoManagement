@@ -20,7 +20,7 @@ namespace CondoManagementWebApp.Helpers
             
         ProfileViewModel ToProfileViewModel(UserDto userDto);
 
-        EditUserDetailsViewModel ToEditUserDetailsViewModel(UserDto userDto, List<SelectListItem> companiesList, List<int>? selectedCompaniesIds, int? companyId);
+        EditUserDetailsViewModel ToEditUserDetailsViewModel(UserDto userDto);
 
         EditUserDetailsDto ToEditUserDetailsDto(EditUserDetailsViewModel model);
 

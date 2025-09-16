@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ClassLibrary.DtoModels
 {
-    public class EditUserDetailsDto : UserDto
+    public class EditUserDetailsDto 
     {
 
         public string FullName { get; set; }
@@ -27,7 +27,6 @@ namespace ClassLibrary.DtoModels
 
         public string? ImageUrl { get; set; }
 
-        public List<CompanyDto> CompaniesDto { get; set; }
 
         public int? FinancialAccountId { get; set; }  
 

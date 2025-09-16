@@ -23,6 +23,7 @@
                 <th>Title</th>
                 <th>Date</th>
                 <th>Sent to</th>
+                <th>Ticket Status</th>
                 <th></th>
             </tr>
         </thead>
@@ -34,8 +35,8 @@
                     <td>@Html.DisplayFor(modelItem => item.MessageTitle)</td>
                     <td>@item.PostingDate?.ToString("MM/dd/yyyy HH:mm")</td>
                     <td>@Html.DisplayFor(modelItem => item.ReceiverEmail)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Status.Name)</td>
                     <td>
-                        <a asp-controller="Message" asp-action="MessageDetails" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">Resolve</a>
                         <a href="#" class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@item.Id">Delete</a>
                     </td>
                 </tr>

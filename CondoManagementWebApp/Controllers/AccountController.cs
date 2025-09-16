@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.IdentityModel.Tokens.Jwt;
@@ -375,6 +376,13 @@ namespace CondoManagementWebApp.Controllers
                     return View("Register", model); // Retorna a View com o erro
                 }
 
+                if (!ModelState.IsValid)
+                {
+                    await LoadModelLists(model);
+
+                    return View("Register", model); // Retorna a View com o erro
+                }
+
                 //Cloudnary da imagem
 
                 if (model.ImageFile != null && model.ImageFile.Length > 0)
@@ -540,7 +548,7 @@ namespace CondoManagementWebApp.Controllers
                 {
                     _flashMessage.Confirmation(apiCall.Message);
 
-                    return View("ResetPassword", new ResetPasswordViewModel());
+                    return RedirectToAction(nameof(Login));
                 }
 
                 _flashMessage.Danger($"{apiCall.Message}");
@@ -607,9 +615,9 @@ namespace CondoManagementWebApp.Controllers
 
                 if (apiCall.IsSuccessStatusCode)
                 {
-                    _flashMessage.Confirmation("Password sucessfully reset");
+                    _flashMessage.Confirmation("Password sucessfully reset, you can login now");
 
-                    return View("RecoverPassword", new RecoverPasswordViewModel());
+                    return RedirectToAction(nameof(Login));
                 }
 
                 _flashMessage.Danger($"Unable to reset password, please contact admin");
@@ -660,7 +668,7 @@ namespace CondoManagementWebApp.Controllers
                 if (apiCall.IsSuccess)
                 {
                     _flashMessage.Confirmation($"{apiCall.Message}");
-                    return View("ChangePassword", model);
+                    return RedirectToAction(nameof(Login));
                 }
 
                 _flashMessage.Danger($"{apiCall.Message}");
@@ -834,34 +842,33 @@ namespace CondoManagementWebApp.Controllers
                
                 if (userdto == null)
                 {
-                    var model = new SysAdminDashboardViewModel();
+                    var model1 = new SysAdminDashboardViewModel();
 
-                    await LoadDashboardDataAsync(model);
+                    await LoadDashboardDataAsync(model1);
 
                     _flashMessage.Danger("Unable to retrieve details, user not found");
 
-                    return View("SysAdminDashBoard", model);
+                    return View("SysAdminDashBoard", model1);
                 }
 
+                var companies = userdto.CompaniesDto.Select(c => c.Name).ToList();
+                
+                ViewBag.Companies = companies;  
 
-                if (userdto.CompaniesDto.Any())
-                {
-                    var model = await LoadEditUserDetailsViewModel(userdto);              
-                    return View(model);
-                }
+                var model = _converterHelper.ToEditUserDetailsViewModel(userdto);
 
-                var companiesSelectList2 = await LoadCompaniesSelectList();
-
-                var model2 = _converterHelper.ToEditUserDetailsViewModel(userdto, companiesSelectList2, null, null);
-
-                return View(model2);
+                return View(model);
 
             }
             catch (Exception)
             {
-                var model = LoadEditUserModel();
-                _flashMessage.Danger("Unable to retrieve details, ser not found");
-                return View(model);
+                var model = new SysAdminDashboardViewModel();
+
+                await LoadDashboardDataAsync(model);
+
+                _flashMessage.Danger("Unable to retrieve details");
+
+                return View("SysAdminDashBoard", model);
             }
 
         }
@@ -903,30 +910,7 @@ namespace CondoManagementWebApp.Controllers
 
                 var editUserDetailsDto = _converterHelper.ToEditUserDetailsDto(model);
 
-                //escolher companies 
-                if ( model.UserRole == "CompanyAdmin" || model.UserRole == "CondoManager")
-                {
-                    if (model.SelectedCompanyId.HasValue)
-                    {
-                        var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{model.SelectedCompanyId.Value}");
-                        if (company != null)
-                        {
-                            editUserDetailsDto.CompaniesDto.Add(company);
-                        }
-                    }
-                }
-                else if (model.UserRole == "CondoMember")
-                {
-                    foreach (var companyId in model.SelectedCompaniesIds)
-                    {
-                        var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{companyId}");
-                        if (company != null)
-                        {
-                            editUserDetailsDto.CompaniesDto.Add(company);
-                        }
-                    }
-                }
-
+               
                 var apiCall = await _apiCallService.PostAsync<EditUserDetailsDto, ClassLibrary.Response<object>>("api/Account/EditUserDetails", editUserDetailsDto);
 
                 if (apiCall.IsSuccess)
@@ -943,35 +927,22 @@ namespace CondoManagementWebApp.Controllers
                         }
                         _flashMessage.Danger("Unable to select user's company, please contact admin");
 
-                        var companiesSelectList1 = await LoadCompaniesSelectList();
-
-                        var model3 = _converterHelper.ToEditUserDetailsViewModel(editedUserDto, companiesSelectList1, null, null);
-
-                        return View("EditUserDetails", model3);
+                        return View("EditUserDetails", model);
 
                     }
 
                     _flashMessage.Danger("Unable to update user details");
-                    var companiesSelectList2 = await LoadCompaniesSelectList();
-
-                    model.AvailableCompanies = companiesSelectList2;
 
                     return View("EditUserDetails", model);
                 }
 
                 _flashMessage.Danger(apiCall.Message);
-                var companiesSelectList3 = await LoadCompaniesSelectList();
-
-                model.AvailableCompanies = companiesSelectList3;
 
                 return View("EditUserDetails", model);
             }
             catch (Exception)
             {
                 _flashMessage.Danger("An unexpected error occurred, unable to update user's details");
-                var companiesSelectList = await LoadCompaniesSelectList();
-
-                model.AvailableCompanies = companiesSelectList;
 
                 return View("EditUserDetails", model);
             }
@@ -1016,22 +987,9 @@ namespace CondoManagementWebApp.Controllers
                 {
                     var user = users.First(); // puxa o primeiro e único da lista
 
+                    var model1 = _converterHelper.ToEditUserDetailsViewModel(user);
 
-                    //criar view model para EditUserDetails
-                    if (user.CompaniesDto.Any())
-                    {
-                        var editedUserDetailsViewModel = LoadEditUserDetailsViewModel(user);
-
-                        return RedirectToAction("EditUserDetails", editedUserDetailsViewModel);
-                    }
-
-                    var companiesList = await LoadCompaniesSelectList();
-
-                    var model3 = _converterHelper.ToEditUserDetailsViewModel(user, companiesList, null, null);
-
-                    _flashMessage.Warning("Unable to retrieve user's companies, please contact admin");
-
-                    return RedirectToAction("EditUserDetails", model3);
+                    return RedirectToAction("EditUserDetails", model1);
                 }
                 else
                 {
@@ -1132,84 +1090,155 @@ namespace CondoManagementWebApp.Controllers
             {
                 return NotFound();
             }
-
-
-            if (!model.CompaniesDto.Any())
-            {
-                _flashMessage.Danger("select one company.");
-                return View(model);
-            }
             
             try
             {
-                var user = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", email);
-                if (user == null)
+                var userDto = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", email);
+                if (userDto == null)
                 {
-                    return NotFound();
+                    _flashMessage.Danger("Unable to change companies, user not found");
+                    var returnModel = await LoadAssingCompanyViewModel(userDto);
+                    return View(returnModel);
                 }
 
-                var editUserDto = new EditUserDetailsDto
-                {
-                    Id = user.Id,
-                    FullName = user.FullName,
-                    Email = user.Email,
-                    Address = user.Address,
-                    PhoneNumber = user.PhoneNumber,
-                    ImageUrl = user.ImageUrl,
-                    BirthDate = user.BirthDate,
-                    FinancialAccountId = user.FinancialAccountId,
-                    IsActive = user.IsActive,
-                    Uses2FA = user.Uses2FA,
-                };
-
+         
                 //escolher companies 
                 if (model.UserRole == "CompanyAdmin" || model.UserRole == "CondoManager")
                 {
                     if (model.SelectedCompanyId.HasValue)
                     {
+
                         var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{model.SelectedCompanyId.Value}");
                         if (company != null)
                         {
-                            editUserDto.CompaniesDto.Add(company);
-
-                            //adicionar à company
-                            company.Users.Add(user);
+                            userDto.CompaniesDto.Add(company);
 
                             if(model.UserRole == "CompanyAdmin")
                             {
-                                company.CompanyAdminId = user.Id;
+                                company.CompanyAdminId = userDto.Id;
+
+                                var assignmentDto = new AssignmentDto() { CompanyDto = company, UserDto = userDto };
 
                                 //update da company
-                                var apiCall = await _apiCallService.PostAsync<CompanyDto, ClassLibrary.Response<object>>("api/Company/EditCompany", company);
+                                var apiCall = await _apiCallService.PostAsync<AssignmentDto, ClassLibrary.Response<object>>("api/Account/AssignCompanyToAdminOrManager", assignmentDto);
+                                if (!apiCall.IsSuccess)
+                                {
+                                    _flashMessage.Danger(apiCall.Message);
+                                    var returnModel = await LoadAssingCompanyViewModel(userDto);
+                                    return View(returnModel);
+                                }
+
+                                _flashMessage.Confirmation(apiCall.Message);
+                                return RedirectToAction(nameof(SysAdminDashboard));
+                            }
+                            else
+                            {
+                                var managerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>($"api/Condominiums/ManagerCondos/{userDto.Id}");
+
+                                if (managerCondos.Any())
+                                {
+                                    _flashMessage.Danger("Unable to change companies, manager is already assinged to condominiums");
+                                    var returnModel = await LoadAssingCompanyViewModel(userDto);
+                                    return View(returnModel);
+                                }
+
+                                var assignmentDto = new AssignmentDto() { CompanyDto = company, UserDto = userDto };
+
+                                //update da company
+                                var apiCall = await _apiCallService.PostAsync<AssignmentDto, ClassLibrary.Response<object>>("api/Account/AssignCompanyToAdminOrManager", assignmentDto);
+                                if (!apiCall.IsSuccess)
+                                {
+                                    _flashMessage.Danger(apiCall.Message);
+                                    var returnModel = await LoadAssingCompanyViewModel(userDto);
+                                    return View(returnModel);
+                                }
+
+                                _flashMessage.Confirmation(apiCall.Message);
+                                return RedirectToAction(nameof(SysAdminDashboard));
                             }
                         }
                     }
                 }
                 else if (model.UserRole == "CondoMember")
                 {
+                    if (!model.SelectedCompaniesIds.Any())
+                    {
+                        ModelState.AddModelError("SelectedCompaniesIds", "Select at least one company");
+                        var returnModel = await LoadAssingCompanyViewModel(userDto);
+                        returnModel.SelectedCompaniesIds.Clear();
+                        return View(returnModel);
+                    }
+
+                    var condomember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{userDto.Email}");
+                    if(condomember == null)
+                    {
+                        _flashMessage.Danger("Unable to change companies, member not found in the system");
+                        var returnModel = await LoadAssingCompanyViewModel(userDto);
+                        return View(returnModel);
+                    }
+
+                    //buscar condos do member
+
+                    var memberCondos = new List<CondominiumDto>();
+
+                    foreach(var unit in condomember.Units)
+                    {
+                        memberCondos.Add(unit.CondominiumDto);  
+                    }
+
+                    //buscar ids das companies do member antes da seleção
+                    var userCompaniesIds = userDto.CompaniesDto.Select(c => c.Id).ToList();
+
+                    //verificar se empresas foram removidas 
+                    foreach(var id in userCompaniesIds)
+                    {
+                        if (!model.SelectedCompaniesIds.Contains(id))
+                        {
+                            //verificar se condomember tem condominios nessa empresa
+                            var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{id}");
+                            foreach (var condo in company.CondominiumDtos)
+                            {
+                                if (memberCondos.Contains(condo))
+                                {
+                                    _flashMessage.Danger("Unable to upadate companies, member condos doesn't match to companies selected");
+                                    var returnModel = await LoadAssingCompanyViewModel(userDto);
+                                    return View(returnModel);
+                                }
+                            }
+                        }
+                    }
+
+                    //seleções de adição de company
                     foreach (var companyId in model.SelectedCompaniesIds)
                     {
                         var company = await _apiCallService.GetAsync<CompanyDto>($"api/Company/GetCompany/{companyId}");
                         if (company != null)
                         {
-                            editUserDto.CompaniesDto.Add(company);
+                            var existingCompany = userCompaniesIds.Any(c => c == company.Id);
 
-                            //adicionar à company
-                            company.Users.Add(user);
+                            if (!existingCompany)
+                            {
+                                userDto.CompaniesDto.Add(company);
+                            }
 
-                            //update da company
-                            var apiCall = await _apiCallService.PostAsync<CompanyDto, ClassLibrary.Response<object>>("api/Company/EditCompany", company);
                         }
                     }
+
+                    //update do user
+                    var result = await _apiCallService.PostAsync<UserDto, ClassLibrary.Response<object>>("api/Account/AssignCompanyToMember", userDto);
+
+                    if (!result.IsSuccess)
+                    {
+                        _flashMessage.Danger("Unable to update user due to system error");
+                        var returnModel = await LoadAssingCompanyViewModel(userDto);
+                        return View(returnModel);
+                    }
+
+                    _flashMessage.Confirmation(result.Message);
+                    return RedirectToAction(nameof(SysAdminDashboard));
                 }
 
-                
-
-                //update do user
-                var result = await _apiCallService.PostAsync<EditUserDetailsDto, ClassLibrary.Response<object>>("api/Account/EditUserDetails", editUserDto);
-
-                _flashMessage.Confirmation("Company assigned successfully!");
-                return RedirectToAction(nameof(SysAdminDashboard));
+               
             }
             catch (Exception)
             {
@@ -1219,6 +1248,7 @@ namespace CondoManagementWebApp.Controllers
             return RedirectToAction(nameof(SysAdminDashboard));
 
         }
+
 
         public List<SelectListItem> GetRolesSelectList()
         {
@@ -1244,18 +1274,7 @@ namespace CondoManagementWebApp.Controllers
             model.AvailableCompanies = comaniesSelectList;
         }
              
-        public async Task<EditUserDetailsViewModel> LoadEditUserModel()
-        {
-            var model = new EditUserDetailsViewModel();
-
-            var companiesList = await _apiCallService.GetAsync<List<CompanyDto>>("api/Company/GetCompanies");
-
-            var companiesSelectList = _converterHelper.ToCompaniesSelectList(companiesList);
-
-            model.AvailableCompanies = companiesSelectList;
-
-            return model;   
-        }
+       
 
         public async Task<List<SelectListItem>> LoadCompaniesSelectList()
         {
@@ -1266,38 +1285,7 @@ namespace CondoManagementWebApp.Controllers
             return companiesSelectList; 
         }
 
-        public async Task<EditUserDetailsViewModel> LoadEditUserDetailsViewModel(UserDto user)
-        {
-            //carregar lista
-            var companiesList1 = await LoadCompaniesSelectList();
-
-            //carregar model
-            var model = _converterHelper.ToEditUserDetailsViewModel(user, companiesList1, null, null);
-
-            //carregar companies do user 
-            var userRole = await _apiCallService.GetAsync<string>($"api/Account/GetUserRole/{user.Email}");
-
-            //carregar userRole
-            if (userRole != null)
-            {
-                model.UserRole = userRole;
-            }
-
-            //buscar ids selecionados e carregar o model
-            if (userRole == "CondoMember")
-            {
-                var selectedCompaniesIds = user.CompaniesDto.Select(c => c.Id).ToList();
-                model.SelectedCompaniesIds = selectedCompaniesIds;
-
-            }
-            else
-            {
-                var selectedCompanyId = user.CompaniesDto.Select(c => c.Id).First();
-                model.SelectedCompanyId = selectedCompanyId;
-            }
-
-            return model;
-        }
+        
 
 
         public async Task<AssignCompanyViewModel> LoadAssingCompanyViewModel(UserDto user)
@@ -1312,20 +1300,22 @@ namespace CondoManagementWebApp.Controllers
                 Address = user.Address,
                 FullName = user.FullName,
                 FinancialAccountId = user.FinancialAccountId,
-                AvailableCompanies = companiesList
+                AvailableCompanies = companiesList,
             };
 
             //carregar companies do user 
-            var userRole = await _apiCallService.GetAsync<string>($"api/Account/GetUserRole?email={user.Email}");
 
             //carregar userRole
+            var userRole = await _apiCallService.GetAsync<UserRoleDto>($"api/Account/GetUserRole?email={user.Email}");
+
+            
             if (userRole != null)
             {
-                model.UserRole = userRole;
+                model.UserRole = userRole.Role;
             }
 
             //buscar ids selecionados e carregar o model
-            if (userRole == "CondoMember")
+            if (userRole.Role == "CondoMember")
             {
                 var selectedCompaniesIds = user.CompaniesDto.Select(c => c.Id).ToList();
                 model.SelectedCompaniesIds = selectedCompaniesIds;
