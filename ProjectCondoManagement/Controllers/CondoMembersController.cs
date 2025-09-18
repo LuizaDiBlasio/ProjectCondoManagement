@@ -50,7 +50,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (user == null)
             {
-                return Ok(new Response<object>() { IsSuccess = false, Message = "Member not found." });
+                return Ok(new List<CondoMemberDto>());
             }
 
 
@@ -68,7 +68,7 @@ namespace ProjectCondoManagement.Controllers
                                                                     
             if (!condoMembers.Any())
             {
-                return Ok(new Response<object>() { IsSuccess = false, Message = "Member not found." });
+                return Ok(new List<CondoMemberDto>());
             }
 
             await _condoMemberRepository.LinkImages(condoMembers); // Link images to condo members
@@ -138,8 +138,14 @@ namespace ProjectCondoManagement.Controllers
             }
 
 
-            var condoMember = await _condoMemberRepository.GetAll(_context).Include(c => c.Units).ThenInclude(u => u.Condominium)
-                .FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
+            var condoMember = await _condoMemberRepository.GetAll(_context)
+            .Include(c => c.Units)
+                .ThenInclude(u => u.Condominium)
+                    .ThenInclude(condo => condo.Occurrences)
+            .Include(c => c.Units)
+                .ThenInclude(u => u.Condominium)
+                    .ThenInclude(condo => condo.Meetings)
+            .FirstOrDefaultAsync(c => c.Email == email);
 
 
             if (condoMember == null)

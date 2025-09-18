@@ -7,6 +7,7 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
+using System.Linq;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -66,7 +67,7 @@ namespace ProjectCondoManagement.Controllers
             var userCompanyIds = user.Companies.Select(c => c.Id).ToList();
 
             var condominiums = await _condominiumRepository.GetAll(_context)
-                                                           .Where(c => userCompanyIds.Contains(c.CompanyId))
+                                                           .Where(c => c.CompanyId.HasValue && userCompanyIds.Contains(c.CompanyId.Value))
                                                            .ToListAsync();
             if (condominiums == null)
             {
@@ -325,13 +326,15 @@ namespace ProjectCondoManagement.Controllers
                 .Select(id => id.Value)
                 .ToList();
 
-            // 2) buscar todos os pagamentos que tenham PayerFinancialAccountId em condominiumFinancialAccountIds
+            // 2) buscar todos os pagamentos que tenham PayerFinancialAccountId ou BenificiarAccountID em condominiumFinancialAccountIds
             var allPayments = await _paymentRepository.GetAll(_dataContextFinances)
-                .Where(p => condominiumFinancialAccountIds.Contains(p.PayerFinancialAccountId))
-                .Include(p => p.Transaction)
-                .Include(p => p.Expenses)
-                .ToListAsync();
-
+                 .Where(p =>
+                     condominiumFinancialAccountIds.Contains(p.PayerFinancialAccountId) ||
+                     (p.BeneficiaryAccountId.HasValue && condominiumFinancialAccountIds.Contains(p.BeneficiaryAccountId.Value))
+                 )
+                 .Include(p => p.Transaction)
+                 .Include(p => p.Expenses)
+                 .ToListAsync();
             // 3) converter pagamentos para DTOs (reutilizando seu converter)
             var allPaymentsDto = allPayments
                 .Select(p => _converterHelper.ToPaymentDto(p, false))
@@ -339,7 +342,7 @@ namespace ProjectCondoManagement.Controllers
 
             // 4) converter condomínios para DTOs e ligar Manager / FinancialAccount (como você já fazia)
             var condominiumsDtos = condominiums
-                .Select(c => _converterHelper.ToCondominiumDto(c, false))
+                .Select(c => _converterHelper.ToCondominiumDto(c, true))
                 .ToList();
 
             await _condominiumRepository.LinkManager(condominiumsDtos);
@@ -351,8 +354,9 @@ namespace ProjectCondoManagement.Controllers
                 // aqui assumimos que condoDto.FinancialAccountId foi preenchido por LinkFinancialAccount
                 // e que existe uma propriedade List<PaymentDto> CondoPayments no CondominiumDto
                 condoDto.Payments = allPaymentsDto
-                    .Where(p => p.PayerFinancialAccountId == condoDto.FinancialAccountId)
-                    .ToList();
+                  .Where(p => p.PayerFinancialAccountId == condoDto.FinancialAccountId
+                           || (p.BeneficiaryAccountId.HasValue && p.BeneficiaryAccountId.Value == condoDto.FinancialAccountId))
+                  .ToList();
             }
 
             return condominiumsDtos;

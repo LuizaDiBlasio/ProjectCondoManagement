@@ -59,7 +59,7 @@ namespace ProjectCondoManagement.Controllers
             {
                 var member = await _userHelper.GetUserByFinancialAccountIdAsync(id);
 
-                if(financialAccount.OwnerName != member.FullName)
+                if(member != null && financialAccount.OwnerName != member.FullName)
                 {
                     financialAccount.OwnerName = member.FullName ;
                 }

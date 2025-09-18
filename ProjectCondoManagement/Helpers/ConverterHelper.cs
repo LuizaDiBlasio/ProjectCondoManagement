@@ -1,5 +1,6 @@
 ﻿using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using NuGet.ProjectModel;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.Enums;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
@@ -163,7 +164,9 @@ namespace ProjectCondoManagement.Helpers
 
         public async Task<CondoMember> FromUserToCondoMember(User user)
         {
-            var condoMember = await _condoMemberRepository.GetCondoMemberByEmailAsync(user.Email);
+            bool includeUnitsAndCondominums = false;
+
+            var condoMember = await _condoMemberRepository.GetCondoMemberByEmailAsync(user.Email, includeUnitsAndCondominums);
 
             if (condoMember == null)
             {
@@ -250,7 +253,8 @@ namespace ProjectCondoManagement.Helpers
                 Units = condominium.Units?.Select(c => ToUnitDto(c, false, false)).ToList() ?? new List<UnitDto>(),
                 FinancialAccountId = condominium.FinancialAccountId,
                 ManagerUserId = condominium.ManagerUserId,
-                Occurrences = IncludeOccurrence == true ? condominium.Occurrences?.Select(o => ToOccurrenceDto(o, false)).ToList() ?? new List<OccurrenceDto>() : null
+                Occurrences = IncludeOccurrence == true ? condominium.Occurrences?.Select(o => ToOccurrenceDto(o, false, false)).ToList() ?? new List<OccurrenceDto>() : null,
+                Meetings = condominium.Meetings?.Select(m => ToMeetingDto(m, false)).ToList() ?? new List<MeetingDto>(),
             };
 
             return condominiumDto;
@@ -311,7 +315,7 @@ namespace ProjectCondoManagement.Helpers
                 CondominiumId = unit.CondominiumId,
                 Floor = unit.Floor,
                 Door = unit.Door,
-                CondominiumDto = includeCondominium ? ToCondominiumDto(unit.Condominium, false) : null
+                CondominiumDto = includeCondominium ? ToCondominiumDto(unit.Condominium, true) : null
             };
 
             if (includeCondoMembers)
@@ -538,14 +542,14 @@ namespace ProjectCondoManagement.Helpers
             return financialAccount;
         }
 
-        public OccurrenceDto ToOccurrenceDto(Occurrence occurrence, bool isNew)
+        public OccurrenceDto ToOccurrenceDto(Occurrence occurrence, bool isNew, bool includeUnits = true)
         {
             var occurrenceDto = new OccurrenceDto()
             {
                 Id = isNew ? 0 : occurrence.Id,
                 Details = occurrence.Details,
                 CondominiumId = occurrence.CondominiumId,
-                UnitDtos = occurrence.Units?.Select(u => ToUnitDto(u, false)).ToList() ?? new List<UnitDto>(),
+                UnitDtos = includeUnits == true ? occurrence.Units?.Select(u => ToUnitDto(u, false)).ToList() ?? new List<UnitDto>() : new List<UnitDto>(),
                 ResolutionDate = occurrence.ResolutionDate,
                 DateAndTime = occurrence.DateAndTime,
                 IsResolved = occurrence.IsResolved,
@@ -554,7 +558,7 @@ namespace ProjectCondoManagement.Helpers
             return occurrenceDto;
         }
 
-        public MeetingDto ToMeetingDto(Meeting meeting)
+        public MeetingDto ToMeetingDto(Meeting meeting, bool IncludeOccurence = true)
         {
             var meetingDto = new MeetingDto()
             {
@@ -564,7 +568,7 @@ namespace ProjectCondoManagement.Helpers
                 Title = meeting.Title,
                 Description = meeting.Description,
                 CondoMembersDto = meeting.CondoMembers?.Select(c => ToCondoMemberDto(c, false)).ToList() ?? new List<CondoMemberDto>(),
-                OccurencesDto = meeting.Occurences?.Select(o => ToOccurrenceDto(o, false)).ToList() ?? new List<OccurrenceDto>(),
+                OccurencesDto = IncludeOccurence ? meeting.Occurences?.Select(o => ToOccurrenceDto(o, false, false)).ToList() ?? new List<OccurrenceDto>() : new List<OccurrenceDto>(),
                 MeetingLink = meeting.MeetingLink,
                 IsExtraMeeting = meeting.IsExtraMeeting,
                 //DocumentDto = ToDocumentDto(meeting.Document)

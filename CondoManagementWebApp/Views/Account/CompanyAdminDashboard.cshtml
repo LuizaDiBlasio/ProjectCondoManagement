@@ -63,13 +63,21 @@
                                 <ul class="list-group">
                                     @foreach (var condo in Model.Condominiums)
                                     {
+                                        var unresolvedOccurrences = condo.Occurrences?
+                                        .Where(o => !o.IsResolved)
+                                        .Count() ?? 0;
+
+                                        var futureMeetings = condo.Meetings?
+                                        .Where(m => m.DateAndTime > DateTime.Now)
+                                        .Count() ?? 0;
+
                                         <li class="list-group-item text-dark">
                                             <strong>@condo.CondoName</strong><br />
                                             <span class="text-secondary">@condo.Address</span><br />
-                                            Manager: @(condo.ManagerUser?.FullName ?? "No manager assigned")<br />
-                                            Units: @(condo.Units?.Count() ?? 0) |
-                                            Occurrences: @(condo.Occurrences?.Count ?? 0) |
-                                            Meetings: @(condo.Meetings?.Count() ?? 0)
+                                           Manager: @(condo.ManagerUser?.FullName ?? "No manager assigned")<br />
+                                           Units: @(condo.Units?.Count() ?? 0) |
+                                           Unresolved Occurrences: @unresolvedOccurrences |
+                                           Upcoming Meetings: @futureMeetings
                                         </li>
                                     }
                                 </ul>
@@ -127,7 +135,7 @@
         <div class="accordion-item mb-2 rounded shadow-sm">
             <h2 class="accordion-header" id="headingPayments">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePayments" aria-expanded="false" aria-controls="collapsePayments">
-                    Upcoming Payments 
+                    Pending Payments 
                 </button>
             </h2>
             <div id="collapsePayments" class="accordion-collapse collapse" aria-labelledby="headingPayments" data-bs-parent="#adminDashboardAccordion">
@@ -163,7 +171,7 @@
                             }
                             else
                             {
-                                <p class="text-secondary">No unpaid payments registered.</p>
+                                <p class="text-secondary">No pending payments registered.</p>
                             }
                         </div>
                     </div>
@@ -195,6 +203,10 @@
                                                 <small class="text-secondary">@msg.PostingDate?.ToString("MM/dd/yyyy")</small>
                                             </div>
                                             <p class="mb-1">@msg.MessageContent</p>
+                                            <small class="text-muted">
+                                                <strong>From:</strong> @msg.SenderEmail <br />
+                                                <strong>To:</strong> @msg.ReceiverEmail
+                                            </small>
                                         </a>
                                     }
                                 </div>

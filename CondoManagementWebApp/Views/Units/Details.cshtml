@@ -7,34 +7,51 @@
 <h1>Details</h1>
 
 <div>
-    <h4>UnitDto</h4>
+
     <hr />
     <dl class="row">
-
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.CondominiumDto)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.CondominiumDto.CondoName)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Floor)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Floor)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Bedrooms)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Bedrooms)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Door)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Door)
         </dd>
+
+        @if (Model.CondoMemberDtos != null && Model.CondoMemberDtos.Any())
+        {
+            <dt class="col-sm-2">
+                Members
+            </dt>
+            <dd class="col-sm-10">
+                <ul class="list-unstyled">
+                    @foreach (var member in Model.CondoMemberDtos)
+                    {
+                        <li>@member.FullName (@member.Email)</li>
+                    }
+                </ul>
+            </dd>
+        }
     </dl>
 </div>
 <div>

@@ -129,54 +129,6 @@ namespace CondoManagementWebApp.Controllers
             return View(model);
         }
 
-        //[HttpGet("CreateOneTimePayment")]
-        //// GET: PaymentController/CreateOneTimePayment
-        //public async Task<ActionResult> CreateOneTimePayment()
-        //{
-        //    var model = new CreateOneTimePaymentViewModel();
-
-        //    var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
-        //    if (condoManagerCondos != null && !condoManagerCondos.Any())
-        //    {
-        //        _flashMessage.Danger("You are not managing any condominiums currently");
-        //        return View("CreateOneTimePayment", new CreateOneTimePaymentViewModel());
-        //    }
-
-        //    model.CondoMembers = new SelectList(new List<CondoMemberDto>(), "Id", "FullName");
-
-        //    var condosToSelectList = _converterHelper.ToCondosSelectList(condoManagerCondos);
-        //    if (condosToSelectList.Any())
-        //    {
-        //        model.CondosToSelect = condosToSelectList;  
-        //    }
-
-        //    var expenseTypeList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
-
-        //    if (expenseTypeList.Any())
-        //    {
-        //        model.ExpenseTypesList = expenseTypeList;
-        //    }
-
-        //    //descobrir o role do user
-
-        //    string userRole = string.Empty;
-
-        //    if (User.IsInRole("CondoManager"))
-        //    {
-        //        userRole = "CondoManager";
-        //    }
-
-        //    if (User.IsInRole("CondoMember"))
-        //    {
-        //        userRole = "CondoMember";
-        //    }
-
-        //    model.BeneficiaryTypeList = _paymentHelper.GetBeneficiaryTypesList(userRole);
-
-
-
-        //    return View(model);
-        //}
 
 
         [HttpGet]
@@ -223,6 +175,11 @@ namespace CondoManagementWebApp.Controllers
             if (!ModelState.IsValid)
             {
                 _flashMessage.Danger("Unable to issue one time payment");
+                model.CondominiumId = null;
+                model.SelectedCondoMemberId = null;
+
+                ModelState.Remove("CondominiumId");
+                ModelState.Remove("SelectedCondoMemberId");
                 return View("CreateOneTimePayment", await BuildCreatePaymentViewModel(model));
             }
 
@@ -231,6 +188,11 @@ namespace CondoManagementWebApp.Controllers
                 if (string.IsNullOrWhiteSpace(model.Recipient) || string.IsNullOrWhiteSpace(model.ExternalRecipientBankAccount))
                 {
                     _flashMessage.Danger("Please enter recipient name and bank account.");
+                    model.CondominiumId = null;
+                    model.SelectedCondoMemberId = null;
+
+                    ModelState.Remove("CondominiumId");
+                    ModelState.Remove("SelectedCondoMemberId");
                     return View("CreateOneTimePayment", await BuildCreatePaymentViewModel(model));
                 }
             }
@@ -250,11 +212,16 @@ namespace CondoManagementWebApp.Controllers
                     }
                 }
 
-                // PREENCHER MODEL (propriedades fora da view)
+          
                 var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
                 if (condoManagerCondos != null && !condoManagerCondos.Any())
                 {
                     _flashMessage.Danger("You are not managing any condominiums currently");
+                    model.CondominiumId = null;
+                    model.SelectedCondoMemberId = null;
+
+                    ModelState.Remove("CondominiumId");
+                    ModelState.Remove("SelectedCondoMemberId");
                     return View("CreateOneTimePayment", await BuildCreatePaymentViewModel());
                 }
 
@@ -264,6 +231,11 @@ namespace CondoManagementWebApp.Controllers
                 if (expenseType == null)
                 {
                     _flashMessage.Danger("Unable to select this type of expense");
+                    model.CondominiumId = null;
+                    model.SelectedCondoMemberId = null;
+
+                    ModelState.Remove("CondominiumId");
+                    ModelState.Remove("SelectedCondoMemberId");
                     return View("CreateOneTimePayment", await BuildCreatePaymentViewModel(model));
                 }
 
@@ -300,6 +272,11 @@ namespace CondoManagementWebApp.Controllers
                 if (!payerFinancialAccountId.HasValue)
                 {
                     _flashMessage.Danger("Unable to resolve financial account.");
+                    model.CondominiumId = null;
+                    model.SelectedCondoMemberId = null;
+
+                    ModelState.Remove("CondominiumId");
+                    ModelState.Remove("SelectedCondoMemberId");
                     return View("CreateOneTimePayment", await BuildCreatePaymentViewModel(model));
                 }
 
@@ -343,6 +320,12 @@ namespace CondoManagementWebApp.Controllers
                 }
 
                 _flashMessage.Danger("Unable to issue payment");
+                model.CondominiumId = null;
+                model.SelectedCondoMemberId = null;
+
+                ModelState.Remove("CondominiumId");
+                ModelState.Remove("SelectedCondoMemberId");
+
                 return View("CreateOneTimePayment", await BuildCreatePaymentViewModel(model));
             }
             catch

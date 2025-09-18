@@ -12,8 +12,8 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 namespace ProjectCondoManagement.Migrations
 {
     [DbContext(typeof(DataContextFinances))]
-    [Migration("20250902165540_InitCreate")]
-    partial class InitCreate
+    [Migration("20250918141028_InitCreateFinances")]
+    partial class InitCreateFinances
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -147,6 +147,12 @@ namespace ProjectCondoManagement.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal?>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("BeneficiaryAccountId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CondominiumId")
                         .HasColumnType("int");
 
@@ -155,6 +161,12 @@ namespace ProjectCondoManagement.Migrations
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("ExpenseType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExternalRecipientBankAccount")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("InvoiceId")
                         .HasColumnType("int");
@@ -168,11 +180,20 @@ namespace ProjectCondoManagement.Migrations
                     b.Property<string>("MbwayNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Payer")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("PayerFinancialAccountId")
                         .HasColumnType("int");
 
                     b.Property<string>("PaymentMethod")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Recipient")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SelectedBeneficiaryId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("TransactionId")
                         .HasColumnType("int");
@@ -210,6 +231,9 @@ namespace ProjectCondoManagement.Migrations
 
                     b.Property<int?>("PaymentId")
                         .HasColumnType("int");
+
+                    b.Property<string>("RecipientName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

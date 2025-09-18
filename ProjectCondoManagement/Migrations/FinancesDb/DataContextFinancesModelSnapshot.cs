@@ -8,7 +8,7 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.FinancesDb
+namespace ProjectCondoManagement.Migrations
 {
     [DbContext(typeof(DataContextFinances))]
     partial class DataContextFinancesModelSnapshot : ModelSnapshot

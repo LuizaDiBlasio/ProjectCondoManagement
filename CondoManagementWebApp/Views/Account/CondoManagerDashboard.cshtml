@@ -20,7 +20,7 @@
 
     <div class="accordion" id="managerDashboardAccordion">
 
-        <!-- Condominiums (all) -->
+        <!-- Condominiums -->
         <div class="accordion-item mb-2 rounded shadow-sm">
             <h2 class="accordion-header" id="headingCondos">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCondos" aria-expanded="true" aria-controls="collapseCondos">
@@ -53,47 +53,12 @@
             </div>
         </div>
 
-        <!-- Occurrences (recent 5) -->
-        <div class="accordion-item mb-2 rounded shadow-sm">
-            <h2 class="accordion-header" id="headingOccurrences">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOccurrences" aria-expanded="false" aria-controls="collapseOccurrences">
-                    Recent Occurrences
-                </button>
-            </h2>
-            <div id="collapseOccurrences" class="accordion-collapse collapse" aria-labelledby="headingOccurrences" data-bs-parent="#managerDashboardAccordion">
-                <div class="accordion-body p-0">
-                    <div class="card bg-white border border-light shadow-sm rounded text-dark">
-                        <div class="card-body">
-                            @if (Model.Occurrences != null && Model.Occurrences.Any())
-                            {
-                                <ul class="list-group">
-                                    @foreach (var occ in Model.Occurrences
-                                                                    .OrderByDescending(o => o.DateAndTime)
-                                                                    .Take(5))
-                                    {
-                                        <li class="list-group-item">
-                                            <strong>@occ.Subject</strong><br />
-                                            <small class="text-secondary">@occ.DateAndTime.ToString("MM/dd/yyyy")</small><br />
-                                            @occ.Details
-                                        </li>
-                                    }
-                                </ul>
-                            }
-                            else
-                            {
-                                <p class="text-secondary">No occurrences found.</p>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Payments (next 5 unpaid) -->
+        <!-- Pending Payments (next 5 unpaid) -->
         <div class="accordion-item mb-2 rounded shadow-sm">
             <h2 class="accordion-header" id="headingPayments">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePayments" aria-expanded="false" aria-controls="collapsePayments">
-                    Upcoming Payments
+                    Pending Payments
                 </button>
             </h2>
             <div id="collapsePayments" class="accordion-collapse collapse" aria-labelledby="headingPayments" data-bs-parent="#managerDashboardAccordion">
@@ -112,10 +77,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (var p in Model.Payments
-                                                                            .Where(p => !p.IsPaid)
-                                                                            .OrderBy(p => p.DueDate)
-                                                                            .Take(5))
+                                        @foreach (var p in Model.Payments.Where(p => !p.IsPaid).OrderBy(p => p.DueDate).Take(5))
                                         {
                                             <tr>
                                                 <td>@p.DueDate.ToString("MM/dd/yyyy")</td>
@@ -129,7 +91,7 @@
                             }
                             else
                             {
-                                <p class="text-secondary">No unpaid payments registered.</p>
+                                <p class="text-secondary">No pending payments registered.</p>
                             }
                         </div>
                     </div>
@@ -137,7 +99,7 @@
             </div>
         </div>
 
-        <!-- Meetings (next 5) -->
+        <!-- Meetings (next 5 upcoming ) -->
         <div class="accordion-item mb-2 rounded shadow-sm">
             <h2 class="accordion-header" id="headingMeetings">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMeetings" aria-expanded="false" aria-controls="collapseMeetings">
@@ -146,70 +108,134 @@
             </h2>
             <div id="collapseMeetings" class="accordion-collapse collapse" aria-labelledby="headingMeetings" data-bs-parent="#managerDashboardAccordion">
                 <div class="accordion-body p-0">
-                    <div class="card bg-white border border-light shadow-sm rounded text-dark">
-                        <div class="card-body">
-                            @if (Model.Meetings != null && Model.Meetings.Any())
+                    @if (Model.Meetings != null && Model.Meetings.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var mt in Model.Meetings.OrderBy(m => m.DateAndTime).Take(5))
                             {
-                                <ul class="list-group">
-                                    @foreach (var mt in Model.Meetings
-                                                                    .OrderBy(m => m.DateAndTime)
-                                                                    .Take(5))
-                                    {
-                                        <li class="list-group-item">
-                                            <strong>@mt.Title</strong><br />
-                                            <small class="text-secondary">@mt.DateAndTime.ToString("MM/dd/yyyy HH:mm")</small><br />
-                                            @mt.Description
-                                        </li>
-                                    }
-                                </ul>
-                            }
-                            else
-                            {
-                                <p class="text-secondary">No upcoming meetings.</p>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                                <div class="list-group-item border-0 mb-3 shadow-sm rounded p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="mb-0 text-primary">
+                                            <i class="bi bi-calendar-event me-2"></i> @mt.Title
+                                        </h5>
+                                        <span class="badge bg-light text-dark">
+                                            @mt.DateAndTime.ToString("dd/MM/yyyy HH:mm")
+                                        </span>
+                                    </div>
 
-        <!-- Messages (recent 5) -->
-        <div class="accordion-item mb-2 rounded shadow-sm">
-            <h2 class="accordion-header" id="headingMessages">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMessages" aria-expanded="false" aria-controls="collapseMessages">
-                    Recent Messages
-                </button>
-            </h2>
-            <div id="collapseMessages" class="accordion-collapse collapse" aria-labelledby="headingMessages" data-bs-parent="#managerDashboardAccordion">
-                <div class="accordion-body p-0">
-                    <div class="card bg-white border border-light shadow-sm rounded text-dark">
-                        <div class="card-body">
-                            @if (Model.Messages != null && Model.Messages.Any())
-                            {
-                                <div class="list-group">
-                                    @foreach (var msg in Model.Messages
-                                                                    .OrderByDescending(m => m.PostingDate)
-                                                                    .Take(5))
+                                    <p class="mb-1 text-muted">
+                                        <strong>Condominium:</strong>
+                                        @{
+                                            var condo = Model.Condominiums.FirstOrDefault(c => c.Id == mt.CondominiumId);
+                                            if (condo != null)
+                                            {
+                                                @condo.CondoName
+                                                ;
+                                            }
+                                        }
+                                    </p>
+
+                                    @if (!string.IsNullOrEmpty(mt.Description))
                                     {
-                                        <a href="#" class="list-group-item list-group-item-action text-dark">
-                                            <div class="d-flex w-100 justify-content-between">
-                                                <h6 class="mb-1">@msg.MessageTitle</h6>
-                                                <small class="text-secondary">@msg.PostingDate?.ToString("MM/dd/yyyy")</small>
-                                            </div>
-                                            <p class="mb-1">@msg.MessageContent</p>
-                                        </a>
+                                        <p class="mb-2"><em>@mt.Description</em></p>
+                                    }
+
+                                    @if (mt.CondoMembersDto != null && mt.CondoMembersDto.Any())
+                                    {
+                                        <div class="mb-2">
+                                            <strong>Members:</strong>
+                                            <ul class="small text-muted ps-3">
+                                                @foreach (var member in mt.CondoMembersDto)
+                                                {
+                                                    <li>@member.FullName (@member.Email)</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+
+                                    @if (mt.OccurencesDto != null && mt.OccurencesDto.Any(o => !o.IsResolved))
+                                    {
+                                        <div class="mb-2">
+                                            <strong>Occurrences:</strong>
+                                            <ul class="small text-danger ps-3">
+                                                @foreach (var occ in mt.OccurencesDto.Where(o => !o.IsResolved))
+                                                {
+                                                    <li>
+                                                        <strong>@occ.Subject</strong> - @occ.DateAndTime.ToString("dd/MM/yyyy")<br />
+                                                        @occ.Details
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(mt.MeetingLink))
+                                    {
+                                        var now = DateTime.Now;
+                                        var start = mt.DateAndTime.AddHours(-3);
+                                        var end = mt.DateAndTime.AddHours(3);
+
+                                        if (now >= start && now <= end)
+                                        {
+                                            <a href="@mt.MeetingLink" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-link-45deg"></i> Join Meeting
+                                            </a>
+                                        }
                                     }
                                 </div>
                             }
-                            else
-                            {
-                                <p class="text-secondary">No messages received.</p>
-                            }
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <p class="text-secondary p-3">No upcoming meetings.</p>
+                    }
                 </div>
             </div>
         </div>
 
-    </div>
-</div>
+
+
+        <!-- Occurrences (recent 5 unresolved) -->
+        <div class="accordion-item mb-2 rounded shadow-sm">
+            <h2 class="accordion-header" id="headingOccurrences">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOccurrences" aria-expanded="false" aria-controls="collapseOccurrences">
+                    Recent Unresolved Occurrences
+                </button>
+            </h2>
+            <div id="collapseOccurrences" class="accordion-collapse collapse" aria-labelledby="headingOccurrences" data-bs-parent="#managerDashboardAccordion">
+                <div class="accordion-body p-0">
+                    @if (Model.Occurrences != null && Model.Occurrences.Any(o => !o.IsResolved))
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var occ in Model.Occurrences
+                                                    .Where(o => !o.IsResolved)
+                                                    .OrderByDescending(o => o.DateAndTime)
+                                                    .Take(5))
+                            {
+                                <div class="list-group-item border-0 mb-3 shadow-sm rounded p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="mb-0 text-primary">
+                                            <i class="bi bi-exclamation-circle me-2"></i> @occ.Subject
+                                        </h5>
+                                        <span class="badge bg-light text-dark">
+                                            @occ.DateAndTime.ToString("dd/MM/yyyy HH:mm")
+                                        </span>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(occ.Details))
+                                    {
+                                        <p class="mb-2 text-muted"><em>@occ.Details</em></p>
+                                    }
+                                  
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-secondary p-3">No unresolved occurrences found.</p>
+                    }
+                </div>
+            </div>
+        </div>

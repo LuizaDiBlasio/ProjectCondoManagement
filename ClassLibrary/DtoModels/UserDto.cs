@@ -21,7 +21,7 @@ namespace ClassLibrary.DtoModels
 
         public DateTime? BirthDate { get; set; }
 
-        public List<CompanyDto> CompaniesDto { get; set; }
+        public List<CompanyDto> CompaniesDto { get; set; } = new List<CompanyDto>();
 
         public int? FinancialAccountId { get; set; } 
 

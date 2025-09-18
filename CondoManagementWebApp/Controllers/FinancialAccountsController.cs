@@ -304,8 +304,10 @@ namespace CondoManagementWebApp.Controllers
             try
             {
 
-                var transaction = new TransactionDto
+                var transaction = new
+                TransactionDto
                 {
+                    RecipientName = financialAccountDto.OwnerName,
                     DateAndTime = DateTime.Now,
                     BeneficiaryAccountId = financialAccountDto.Id,
                     ExternalRecipientBankAccount = $"{financialAccountDto.OwnerName}'s Wallet",

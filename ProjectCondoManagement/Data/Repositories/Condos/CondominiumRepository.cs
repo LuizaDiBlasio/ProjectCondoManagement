@@ -229,15 +229,20 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             }
         }
 
-        public Task<IEnumerable<CondominiumDto>?> GetCondominiumsByCompanyIdAsync(int id)
+        public async Task<List<CondominiumDto>> GetCondominiumsByCompanyIdAsync(int id)
         {
-            var condos = _dataContextCondos.Condominiums
-                            .Where(c => c.CompanyId == id).Include(c => c.Units).Include(c => c.Occurrences).Include(c => c.Meetings);
+            var condos = await _dataContextCondos.Condominiums
+                .Where(c => c.CompanyId == id)
+                .Include(c => c.Units)
+                .Include(c => c.Occurrences)
+                .Include(c => c.Meetings)
+                .ToListAsync();
 
-            var condosDto = condos.Select(c => _converterHelper.ToCondominiumDto(c, false));
+            var condosDto = condos
+                .Select(c => _converterHelper.ToCondominiumDto(c, true))
+                .ToList();
 
-            return  condosDto.Any() ? Task.FromResult<IEnumerable<CondominiumDto>?>(condosDto) : Task.FromResult<IEnumerable<CondominiumDto>?>(null);
-
+            return condosDto;
         }
 
         public Task<Condominium> GetCondominiumByFinancialAccountIdAsync(int id)

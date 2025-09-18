@@ -29,6 +29,6 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
         public string PhoneNumber { get; set; }
 
         public string TaxIdDocument { get; set; }
-
+        public List<int>? CondominiumIds { get; internal set; }
     }
 }

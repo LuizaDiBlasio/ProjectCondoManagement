@@ -521,7 +521,7 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet("GetUserByEmail2")]
         public async Task<IActionResult> GetUserByEmail2([FromQuery] string email)
         {
-            var user = await _userHelper.GetUserByEmailAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
 
             if (user == null)
             {
@@ -698,6 +698,21 @@ namespace ProjectCondoManagement.Controllers
         {
             var managers = await _userHelper.GetUsersWithCompanyByRoleAsync("CondoManager");
 
+            if (!this.User.IsInRole("SysAdmin"))
+            {
+                var currentUserEmail = User.Identity?.Name;
+                var currentUser = await _userHelper.GetUserByEmailWithCompaniesAsync(currentUserEmail);
+                if (currentUser == null)
+                {
+                    return Unauthorized(new { Message = "Current user not found." });
+                }
+
+                var userCompaniesIds = currentUser.Companies.Select(c => c.Id).ToList();
+
+                managers = managers.Where(m => m.Companies.Any(c => userCompaniesIds.Contains(c.Id))).ToList();
+
+            }           
+
             var managersDto = managers
                 .Select(m => _converterHelper.ToUserDto((User)m, true))
                 .ToList();
@@ -711,7 +726,6 @@ namespace ProjectCondoManagement.Controllers
             var user = await _userHelper.GetUserByEmailAsync(email);
 
             var userRoles = await _userHelper.GetRolesAsync(user);
-                .ToList();
 
             return userRoles.FirstOrDefault();
         }

@@ -66,11 +66,21 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             }
         }
 
-        public async Task<CondoMember> GetCondoMemberByEmailAsync(string email)
+        public async Task<CondoMember> GetCondoMemberByEmailAsync(string email, bool includeUnitsAndCondominums = true)
         {
-            var condoMember = await GetAll(_context).Include(c => c.Units)
+            var condoMember = new CondoMember();
+
+            if (includeUnitsAndCondominums)
+            {
+                condoMember = await GetAll(_context).Include(c => c.Units)
                                             .ThenInclude(u => u.Condominium)
                                             .FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
+            }
+
+            else
+            {
+                condoMember = await GetAll(_context).FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
+            }
             
             if (condoMember == null)
             {

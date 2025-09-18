@@ -13,5 +13,11 @@ namespace CondoManagementWebApp.Models
 
         public CondoMemberDto? CondoMemberDto { get; set; }
 
+
+        public List<OccurrenceDto>? OccurrenceDtos { get; set; }
+
+
+        public List<PaymentDto>? PaymentsDtos { get; set; }
+        public List<MeetingDto>? MeetingsDtos { get; internal set; }
     }
 }

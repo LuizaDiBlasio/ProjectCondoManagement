@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.FinancesDb
+namespace ProjectCondoManagement.Migrations
 {
     /// <inheritdoc />
     public partial class InitCreateFinances : Migration
@@ -131,6 +131,7 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
                     PayerAccountId = table.Column<int>(type: "int", nullable: true),
                     BeneficiaryAccountId = table.Column<int>(type: "int", nullable: true),
                     ExternalRecipientBankAccount = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RecipientName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PaymentId = table.Column<int>(type: "int", nullable: true),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     CompanyId = table.Column<int>(type: "int", nullable: true)

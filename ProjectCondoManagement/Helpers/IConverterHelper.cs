@@ -61,9 +61,9 @@ namespace ProjectCondoManagement.Helpers
 
         FinancialAccount ToFinancialAccount(FinancialAccountDto financialAccountDto, bool isNew);
 
-        OccurrenceDto ToOccurrenceDto(Occurrence occurrence, bool isNew);
+        OccurrenceDto ToOccurrenceDto(Occurrence occurrence, bool isNew, bool includeUnits = true);
 
-        MeetingDto ToMeetingDto(Meeting meeting);
+        MeetingDto ToMeetingDto(Meeting meeting, bool IncludeOccurence = true);
 
         Meeting ToMeeting(MeetingDto meetingDto, bool isNew);
 

@@ -2,6 +2,8 @@
 {
     public class CompanyDto
     {
+        public List<int> SelectedCondominiumIds;
+
         public int Id { get; set; }
 
         public string Name { get; set; }
