@@ -2,7 +2,8 @@
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using ProjectCondoManagement.Data.Entites.UsersDb;
-using System.Security.Claims;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Helpers
 {
@@ -10,11 +11,11 @@ namespace ProjectCondoManagement.Helpers
     {
 
         Task<User> CreateUser(RegisterUserDto registerDtoModel); //cria user com base no RegisterUserDto
-        
+
         Task<User> GetUserByEmailAsync(string email); //passa o email para buscar user
 
-        Task<User> GetUserByEmailWithCompanyAsync(string email); //passa o email para buscar user com a empresa associada
-        
+        Task<User> GetUserByEmailWithCompaniesAsync(string email); //passa o email para buscar user com a empresa associada
+
         Task<List<User>> GetUsersByEmailsAsync(IEnumerable<string> emails); //recebe uma lista de emails e devolve uma lista de users 
 
         Task<IdentityResult> AddUserAsync(User user, string password); //adiciona user na BD
@@ -64,7 +65,7 @@ namespace ProjectCondoManagement.Helpers
 
         Task<bool> ExistsAsync(string email);
 
-
+        Task<List<User>> GetUsersWithCompanyByRoleAsync(string role);
         Task<User> GetUserByFinancialAccountIdAsync(int financialAccountId);
     }
 }

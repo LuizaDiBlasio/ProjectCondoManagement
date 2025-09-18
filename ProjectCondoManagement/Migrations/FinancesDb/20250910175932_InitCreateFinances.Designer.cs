@@ -9,11 +9,11 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations
+namespace ProjectCondoManagement.Migrations.FinancesDb
 {
     [DbContext(typeof(DataContextFinances))]
-    [Migration("20250909122306_UpdatePayment2")]
-    partial class UpdatePayment2
+    [Migration("20250910175932_InitCreateFinances")]
+    partial class InitCreateFinances
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -150,7 +150,7 @@ namespace ProjectCondoManagement.Migrations
                     b.Property<decimal?>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("BeneficiaryAccountId")
+                    b.Property<int?>("BeneficiaryAccountId")
                         .HasColumnType("int");
 
                     b.Property<int>("CondominiumId")
@@ -161,6 +161,9 @@ namespace ProjectCondoManagement.Migrations
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("ExpenseType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ExternalRecipientBankAccount")
                         .HasColumnType("nvarchar(max)");
@@ -175,6 +178,9 @@ namespace ProjectCondoManagement.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("MbwayNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Payer")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PayerFinancialAccountId")

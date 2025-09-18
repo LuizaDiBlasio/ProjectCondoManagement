@@ -5,8 +5,15 @@ namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
 {
     public interface ICondoMemberRepository : IGenericRepository<CondoMember, DataContextCondos>
     {
-        public Task<Response<object>> LinkImages(IEnumerable<CondoMember> condoMembers);
+        Task<Response<object>> LinkImages(IEnumerable<CondoMember> condoMembers);
 
+        Task<CondoMember> GetCondoMemberByEmailAsync(string email);
+
+        Task<CondoMember?> GetByIdWithIncludeAsync(int id, DataContextCondos context);
+
+        Task<bool> AssociateFinancialAccountAsync(string? email, int? financialAccountId);
+
+        Task<List<CondoMember>> GetCondoMembersByEmailsAsync(List<string> emails);
         public Task<CondoMember> GetCondoMemberByEmailAsync(string email);
         public Task<CondoMember?> GetByIdWithIncludeAsync(int id, DataContextCondos context);
         public Task<bool> AssociateFinancialAccountAsync(string? email, int? financialAccountId);

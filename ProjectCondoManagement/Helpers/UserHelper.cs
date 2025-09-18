@@ -2,6 +2,7 @@
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
@@ -21,7 +22,6 @@ namespace ProjectCondoManagement.Helpers
         private readonly IFinancialAccountRepository _financialAccountRepository;
 
         private readonly DataContextFinances _dataContextFinances;
-
 
 
         public UserHelper(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager,
@@ -49,8 +49,6 @@ namespace ProjectCondoManagement.Helpers
                 return null; //já existe o user --> resposta negativa (null)
             }
 
-            
-
             user = new User
             {
                 FullName = registerDtoModel.FullName,
@@ -60,11 +58,10 @@ namespace ProjectCondoManagement.Helpers
                 PhoneNumber = registerDtoModel.PhoneNumber,
                 ImageUrl = registerDtoModel.ImageUrl,
                 BirthDate = registerDtoModel.BirthDate,
-                CompanyId = registerDtoModel.CompanyId,
                 FinancialAccountId = null,
             };
 
-            if (registerDtoModel.SelectedRole == "CondoMember")
+            if (registerDtoModel.SelectedRole == "CondoMember") // add fin. acc. pessoal do member
             {
                 var financialAccount = new FinancialAccount
                 {
@@ -77,6 +74,18 @@ namespace ProjectCondoManagement.Helpers
                 user.FinancialAccountId = financialAccount.Id;
             }
 
+            if (registerDtoModel.Companies != null && registerDtoModel.Companies.Any())
+            {
+                var companyIds = registerDtoModel.Companies.Select(c => c.Id).ToList();
+
+                // Buscar as empresas no banco de dados
+                var existingCompanies = await _dataContextUsers.Companies
+                                                                .Where(c => companyIds.Contains(c.Id))
+                                                                .ToListAsync();
+
+                // Atribuir user
+                user.Companies = existingCompanies;
+            }
 
             var result = await AddUserAsync(user, "123456"); //add user depois de criado
 
@@ -99,8 +108,7 @@ namespace ProjectCondoManagement.Helpers
                     break;
             }
 
-            //se for condoMember adicionanr uma financial account
-    
+
 
             ////TODO Tirar o if e essa atribuição de bool quando publicar, manter só o método de ativação
             //user.Uses2FA = true;
@@ -209,10 +217,10 @@ namespace ProjectCondoManagement.Helpers
             return await _userManager.FindByEmailAsync(email);
         }
 
-        public async Task<User> GetUserByEmailWithCompanyAsync(string email)
+        public async Task<User> GetUserByEmailWithCompaniesAsync(string email)
         {
             return await _dataContextUsers.Users
-                .Include(u => u.Company)
+                .Include(u => u.Companies)
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
@@ -395,7 +403,7 @@ namespace ProjectCondoManagement.Helpers
             }
             catch (Exception ex)
             {
-                return new Response<object> 
+                return new Response<object>
                 {
                     IsSuccess = false,
                     Message = $"Error deactivating User.({ex.Message})"
@@ -409,6 +417,7 @@ namespace ProjectCondoManagement.Helpers
         {
             return await _dataContextUsers.Users
                .Where(s => s.FullName.ToLower() == cleanedFullName)
+               .Include(s => s.Companies)
                .ToListAsync();
         }
 
@@ -440,10 +449,24 @@ namespace ProjectCondoManagement.Helpers
 
         public async Task<List<User>> GetUsersWithCompanyAsync()
         {
-          
+
             return await _userManager.Users
-                .Include(u => u.Company)
+                .Include(u => u.Companies)
                 .ToListAsync();
+        }
+
+        public async Task<List<User>> GetUsersWithCompanyByRoleAsync(string role)
+        {
+            var users = await _userManager.GetUsersInRoleAsync(role);
+
+            var userIds = users.Select(u => u.Id).ToList();
+
+            var usersWithCompanies = await _userManager.Users
+                .Where(u => userIds.Contains(u.Id))
+                .Include(u => u.Companies)
+                .ToListAsync();
+
+            return usersWithCompanies;
         }
 
 

@@ -8,6 +8,6 @@ namespace CondoManagementWebApp.Models
 
         public UserDto? CompanyAdmin { get; set; }
 
-        public List<CondominiumDto> CondominiumDtos { get; set; } = new List<CondominiumDto>();
+        public IEnumerable<CondominiumDto> CondominiumDtos { get; set; } = new List<CondominiumDto>();
     }
 }

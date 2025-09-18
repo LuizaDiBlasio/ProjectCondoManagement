@@ -10,7 +10,7 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
     {
         public int Id { get; set; }  
 
-        public int? CompanyId { get; set; }
+        public int CompanyId { get; set; }
 
         [NotMapped]
         public Company? Company { get; set; }
@@ -34,10 +34,7 @@ namespace ProjectCondoManagement.Data.Entites.CondosDb
 
         public IEnumerable<Unit>? Units { get; set; }
 
-        public IEnumerable<Document>? Documents { get; set; }
-
         public IEnumerable<Meeting>? Meetings { get; set; }
-
 
         public IEnumerable<Occurrence>? Occurrences { get; set; }
 

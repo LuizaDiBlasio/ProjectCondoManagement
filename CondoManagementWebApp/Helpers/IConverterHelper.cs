@@ -20,9 +20,9 @@ namespace CondoManagementWebApp.Helpers
             
         ProfileViewModel ToProfileViewModel(UserDto userDto);
 
-        EditUserDetailsViewModel ToEditUserDetailsViewModel(UserDto userDto, string? companyName);
+        EditUserDetailsViewModel ToEditUserDetailsViewModel(UserDto userDto, List<SelectListItem> companiesList, List<int>? selectedCompaniesIds, int? companyId);
 
-        EditUserDetailsDto ToEditUserDetailsDto(EditUserDetailsViewModel model, string? companyName);
+        EditUserDetailsDto ToEditUserDetailsDto(EditUserDetailsViewModel model);
 
         CompanyDto ToCompanyDto(CreateEditCompanyViewModel model);
 
@@ -50,6 +50,8 @@ namespace CondoManagementWebApp.Helpers
 
         EditMeetingViewModel ToEditMeetingViewModel(MeetingDto meeting);
 
-        MeetingDto ToEditedMeetingDto(EditMeetingViewModel model);
+        void SetEditedMeetingProperties(MeetingDto meetingDto, List<CondoMemberDto> condoMembersDto, List<OccurrenceDto> occurrencesDto, EditMeetingViewModel model);
+
+        List<SelectListItem> ToCompaniesSelectList(List<CompanyDto> companies);
     }
 }

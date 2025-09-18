@@ -34,6 +34,7 @@ namespace ClassLibrary.DtoModels
 
         [Required(ErrorMessage = "Birth date is required.")]
         [DataType(DataType.Date, ErrorMessage = "Invalid date format.")]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy HH:mm}", ApplyFormatInEditMode = true)]
         [Display(Name = "Birth Date")]
         public DateTime? BirthDate { get; set; }
 
@@ -46,14 +47,17 @@ namespace ClassLibrary.DtoModels
         public IEnumerable<UnitDto>? Units { get; set; }
 
 
-        public int CompanyId { get; set; }
-
-
         public string? ImageUrl { get; set; }
 
         public string ImageFullPath =>
           string.IsNullOrWhiteSpace(ImageUrl)
           ? "https://res.cloudinary.com/ddnkq9dyb/image/upload/v1754230681/noimage_q8mayx.jpg"
           : ImageUrl;
+
+        public override string ToString()
+        {
+            return FullName;
+        }
+
     }
 }

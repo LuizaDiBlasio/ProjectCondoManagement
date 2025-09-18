@@ -1,219 +1,261 @@
 ﻿@model CondoManagementWebApp.Models.EditMeetingViewModel
 
 @{
-    ViewData["Title"] = "Edit Meeting";
+	ViewData["Title"] = "Edit Meeting";
 }
 
 <div class="fix-wrapper">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10 col-md-12">
-                <div class="card mb-0 h-auto">
-                    <div class="card-body">
-                        <h4 class="text-center mb-4">Edit Meeting</h4>
-                        <hr class="mt-4 mb-5" style="border-top: 1px solid #e0e0e0; opacity: 0.8;" />
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-lg-10 col-md-12">
+				<div class="card mb-0 h-auto">
+					<div class="card-body">
+						<h4 class="text-center mb-4">Modify Meeting</h4>
+						<hr class="mt-4 mb-5" style="border-top: 1px solid #e0e0e0; opacity: 0.8;" />
 
-                        <div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
+						<div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
 
-                        <form asp-action="RequestEditMeeting">
-                            <input type="hidden" asp-for="Id" />
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-4">
-                                        <label asp-for="Title" class="form-label"></label>
-                                        <input asp-for="Title" class="form-control" />
-                                        <span asp-validation-for="Title" class="text-danger"></span>
-                                    </div>
-                                    <div class="form-group mb-4">
-                                        <label asp-for="Description" class="form-label"></label>
-                                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                                        <span asp-validation-for="Description" class="text-danger"></span>
-                                    </div>
-                                    <div class="form-group mb-4">
-                                        <label asp-for="DateAndTime" class="form-label"></label>
-                                        <input asp-for="DateAndTime" class="form-control" id="dateAndTimePicker" />
-                                        <span asp-validation-for="DateAndTime" class="text-danger"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-4">
-                                        <label asp-for="CondominiumId" class="form-label">Condominium</label>
-                                        <select asp-for="CondominiumId" asp-items="Model.CondosToSelect" class="form-control" id="condominiumSelect">
-                                            <option value="">-- Select Condominium --</option>
-                                        </select>
-                                        <span asp-validation-for="CondominiumId" class="text-danger"></span>
-                                    </div>
-                                    <div class="form-group mb-4">
-                                        <label asp-for="SelectedOccurrencesIds" class="form-label">Matters that will be discussed</label>
-                                        <div class="border p-3 rounded" style="max-height: 250px; overflow-y: auto;" id="occurrencesListContainer">
-                                            <p>Please select a condominium to load its occurrences.</p>
-                                        </div>
-                                        <span asp-validation-for="SelectedOccurrencesIds" class="text-danger"></span>
-                                    </div>
-                                    <div class="form-group mb-4">
-                                        <label asp-for="SelectedCondoMembersIds" class="form-label">Invite members</label>
-                                        <div class="border p-3 rounded" style="max-height: 250px; overflow-y: auto;" id="condoMembersListContainer">
-                                            <p>Please select a condominium to load its members.</p>
-                                        </div>
-                                        <span asp-validation-for="SelectedCondoMembersIds" class="text-danger"></span>
-                                    </div>
-                                    <div class="form-group mb-4">
-                                        <label class="form-label">Meeting Type</label>
-                                        <div class="form-check form-switch d-flex align-items-center">
-                                            <input class="form-check-input me-2" type="checkbox" id="isExtraMeetingSwitch" asp-for="MeetingType">
-                                            <label class="form-check-label" for="isExtraMeetingSwitch" id="isExtraMeetingLabel">
-                                                <span class="text-danger">Regular</span>
-                                            </label>
-                                        </div>
-                                        <span asp-validation-for="MeetingType" class="text-danger"></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group mt-3 d-flex justify-content-between align-items-center">
-                                <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+						<form asp-action="RequestEditMeeting">
+							<input type="hidden" asp-for="Id" />
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group mb-4">
+										<label asp-for="Title" class="form-label"></label>
+										<input asp-for="Title" class="form-control" />
+										<span asp-validation-for="Title" class="text-danger"></span>
+									</div>
+									<div class="form-group mb-4">
+										<label asp-for="Description" class="form-label"></label>
+										<textarea asp-for="Description" class="form-control" rows="3"></textarea>
+										<span asp-validation-for="Description" class="text-danger"></span>
+									</div>
+									<div class="form-group mb-4">
+										<label asp-for="DateAndTime" class="form-label"></label>
+										<input asp-for="DateAndTime" class="form-control" id="dateAndTimePicker" />
+										<span asp-validation-for="DateAndTime" class="text-danger"></span>
+									</div>
+									<div class="form-group mb-4">
+										<label asp-for="CondominiumId" class="form-label">Condominium</label>
+										<select asp-for="CondominiumId" asp-items="Model.CondosToSelect" class="form-control" id="condominiumSelect">
+											<option value="">-- Select Condominium --</option>
+										</select>
+										<span asp-validation-for="CondominiumId" class="text-danger"></span>
+									</div>
+								</div>
+								<div class="col-md-6">
+									
+									<div class="form-group mb-4">
+										<label asp-for="SelectedOccurrencesIds" class="form-label">Matters that will be discussed</label>
+										<div class="border p-3 rounded" style="max-height: 150px; overflow-y: auto;" id="occurrencesListContainer">
+											@if (Model.OccurrencesToSelect != null && Model.OccurrencesToSelect.Any())
+											{
+												@foreach (var occurrence in Model.OccurrencesToSelect)
+												{
+													var isChecked = Model.SelectedOccurrencesIds.Contains(int.Parse(occurrence.Value)) ? "checked" : "";
+													<div class="form-check">
+														<input type="checkbox"
+																							  name="SelectedOccurrencesIds"
+																							  value="@occurrence.Value"
+																							  id="occurrence_@occurrence.Value"
+																							  class="form-check-input"
+														@isChecked />
+														<label class="form-check-label" for="occurrence_@occurrence.Value">
+															@occurrence.Text
+														</label>
+													</div>
+												}
+											}
+											else
+											{
+												<p>No occurrences for this condominium.</p>
+											}
+										</div>
+										<span asp-validation-for="SelectedOccurrencesIds" class="text-danger"></span>
+									</div>
+
+									<div class="form-group mb-4">
+										<label asp-for="SelectedCondoMembersIds" class="form-label">Invite members</label>
+										<div class="border p-3 rounded" style="max-height: 150px; overflow-y: auto;" id="condoMembersListContainer">
+											@if (Model.CondoMembersToSelect != null && Model.CondoMembersToSelect.Any())
+											{
+												@foreach (var member in Model.CondoMembersToSelect)
+												{
+													var isChecked = Model.SelectedCondoMembersIds.Contains(int.Parse(member.Value)) ? "checked" : "";
+													<div class="form-check">
+														<input type="checkbox"
+																							  name="SelectedCondoMembersIds"
+																							  value="@member.Value"
+																							  id="condomember_@member.Value"
+																							  class="form-check-input"
+														@isChecked />
+														<label class="form-check-label" for="condomember_@member.Value">
+															@member.Text
+														</label>
+													</div>
+												}
+											}
+											else
+											{
+												<p>Condominium has no members yet.</p>
+											}
+										</div>
+										<span asp-validation-for="SelectedCondoMembersIds" class="text-danger"></span>
+									</div>
+									<div class="form-group mb-4">
+										<label class="form-label">Meeting Type</label>
+										<div class="form-check form-switch d-flex align-items-center">
+											<input class="form-check-input me-2" type="checkbox" id="isExtraMeetingSwitch" asp-for="MeetingType">
+											<label class="form-check-label" for="isExtraMeetingSwitch" id="isExtraMeetingLabel">
+												<span class="text-danger">Regular</span>
+											</label>
+										</div>
+										<span asp-validation-for="MeetingType" class="text-danger"></span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group mt-3 d-flex justify-content-between align-items-center">
+								<a asp-action="IndexMeetings" class="btn btn-outline-secondary">Back to List</a>
+								<button type="submit" class="btn btn-primary">Save Changes</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
 
-    <!-- Include Syncfusion DateTimePicker library -->
-    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css" />
+	<script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css" />
 
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            // Inicializa o Syncfusion DateTimePicker
-            var initialDateTime = '@(Model.DateAndTime.HasValue ? Model.DateAndTime.Value.ToString("yyyy-MM-ddTHH:mm:ss") : "")';
-            var dateTimePicker = new ej.calendars.DateTimePicker({
-                format: 'MM/dd/yyyy HH:mm',
-                placeholder: 'Select a date and time',
-                min: new Date(),
-                value: initialDateTime ? new Date(initialDateTime) : null
-            });
-            dateTimePicker.appendTo('#dateAndTimePicker');
+	<script type="text/javascript">
+		document.addEventListener('DOMContentLoaded', function () {
+			console.log("DOM is ready. Starting script execution.");
+			// Inicializa o Syncfusion DateTimePicker
+			var initialDateTime = '@(Model.DateAndTime.HasValue ? Model.DateAndTime.Value.ToString("yyyy-MM-ddTHH:mm:ss") : "")';
+			var dateTimePicker = new ej.calendars.DateTimePicker({
+				format: 'MM/dd/yyyy HH:mm',
+				placeholder: 'Select a date and time',
+				min: new Date(),
+				value: initialDateTime ? new Date(initialDateTime) : null
+			});
+			dateTimePicker.appendTo('#dateAndTimePicker');
 
-            // Script para o switch do tipo de reunião
-            const isExtraMeetingSwitch = document.getElementById('isExtraMeetingSwitch');
-            const isExtraMeetingLabel = document.getElementById('isExtraMeetingLabel');
+			// Script para o switch do tipo de reunião
+			const isExtraMeetingSwitch = document.getElementById('isExtraMeetingSwitch');
+			const isExtraMeetingLabel = document.getElementById('isExtraMeetingLabel');
 
-            function updateLabel() {
-                if (isExtraMeetingSwitch.checked) {
-                    isExtraMeetingLabel.innerHTML = '<span class="text-success">Extra</span>';
-                } else {
-                    isExtraMeetingLabel.innerHTML = '<span class="text-danger">Regular</span>';
-                }
-            }
-            updateLabel(); // Define o estado inicial do rótulo
-            isExtraMeetingSwitch.addEventListener('change', updateLabel);
+			function updateLabel() {
+				if (isExtraMeetingSwitch.checked) {
+					isExtraMeetingLabel.innerHTML = '<span class="text-success">Extra</span>';
+				} else {
+					isExtraMeetingLabel.innerHTML = '<span class="text-danger">Regular</span>';
+				}
+			}
+			updateLabel(); // Define o estado inicial do rótulo
+			isExtraMeetingSwitch.addEventListener('change', updateLabel);
 
-            // Função para carregar ocorrências
-            function loadOccurrences(condoId, selectedIds) {
-                var occurrencesContainer = $('#occurrencesListContainer');
-                occurrencesContainer.empty();
+			// Funções para carregar ocorrências e membros
+			// Elas agora só serão chamadas no evento de 'change' do select
+			function loadOccurrences(id, selectedOccurrencesIds) {
+				var occurrencesContainer = $('#occurrencesListContainer');
+				occurrencesContainer.empty();
+				occurrencesContainer.append('<p class="text-info">Loading occurrences...</p>');
 
-                if (condoId) {
-                    $.ajax({
-                        url: `/GetOccurencesFromCondo/${condoId}`,
-                        type: 'GET',
-                        dataType: 'json',
-                        success: function (occurrences) {
-                            if (occurrences.length > 0) {
-                                $.each(occurrences, function (i, occurrence) {
-                                    var isChecked = selectedIds.includes(occurrence.value) ? 'checked' : '';
-                                    var checkboxHtml = `
-                                        <div class="form-check">
-                                            <input type="checkbox"
-                                                name="SelectedOccurrencesIds"
-                                                value="${occurrence.value}"
-                                                id="occurrence_${occurrence.value}"
-                                                class="form-check-input"
-                                                ${isChecked} />
-                                            <label class="form-check-label" for="occurrence_${occurrence.value}">
-                                                ${occurrence.text}
-                                            </label>
-                                        </div>`;
-                                    occurrencesContainer.append(checkboxHtml);
-                                });
-                            } else {
-                                occurrencesContainer.append('<p>No occurrences for this condominium.</p>');
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error("Error fetching occurrences: " + error);
-                            occurrencesContainer.append('<p>Error loading occurrences. Please try again.</p>');
-                        }
-                    });
-                }
-            }
+				if (id) {
+					$.ajax({
+						url: `/GetOccurencesFromCondo/${id}`,
+						type: 'GET',
+						dataType: 'json',
+						success: function (occurrences) {
+							occurrencesContainer.empty();
+							if (occurrences.length > 0) {
+								$.each(occurrences, function (i, occurrence) {
+									var isChecked = selectedOccurrencesIds.includes(parseInt(occurrence.value)) ? 'checked' : '';
+									var checkboxHtml = `
+										<div class="form-check">
+											<input type="checkbox"
+												name="SelectedOccurrencesIds"
+												value="${occurrence.value}"
+												id="occurrence_${occurrence.value}"
+												class="form-check-input"
+												${isChecked} />
+											<label class="form-check-label" for="occurrence_${occurrence.value}">
+												${occurrence.text}
+											</label>
+										</div>`;
+									occurrencesContainer.append(checkboxHtml);
+								});
+							} else {
+								occurrencesContainer.append('<p>No occurrences for this condominium.</p>');
+							}
+						},
+						error: function (xhr, status, error) {
+							console.error("Error fetching occurrences: " + error);
+							occurrencesContainer.empty();
+							occurrencesContainer.append('<p>Error loading occurrences. Please try again.</p>');
+						}
+					});
+				}
+			}
 
-            // Função para carregar membros do condomínio
-            function loadCondoMembers(condoId, selectedIds) {
-                var membersContainer = $('#condoMembersListContainer');
-                membersContainer.empty();
+			function loadCondoMembers(id, selectedMembersIds) {
+				var membersContainer = $('#condoMembersListContainer');
+				membersContainer.empty();
+				membersContainer.append('<p class="text-info">Loading members...</p>');
 
-                if (condoId) {
-                    $.ajax({
-                        url: `/GetCondoMembersFromCondo/${condoId}`,
-                        type: 'GET',
-                        dataType: 'json',
-                        success: function (condoMembers) {
-                            if (condoMembers.length > 0) {
-                                $.each(condoMembers, function (i, member) {
-                                    var isChecked = selectedIds.includes(member.value) ? 'checked' : '';
-                                    var checkboxHtml = `
-                                        <div class="form-check">
-                                            <input type="checkbox"
-                                                name="SelectedCondoMembersIds"
-                                                value="${member.value}"
-                                                id="condomember_${member.value}"
-                                                class="form-check-input"
-                                                ${isChecked} />
-                                            <label class="form-check-label" for="condomember_${member.value}">
-                                                ${member.text}
-                                            </label>
-                                        </div>`;
-                                    membersContainer.append(checkboxHtml);
-                                });
-                            } else {
-                                membersContainer.append('<p>Condominium has no members yet.</p>');
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error("Error fetching condo members: " + error);
-                            membersContainer.append('<p>Error loading members. Please try again.</p>');
-                        }
-                    });
-                }
-            }
+				if (id) {
+					$.ajax({
+						url: `/GetCondoMembersFromCondo/${id}`,
+						type: 'GET',
+						dataType: 'json',
+						success: function (condoMembers) {
+							membersContainer.empty();
+							if (condoMembers.length > 0) {
+								$.each(condoMembers, function (i, member) {
+									var isChecked = selectedMembersIds.includes(parseInt(member.value)) ? 'checked' : '';
+									var checkboxHtml = `
+										<div class="form-check">
+											<input type="checkbox"
+												name="SelectedCondoMembersIds"
+												value="${member.value}"
+												id="condomember_${member.value}"
+												class="form-check-input"
+												${isChecked} />
+											<label class="form-check-label" for="condomember_${member.value}">
+												${member.text}
+											</label>
+										</div>`;
+									membersContainer.append(checkboxHtml);
+								});
+							} else {
+								membersContainer.append('<p>Condominium has no members yet.</p>');
+							}
+						},
+						error: function (xhr, status, error) {
+							console.error("Error fetching condo members: " + error);
+							membersContainer.empty();
+							membersContainer.append('<p>Error loading members. Please try again.</p>');
+						}
+					});
+				}
+			}
 
-            // Lógica inicial para pré-selecionar os valores do modelo
-            var initialCondoId = $('#condominiumSelect').val();
-            var initialSelectedOccurrences = @(Html.Raw(Json.Serialize(Model.SelectedOccurrencesIds)));
-            var initialSelectedMembers = @(Html.Raw(Json.Serialize(Model.SelectedCondoMembersIds)));
-
-            if (initialCondoId) {
-                loadOccurrences(initialCondoId, initialSelectedOccurrences);
-                loadCondoMembers(initialCondoId, initialSelectedMembers);
-            }
-
-            // Ativar a função também no evento de mudança, para permitir a troca de condomínio
-            $('#condominiumSelect').change(function () {
-                var condoId = $(this).val();
-                loadOccurrences(condoId, []); 
-                loadCondoMembers(condoId, []); 
-            });
-        });
-    </script>
-
+			// Ativar a função no evento de mudança, para permitir a troca de condomínio
+			$('#condominiumSelect').change(function () {
+				var condoId = $(this).val();
+				if (condoId) {
+					// Quando o condomínio muda, não há pré-seleção
+					loadOccurrences(condoId, []);
+					loadCondoMembers(condoId, []);
+				}
+			});
+		});
+	</script>
 }

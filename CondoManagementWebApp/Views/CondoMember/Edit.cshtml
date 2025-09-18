@@ -4,52 +4,86 @@
     ViewData["Title"] = "Edit";
 }
 
-<h4>Edit Condo Member</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Edit Member</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+            </div>
+        </div>
 
-            <input type="hidden" asp-for="CompanyId" />
-         
-            <div class="form-group">
-                <label asp-for="FullName" class="control-label"></label>
-                <input asp-for="FullName" class="form-control" />
-                <span asp-validation-for="FullName" class="text-danger"></span>
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Member Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <form asp-action="Edit">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                                    <input type="hidden" asp-for="Id" />
+
+                                    <div class="form-group mb-3">
+                                        <label asp-for="FullName" class="control-label"></label>
+                                        <input asp-for="FullName" class="form-control" />
+                                        <span asp-validation-for="FullName" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label asp-for="Email" class="control-label"></label>
+                                        <input asp-for="Email" class="form-control" />
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label asp-for="Address" class="control-label"></label>
+                                        <input asp-for="Address" class="form-control" />
+                                        <span asp-validation-for="Address" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label asp-for="BirthDate" class="control-label"></label>
+                                        <input type="text" id="birthDateInput" asp-for="BirthDate" class="form-control" value="@Model.BirthDate?.ToString("MM-dd-yyyy")" placeholder="Select a date" />
+                                        <span asp-validation-for="BirthDate" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label asp-for="PhoneNumber" class="control-label"></label>
+                                        <input asp-for="PhoneNumber" class="form-control" />
+                                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group d-flex">
+                                        <button type="submit" class="btn btn-success me-2">Save</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Address" class="control-label"></label>
-                <input asp-for="Address" class="form-control" />
-                <span asp-validation-for="Address" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="BirthDate" class="control-label"></label>
-                <ejs-datepicker id="BirthDate"
-                                name="BirthDate"
-                                format="dd/MM/yyyy"
-								value="@Model.BirthDate"
-                                placeholder="Select birth date">
-                </ejs-datepicker>
-                <span asp-validation-for="BirthDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PhoneNumber" class="control-label"></label>
-                <input asp-for="PhoneNumber" class="form-control" />
-                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-            </div>
-     
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-success" />
-                <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializa o DatePicker para BirthDate
+            var birthDatePicker = new ej.calendars.DatePicker({
+                format: 'MM/dd/yyyy',
+                placeholder: 'Select a date',
+                max: new Date()
+            });
+            birthDatePicker.appendTo('#birthDateInput');
+        });
+    </script>
+}

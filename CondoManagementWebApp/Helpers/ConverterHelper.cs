@@ -54,7 +54,6 @@ namespace CondoManagementWebApp.Helpers
                 Email = condoMember.Email,
                 Address = condoMember.Address,
                 BirthDate = condoMember.BirthDate,
-                CompanyId = condoMember.CompanyId,
                 PhoneNumber = condoMember.PhoneNumber,
                 ImageUrl = condoMember.ImageUrl
             };
@@ -105,7 +104,7 @@ namespace CondoManagementWebApp.Helpers
             return model;   
         }
 
-        public EditUserDetailsViewModel ToEditUserDetailsViewModel (UserDto userDto, string? companyName)
+        public EditUserDetailsViewModel ToEditUserDetailsViewModel (UserDto userDto, List<SelectListItem> companiesList, List<int>? selectedCompaniesIds, int? companyId)
         {
             var model = new EditUserDetailsViewModel()
             {
@@ -117,15 +116,16 @@ namespace CondoManagementWebApp.Helpers
                 ImageUrl = userDto.ImageUrl,
                 IsActive = userDto.IsActive,
                 Email = userDto.Email,
-                CompanyName = companyName,
-                CompanyId = userDto.CompanyId,
-                FinancialAccountId = userDto.FinancialAccountId
+                AvailableCompanies = companiesList,
+                FinancialAccountId = userDto.FinancialAccountId,
+                SelectedCompaniesIds = selectedCompaniesIds,
+                SelectedCompanyId = companyId
             };
 
             return model;
         }
 
-        public EditUserDetailsDto ToEditUserDetailsDto (EditUserDetailsViewModel model, string? companyName)
+        public EditUserDetailsDto ToEditUserDetailsDto (EditUserDetailsViewModel model)
         {
             var editUserDetailsDto = new EditUserDetailsDto()
             {
@@ -137,9 +137,8 @@ namespace CondoManagementWebApp.Helpers
                 Email = model.Email,
                 IsActive = model.IsActive,
                 ImageUrl = model.ImageUrl,
-                CompanyName = model.CompanyName,
                 FinancialAccountId = model.FinancialAccountId, 
-                CompanyId = model.CompanyId 
+               
             };
 
             return editUserDetailsDto;
@@ -152,8 +151,6 @@ namespace CondoManagementWebApp.Helpers
             {
                 Id = model.Id,
                 Name = model.Name, 
-                CompanyAdminId = model.SelectedCompanyAdminId,
-                SelectedCondominiumIds = model.SelectedCondominiumIds,
                 Email = model.Email,
                 FinancialAccountId = model.FinancialAccountId,
                 Address = model.Address,
@@ -169,8 +166,6 @@ namespace CondoManagementWebApp.Helpers
             var model = new CreateEditCompanyViewModel()
             {
                 Name = editedCompany.Name,
-                SelectedCompanyAdminId = editedCompany.CompanyAdminId,
-                SelectedCondominiumIds = editedCompany.SelectedCondominiumIds,
                 Email = editedCompany.Email,
                 Address = editedCompany.Address,
                 FinancialAccountId = editedCompany.FinancialAccountId, 
@@ -309,11 +304,17 @@ namespace CondoManagementWebApp.Helpers
 
         public List<SelectListItem> ToOccurrenceSelectList(List<OccurrenceDto> occurrenceList)
         {
-            return occurrenceList.Select(o => new SelectListItem
+            var selectList = occurrenceList.Select(o => new SelectListItem
             {
                 Value = o.Id.ToString(),
                 Text = o.Subject.ToString()
             }).ToList();
+
+            selectList.Add(new SelectListItem() {Value = "0", Text = "Others" });
+
+            selectList.OrderByDescending(o => o.Value).ToList();
+
+            return selectList;
         }
 
         public MeetingDto ToNewMeetingDto(CreateMeetingViewModel model)
@@ -325,6 +326,7 @@ namespace CondoManagementWebApp.Helpers
                 DateAndTime = model.DateAndTime.Value, 
                 Title = model.Title,
                 Description = model.Description,
+                IsExtraMeeting = model.IsExtraMeeting,
 
             };
             return meetignDto;  
@@ -344,18 +346,27 @@ namespace CondoManagementWebApp.Helpers
             return model;   
         }
 
-        public MeetingDto ToEditedMeetingDto(EditMeetingViewModel model)
+
+        public void SetEditedMeetingProperties(MeetingDto meetingDto, List<CondoMemberDto> condoMembersDto, List<OccurrenceDto> occurrencesDto, EditMeetingViewModel model)
         {
-            var meetingDto = new MeetingDto()
+            meetingDto.CondoMembersDto = condoMembersDto;
+            meetingDto.OccurencesDto = occurrencesDto;
+            meetingDto.Title = model.Title;
+            meetingDto.IsExtraMeeting = model.MeetingType;
+            meetingDto.CondominiumId = model.CondominiumId.Value;
+            meetingDto.DateAndTime = model.DateAndTime.Value;
+            meetingDto.Description = model.Description;
+          
+        }
+
+        public List<SelectListItem> ToCompaniesSelectList(List<CompanyDto> companies)
+        {
+            return companies.Select(cm => new SelectListItem
             {
-                Id = model.Id,
-                CondominiumId = model.CondominiumId.Value,
-                DateAndTime = model.DateAndTime.Value,
-                Title = model.Title,    
-                Description = model.Description,    
-                IsExtraMeeting = model.MeetingType,
-            };
-            return meetingDto;  
-        }  
+                Value = cm.Id.ToString(),
+                Text = cm.Name.ToString()
+            }).ToList();
+        }
+
     }
 }

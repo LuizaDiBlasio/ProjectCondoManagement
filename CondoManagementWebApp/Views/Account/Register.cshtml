@@ -56,6 +56,46 @@
                                         <select asp-for="SelectedRole" asp-items="Model.AvailableRoles" class="form-control" id="SelectedRole"></select>
                                         <span asp-validation-for="SelectedRole" class="text-danger"></span>
                                     </div>
+                                   
+                                    <div id="radioButtonsContainer" class="form-group mb-4" style="display:none;">
+                                        <label class="form-label">Company</label>
+                                        <span asp-validation-for="SelectedCompanyId" class="text-danger"></span>
+                                        <div>
+                                            @foreach (var company in Model.AvailableCompanies)
+                                            {
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio"
+                                                           name="SelectedCompanyId"
+                                                           id="@($"company_radio_{company.Value}")"
+                                                           value="@company.Value"
+                                                    @(company.Value == Model.SelectedCompanyId.ToString() ? "checked" : "") />
+                                                    <label class="form-check-label" for="@($"company_radio_{company.Value}")">
+                                                        @company.Text
+                                                    </label>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div id="checkboxesContainer" class="form-group mb-4" style="display:none;">
+                                        <label class="form-label">Companies</label>
+                                        <span asp-validation-for="SelectedCompaniesIds" class="text-danger"></span>
+                                        <div>
+                                            @foreach (var company in Model.AvailableCompanies)
+                                            {
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           name="SelectedCompaniesIds"
+                                                           id="@($"company_checkbox_{company.Value}")"
+                                                           value="@company.Value"
+                                                    @(Model.SelectedCompaniesIds != null && Model.SelectedCompaniesIds.Contains(int.Parse(company.Value)) ? "checked" : "") />
+                                                    <label class="form-check-label" for="@($"company_checkbox_{company.Value}")">
+                                                        @company.Text
+                                                    </label>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
                                     <div class="form-group mb-4">
                                         <label class="form-label" asp-for="ImageFile"></label>
                                         <input asp-for="ImageFile" class="form-control" type="file" />
@@ -84,14 +124,46 @@
     }
 
     <script type="text/javascript">
+        // Aguarda o carregamento completo do documento HTML
         document.addEventListener('DOMContentLoaded', function () {
-            // Inicializa o DatePicker para BirthDate
-            var birthDatePicker = new ej.calendars.DatePicker({
-                format: 'MM/dd/yyyy',
-                placeholder: 'Select a date',
-                max: new Date()
-            });
-            birthDatePicker.appendTo('#birthDateInput');
+
+            // Lógica para o DatePicker (só executa se a biblioteca estiver disponível)
+            if (typeof ej !== 'undefined' && ej.calendars && ej.calendars.DatePicker) {
+                var birthDatePicker = new ej.calendars.DatePicker({
+                    format: 'MM/dd/yyyy',
+                    placeholder: 'Select a date',
+                    max: new Date()
+                });
+                birthDatePicker.appendTo('#birthDateInput');
+            } else {
+                console.warn("A biblioteca Syncfusion DatePicker não foi carregada. O campo de data pode não funcionar corretamente.");
+            }
+
+            // Lógica para mostrar/esconder os campos de empresa
+            var roleSelect = document.getElementById('SelectedRole');
+            var radioContainer = document.getElementById('radioButtonsContainer');
+            var checkboxContainer = document.getElementById('checkboxesContainer');
+
+            function toggleCompanyFields() {
+                var selectedRole = roleSelect.value;
+                if (selectedRole === 'CompanyAdmin' || selectedRole === 'CondoManager') {
+                    radioContainer.style.display = 'block';
+                    checkboxContainer.style.display = 'none';
+                } else if (selectedRole === 'CondoMember') {
+                    radioContainer.style.display = 'none';
+                    checkboxContainer.style.display = 'block';
+                } else {
+                    // Esconde ambos se a role for diferente das anteriores
+                    radioContainer.style.display = 'none';
+                    checkboxContainer.style.display = 'none';
+                }
+            }
+
+            // Chama a função para definir o estado inicial dos campos
+            toggleCompanyFields();
+
+            // Adiciona um listener para o evento 'change'
+            roleSelect.addEventListener('change', toggleCompanyFields);
         });
     </script>
 }

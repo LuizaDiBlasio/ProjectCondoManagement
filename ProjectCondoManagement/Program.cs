@@ -107,6 +107,8 @@ builder.Services.AddScoped<ICondominiumRepository, CondominiumRepository>();
 
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 
+builder.Services.AddScoped<IMeetingRepository, MeetingRepository>();
+
 builder.Services.AddScoped<IOccurenceRepository, OccurrenceRepository>();
 
 

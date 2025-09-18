@@ -12,8 +12,8 @@ using ProjectCondoManagement.Data.Entites.CondosDb;
 namespace ProjectCondoManagement.Migrations.CondosDb
 {
     [DbContext(typeof(DataContextCondos))]
-    [Migration("20250825114622_RemoveCondoFromMember")]
-    partial class RemoveCondoFromMember
+    [Migration("20250912100354_VoteVotingDocument_Removal")]
+    partial class VoteVotingDocument_Removal
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -85,9 +85,15 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FinancialAccountId")
+                        .HasColumnType("int");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -130,44 +136,15 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("FinancialAccountId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ManagerUserId")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Condominiums");
-                });
-
-            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Document", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("CondominiumId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DataUpload")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DocumentUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CondominiumId");
-
-                    b.ToTable("Documents");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Meeting", b =>
@@ -184,17 +161,24 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.Property<DateTime>("DateAndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("MeetingType")
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsExtraMeeting")
                         .HasColumnType("bit");
 
-                    b.Property<int>("ReportId")
-                        .HasColumnType("int");
+                    b.Property<string>("MeetingLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CondominiumId");
-
-                    b.HasIndex("ReportId");
 
                     b.ToTable("Meeting");
                 });
@@ -207,7 +191,7 @@ namespace ProjectCondoManagement.Migrations.CondosDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CondominiumId")
+                    b.Property<int>("CondominiumId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DateAndTime")
@@ -217,14 +201,18 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Meeting")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsResolved")
+                        .HasColumnType("bit");
 
                     b.Property<int?>("MeetingId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("ResolutionDate")
+                    b.Property<DateTime?>("ResolutionDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -262,57 +250,6 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.HasIndex("CondominiumId");
 
                     b.ToTable("Units");
-                });
-
-            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Vote", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CondoMemberId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("VotingId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("YesNoVote")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CondoMemberId");
-
-                    b.HasIndex("VotingId");
-
-                    b.ToTable("Votes");
-                });
-
-            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Voting", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Matter")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("MeetingId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Result")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MeetingId");
-
-                    b.ToTable("Voting");
                 });
 
             modelBuilder.Entity("CondoMemberMeeting", b =>
@@ -360,41 +297,28 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Document", b =>
-                {
-                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Condominium", null)
-                        .WithMany("Documents")
-                        .HasForeignKey("CondominiumId");
-                });
-
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Meeting", b =>
                 {
-                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Condominium", "Condominium")
+                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Condominium", null)
                         .WithMany("Meetings")
                         .HasForeignKey("CondominiumId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Document", "Report")
-                        .WithMany()
-                        .HasForeignKey("ReportId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Condominium");
-
-                    b.Navigation("Report");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Occurrence", b =>
                 {
                     b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Condominium", null)
                         .WithMany("Occurrences")
-                        .HasForeignKey("CondominiumId");
+                        .HasForeignKey("CondominiumId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Meeting", null)
+                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Meeting", "Meeting")
                         .WithMany("Occurences")
                         .HasForeignKey("MeetingId");
+
+                    b.Navigation("Meeting");
                 });
 
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Unit", b =>
@@ -408,36 +332,8 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.Navigation("Condominium");
                 });
 
-            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Vote", b =>
-                {
-                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.CondoMember", "CondoMember")
-                        .WithMany()
-                        .HasForeignKey("CondoMemberId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Voting", null)
-                        .WithMany("Votes")
-                        .HasForeignKey("VotingId");
-
-                    b.Navigation("CondoMember");
-                });
-
-            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Voting", b =>
-                {
-                    b.HasOne("ProjectCondoManagement.Data.Entites.CondosDb.Meeting", "Meeting")
-                        .WithMany("Votings")
-                        .HasForeignKey("MeetingId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Meeting");
-                });
-
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Condominium", b =>
                 {
-                    b.Navigation("Documents");
-
                     b.Navigation("Meetings");
 
                     b.Navigation("Occurrences");
@@ -448,13 +344,6 @@ namespace ProjectCondoManagement.Migrations.CondosDb
             modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Meeting", b =>
                 {
                     b.Navigation("Occurences");
-
-                    b.Navigation("Votings");
-                });
-
-            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.CondosDb.Voting", b =>
-                {
-                    b.Navigation("Votes");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,13 +1,10 @@
 ﻿using ClassLibrary.DtoModels;
-using Humanizer;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.Enums;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Helpers
 {
@@ -30,11 +27,10 @@ namespace ProjectCondoManagement.Helpers
             var condoMember = new CondoMember
             {
                 Id = condoMemberDto.Id,
-                FinancialAccountId = condoMemberDto.FinancialAccountId,               
+                FinancialAccountId = condoMemberDto.FinancialAccountId,
                 FullName = condoMemberDto.FullName,
                 Email = condoMemberDto.Email,
                 Address = condoMemberDto.Address,
-                CompanyId = condoMemberDto.CompanyId,
                 BirthDate = condoMemberDto.BirthDate,
                 PhoneNumber = condoMemberDto.PhoneNumber,
                 ImageUrl = condoMemberDto.ImageUrl
@@ -50,7 +46,6 @@ namespace ProjectCondoManagement.Helpers
                 Id = condoMember.Id,
                 FullName = condoMember.FullName,
                 FinancialAccountId = condoMember.FinancialAccountId,
-                CompanyId = condoMember.CompanyId,
                 Email = condoMember.Email,
                 Address = condoMember.Address,
                 BirthDate = condoMember.BirthDate,
@@ -80,13 +75,12 @@ namespace ProjectCondoManagement.Helpers
                 Address = user.Address,
                 BirthDate = user.BirthDate,
                 PhoneNumber = user.PhoneNumber,
-                CompanyId = user.CompanyId ?? 0,
                 ImageUrl = user.ImageUrl,
             };
             return condoMemberDto;
         }
 
-        public UserDto ToUserDto(User user)
+        public UserDto ToUserDto(User user, bool withCompaniesDto)
         {
             if (user == null)
             {
@@ -102,15 +96,14 @@ namespace ProjectCondoManagement.Helpers
                 Address = user.Address,
                 ImageUrl = user.ImageUrl,
                 IsActive = user.IsActive,
-                CompanyDto = user.Company == null ? null : ToCompanyDto(user.Company),
+                CompaniesDto = withCompaniesDto? user.Companies?.Select(c => ToCompanyDto(c, false)).ToList() ?? new List<CompanyDto>() : new List<CompanyDto>(),
                 Email = user.Email,
-                CompanyId = user.CompanyId,
                 FinancialAccountId = user.FinancialAccountId,
             };
             return userDto;
         }
 
-        public User ToUser(UserDto userDto)
+        public User ToUser(UserDto userDto, bool withCompanies)
         {
             var user = new User()
             {
@@ -121,13 +114,13 @@ namespace ProjectCondoManagement.Helpers
                 ImageUrl = userDto.ImageUrl,
                 IsActive = userDto.IsActive,
                 Email = userDto.Email,
-                CompanyId = userDto.CompanyId,
                 FinancialAccountId = userDto.FinancialAccountId,
+                Companies = withCompanies ? userDto.CompaniesDto?.Select(c => ToCompany(c, false, false)).ToList() ?? new List<Company>() : new List<Company>(),
             };
             return user;
         }
 
-        public async Task<User> ToEditedUser(EditUserDetailsDto editUserDetailsDto)
+        public async Task<User> ToEditedUser(EditUserDetailsDto editUserDetailsDto, bool withCompanies)
         {
             var user = await _userHelper.GetUserByEmailAsync(editUserDetailsDto.Email);
 
@@ -143,7 +136,7 @@ namespace ProjectCondoManagement.Helpers
             user.ImageUrl = editUserDetailsDto.ImageUrl;
             user.Email = editUserDetailsDto.Email;
             user.IsActive = editUserDetailsDto.IsActive;
-            user.CompanyId = editUserDetailsDto.CompanyId;
+            user.Companies = withCompanies? editUserDetailsDto.CompaniesDto?.Select(c => ToCompany(c, false, false)).ToList() ?? new List<Company>() : new List<Company>();
             user.FinancialAccountId = editUserDetailsDto.FinancialAccountId;
 
             return user;
@@ -180,14 +173,13 @@ namespace ProjectCondoManagement.Helpers
             condoMember.FullName = user.FullName;
             condoMember.PhoneNumber = user.PhoneNumber;
             condoMember.Address = user.Address;
-            condoMember.CompanyId = user?.CompanyId ?? 0;
             condoMember.ImageUrl = user.ImageUrl;
             condoMember.BirthDate = user.BirthDate;
 
             return condoMember;
         }
 
-        public CompanyDto ToCompanyDto(Company company)
+        public CompanyDto ToCompanyDto(Company company, bool withUsersDto)
         {
             var companyDto = new CompanyDto()
             {
@@ -200,27 +192,29 @@ namespace ProjectCondoManagement.Helpers
                 PhoneNumber = company.PhoneNumber,
                 TaxIdDocument = company.TaxIdDocument,
                 FinancialAccountId = company.FinancialAccountId,
-                SelectedCondominiumIds = company.CondominiumIds?.ToList()?? new List<int>(),
-                CompanyAdminId = company.CompanyAdminId,    
+                CompanyAdminId = company.CompanyAdminId,
+                Users = withUsersDto? company.Users?.Select(u => ToUserDto(u, false)).ToList() : new List<UserDto>(),  
             };
 
             return companyDto;
         }
 
-        public Company ToCompany(CompanyDto companyDto, bool isNew)
+        public Company ToCompany(CompanyDto companyDto, bool isNew, bool withUsers)
         {
             var company = new Company()
             {
                 Id = isNew ? 0 : companyDto.Id,
                 Name = companyDto.Name,
                 Condominiums = companyDto.CondominiumDtos?.Select(c => ToCondominium(c, false)).ToList() ?? new List<Condominium>(),
-                CondominiumIds = companyDto.SelectedCondominiumIds,
                 Email = companyDto.Email,
                 Address = companyDto.Address,
                 PhoneNumber = companyDto.PhoneNumber,
                 TaxIdDocument = companyDto.TaxIdDocument,
-                FinancialAccountId = companyDto.FinancialAccountId,  
-                CompanyAdminId = companyDto.CompanyAdminId,
+                FinancialAccountId = companyDto.FinancialAccountId,
+                Users = withUsers
+                        ? companyDto.Users?.Select(c => ToUser(c, false)).ToList() ?? new List<User>()
+                        : new List<User>(),
+                CompanyAdminId = companyDto.CompanyAdminId?? null,
             };
 
             return company;
@@ -232,13 +226,12 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = isNew ? 0 : condominiumDto.Id,
                 CondoName = condominiumDto.CondoName,
-                CompanyId = condominiumDto.CompanyId,
+                CompanyId = condominiumDto.CompanyId.Value,
                 Address = condominiumDto.Address,
                 ManagerUserId = condominiumDto.ManagerUserId,
-                Units = condominiumDto.Units?.Select(u => ToUnit(u,false)).ToList() ?? new List<Unit>(), 
-                Documents = condominiumDto.Documents?.Select(d => ToDocument(d,false)).ToList() ?? new List<Document>(),
-                Occurrences = condominiumDto.Occurrences?.Select(o => ToOccurrence(o,false)).ToList() ?? new List<Occurrence>(),
-                FinancialAccountId = condominiumDto.FinancialAccountId  
+                Units = condominiumDto.Units?.Select(u => ToUnit(u, false)).ToList() ?? new List<Unit>(),
+                Occurrences = condominiumDto.Occurrences?.Select(o => ToOccurrence(o, false)).ToList() ?? new List<Occurrence>(),
+                FinancialAccountId = condominiumDto.FinancialAccountId
             };
 
             return condominium;
@@ -257,7 +250,7 @@ namespace ProjectCondoManagement.Helpers
                 Units = condominium.Units?.Select(c => ToUnitDto(c, false, false)).ToList() ?? new List<UnitDto>(),
                 FinancialAccountId = condominium.FinancialAccountId,
                 ManagerUserId = condominium.ManagerUserId,
-                Occurrences = IncludeOccurrence == true? condominium.Occurrences?.Select(o => ToOccurrenceDto(o, false)).ToList() ?? new List<OccurrenceDto>() : null
+                Occurrences = IncludeOccurrence == true ? condominium.Occurrences?.Select(o => ToOccurrenceDto(o, false)).ToList() ?? new List<OccurrenceDto>() : null
             };
 
             return condominiumDto;
@@ -272,7 +265,9 @@ namespace ProjectCondoManagement.Helpers
                 DateAndTime = occurrence.DateAndTime,
                 UnitDtos = occurrence.Units?.Select(u => ToUnitDto(u)).ToList() ?? new List<UnitDto>(),
                 IsResolved = occurrence.IsResolved,
-                CondominiumId = occurrence.CondominiumId,   
+                CondominiumId = occurrence.CondominiumId,
+                Subject = occurrence.Subject,
+
             };
 
             return occurrenceDto;
@@ -330,35 +325,6 @@ namespace ProjectCondoManagement.Helpers
         }
 
 
-
-        public Document ToDocument(DocumentDto documentDto, bool isNew)
-        {
-            var document = new Document()
-            {
-                Id = isNew ? 0 : documentDto.Id,
-                CondominiumId = documentDto.CondominiumId,
-                FileName = documentDto.FileName,
-                ContentType = documentDto.ContentType,
-                DocumentUrl = documentDto.DocumentUrl,
-                DataUpload = documentDto.DataUpload
-            };
-            return document;
-        }
-
-        public DocumentDto ToDocumentDto(Document document)
-        {
-            var documentDto = new DocumentDto()
-            {
-                Id = document.Id,
-                CondominiumId = document.CondominiumId,
-                FileName = document.FileName,
-                ContentType = document.ContentType,
-                DocumentUrl = document.DocumentUrl,
-                DataUpload = document.DataUpload
-            };
-            return documentDto;
-        }
-
         public MessageDto ToMessageDto(Message message, List<SelectListItem>? statusList)
         {
             var messageDto = new MessageDto()
@@ -391,7 +357,7 @@ namespace ProjectCondoManagement.Helpers
                 Status = (MessageStatus)messageDto.Status.Value,
             };
 
-            return message; 
+            return message;
         }
 
         public PaymentDto ToPaymentDto(Payment payment, bool isNew)
@@ -400,28 +366,28 @@ namespace ProjectCondoManagement.Helpers
             {
                 Id = isNew ? 0 : payment.Id,
                 IssueDate = payment.IssueDate,
-                DueDate = payment.DueDate,  
+                DueDate = payment.DueDate,
                 ExpenseType = payment.ExpenseType,
                 Payer = payment.Payer,
                 BeneficiaryAccountId = payment.BeneficiaryAccountId,
                 SelectedBeneficiaryId = payment.SelectedBeneficiaryId,
                 ExternalRecipientBankAccount = payment.ExternalRecipientBankAccount,
-                PaymentMethod = payment.PaymentMethod,  
+                PaymentMethod = payment.PaymentMethod,
                 CondominiumId = payment.CondominiumId,
-                IsPaid = payment.IsPaid,    
-                InvoiceDto = payment.Invoice == null? null : ToInvoiceDto(payment.Invoice, false),
+                IsPaid = payment.IsPaid,
+                InvoiceDto = payment.Invoice == null ? null : ToInvoiceDto(payment.Invoice, false),
                 ExpensesDto = payment.Expenses?.Select(e => ToExpenseDto(e, false)).ToList() ?? new List<ExpenseDto>(),
                 OneTimeExpenseDto = payment.OneTimeExpense == null ? null : ToExpenseDto(payment.OneTimeExpense, false),
                 PayerFinancialAccountId = payment.PayerFinancialAccountId,
                 TransactionDto = payment.Transaction == null ? null : ToTransactionDto(payment.Transaction, false),
-                InvoiceId = payment.InvoiceId, 
-                TransactionId = payment.TransactionId, 
-                MbwayNumber = payment.MbwayNumber,  
-                CreditCard= payment.CreditCard, 
+                InvoiceId = payment.InvoiceId,
+                TransactionId = payment.TransactionId,
+                MbwayNumber = payment.MbwayNumber,
+                CreditCard = payment.CreditCard,
                 Recipient = payment.Recipient,
                 Amount = payment.Amount,
-            };  
-           
+            };
+
             return paymentDto;
         }
 
@@ -430,14 +396,14 @@ namespace ProjectCondoManagement.Helpers
         {
             var invoiceDto = new InvoiceDto()
             {
-                Id = isNew ? 0 : invoice.Id,    
-                PaymentDate = invoice.PaymentDate,  
+                Id = isNew ? 0 : invoice.Id,
+                PaymentDate = invoice.PaymentDate,
                 CondominiumId = invoice.CondominiumId,
                 PayerAccountId = invoice.PayerAccountId,
-                BeneficiaryAccountId = invoice.BeneficiaryAccountId, 
-                PaymentId = invoice.PaymentId,  
+                BeneficiaryAccountId = invoice.BeneficiaryAccountId,
+                PaymentId = invoice.PaymentId,
             };
-            
+
             return invoiceDto;
         }
 
@@ -451,30 +417,30 @@ namespace ProjectCondoManagement.Helpers
                 Detail = expense.Detail,
                 CondominiumId = expense.CondominiumId,
                 ExpenseTypeDto = new EnumDto { Name = expense.ExpenseType.ToString(), Value = (int)expense.ExpenseType },
-                PaymentId = expense.PaymentId,  
+                PaymentId = expense.PaymentId,
             };
-           return expenseDto;   
+            return expenseDto;
         }
 
-        public TransactionDto ToTransactionDto(Transaction transaction, bool isNew)
+        public TransactionDto ToTransactionDto(Data.Entites.FinancesDb.Transaction transaction, bool isNew)
         {
             var transactionDto = new TransactionDto()
             {
                 Id = isNew ? 0 : transaction.Id,
                 DateAndTime = transaction.DateAndTime,
-                PayerAccountId = transaction.PayerAccountId,  
+                PayerAccountId = transaction.PayerAccountId,
                 //AccountBeneficiaryDto = ToFinancialAccountDto(transaction.AccountBeneficiary, false),
                 BeneficiaryAccountId = transaction.BeneficiaryAccountId,
                 RecipientName = transaction.RecipientName,
                 Amount = transaction.Amount,
                 CompanyId = transaction?.CompanyId,
                 ExternalRecipientBankAccount = transaction.ExternalRecipientBankAccount,
-                PaymentId = transaction.PaymentId,  
-                
-                
+                PaymentId = transaction.PaymentId,
+
+
             };
-            
-            return transactionDto;  
+
+            return transactionDto;
         }
 
         public FinancialAccountDto ToFinancialAccountDto(FinancialAccount financialAccount, bool isNew)
@@ -482,7 +448,7 @@ namespace ProjectCondoManagement.Helpers
             var financialAccountDto = new FinancialAccountDto()
             {
                 Id = isNew ? 0 : financialAccount.Id,
-                OwnerName= financialAccount.OwnerName,
+                OwnerName = financialAccount.OwnerName,
                 Balance = financialAccount.Balance,
                 IsActive = financialAccount.IsActive,
                 CardNumber = financialAccount.CardNumber,
@@ -491,7 +457,7 @@ namespace ProjectCondoManagement.Helpers
                 TransactionsAsBeneficiaryDto = financialAccount.TransactionsAsBeneficiary?.Select(tb => ToTransactionDto(tb, false)).ToList() ?? new List<TransactionDto>(),
                 TransactionsAsPayerDto = financialAccount.TransactionsAsPayer?.Select(tp => ToTransactionDto(tp, false)).ToList() ?? new List<TransactionDto>()
             };
-            return financialAccountDto; 
+            return financialAccountDto;
         }
 
         public Expense ToExpense(ExpenseDto expenseDto, bool isNew)
@@ -506,7 +472,7 @@ namespace ProjectCondoManagement.Helpers
                 PaymentId = expenseDto.PaymentId
             };
 
-            return expense; 
+            return expense;
         }
 
         public Payment ToPayment(PaymentDto paymentDto, bool isNew)
@@ -531,17 +497,17 @@ namespace ProjectCondoManagement.Helpers
                 TransactionId = isNew ? null : paymentDto.TransactionDto == null ? null : paymentDto.TransactionDto.Id,
                 InvoiceId = paymentDto.InvoiceId,
                 MbwayNumber = paymentDto.MbwayNumber,
-                CreditCard = paymentDto.CreditCard, 
+                CreditCard = paymentDto.CreditCard,
                 Recipient = paymentDto.Recipient,
                 Amount = paymentDto.Amount
             };
 
-            return payment; 
+            return payment;
         }
 
-        public Transaction ToTransaction(TransactionDto transactionDto, bool isNew)
+        public Data.Entites.FinancesDb.Transaction ToTransaction(TransactionDto transactionDto, bool isNew)
         {
-            var transaction = new Transaction()
+            var transaction = new Data.Entites.FinancesDb.Transaction()
             {
                 Id = isNew ? 0 : transactionDto.Id,
                 DateAndTime = transactionDto.DateAndTime,
@@ -554,7 +520,7 @@ namespace ProjectCondoManagement.Helpers
                 ExternalRecipientBankAccount = transactionDto.ExternalRecipientBankAccount,
             };
 
-            return transaction; 
+            return transaction;
         }
 
         public FinancialAccount ToFinancialAccount(FinancialAccountDto financialAccountDto, bool isNew)
@@ -566,7 +532,7 @@ namespace ProjectCondoManagement.Helpers
                 Balance = financialAccountDto.Balance,
                 IsActive = financialAccountDto.IsActive,
                 CardNumber = financialAccountDto.CardNumber,
-                AssociatedBankAccount= financialAccountDto.AssociatedBankAccount,   
+                AssociatedBankAccount = financialAccountDto.AssociatedBankAccount,
                 BankName = financialAccountDto.BankName,
             };
             return financialAccount;
@@ -585,7 +551,7 @@ namespace ProjectCondoManagement.Helpers
                 IsResolved = occurrence.IsResolved,
                 Subject = occurrence.Subject,
             };
-            return occurrenceDto;   
+            return occurrenceDto;
         }
 
         public MeetingDto ToMeetingDto(Meeting meeting)
@@ -616,13 +582,13 @@ namespace ProjectCondoManagement.Helpers
                 DateAndTime = meetingDto.DateAndTime,
                 Title = meetingDto.Title,
                 Description = meetingDto.Description,
-                CondoMembers = meetingDto.CondoMembersDto?.Select(c => ToCondoMember(c)).ToList()?? new List<CondoMember>(),
-                Occurences = meetingDto.OccurencesDto?.Select(o => ToOccurrence(o,false)).ToList() ?? new List<Occurrence>(),
-                MeetingLink=meetingDto.MeetingLink,
+                CondoMembers = meetingDto.CondoMembersDto?.Select(c => ToCondoMember(c)).ToList() ?? new List<CondoMember>(),
+                Occurences = meetingDto.OccurencesDto?.Select(o => ToOccurrence(o, false)).ToList() ?? new List<Occurrence>(),
+                MeetingLink = meetingDto.MeetingLink,
                 IsExtraMeeting = meetingDto.IsExtraMeeting,
             };
-            return meeting; 
+            return meeting;
         }
     }
-    
+
 }

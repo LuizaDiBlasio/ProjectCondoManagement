@@ -9,11 +9,11 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations
+namespace ProjectCondoManagement.Migrations.FinancesDb
 {
     [DbContext(typeof(DataContextFinances))]
-    [Migration("20250910131520_AddExpenseTypeToPayment")]
-    partial class AddExpenseTypeToPayment
+    [Migration("20250910175932_InitCreateFinances")]
+    partial class InitCreateFinances
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

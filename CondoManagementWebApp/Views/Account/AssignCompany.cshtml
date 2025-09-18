@@ -1,71 +1,107 @@
 ﻿@model CondoManagementWebApp.Models.AssignCompanyViewModel
 @{
     ViewData["Title"] = "Assign Company";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Garante que o layout é o mesmo
 }
 
-<h1 class="mb-4">Assign Company</h1>
-<hr />
+<div class="fix-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="card mb-0 h-auto">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <h4 class="text-center mb-4">Assign Company to User</h4>
+                        </div>
+                        <hr class="mt-4 mb-5" style="border-top: 1px solid #e0e0e0; opacity: 0.8;" />
 
-<div class="row">
-    <div class="col-md-8">
-        <form asp-action="AssignCompany" method="post">
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="FinancialAccountId" />
-            <input type="hidden" name="email" value="@Context.Request.Query["email"]" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
 
-            <div class="mb-4">
-                <h5>User Info</h5>
-                <p><strong>Name:</strong> @Model.FullName</p>
-                <p><strong>Address:</strong> @Model.Address</p>
-            </div>
+                        <form asp-action="AssignCompany" method="post">
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="FinancialAccountId" />
+                            <input type="hidden" name="email" value="@Context.Request.Query["email"]" />
 
-            <br />
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <h5>User Info</h5>
+                                        <p><strong>Name:</strong> @Model.FullName</p>
+                                        <p><strong>Address:</strong> @Model.Address</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <h5>User Role</h5>
+                                        <p><strong>Role:</strong> @Model.UserRole</p>
+                                    </div>
+                                </div>
+                            </div>
 
-            <div class="mb-3">
-                <h5>Select Company</h5>
-                @if (Model.Companies != null && Model.Companies.Any())
-                {
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 50px;"></th>
-                                <th>Name</th>
-                                <th>Address</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var company in Model.Companies)
-                            {
-                                <tr>
-                                    <td>
-                                        <input type="radio"
-                                               name="CompanyId"
-                                               value="@company.Id"
-                                               id="company_@company.Id"
-                                               @(Model.CompanyId == company.Id ? "checked" : "") />
-                                    </td>
-                                    <td>
-                                        <label for="company_@company.Id">@company.Name</label>
-                                    </td>
-                                    <td>@company.Address</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
-                else
-                {
-                    <div class="alert alert-warning">
-                        No companies available. Please create companies first.
+                            <hr class="mt-4 mb-5" style="border-top: 1px solid #e0e0e0; opacity: 0.8;" />
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h5>Select Company(ies)</h5>
+                                    @if (Model.AvailableCompanies != null && Model.AvailableCompanies.Any())
+                                    {
+                                        <div class="form-group mb-4">
+                                            @if (Model.UserRole == "CompanyAdmin" || Model.UserRole == "CondoManager")
+                                            {
+                                                <div id="radioButtonsContainer">
+                                                    @foreach (var company in Model.AvailableCompanies)
+                                                    {
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                   name="SelectedCompanyId"
+                                                                   id="@($"company_radio_{company.Value}")"
+                                                                   value="@company.Value"
+                                                            @(Model.SelectedCompanyId?.ToString() == company.Value ? "checked" : "") />
+                                                            <label class="form-check-label" for="@($"company_radio_{company.Value}")">
+                                                                @company.Text
+                                                            </label>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                            else if (Model.UserRole == "CondoMember")
+                                            {
+                                                <div id="checkboxesContainer">
+                                                    @foreach (var company in Model.AvailableCompanies)
+                                                    {
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                   name="SelectedCompaniesIds"
+                                                                   id="@($"company_checkbox_{company.Value}")"
+                                                                   value="@company.Value"
+                                                            @(Model.SelectedCompaniesIds != null && Model.SelectedCompaniesIds.Contains(int.Parse(company.Value)) ? "checked" : "") />
+                                                            <label class="form-check-label" for="@($"company_checkbox_{company.Value}")">
+                                                                @company.Text
+                                                            </label>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-warning">
+                                            No companies available. Please create companies first.
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-3 d-flex justify-content-between align-items-center">
+                                <a asp-action="SysAdminDashboard" class="btn btn-outline-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary">Assign Company</button>
+                            </div>
+                        </form>
                     </div>
-                }
+                </div>
             </div>
-
-            <div class="mt-4">
-                <button type="submit" class="btn btn-success">Assign Company</button>
-                <a asp-action="SysAdminDashboard" class="btn btn-outline-danger">Cancel</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 

@@ -44,7 +44,7 @@ namespace ProjectCondoManagement.Controllers
         {
             var email = this.User.Identity?.Name;
 
-            var user = await _userHelper.GetUserByEmailWithCompanyAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
 
             var condominiums = await _condominiumRepository.GetAll(_dataContextCondos).Where(c => c.ManagerUserId == user.Id).ToListAsync();
             if (condominiums == null)
@@ -81,6 +81,20 @@ namespace ProjectCondoManagement.Controllers
                 condosWithOccurrencesDto.Add(condoWithOccurrences);
             }
             return Ok(condosWithOccurrencesDto);    
+        }
+
+
+        [HttpGet("GetCondoOccurrences/{id}")]
+        public async Task<ActionResult<List<OccurrenceDto>>> GetCondoOccurrences(int id)
+        {
+            
+
+            //buscar  ocorrencias que contenham o id do condominio iguais aos da lista de ids
+            var allCondosOccurrences = await _occurrenceRepository.GetAll(_dataContextCondos)
+                                                        .Where(o => o.CondominiumId == id)
+                                                        .ToListAsync();
+
+            return allCondosOccurrences.Select(o => _converterHelper.ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>();
         }
 
 
@@ -225,7 +239,7 @@ namespace ProjectCondoManagement.Controllers
 
             var occurrencesDto = occurrences?.Select(o => _converterHelper.ToOccurrenceDto(o)).ToList() ?? new List<OccurrenceDto>();
 
-            var condominiums = condoMember.Units.Select(u => u.Condominium).ToList();
+            var condominiums = condoMember.Units.Select(u => u.Condominium).DistinctBy(c => c.Id).ToList();
 
             var condosWithOccurrencesDto = new List<CondominiumWithOccurrencesDto>();
 

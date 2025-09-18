@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProjectCondoManagement.Data.Entites.UsersDb
 {
@@ -13,12 +14,11 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
 
         public DateTime? BirthDate { get; set; }
 
-        public int? CompanyId { get; set; }
-
-        public Company? Company { get; set; }
+        public List<Company> Companies { get; set; } = new List<Company>();
 
         public int? FinancialAccountId { get; set; }
 
+        [NotMapped]
         public FinancialAccount? FinancialAccount { get; set; }
 
         public bool IsActive { get; set; }  = true; 

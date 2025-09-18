@@ -46,6 +46,11 @@
                                         <span asp-validation-for="Address" class="text-danger"></span>
                                     </div>
 
+                                   
+
+                                </div> 
+                                <div class="col-md-6">
+
                                     <div class="form-group mb-4">
                                         <label class="form-label" asp-for="PhoneNumber"></label>
                                         <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number">
@@ -58,61 +63,13 @@
                                         <span asp-validation-for="TaxIdDocument" class="text-danger"></span>
                                     </div>
 
-                                </div> 
-                                <div class="col-md-6">
-
-                                    @* Dropdown para o Company Admin *@
-                                    <div class="form-group mb-4">
-                                        <label asp-for="SelectedCompanyAdminId" class="form-label">Company Admin</label>
-                                        <select asp-for="SelectedCompanyAdminId" asp-items="Model.CompanyAdminsToSelect" class="form-control">
-                                            @if (Model.CompanyAdminsToSelect != null && Model.CompanyAdminsToSelect.Any())
-                                            {
-                                                <option value="">-- Select Company Admin --</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="">-- No Company Admins available --</option>
-                                            }
-                                        </select>
-                                        <span asp-validation-for="SelectedCompanyAdminId" class="text-danger"></span>
-                                    </div>
-
-                                    @* Múltipla seleção para os Condomínios (checklist) *@
-                                    <div class="form-group mb-4">
-                                        <label asp-for="SelectedCondominiumIds" class="form-label">Select Company Condominiums</label>
-
-                                        <div class="border p-3 rounded" style="max-height: 250px; overflow-y: auto;">
-                                            @if (Model.CondominiumsToSelect != null && Model.CondominiumsToSelect.Any())
-                                            {
-                                                @foreach (var condoItem in Model.CondominiumsToSelect)
-                                                {
-                                                    <div class="form-check">
-                                                        <input type="checkbox"
-                                                               name="SelectedCondominiumIds"
-                                                               value="@condoItem.Value"
-                                                               id="condo_@condoItem.Value"
-                                                               class="form-check-input"
-                                                        @(Model.SelectedCondominiumIds != null && Model.SelectedCondominiumIds.Contains(int.Parse(condoItem.Value)) ? "checked" : "") />
-                                                        <label class="form-check-label" for="condo_@condoItem.Value">
-                                                            @condoItem.Text
-                                                        </label>
-                                                    </div>
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <p>No condos available to select.</p>
-                                            }
-                                        </div>
-                                        <span asp-validation-for="SelectedCondominiumIds" class="text-danger"></span>
-                                    </div>
 
                                 </div>
 
                             </div> 
 
                             <div class="form-group mt-3 d-flex justify-content-between align-items-center">
-                                <a asp-action="IndexCompanies" asp-controller="Company" class="btn btn-outline-secondary">Back to DashBoard</a>
+                                <a asp-action="IndexCompanies" asp-controller="Company" class="btn btn-outline-secondary">Back to List</a>
                                 <button type="submit" class="btn btn-primary">Create Company</button>
                             </div>
                         </form>

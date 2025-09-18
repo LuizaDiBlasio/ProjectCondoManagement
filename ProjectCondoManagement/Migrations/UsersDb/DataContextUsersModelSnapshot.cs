@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 
@@ -12,11 +11,9 @@ using ProjectCondoManagement.Data.Entites.UsersDb;
 namespace ProjectCondoManagement.Migrations.UsersDb
 {
     [DbContext(typeof(DataContextUsers))]
-    [Migration("20250824194112_CompanyCondominiumsIdList")]
-    partial class CompanyCondominiumsIdList
+    partial class DataContextUsersModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,6 +21,21 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("CompanyUser", b =>
+                {
+                    b.Property<int>("CompaniesId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CompaniesId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("CompanyUser");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -173,9 +185,6 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                     b.Property<string>("CompanyAdminId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CondominiumIds")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -256,9 +265,6 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CompanyId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -322,8 +328,6 @@ namespace ProjectCondoManagement.Migrations.UsersDb
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -333,6 +337,21 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("CompanyUser", b =>
+                {
+                    b.HasOne("ProjectCondoManagement.Data.Entites.UsersDb.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompaniesId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ProjectCondoManagement.Data.Entites.UsersDb.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -384,16 +403,6 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("ProjectCondoManagement.Data.Entites.UsersDb.User", b =>
-                {
-                    b.HasOne("ProjectCondoManagement.Data.Entites.UsersDb.Company", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Company");
                 });
 #pragma warning restore 612, 618
         }

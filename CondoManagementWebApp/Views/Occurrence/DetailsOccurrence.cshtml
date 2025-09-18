@@ -27,12 +27,7 @@
                         <div class="row">
                             <div class="col-md-12 mb-4">
                                 <dl class="row">
-                                    <dt class="col-sm-3">
-                                        @Html.DisplayNameFor(model => model.Id)
-                                    </dt>
-                                    <dd class="col-sm-9">
-                                        @Html.DisplayFor(model => model.Id)
-                                    </dd>
+                                   
                                     <dt class="col-sm-3">
                                         @Html.DisplayNameFor(model => model.Subject)
                                     </dt>
@@ -84,7 +79,7 @@
         <div class="col-xl-12 col-xxl-12 mt-4">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Associated Expense</h4>
+                    <h4 class="card-title">Associated Units</h4>
                 </div>
                 <div class="card-body">
                     @if (!Model.UnitDtos.Any())
@@ -97,7 +92,7 @@
                             <table class="table table-striped table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Id</th>
+                                       
                                         <th>Floor</th>
                                         <th>Door</th>
                                     </tr>
@@ -106,7 +101,7 @@
                                     @foreach (var item in Model.UnitDtos)
                                     {
                                         <tr>
-                                            <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                                           
                                             <td>@Html.DisplayFor(modelItem => item.Floor)</td>
                                             <td>@Html.DisplayFor(modelItem => item.Door)</td>
                                         </tr>

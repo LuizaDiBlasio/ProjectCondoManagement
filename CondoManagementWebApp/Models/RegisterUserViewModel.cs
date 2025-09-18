@@ -35,6 +35,11 @@ namespace CondoManagementWebApp.Models
         [MaxLength(30, ErrorMessage = "The field {0} can only contain {1} characters length")]
         public string PhoneNumber { get; set; }
 
+        public int? SelectedCompanyId { get; set; } //para opção de uma company
+
+        public List<SelectListItem>? AvailableCompanies { get; set; }
+
+        public List<int>? SelectedCompaniesIds { get; set; }  //para opção de seleção de mais de uma company
 
 
         [Required(ErrorMessage = "You need to select a role for your user")]
