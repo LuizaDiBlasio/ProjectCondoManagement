@@ -25,7 +25,7 @@ namespace CondoManagementWebApp.Models
 
        
         [Display(Name = "Units involved")]
-        public List<int>? SelectedUnitIds { get; set; }
+        public List<int>? SelectedUnitIds { get; set; } = new List<int>();
 
 
         public List<SelectListItem>? UnitsToSelect { get; set; }

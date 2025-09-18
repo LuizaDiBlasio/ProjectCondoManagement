@@ -1,33 +1,54 @@
 ﻿@model ClassLibrary.DtoModels.CondominiumDto
 
 @{
-    ViewData["Title"] = "Create";
+	ViewData["Title"] = "Create Condominium";
+	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>New Condominium</h1>
+<div class="fix-wrapper">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-lg-10 col-md-12">
+				<div class="card mb-0 h-auto">
+					<div class="card-body">
 
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+						<h4 class="text-center mb-4">Add Condominium</h4>
 
-            <div class="form-group">
-                <label asp-for="CondoName" class="control-label"></label>
-                <input asp-for="CondoName" class="form-control" />
-                <span asp-validation-for="CondoName" class="text-danger"></span>
-            </div>
+						<hr class="mt-4 mb-5" style="border-top: 1px solid #e0e0e0; opacity: 0.8;" />
 
-            <div class="form-group">
-                <label asp-for="Address" class="control-label"></label>
-                <input asp-for="Address" class="form-control" />
-                <span asp-validation-for="Address" class="text-danger"></span>
-            </div>
+						<div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
 
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-success" />
-                <a asp-action="Index" class="btn btn-outline-info">Back to List</a>
-            </div>
-        </form>
-    </div>
+						<form asp-action="Create">
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group mb-4">
+										<label class="form-label" asp-for="CondoName"></label>
+										<input asp-for="CondoName" class="form-control" placeholder="Enter condominium name" />
+										<span asp-validation-for="CondoName" class="text-danger"></span>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group mb-4">
+										<label class="form-label" asp-for="Address"></label>
+										<input asp-for="Address" class="form-control" placeholder="Enter address" />
+										<span asp-validation-for="Address" class="text-danger"></span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group mt-3 d-flex justify-content-between align-items-center">
+								<a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+								<button type="submit" class="btn btn-primary">Create Condominium</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
+
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+}

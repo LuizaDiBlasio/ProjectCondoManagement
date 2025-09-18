@@ -1,84 +1,98 @@
 ﻿@model CondoManagementWebApp.Models.AssignManagerViewModel
 @{
-    ViewData["Title"] = "Assign Manager";
+	ViewData["Title"] = "Assign Manager";
+	Layout = "~/Views/Shared/_Layout.cshtml"; // Mantém o mesmo layout
 }
 
-<h1 class="mb-4">Assign Manager</h1>
-<hr />
+<div class="fix-wrapper">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-lg-8 col-md-10">
+				<div class="card mb-0 h-auto">
+					<div class="card-body">
+						<div class="text-center mb-3">
+							<h4 class="text-center mb-4">Assign Manager to Condo</h4>
+						</div>
+						<hr class="mt-4 mb-5" style="border-top: 1px solid #e0e0e0; opacity: 0.8;" />
 
-<div class="row">
-    <div class="col-md-8">
-        <form asp-action="AssignManager" method="post">
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="CompanyId" />
-            <input type="hidden" asp-for="Address" />
-            <input type="hidden" asp-for="CondoName" />
-            <input type="hidden" asp-for="FinancialAccountId" />
+						<div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
 
+						<form asp-action="AssignManager" method="post">
+							<input type="hidden" asp-for="Id" />
+							<input type="hidden" asp-for="CompanyId" />
+							<input type="hidden" asp-for="Address" />
+							<input type="hidden" asp-for="CondoName" />
+							<input type="hidden" asp-for="FinancialAccountId" />
 
+							<div class="row">
+								<div class="col-md-12">
+									<div class="mb-4">
+										<h5>Condominium Info</h5>
+										<p><strong>Name:</strong> @Model.CondoName</p>
+										<p><strong>Address:</strong> @Model.Address</p>
+									</div>
+								</div>
+							</div>
 
+							<hr class="mt-4 mb-5" style="border-top: 1px solid #e0e0e0; opacity: 0.8;" />
 
-
-            <div class="mb-4">
-                <h5>Condominium Info</h5>
-                <p><strong>Name:</strong> @Model.CondoName</p>
-                <p><strong>Address:</strong> @Model.Address</p>
-            </div>
-
-            <br />
-
-            <div class="mb-3">
-                <h5>Select Manager</h5>
-                @if (Model.Managers != null && Model.Managers.Any())
-                {
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 50px;"></th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var manager in Model.Managers)
-                            {
-                                <tr>
-                                    <td>
-                                        <input type="radio"
-                                               name="ManagerUserId"
-                                               value="@manager.Id"
-                                               id="manager_@manager.Id"
-                                               @(Model.ManagerUserId == manager.Id ? "checked" : "") />
-                                    </td>
-                                    <td>
-                                        <label for="manager_@manager.Id">@manager.FullName</label>
-                                    </td>
-                                    <td>@manager.Email</td>
-                                    <td>@(manager.PhoneNumber ?? "N/A")</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
-                else
-                {
-                    <div class="alert alert-warning">
-                        No managers available. Please create manager accounts first.
-                    </div>
-                }
-            </div>
-
-            <div class="mt-4">
-                <button type="submit" class="btn btn-success">Assign Manager</button>
-                <a asp-action="Index" class="btn btn-outline-danger">Cancel</a>
-            </div>
-        </form>
-    </div>
+							<div class="row">
+								<div class="col-md-12">
+									<h5>Select Manager</h5>
+									@if (Model.Managers != null && Model.Managers.Any())
+									{
+										<table class="table table-hover align-middle">
+											<thead class="table-light">
+												<tr>
+													<th style="width: 50px;"></th>
+													<th>Name</th>
+													<th>Email</th>
+													<th>Phone</th>
+												</tr>
+											</thead>
+											<tbody>
+												@foreach (var manager in Model.Managers)
+												{
+													<tr>
+														<td>
+															<input type="radio"
+																									 name="ManagerUserId"
+																									 value="@manager.Id"
+																									 id="manager_@manager.Id"
+															@(Model.ManagerUserId == manager.Id ? "checked" : "") />
+														</td>
+														<td>
+															<label for="manager_@manager.Id">@manager.FullName</label>
+														</td>
+														<td>@manager.Email</td>
+														<td>@(manager.PhoneNumber ?? "N/A")</td>
+													</tr>
+												}
+											</tbody>
+										</table>
+									}
+									else
+									{
+										<div class="alert alert-warning">
+											No managers available. Please create manager accounts first.
+										</div>
+									}
+								</div>
+							</div>
+							<div class="form-group mt-3 d-flex justify-content-between align-items-center">
+								<a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+								<button type="submit" class="btn btn-primary">Assign Manager</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
 }

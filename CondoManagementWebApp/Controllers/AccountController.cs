@@ -667,7 +667,6 @@ namespace CondoManagementWebApp.Controllers
 
                 if (apiCall.IsSuccess)
                 {
-                    _flashMessage.Confirmation($"{apiCall.Message}");
                     return RedirectToAction(nameof(Login));
                 }
 
@@ -851,9 +850,17 @@ namespace CondoManagementWebApp.Controllers
                     return View("SysAdminDashBoard", model1);
                 }
 
+                //mandar companies e roles para a view
                 var companies = userdto.CompaniesDto.Select(c => c.Name).ToList();
                 
-                ViewBag.Companies = companies;  
+                ViewBag.Companies = companies;
+
+                var userRole = await _apiCallService.GetAsync<UserRoleDto>($"api/Account/GetUserRole?email={userdto.Email}");
+
+                if (userRole != null)
+                {
+                    ViewBag.UserRole = userRole.Role;
+                }
 
                 var model = _converterHelper.ToEditUserDetailsViewModel(userdto);
 
@@ -915,25 +922,8 @@ namespace CondoManagementWebApp.Controllers
 
                 if (apiCall.IsSuccess)
                 {
-                    var editedUserDto = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", model.Email);
-
-                    if (editedUserDto != null)
-                    {
-                        if (editedUserDto.CompaniesDto.Any())
-                        {
-                            _flashMessage.Confirmation("User details updated successfully!");
-                            return RedirectToAction(nameof(SysAdminDashboard));
-
-                        }
-                        _flashMessage.Danger("Unable to select user's company, please contact admin");
-
-                        return View("EditUserDetails", model);
-
-                    }
-
-                    _flashMessage.Danger("Unable to update user details");
-
-                    return View("EditUserDetails", model);
+                    _flashMessage.Confirmation("User details updated successfully!");
+                    return RedirectToAction(nameof(SysAdminDashboard));
                 }
 
                 _flashMessage.Danger(apiCall.Message);
@@ -1073,7 +1063,7 @@ namespace CondoManagementWebApp.Controllers
             catch (Exception ex)
             {
 
-                _flashMessage.Danger($"Unable to assing company to user, please contact admin");
+                _flashMessage.Danger($"Unable to assing company to user");
                 return RedirectToAction(nameof(SysAdminDashboard));
             }
 
@@ -1317,14 +1307,20 @@ namespace CondoManagementWebApp.Controllers
             //buscar ids selecionados e carregar o model
             if (userRole.Role == "CondoMember")
             {
-                var selectedCompaniesIds = user.CompaniesDto.Select(c => c.Id).ToList();
-                model.SelectedCompaniesIds = selectedCompaniesIds;
-
+                if (user.CompaniesDto != null && user.CompaniesDto.Any())
+                {
+                    var selectedCompaniesIds = user.CompaniesDto.Select(c => c.Id).ToList();
+                    model.SelectedCompaniesIds = selectedCompaniesIds;
+                }
             }
             else
             {
-                var selectedCompanyId = user.CompaniesDto.Select(c => c.Id).First();
-                model.SelectedCompanyId = selectedCompanyId;
+                if(user.CompaniesDto != null && user.CompaniesDto.Any())
+                {
+                    var selectedCompanyId = user.CompaniesDto.Select(c => c.Id).First();
+                    model.SelectedCompanyId = selectedCompanyId;
+                } 
+                
             }
 
             return model;

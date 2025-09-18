@@ -1,50 +1,98 @@
 ﻿@model ClassLibrary.DtoModels.CondominiumDto
-
 @{
-    ViewData["Title"] = "Details";
+	ViewData["Title"] = "Condominium Details";
+	Layout = "~/Views/Shared/_Layout.cshtml"; 
 }
 
-<h1>Details</h1>
+<div class="content-body">
+	<div class="container-fluid">
+		<div class="row page-titles mx-0">
+			<div class="col-sm-6 p-md-0">
+				<div class="welcome-text">
+					<h4>Condominium Details</h4>
+				</div>
+			</div>
+			<div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+					<li class="breadcrumb-item"><a asp-action="Index">Condominiums</a></li>
+					<li class="breadcrumb-item active"><a href="javascript:void(0)">Details</a></li>
+				</ol>
+			</div>
+		</div>
 
-<div>
-    <h4>CondominiumDto</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CompanyId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Company.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Address)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Address)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ManagerUserId)
-        </dt>
-        <dd class="col-sm-10">
-            @if (Model.ManagerUserId == null)
-            {
-                <span class="text-danger">No Manager Assigned</span>
-            }
-            else
-            {
-                @Html.DisplayFor(model => model.ManagerUser.FullName)
-            }
-        </dd>
-    </dl>
-</div>
-<div>
-    @if(ViewBag.ReturnUrl != null)
-    {
-        <a asp-action="@ViewBag.ReturnUrl" class="btn btn-outline-primary">Back to List</a>
-    }
-    else
-    {
-        <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
-    }
-    
+		<div class="row">
+			<div class="col-xl-12 col-xxl-12">
+				<div class="card">
+					<div class="card-header">
+						<h4 class="card-title">@Model.CondoName's Info</h4>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-md-6 mb-3">
+								<label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CondoName)</label>
+								<p>@Html.DisplayFor(model => model.CondoName)</p>
+							</div>
+							<div class="col-md-6 mb-3">
+								<label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.Address)</label>
+								<p>@Html.DisplayFor(model => model.Address)</p>
+							</div>
+							<div class="col-md-6 mb-3">
+								<label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CompanyId)</label>
+								<p>@Html.DisplayFor(model => model.Company.Name)</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-xl-12 col-xxl-12 mt-4">
+				<div class="card">
+					<div class="card-header">
+						<h4 class="card-title">Manager Details</h4>
+					</div>
+					<div class="card-body">
+						@if (Model.ManagerUserId == null)
+						{
+							<p class="text-danger">No Manager Assigned</p>
+						}
+						else
+						{
+							<div class="row">
+								<div class="col-12 d-flex align-items-center">
+									<div class="col-auto me-5">
+										<img src="@Html.DisplayFor(model => model.ManagerUser.ImageFullPath)" alt="User Image" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+									</div>
+									<div class="col-sm d-flex flex-column me-4">
+										<label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.ManagerUser.FullName)</label>
+										<p class="mb-0">@Html.DisplayFor(model => model.ManagerUser.FullName)</p>
+									</div>
+									<div class="col-sm d-flex flex-column me-4">
+										<label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.ManagerUser.Email)</label>
+										<p class="mb-0">@Html.DisplayFor(model => model.ManagerUser.Email)</p>
+									</div>
+									<div class="col-sm d-flex flex-column">
+										<label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.ManagerUser.PhoneNumber)</label>
+										<p class="mb-0">@Html.DisplayFor(model => model.ManagerUser.PhoneNumber)</p>
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="d-flex justify-content-start mt-3">
+			<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary me-2">Edit</a>
+			@if (ViewBag.ReturnUrl != null)
+			{
+				<a asp-action="@ViewBag.ReturnUrl" class="btn btn-outline-secondary">Back to List</a>
+			}
+			else
+			{
+				<a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+			}
+		</div>
+	</div>
 </div>

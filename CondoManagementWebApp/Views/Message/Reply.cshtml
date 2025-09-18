@@ -1,0 +1,56 @@
+﻿@model CondoManagementWebApp.Models.CreateMessageViewModel
+
+@{
+    ViewData["Title"] = "Reply Message";
+}
+<flash dismissable="true" />
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-8 col-xxl-8">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <h4 class="card-title welcome-text mb-0">Reply Message</h4>
+                            @* A barra de navegação da direita foi removida *@
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        @using (Html.BeginForm("RequestReply", "Message", FormMethod.Post))
+                        {
+
+                            <div class="form-group">
+                                <label>Send to</label>
+                                @Html.EditorFor(model => model.ReceiverEmail, new { htmlAttributes = new { @class = "form-control input-default", placeholder = "Receiver's email", @readonly = "readonly" } })
+                                @Html.ValidationMessageFor(model => model.ReceiverEmail, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.MessageTitle)
+                                @Html.EditorFor(model => model.MessageTitle, new { htmlAttributes = new { @class = "form-control input-default", placeholder = "Enter message title" } })
+                                @Html.ValidationMessageFor(model => model.MessageTitle, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.MessageContent)
+                                @Html.TextAreaFor(model => model.MessageContent, new { @class = "form-control input-default", rows = 8, placeholder = "Enter message content" })
+                                @Html.ValidationMessageFor(model => model.MessageContent, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-3">
+                                <button type="submit" class="btn btn-primary">Send</button>
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

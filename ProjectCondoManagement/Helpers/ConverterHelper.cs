@@ -122,7 +122,7 @@ namespace ProjectCondoManagement.Helpers
 
         public async Task<User> ToEditedUser(EditUserDetailsDto editUserDetailsDto, bool withCompanies)
         {
-            var user = await _userHelper.GetUserByEmailAsync(editUserDetailsDto.Email);
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(editUserDetailsDto.Email);
 
             if (user == null)
             {
@@ -265,6 +265,7 @@ namespace ProjectCondoManagement.Helpers
                 IsResolved = occurrence.IsResolved,
                 CondominiumId = occurrence.CondominiumId,
                 Subject = occurrence.Subject,
+                ResolutionDate = occurrence.ResolutionDate,
 
             };
 

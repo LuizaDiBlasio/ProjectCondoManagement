@@ -105,23 +105,26 @@ namespace CondoManagementWebApp.Controllers
 
                 var occurrenceDto = _converterHelper.ToOccurenceDto(model);
 
-                //obter lista de units selecionadas
-                var selectedUnitsList = await _apiCallService.PostAsync<List<int>, List<UnitDto>>("api/Occurrence/GetSelectedUnits", model.SelectedUnitIds);
+                if (model.SelectedUnitIds.Any())
+                {
+                    //obter lista de units selecionadas
+                    var selectedUnitsList = await _apiCallService.PostAsync<List<int>, List<UnitDto>>("api/Occurrence/GetSelectedUnits", model.SelectedUnitIds);
 
-                occurrenceDto.UnitDtos = selectedUnitsList;
-
+                    occurrenceDto.UnitDtos = selectedUnitsList;
+                }
+               
                 var apicall = await _apiCallService.PostAsync<OccurrenceDto, Response<object>>("api/Occurrence/CreateOccurrence", occurrenceDto);
 
                 if (apicall.IsSuccess)
                 {
                     if (this.User.IsInRole("CondoManager"))
                     {
-                        _flashMessage.Confirmation("Occurence reported successfully, condominium administration will contact you as soon as possible");
+                        _flashMessage.Confirmation("Occurence reported successfully!");
                         return RedirectToAction(nameof(IndexOccurrences));
                     }
                     else
                     {
-                        _flashMessage.Confirmation("Occurence reported successfully, condominium administratio will contact you as soon as possible");
+                        _flashMessage.Confirmation("Occurence reported successfully, condominium administratio will contact you as soon as possible.");
                         return RedirectToAction(nameof(IndexOccurrences));
                     }
                 }
@@ -152,20 +155,20 @@ namespace CondoManagementWebApp.Controllers
                     return RedirectToAction(nameof(IndexOccurrences));
                 }
 
-                List<int> selectedIds = occurrenceDto.UnitDtos.Select(u => u.Id).ToList();
+                var selectedIds = new List<int>();
 
-                var model = _converterHelper.ToEditOccurrenceView(occurrenceDto, selectedIds);
-               
-                //carregar listas
-
-                if (this.User.IsInRole("CondoManager"))
+                if(occurrenceDto.UnitDtos != null && occurrenceDto.UnitDtos.Any())
                 {
-                    model.CondosToSelect = await GetCondosList();
+                   selectedIds = occurrenceDto.UnitDtos.Select(u => u.Id).ToList();
                 }
-                else //será o condoMember
+                
+                var model = _converterHelper.ToEditOccurrenceView(occurrenceDto, selectedIds);
+
+                model.CondosToSelect = await GetCondosList();
+
+                if (model.CondominiumId != null)
                 {
-                    model.CondosToSelect = await GetCondosList();
-                    model.UnitsToSelect = await GetCondoMemberUnitsList(this.User.Identity.Name);
+                    model.UnitsToSelect = await GetUnitsList(model.CondominiumId.Value);
                 }
 
                 return View(model);
@@ -186,7 +189,11 @@ namespace CondoManagementWebApp.Controllers
                 if (!ModelState.IsValid)
                 {
                     model.CondosToSelect = await GetCondosList();
-                    model.UnitsToSelect = await GetCondoMemberUnitsList(this.User.Identity.Name);
+
+                    if (model.CondominiumId != null)
+                    {
+                        model.UnitsToSelect = await GetUnitsList(model.CondominiumId.Value);
+                    }
 
                     return View("EditOccurrence", model);
                 }
@@ -214,7 +221,11 @@ namespace CondoManagementWebApp.Controllers
                 else
                 {
                     model.CondosToSelect = await GetCondosList();
-                    model.UnitsToSelect = await GetCondoMemberUnitsList(this.User.Identity.Name);
+
+                    if (model.CondominiumId != null)
+                    {
+                        model.UnitsToSelect = await GetUnitsList(model.CondominiumId.Value);
+                    }
 
                     return View("EditOccurrence", model);
                 }

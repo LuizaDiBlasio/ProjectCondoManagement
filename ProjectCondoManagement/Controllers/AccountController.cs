@@ -1,8 +1,11 @@
 using ClassLibrary;
 using ClassLibrary.DtoModels;
+using ClassLibrary.DtoModelsMobile;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
@@ -35,11 +38,12 @@ namespace ProjectCondoManagement.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly DataContextUsers _dataContextUsers;
         private readonly ICompanyRepository _companyRepository;
+        private readonly UserManager<User> _userManager;
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
                                IMailHelper mailHelper, DataContextCondos dataContextCondos, DataContextFinances dataContextFinances, IJwtTokenService jwtTokenService,
                                ICondoMemberRepository condoMemberRepository , ISmsHelper smsHelper, IFinancialAccountRepository financialAccountRepository, IWebHostEnvironment env,
-                               DataContextUsers dataContextUsers, ICompanyRepository companyRepository)
+                               DataContextUsers dataContextUsers, ICompanyRepository companyRepository, UserManager<User> userManager)
         {
             _userHelper = userHelper;
             _httpClient = httpClient;
@@ -55,6 +59,7 @@ namespace ProjectCondoManagement.Controllers
             _env = env;
             _dataContextUsers = dataContextUsers;
             _companyRepository = companyRepository;
+            _userManager = userManager;
         }
 
 
@@ -253,6 +258,46 @@ namespace ProjectCondoManagement.Controllers
             //se não conseguiu enviar email:
             return StatusCode(500, new { Message = "Unable to retrieve password, please contact admin" });
 
+        }
+
+
+        [HttpPost]
+        [AllowAnonymous] 
+        [Route("LoginMobile")] 
+        public async Task<IActionResult> LoginMobile([FromBody] LoginMobileDto model)
+        {
+            // Validação do modelo de entrada
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { isSuccess = false, message = "Invalid credentials." });
+            }
+
+            // Autenticação do usuário
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                return Unauthorized(new { isSuccess = false, message = "Invalid email or password." });
+            }
+
+            // 3. Obter a role do usuário
+            var roles = await _userManager.GetRolesAsync(user);
+            if (!roles.Any())
+            {
+                return BadRequest(new { isSuccess = false, message = "User has no role." });
+            }
+            var role = roles.First();
+
+            // Gerar o JWT usando seu serviço
+            var token = _jwtTokenService.GenerateToken(user, role);
+
+            // Retornar a resposta de sucesso com o token
+            return Ok(new
+            {
+                isSuccess = true,
+                message = "Login successful.",
+                token,
+                role 
+            });
         }
 
 
@@ -626,6 +671,12 @@ namespace ProjectCondoManagement.Controllers
                 return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to update, user not found in the system"});
             }
 
+            //desfazer relações com companies
+            if(editedUser.IsActive == false)
+            {
+                editedUser.Companies.Clear();
+            }
+
             await _userHelper.UpdateUserAsync(editedUser);
 
             if (await _userHelper.IsUserInRoleAsync(editedUser, "CondoMember"))
@@ -801,7 +852,7 @@ namespace ProjectCondoManagement.Controllers
             if (!this.User.IsInRole("SysAdmin"))
             {
                 var currentUserEmail = User.Identity?.Name;
-                var currentUser = await _userHelper.GetUserByEmailAsync(currentUserEmail);
+                var currentUser = await _userHelper.GetUserByEmailWithCompaniesAsync(currentUserEmail);
                 if (currentUser == null)
                 {
                     return Unauthorized(new { Message = "Current user not found." });

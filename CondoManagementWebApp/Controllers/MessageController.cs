@@ -90,7 +90,6 @@ namespace CondoManagementWebApp.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _flashMessage.Danger("Unable to send message, due to system error");
                 return View("CreateMessage", model);   
             }
 
@@ -157,6 +156,94 @@ namespace CondoManagementWebApp.Controllers
             
         }
 
+        public async Task<ActionResult> Reply (int id)
+        {
+            try
+            {
+                var messageDto = await _apiCallService.GetAsync<MessageDto>($"api/Message/MessageDetails/{id}");
+
+                var model = new CreateMessageViewModel()
+                {
+                    ReceiverEmail = messageDto.SenderEmail
+                };
+
+                return View(model);
+            }
+            catch
+            {
+                _flashMessage.Danger("Unable to reply message due to server error");
+                return RedirectToAction(nameof(IndexReceived));
+            }
+        }
+
+        public async Task<ActionResult> RequestReply (CreateMessageViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("CreateMessage", model);
+            }
+
+            try
+            {
+                var user = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", model.ReceiverEmail);
+
+                if (user == null)
+                {
+                    _flashMessage.Danger("Unable to send message. No user was found under this email");
+                    return View("CreateMessage", model);
+                }
+
+                //Popular propriedades de message dto fora do model
+
+                DateTime date = DateTime.Now;
+
+                string senderEmail = this.User.Identity.Name;
+
+                var status = new EnumDto() { Value = 1, Name = "Unresolved" };
+
+                var messageDto = _converterHelper.ToMessageDto(model, date, senderEmail, status);
+
+                var apiCall = await _apiCallService.PostAsync<MessageDto, Response<object>>("api/Message/CreateMessage", messageDto);
+
+                if (apiCall.IsSuccess)
+                {
+                    //Enviar notificação via email para quem recebe mensagem 
+                    var sendEmail = await _apiCallService.PostAsync<string, Response<object>>("api/Message/SendEmailNotification", messageDto.ReceiverEmail);
+
+                    if (sendEmail.IsSuccess)
+                    {
+                        return RedirectToAction(nameof(IndexSent));
+                    }
+
+                    _flashMessage.Warning(sendEmail.Message);
+                    return View("CreateMessage", model);
+                }
+
+                _flashMessage.Danger($"{apiCall.Message}");
+
+                return View("CreateMessage", model);
+            }
+            catch (HttpRequestException ex)
+            {
+                // Captura a exceção específica para requisições HTTP
+                if (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+
+                    _flashMessage.Danger("Unable to send message. No user was found under this email.");
+                }
+                else
+                {
+
+                    _flashMessage.Danger("Unable to send message, due to a network error.");
+                }
+                return View("CreateMessage", model);
+            }
+            catch
+            {
+                _flashMessage.Danger("Unable to send message, due to unexpected error");
+                return View("CreateMessage", model);
+            }
+        }
        
 
         // GET: MessageController/MessageDetails/5

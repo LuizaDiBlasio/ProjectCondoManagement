@@ -175,19 +175,19 @@ namespace ProjectCondoManagement.Controllers
 
                 if (user == null)
                 {
-                    return BadRequest("User not found.");
+                    return Ok(new Response<object>() { IsSuccess = false, Message = "User not found." });
+                }
+
+                if (!user.Companies.Any())
+                {
+                    return Ok(new Response<object>() { IsSuccess = false, Message = "Unable to add condominiums, the manager is not assigned to any company, please contact admin" });
                 }
 
                 var userCompanyIds = user.Companies.Select(c => c.Id).ToList();
 
+                
                 condominiumDto.CompanyId = userCompanyIds.First();
-
-                if (user.Companies == null)
-                {
-                    return BadRequest("User does not belong to a company.");
-                }
-
-
+                
                 var condominium = _converterHelper.ToCondominium(condominiumDto, true);
 
                 if (condominium == null)
@@ -350,6 +350,7 @@ namespace ProjectCondoManagement.Controllers
 
             return condominiumsDtos;
         }
+
 
         [HttpGet("ManagerCondos/{id}")]
         public async Task<ActionResult<IEnumerable<CondominiumDto>>> GetManagerCondosById(string id)

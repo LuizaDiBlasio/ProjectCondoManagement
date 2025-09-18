@@ -82,7 +82,7 @@
                     <h4 class="card-title">Associated Units</h4>
                 </div>
                 <div class="card-body">
-                    @if (!Model.UnitDtos.Any())
+                    @if (Model.UnitDtos != null && !Model.UnitDtos.Any())
                     {
                         <p>No units associated with this occurrence.</p>
                     }

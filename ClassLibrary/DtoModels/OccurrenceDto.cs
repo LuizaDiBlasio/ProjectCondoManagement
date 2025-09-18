@@ -25,7 +25,7 @@ namespace ClassLibrary.DtoModels
 
 
         [Display(Name = "Units involved")]
-        public List<UnitDto> UnitDtos { get; set; }
+        public List<UnitDto>? UnitDtos { get; set; } = new List<UnitDto>();
 
 
         [Display(Name = "Status")]

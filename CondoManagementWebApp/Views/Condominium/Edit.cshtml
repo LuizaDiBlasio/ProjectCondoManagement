@@ -1,37 +1,66 @@
 ﻿@model ClassLibrary.DtoModels.CondominiumDto
 
 @{
-    ViewData["Title"] = "Edit";
+	ViewData["Title"] = "Edit Condominium";
+	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Edit Condominium</h1>
+<div class="content-body">
+	<div class="container-fluid">
+		<div class="row page-titles mx-0">
+			<div class="col-sm-6 p-md-0">
+				<div class="welcome-text">
+					<h4>Update Condominium</h4>
+				</div>
+			</div>
+			<div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+					<li class="breadcrumb-item"><a asp-action="Index">Condominiums</a></li>
+					<li class="breadcrumb-item active"><a href="javascript:void(0)">Edit</a></li>
+				</ol>
+			</div>
+		</div>
 
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            
-            <input type="hidden" asp-for="CompanyId" />
+		<div class="row">
+			<div class="col-xl-12 col-xxl-12">
+				<div class="card">
+					<div class="card-header">
+						<h4 class="card-title">Condominium Information</h4>
+					</div>
+					<div class="card-body">
+						<div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
+						<form asp-action="Edit">
+							<input type="hidden" asp-for="Id" />
+							<input type="hidden" asp-for="CompanyId" />
 
-            <div class="form-group">
-                <label asp-for="Address" class="control-label"></label>
-                <input asp-for="Address" class="form-control" />
-                <span asp-validation-for="Address" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CondoName" class="control-label"></label>
-                <input asp-for="CondoName" class="form-control" />
-                <span asp-validation-for="CondoName" class="text-danger"></span>
-            </div>
+							<div class="row">
+								<div class="col-md-6 mb-3">
+									<label class="form-label font-weight-bold" asp-for="CondoName"></label>
+									<input asp-for="CondoName" class="form-control" placeholder="Enter condominium name" />
+									<span asp-validation-for="CondoName" class="text-danger"></span>
+								</div>
+								<div class="col-md-6 mb-3">
+									<label class="form-label font-weight-bold" asp-for="Address"></label>
+									<input asp-for="Address" class="form-control" placeholder="Enter address" />
+									<span asp-validation-for="Address" class="text-danger"></span>
+								</div>
+							</div>
 
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-success" />
-                <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
-            </div>
-        </form>
-    </div>
+							<div class="form-group mt-4 d-flex justify-content-between align-items-center">
+								<a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+								<button type="submit" class="btn btn-primary">Save Condominium</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
-
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+}

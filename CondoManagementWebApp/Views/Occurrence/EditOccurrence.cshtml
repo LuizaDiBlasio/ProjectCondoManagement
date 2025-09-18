@@ -40,7 +40,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-4">
-                                        <label asp-for="CondominiumId" class="form-label">Condominium Payment Reference </label>
+                                        <label asp-for="CondominiumId" class="form-label">Condominium </label>
                                         <select asp-for="CondominiumId" asp-items="Model.CondosToSelect" class="form-control" id="condominiumSelect">
                                             <option value="">-- Select Condominium --</option>
                                         </select>
@@ -55,23 +55,27 @@
                                         <span asp-validation-for="SelectedUnitIds" class="text-danger"></span>
                                     </div>
                                 </div>
-                                <div class="form-group mb-4">
-                                    <label asp-for="IsResolved" class="form-label">Status</label>
-                                    <div class="form-check form-switch d-flex align-items-center">
-                                        <input class="form-check-input me-2" type="checkbox" id="isResolvedSwitch" asp-for="IsResolved">
-                                        <label class="form-check-label" for="isResolvedSwitch" id="isResolvedLabel">
-                                            @if (Model.IsResolved)
-                                            {
-                                                <span class="text-success">Resolved</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-danger">Unresolved</span>
-                                            }
-                                        </label>
+                                @if (this.User.IsInRole("CondoManager"))
+                                {
+                                    <div class="form-group mb-4">
+                                        <label asp-for="IsResolved" class="form-label">Status</label>
+                                        <div class="form-check form-switch d-flex align-items-center">
+                                            <input class="form-check-input me-2" type="checkbox" id="isResolvedSwitch" asp-for="IsResolved">
+                                            <label class="form-check-label" for="isResolvedSwitch" id="isResolvedLabel">
+                                                @if (Model.IsResolved)
+                                                {
+                                                    <span class="text-success">Resolved</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-danger">Unresolved</span>
+                                                }
+                                            </label>
+                                        </div>
+                                        <span asp-validation-for="IsResolved" class="text-danger"></span>
                                     </div>
-                                    <span asp-validation-for="IsResolved" class="text-danger"></span>
-                                </div>
+                                }
+                                
                             </div>
                             <div class="form-group mt-3 d-flex justify-content-between align-items-center">
                                 <a asp-action="IndexOccurrences" class="btn btn-outline-secondary">Back to List</a>

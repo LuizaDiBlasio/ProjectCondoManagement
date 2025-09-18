@@ -4,15 +4,21 @@
     ViewData["Title"] = "SysAdminDashboard";
 }
 
-<div class="row d-flex justify-content-between align-items-center mb-4">
-    <div class="col-auto">
+@* Linha para o título *@
+<div class="row mb-4">
+    <div class="col">
         <h1 class="mb-0">Manage users</h1>
     </div>
-    <div class="col-auto">
-        @* Barra de busca com formulário *@
+</div>
+
+@* Linha para a barra de busca e o botão de registro, em lados opostos *@
+<div class="row mb-4 align-items-center">
+    @* Coluna para a barra de busca, à esquerda *@
+    <div class="col-md-6">
         <form asp-action="SearchUsers" asp-controller="Account" method="post">
-            <div class="input-group search-area d-xl-inline-flex d-none border shadow-sm rounded">
-                <input class="form-control" type="text" name="SearchTerm" placeholder="Search Here" aria-label="Search" />
+            <div class="input-group search-area border shadow-sm rounded" style="width: 50%;">
+                @* Limita a largura da barra de busca para 50% *@
+                <input class="form-control" type="text" name="SearchTerm" placeholder="Type user's full name" aria-label="Search" />
                 <button class="input-group-text bg-white border-start-0">
                     <span>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -23,20 +29,23 @@
             </div>
         </form>
     </div>
+
+    @* Coluna para o botão, alinhado à direita *@
+    <div class="col-md-6 d-flex justify-content-end">
+        <a asp-action="Register" asp-controller="Account" class="btn text-white" style="background-color: #32CD32;">
+            Register User
+        </a>
+    </div>
 </div>
-
-
-
-
 @* Accordion for Condo Members *@
 <div class="accordion" id="accordionCondoMembers">
     <div class="accordion-item">
         <h2 class="accordion-header" id="headingCondoMembers">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCondoMembers" aria-expanded="true" aria-controls="collapseCondoMembers">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCondoMembers" aria-expanded="false" aria-controls="collapseCondoMembers">
                 Condo Members
             </button>
         </h2>
-        <div id="collapseCondoMembers" class="accordion-collapse collapse show" aria-labelledby="headingCondoMembers" data-bs-parent="#accordionCondoMembers">
+        <div id="collapseCondoMembers" class="accordion-collapse collapse" aria-labelledby="headingCondoMembers" data-bs-parent="#accordionCondoMembers">
             <div class="accordion-body">
                 <table class="table">
                     @if (Model.CondoMembers != null && Model.CondoMembers.Any())
@@ -47,6 +56,7 @@
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Status</th>
+                                <th></th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -60,7 +70,14 @@
                                     <td>@member.FullName</td>
                                     <td>@member.Email</td>
                                     <td>
-                                        <label class="form-check-label" for="memberSwitch_@member.Email">@(member.IsActive ? "Active" : "Inactive")</label>
+                                        @if (member.IsActive)
+                                        {
+                                            <span class="badge bg-success" style="font-size: 1.1em;">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger" style="font-size: 1.1em;">Inactive</span>
+                                        }
                                     </td>
                                     <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@member.Email">Edit Details</a></td>
                                     <td><a class="btn btn-outline-secondary" asp-controller="Account" asp-action="AssignCompany" asp-route-email="@member.Email">Manage Companies</a></td>
@@ -113,18 +130,25 @@
                                     <td>@admin.FullName</td>
                                     <td>@admin.Email</td>
                                     <td>
-                                        <label class="form-check-label" for="memberSwitch_@admin.Email">@(admin.IsActive ? "Active" : "Inactive")</label>
-                                    </td>
-                                   
-                                        @if (!admin.CompaniesDto.Any())
+                                        @if (admin.IsActive)
                                         {
-                                        <td style="color: red; font-weight: bold;">No Company Assigned</td>
+                                            <span class="badge bg-success" style="font-size: 1.1em;">Active</span>
                                         }
                                         else
                                         {
-                                        <td>@admin.CompaniesDto.First().Name</td>
+                                            <span class="badge bg-danger" style="font-size: 1.1em;">Inactive</span>
                                         }
-                                 
+                                    </td>
+
+                                    @if (!admin.CompaniesDto.Any())
+                                    {
+                                        <td style="color: red; font-weight: bold;">No Company Assigned</td>
+                                    }
+                                    else
+                                    {
+                                        <td>@admin.CompaniesDto.First().Name</td>
+                                    }
+
                                     <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@admin.Email">Edit Details</a></td>
                                     <td><a class="btn btn-outline-secondary" asp-controller="Account" asp-action="AssignCompany" asp-route-email="@admin.Email">Manage Company</a></td>
                                 </tr>
@@ -163,7 +187,8 @@
                                 <th>Email</th>
                                 <th>Status</th>
                                 <th>Company</th>
-                                <th></th> <th></th>
+                                <th></th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -176,9 +201,16 @@
                                     <td>@manager.FullName</td>
                                     <td>@manager.Email</td>
                                     <td>
-                                        <label class="form-check-label" for="memberSwitch_@manager.Email">@(manager.IsActive ? "Active" : "Inactive")</label>
+                                        @if (manager.IsActive)
+                                        {
+                                            <span class="badge bg-success" style="font-size: 1.1em;">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger" style="font-size: 1.1em;">Inactive</span>
+                                        }
                                     </td>
-                                    @if(!manager.CompaniesDto.Any())
+                                    @if (!manager.CompaniesDto.Any())
                                     {
                                         <td style="color: red; font-weight: bold;">No Company Assigned</td>
                                     }
@@ -248,7 +280,7 @@
         @if (Model.HasHomonyms)
         {
             <text>
-                        $('#homonymDialog').modal('show');
+                            $('#homonymDialog').modal('show');
             </text>
         }
         });
