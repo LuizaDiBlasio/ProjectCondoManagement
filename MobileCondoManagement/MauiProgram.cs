@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using MobileCondoManagement.Models;
+using MobileCondoManagement.Services;
+using MobileCondoManagement.Views;
 
 namespace MobileCondoManagement
 {
@@ -15,8 +18,16 @@ namespace MobileCondoManagement
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+            //Serviços
+            builder.Services.AddHttpClient();
+            builder.Services.AddSingleton<ApiService>();
+
+            //Views e Models
+            builder.Services.AddTransient<LoginViewModel>();
+            builder.Services.AddTransient<LoginPage>();
+
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();

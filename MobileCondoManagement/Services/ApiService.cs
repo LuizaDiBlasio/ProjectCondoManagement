@@ -7,13 +7,11 @@ namespace MobileCondoManagement.Services
     public class ApiService
     {
         private readonly HttpClient _httpClient;
-        private readonly IConfiguration _configuration;
 
-        public ApiService(HttpClient httpClient, IConfiguration configuration)
+        public ApiService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _configuration = configuration;
-            _httpClient.BaseAddress = new Uri($"{_configuration["ApiSettings:BaseUrl"]}");
+            _httpClient.BaseAddress = new Uri("http://10.0.2.2:7081/");
         }
 
         public async Task<LoginResponseDto> RequestLoginAsync(string email, string password)

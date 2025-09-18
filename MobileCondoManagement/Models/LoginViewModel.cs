@@ -15,15 +15,20 @@ namespace MobileCondoManagement.Models
         private string password;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsNotBusy))]
         private bool isBusy;
+        public bool IsNotBusy => !IsBusy;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasError))]
         private string errorMessage;
 
         public LoginViewModel(ApiService apiService)
         {
             _apiService = apiService;
         }
+
+        public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
         [RelayCommand]
         private async Task LoginAsync()
