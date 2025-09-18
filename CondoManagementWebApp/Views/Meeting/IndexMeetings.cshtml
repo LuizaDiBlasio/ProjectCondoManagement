@@ -10,9 +10,12 @@
 			<h4>Condominium Meetings</h4>
 		</div>
 	</div>
-	<div class="col-sm-6 p-md-0 text-sm-end mt-2 mt-sm-0">
-		<a asp-controller="Meeting" asp-action="CreateMeeting" class="btn btn-primary me-2">Arrange Meeting</a>
-	</div>
+	@if (User.IsInRole("CondoManager"))
+	{
+		<div class="col-sm-6 p-md-0 text-sm-end mt-2 mt-sm-0">
+			<a asp-controller="Meeting" asp-action="CreateMeeting" class="btn btn-primary me-2">Arrange Meeting</a>
+		</div>
+	}
 </div>
 
 @if (!Model.Any())
@@ -71,9 +74,12 @@ else
 														<i class="fas fa-video"></i>
 												</td>
 												<td>
+													@if (User.IsInRole("CondoManager"))
+													{
+														@Html.ActionLink("Modify", "EditMeeting", new { id = meeting.Id }, new { @class = "btn btn-outline-secondary" })
+														<a href="#" class="btn btn-outline-danger " data-id="@meeting.Id" data-bs-toggle="modal" data-bs-target="#deleteDialog">Cancel meeting</a>
+													}
 													@Html.ActionLink("Details", "DetailsMeeting", new { id = meeting.Id }, new { @class = "btn btn-outline-info" })
-													@Html.ActionLink("Modify", "EditMeeting", new { id = meeting.Id }, new { @class = "btn btn-outline-secondary" })
-													<a href="#" class="btn btn-outline-danger ms-2 delete-btn" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@meeting.Id">Cancel Meeting</a>
 												</td>
 											</tr>
 		}
@@ -92,33 +98,70 @@ else
 </div>
 }
 
+
 <div id="deleteDialog" class="modal fade">
 	<div class="modal-dialog modal-sm">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title">Cancel Meeting</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				<h5 class="modal-title" id="deleteModalLabel">Cancel Meeting</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
 				<p>Are you sure you want to cancel this meeting?</p>
-				<form id="deleteForm" method="post" asp-action="Delete">
-					<input type="hidden" id="meetingIdToDelete" name="id" />
-				</form>
+				<div id="delete-error-message" class="text-danger"></div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">No</button>
-				<button type="submit" class="btn btn-danger" form="deleteForm">Yes</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnNoDelete">No</button>
+				<button type="button" class="btn btn-danger" id="btnYesDelete">Yes</button>
 			</div>
 		</div>
 	</div>
 </div>
 
 @section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+
 	<script type="text/javascript">
 		$(document).ready(function () {
+			var idToDelete = 0;
+
+			// Use o seletor para o link que abre o modal de deleção
 			$('a[data-bs-target="#deleteDialog"]').click(function () {
-				var id = $(this).data('id');
-				$('#meetingIdToDelete').val(id);
+				idToDelete = $(this).data('id');
+				// Limpe a mensagem de erro anterior quando o modal é reaberto
+				$('#delete-error-message').text('').hide();
+			});
+
+			$("#btnYesDelete").click(function () {
+				console.log('ID para deletar:', idToDelete);
+				console.log('URL da requisição:', '/Meeting/RequestDeleteMeeting/' + idToDelete);
+
+				$.ajax({
+					url: '/Meeting/RequestDeleteMeeting/' + idToDelete,
+					type: 'DELETE',
+					success: function (response) {
+						// Verifique se a operação foi um sucesso
+						if (response.success) {
+							$("#deleteDialog").modal('hide'); // Fecha a modal APENAS no sucesso
+							window.location.reload();
+						} else {
+							// Se for um erro, exibe a mensagem, mas NÃO fecha a modal
+							$('#delete-error-message').text(response.message).show();
+						}
+					},
+					error: function (xhr, status, error) {
+						// Tratar erros de servidor (por exemplo, 500 Internal Server Error)
+						$("#deleteDialog").modal('hide');
+						console.error('AJAX Error:', status, error, xhr.responseText);
+						alert('Unexpected error, try again later.');
+					}
+				});
+			});
+
+			$("#btnNoDelete").click(function () {
+				$("#deleteDialog").modal('hide');
 			});
 		});
 	</script>

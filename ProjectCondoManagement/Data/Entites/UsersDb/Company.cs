@@ -10,16 +10,15 @@ namespace ProjectCondoManagement.Data.Entites.UsersDb
 
         public string Name { get; set; }
 
-
         public string? CompanyAdminId { get; set; }
 
         [NotMapped]
         public IEnumerable<Condominium>? Condominiums { get; set; }
 
         [NotMapped]
-        public IEnumerable<CondoMember>? CondoMembers{ get; set; }
+        public IEnumerable<CondoMember>? CondoMembers { get; set; }
 
-        public List<int>? CondominiumIds { get; set; }
+        public List<User> Users { get; set; } = new List<User>();   
 
         public int FinancialAccountId { get; set; } 
 

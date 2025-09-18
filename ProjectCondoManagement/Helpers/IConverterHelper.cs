@@ -8,7 +8,7 @@ namespace ProjectCondoManagement.Helpers
 {
     public interface IConverterHelper
     {
-        CompanyDto? ToCompanyDto(Company company);
+        CompanyDto? ToCompanyDto(Company company, bool WithUsers);
 
         CondoMember ToCondoMember(CondoMemberDto condoMemberDto);
 
@@ -16,17 +16,17 @@ namespace ProjectCondoManagement.Helpers
 
        CondoMemberDto ToCondoMemberDto(User user);
 
-        UserDto ToUserDto(User user);
+        UserDto ToUserDto(User user, bool withCompaniesDto);
 
-        Task<User> ToEditedUser(EditUserDetailsDto editUserDetailsDto);
+        Task<User> ToEditedUser(EditUserDetailsDto editUserDetailsDto, bool withCompanies);
 
         Task<User> ToEditedProfile(UserDto userDto);
 
         Task<CondoMember> FromUserToCondoMember(User user);
+        
+        User ToUser(UserDto userDto, bool withCompanies);
 
-        User ToUser(UserDto userDto);
-
-        Company ToCompany(CompanyDto companyDto, bool isNew);
+        Company ToCompany(CompanyDto companyDto, bool isNew, bool withUsers);
 
         CondominiumDto ToCondominiumDto(Condominium condominium, bool includeOccurrence);    
 
@@ -37,10 +37,6 @@ namespace ProjectCondoManagement.Helpers
         Occurrence ToOccurrence(OccurrenceDto occurrenceDto, bool isNew);
 
         Unit ToUnit(UnitDto unitDto, bool isNew);
-
-        Document ToDocument(DocumentDto documentDto, bool isNew);
-
-        DocumentDto ToDocumentDto(Document document);
 
         MessageDto ToMessageDto(Message message, List<SelectListItem> statusList);
 

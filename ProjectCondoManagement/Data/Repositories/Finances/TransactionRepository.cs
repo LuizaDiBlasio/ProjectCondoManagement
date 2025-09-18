@@ -26,9 +26,11 @@ namespace ProjectCondoManagement.Data.Repositories.Finances
 
         public async Task<IEnumerable<Transaction>> GetTransactions(User user)
         {
-            if (user.CompanyId != null)
+            if (user.Companies.Any())
             {
-                return _contextFinances.Transactions.Where(t => t.CompanyId.HasValue && t.CompanyId == user.CompanyId);
+                var userCompanyIds = user.Companies.Select(c => c.Id).ToList();
+
+                return _contextFinances.Transactions.Where(t => t.CompanyId.HasValue && userCompanyIds.Contains(t.CompanyId.Value));
             }
 
             var financialAccount = await _financialAccountRepository.GetByIdAsync(user.FinancialAccountId.Value, _contextFinances);

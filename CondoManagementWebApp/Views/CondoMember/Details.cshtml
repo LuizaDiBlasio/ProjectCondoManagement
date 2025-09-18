@@ -4,40 +4,55 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
-
-<div class="container mt-4">
-    <div class="row">
-
-
-        <!-- Table Section -->
-        <div class="col-md-8">
-            <h4>CondoMember Details</h4>
-            <hr />
-            <dl class="row">
-                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.FullName)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.FullName)</dd>
-
-                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Email)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.Email)</dd>
-
-                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Address)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.Address)</dd>
-
-                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.BirthDate)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.BirthDate)</dd>
-
-                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.PhoneNumber)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.PhoneNumber)</dd>
-            </dl>
-            <a asp-action="Index" class="btn btn-outline-secondary mt-3">Back to List</a>
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Member Details</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+            </div>
         </div>
 
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 d-flex align-items-start justify-content-center mb-4">
+                                <img src="@Model.ImageFullPath" alt="Member Image" class="img-fluid rounded-circle border shadow" style="max-height: 250px; object-fit: cover; aspect-ratio: 1/1;" />
+                            </div>
 
+                            <div class="col-md-8 mb-4">
+                                <dl class="row">
+                                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FullName)</dt>
+                                    <dd class="col-sm-9">@Html.DisplayFor(model => model.FullName)</dd>
 
-        <!-- Image Section -->
-        <div class="col-md-4 d-flex align-items-start justify-content-center">
-            <img src="@Model.ImageFullPath" alt="Member Image" class="img-fluid rounded border shadow" style="max-height: 300px;" />
+                                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Email)</dt>
+                                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Email)</dd>
+
+                                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Address)</dt>
+                                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Address)</dd>
+
+                                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.BirthDate)</dt>
+                                    <dd class="col-sm-9">@Html.DisplayFor(model => model.BirthDate)</dd>
+
+                                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PhoneNumber)</dt>
+                                    <dd class="col-sm-9">@Html.DisplayFor(model => model.PhoneNumber)</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-info me-2">Edit</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">Delete</a>
         </div>
     </div>
 </div>

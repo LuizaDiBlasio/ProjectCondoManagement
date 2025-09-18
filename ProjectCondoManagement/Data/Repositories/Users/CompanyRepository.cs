@@ -30,50 +30,16 @@ namespace ProjectCondoManagement.Data.Repositories.Users
 
         
 
-        public async Task<List<SelectListItem>> GetCondosSelectListAsync(DataContextCondos contextCondos)
-        {
-            var allCondos = await contextCondos.Condominiums.ToListAsync();
-
-            var availableCondos = allCondos
-                                            .Select(s => new SelectListItem
-                                            {
-                                                Value = s.Id.ToString(),
-                                                Text = s.CondoName
-                                            })
-                                            .OrderBy(s => s.Text).ToList();
-
-            // Apenas retorna a lista
-            return availableCondos;
-        }
-
-
-        public async Task<List<SelectListItem>> GetCondosSelectListAsyncToCreate(DataContextCondos contextCondos)
-        {
-            var allCondos = await contextCondos.Condominiums.ToListAsync();
-
-            var availableCondos = allCondos.Where(c => c.CompanyId == 0) // ainda não selecionados
-                                            .Select(s => new SelectListItem
-                                            {
-                                                Value = s.Id.ToString(),
-                                                Text = s.CondoName
-                                            })
-                                            .OrderBy(s => s.Text).ToList();
-
-            // Apenas retorna a lista
-            return availableCondos;
-        }
-
-
         public async Task<List<SelectListItem>> GetCompanyAdminsSelectListToEdit(int id)
         {
-            var companyAdmins = await _userHelper.GetUsersByRoleAsync("CompanyAdmin");
+            var companyAdmins = await _userHelper.GetUsersWithCompanyByRoleAsync("CompanyAdmin");
 
             if(companyAdmins == null)
             {
                 return null;
             }
 
-            var availableAdmins = companyAdmins.Where(u => u.CompanyId == null);
+            var availableAdmins = companyAdmins.Where(u => !u.Companies.Any());
 
             var adminsToSelect = availableAdmins
                 .Select(a => new SelectListItem
@@ -110,14 +76,14 @@ namespace ProjectCondoManagement.Data.Repositories.Users
 
         public async Task<List<SelectListItem>> GetCompanyAdminsSelectListAsync()
         {
-            var companyAdmins = await _userHelper.GetUsersByRoleAsync("CompanyAdmin");
+            var companyAdmins = await _userHelper.GetUsersWithCompanyByRoleAsync("CompanyAdmin");
 
             if (companyAdmins == null)
             {
                 return null;
             }
 
-            var availableAdmins = companyAdmins.Where(u => u.CompanyId == null);
+            var availableAdmins = companyAdmins.Where(u => !u.Companies.Any());
 
             var adminsToSelect = availableAdmins
                 .Select(a => new SelectListItem
@@ -139,47 +105,37 @@ namespace ProjectCondoManagement.Data.Repositories.Users
         }
 
 
-        public async Task<SelectedAdminAndCondosDto> SelectedAdminAndCondos(CompanyDto companyDto)
+        public async Task<UserDto> SelectedAdmin(CompanyDto companyDto)
         {
             var admins = await _userHelper.GetUsersByRoleAsync("CompanyAdmin");
 
-            var adminsDto = admins?.Select(a => _converterHelper.ToUserDto(a)).ToList() ?? new List<UserDto>();    
+            var adminsDto = admins?.Select(a => _converterHelper.ToUserDto(a, true)).ToList() ?? new List<UserDto>();
 
             var selectedAdmin = adminsDto.FirstOrDefault(a => a.Id == companyDto.CompanyAdminId);
 
-
-            var selectedCondos = new List<CondominiumDto> ();
-
-            var condos = _condominiumRepository.GetAll(_contextCondos);
-
-            var condosDto = condos?.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList() ?? new List<CondominiumDto>();
-
-            foreach(var condo in condosDto)
-            {
-                if (companyDto.SelectedCondominiumIds != null && companyDto.SelectedCondominiumIds.Any())
-                {
-                    foreach (var id in companyDto.SelectedCondominiumIds)
-                    {
-                        if (id == condo.Id)
-                        {
-                            selectedCondos.Add(condo);
-                        }
-                    }
-                }
-               
-            }
-
-            var selectedAdminAndCondosDto = new SelectedAdminAndCondosDto()
-            {
-                SelectedAdmin = selectedAdmin,
-                SelectedCondos = selectedCondos   
-
-            };
-
-            return selectedAdminAndCondosDto;
-
-
+            return selectedAdmin;
                 
+        }
+
+        public async Task<Company?> GetCompanyWithCondosAndUsers(int id)
+        {
+            
+            var company = await _dataContextUsers.Companies.Include(c => c.Users).FirstOrDefaultAsync(c => c.Id == id);
+            
+            if (company == null)
+            {
+                return null;
+            }
+            else
+            {
+                var companyCondos = await _condominiumRepository.GetAll(_contextCondos)
+                                    .Where(c => c.CompanyId == id)
+                                    .ToListAsync();
+
+                company.Condominiums = companyCondos;
+              
+                return company; 
+            }
         }
 
         public async Task<Company> GetCompanyByFinancialAccountIdAsync(int id)

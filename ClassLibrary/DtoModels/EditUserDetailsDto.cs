@@ -27,9 +27,7 @@ namespace ClassLibrary.DtoModels
 
         public string? ImageUrl { get; set; }
 
-        public string? CompanyName { get; set; } 
-
-        public int? CompanyId { get; set; }
+        public List<CompanyDto> CompaniesDto { get; set; }
 
         public int? FinancialAccountId { get; set; }  
 

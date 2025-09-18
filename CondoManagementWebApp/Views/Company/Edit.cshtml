@@ -52,69 +52,26 @@
 									<input asp-for="Address" class="form-control" placeholder="Enter address">
 									<span asp-validation-for="Address" class="text-danger"></span>
 								</div>
-								<div class="col-md-6 mb-3">
-									<label class="form-label font-weight-bold" asp-for="PhoneNumber"></label>
-									<input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number">
-									<span asp-validation-for="PhoneNumber" class="text-danger"></span>
-								</div>
-								<div class="col-md-6 mb-3">
-									<label class="form-label font-weight-bold" asp-for="TaxIdDocument"></label>
-									<input asp-for="TaxIdDocument" class="form-control" placeholder="Enter tax ID number">
-									<span asp-validation-for="TaxIdDocument" class="text-danger"></span>
-								</div>
+								
 							</div>
 
-							@* Dropdown e Checklist em uma única coluna *@
 							<div class="row">
 								<div class="col-12">
 									<div class="form-group mb-4">
-										<label asp-for="SelectedCompanyAdminId" class="form-label font-weight-bold"></label>
-										<select asp-for="SelectedCompanyAdminId" asp-items="Model.CompanyAdminsToSelect" class="form-control custom-select">
-											@if (Model.CompanyAdminsToSelect != null && Model.CompanyAdminsToSelect.Any())
-											{
-												<option value="">-- Select Company Admin --</option>
-											}
-											else
-											{
-												<option value="">-- No Company Admins available --</option>
-											}
-										</select>
-										<span asp-validation-for="SelectedCompanyAdminId" class="text-danger"></span>
+										<label class="form-label font-weight-bold" asp-for="PhoneNumber"></label>
+										<input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number">
+										<span asp-validation-for="PhoneNumber" class="text-danger"></span>
 									</div>
-								</div>
-							</div>
-
-							<div class="row">
-								<div class="col-12">
 									<div class="form-group mb-4">
-										<label asp-for="SelectedCondominiumIds" class="form-label font-weight-bold"></label>
-										<div class="border p-3 rounded" style="max-height: 200px; overflow-y: auto;">
-											@if (Model.CondominiumsToSelect != null && Model.CondominiumsToSelect.Any())
-											{
-												@foreach (var condoItem in Model.CondominiumsToSelect)
-												{
-													<div class="form-check">
-														<input type="checkbox"
-																							  name="SelectedCondominiumIds"
-																							  value="@condoItem.Value"
-																							  id="condo_@condoItem.Value"
-																							  class="form-check-input"
-														@(Model.SelectedCondominiumIds != null && Model.SelectedCondominiumIds.Contains(int.Parse(condoItem.Value)) ? "checked" : "") />
-														<label class="form-check-label" for="condo_@condoItem.Value">
-															@condoItem.Text
-														</label>
-													</div>
-												}
-											}
-											else
-											{
-												<p>No condos available to select.</p>
-											}
-										</div>
-										<span asp-validation-for="SelectedCondominiumIds" class="text-danger"></span>
+										<label class="form-label font-weight-bold" asp-for="TaxIdDocument"></label>
+										<input asp-for="TaxIdDocument" class="form-control" placeholder="Enter tax ID number">
+										<span asp-validation-for="TaxIdDocument" class="text-danger"></span>
 									</div>
 									
 								</div>
+							</div>
+
+							
 								<flash dismissable="true" />
 								<div class="form-group mt-4 text-center">
 									<button type="submit" class="btn btn-primary">Update Company</button>

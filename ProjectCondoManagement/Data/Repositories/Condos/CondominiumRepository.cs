@@ -66,7 +66,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
                     var manager = managers.FirstOrDefault(m => m.Id == condominium.ManagerUserId);
                     if (manager != null)
                     {
-                        var managerDto = _converterHelper.ToUserDto(manager);
+                        var managerDto = _converterHelper.ToUserDto(manager, true);
 
                         condominium.ManagerUser = managerDto;
                     }

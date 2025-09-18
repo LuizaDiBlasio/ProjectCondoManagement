@@ -154,7 +154,7 @@ namespace CondoManagementWebApp.Controllers
             }
             catch (Exception ex)
             {
-                _flashMessage.Danger($"Erro posting condominium{ex.InnerException}");
+                _flashMessage.Danger($"Unable to add condominium");
                 return View(condominiumDto);
             }                              
             

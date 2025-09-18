@@ -34,26 +34,27 @@
 										<input asp-for="DateAndTime" class="form-control" id="dateAndTimePicker" />
 										<span asp-validation-for="DateAndTime" class="text-danger"></span>
 									</div>
+                                    <div class="form-group mb-4">
+                                        <label asp-for="CondominiumId" class="form-label">Condominium</label>
+                                        <select asp-for="CondominiumId" asp-items="Model.CondosToSelect" class="form-control" id="condominiumSelect">
+                                            <option value="">-- Select Condominium --</option>
+                                        </select>
+
+                                        <span asp-validation-for="CondominiumId" class="text-danger"></span>
+                                    </div>
 								</div>
 								<div class="col-md-6">
+                                    
 									<div class="form-group mb-4">
-										<label asp-for="CondominiumId" class="form-label">Condominium</label>
-										<select asp-for="CondominiumId" class="form-control" id="condominiumSelect">
-											<option value="">-- Select Condominium --</option>
-											<!-- Condos to be loaded from ViewModel -->
-										</select>
-										<span asp-validation-for="CondominiumId" class="text-danger"></span>
-									</div>
-									<div class="form-group mb-4">
-										<label asp-for="SelectedOccurrencesIds" class="form-label">Matters that will be discussed</label>
-										<div class="border p-3 rounded" style="max-height: 250px; overflow-y: auto;" id="occurrencesListContainer">
+										<label asp-for="SelectedOccurrencesIds" class="form-label">Matters that will be discussed</label >
+										<div class="border p-3 rounded" style="max-height: 150px; overflow-y: auto;" id="occurrencesListContainer">
 											<p>Please select a condominium to load its occurrences.</p>
 										</div>
 										<span asp-validation-for="SelectedOccurrencesIds" class="text-danger"></span>
 									</div>
 									<div class="form-group mb-4">
 										<label asp-for="SelectedCondoMembersIds" class="form-label">Invite members</label>
-										<div class="border p-3 rounded" style="max-height: 250px; overflow-y: auto;" id="condomembersListContainer">
+										<div class="border p-3 rounded" style="max-height: 150px; overflow-y: auto;" id="condomembersListContainer">
 											<p>Please select a condominium to load its members.</p>
 										</div>
 										<span asp-validation-for="SelectedCondoMembersIds" class="text-danger"></span>
@@ -71,7 +72,7 @@
 								</div>
 							</div>
 							<div class="form-group mt-3 d-flex justify-content-between align-items-center">
-								<a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+								<a asp-action="IndexMeetings" class="btn btn-outline-secondary">Back to List</a>
 								<button type="submit" class="btn btn-primary">Create</button>
 							</div>
 						</form>
@@ -92,90 +93,119 @@
 	<script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css" />
 
-	<script type="text/javascript">
-		document.addEventListener('DOMContentLoaded', function () {
-			// Initialize Syncfusion DateTimePicker
-			var dateTimePicker = new ej.calendars.DateTimePicker({
-				format: 'MM/dd/yyyy HH:mm',
-				placeholder: 'Select a date and time',
-				min: new Date(), // Disables past dates
-				value: new Date()
-			});
-			dateTimePicker.appendTo('#dateAndTimePicker');
+    <script type="text/javascript">
+                             document.addEventListener('DOMContentLoaded', function () {
+            // Inicializar o Syncfusion DateTimePicker
+            var dateTimePicker = new ej.calendars.DateTimePicker({
+                format: 'MM/dd/yyyy HH:mm',
+                placeholder: 'Select a date and time',
+                min: new Date()
+            });
+            dateTimePicker.appendTo('#dateAndTimePicker');
 
-			// Script for the meeting type switch
-			const isExtraMeetingSwitch = document.getElementById('isExtraMeetingSwitch');
-			const isExtraMeetingLabel = document.getElementById('isExtraMeetingLabel');
+            // Script para o switch de tipo de reunião
+            const isExtraMeetingSwitch = document.getElementById('isExtraMeetingSwitch');
+            const isExtraMeetingLabel = document.getElementById('isExtraMeetingLabel');
 
-			function updateLabel() {
-				if (isExtraMeetingSwitch.checked) {
-					isExtraMeetingLabel.innerHTML = '<span class="text-success">Extra</span>';
-				} else {
-					isExtraMeetingLabel.innerHTML = '<span class="text-danger">Regular</span>';
-				}
-			}
+            function updateLabel() {
+                if (isExtraMeetingSwitch.checked) {
+                    isExtraMeetingLabel.innerHTML = '<span class="text-success">Extra</span>';
+                } else {
+                    isExtraMeetingLabel.innerHTML = '<span class="text-danger">Regular</span>';
+                }
+            }
 
-			updateLabel(); // Set initial label state
-			isExtraMeetingSwitch.addEventListener('change', updateLabel);
+            updateLabel();
+            isExtraMeetingSwitch.addEventListener('change', updateLabel);
 
-			//script para occurrences checkBox
-			$('#condominiumSelect').change(function () {
-				var condoId = $(this).val();
-				var occurrencesContainer = $('#occurrencesListContainer');
-				occurrencesContainer.empty();
+            // Script para carregar as listas de ocorrências e membros
+            $('#condominiumSelect').change(function () {
+                var id = $(this).val();
+                console.log("Valor selecionado de CondominiumId:", id);
 
-				if (condoId) {
-					$.ajax({
-						url: /GetOccurencesFromCondo/${condoId},
-						type: 'GET',
-						dataType: 'json',
-						success: function (occurrences) {
-							if (occurrences.length > 0) {
-								$.each(occurrences, function (i, occurrence) {
-									var checkboxHtml =                                          <div class="form-check">                                             <input type="checkbox"                                                 name="SelectedOccurrencesIds"                                                 value="${occurrence.value}"                                                 id="occurrence_${occurrence.value}"                                                 class="form-check-input" />                                             <label class="form-check-label" for="occurrence_${occurrence.value}">                                                 ${occurrence.text}                                             </label>                                         </div>;
-									occurrencesContainer.append(checkboxHtml);
-								});
-							} else {
-								occurrencesContainer.append('<p>No occurrences for this condominium.</p>');
-							}
-						},
-						error: function (xhr, status, error) {
-							console.error("Error fetching occurrences: " + error);
-							occurrencesContainer.append('<p>Error loading units. Please try again.</p>');
-						}
-					});
-				}
-			});
+                var occurrencesContainer = $('#occurrencesListContainer');
+                var condomembersContainer = $('#condomembersListContainer');
 
-			 //script para condomembers checkBox
-			$('#condominiumSelect').change(function () {
-				var condoId = $(this).val();
-				var condomembersContainer = $('#condomembersListContainer');
-				condomembersContainer.empty();
+                // Limpa as listas
+                occurrencesContainer.empty();
+                condomembersContainer.empty();
 
-				if (condoId) {
-					$.ajax({
-						url: /GetCondoMembersFromCondo/${condoId},
-						type: 'GET',
-						dataType: 'json',
-						success: function (condomembers) {
-							if (condomembers.length > 0) {
-								$.each(condomembers, function (i, condomember) {
-									var checkboxHtml =                                          <div class="form-check">                                             <input type="checkbox"                                                 name="SelectedCondoMembersIds"                                                 value="${condomember.value}"                                                 id="condomember_${condomember.value}"                                                 class="form-check-input" />                                             <label class="form-check-label" for="condomember_${condomember.value}">                                                 ${condomember.text}                                             </label>                                         </div>;
-									condomembersContainer.append(checkboxHtml);
-								});
-							} else {
-								condomembersContainer.append('<p>Condominium has no members yet.</p>');
-							}
-						},
-						error: function (xhr, status, error) {
-							console.error("Error fetching condomembers: " + error);
-							condomembersContainer.append('<p>Error loading units. Please try again.</p>');
-						}
-					});
-				}
-			});
-		});
-	</script>
+                // Checagem do valor
+                if (!id) {
+                    occurrencesContainer.append('<p>Please select a condominium to load its occurrences.</p>');
+                    condomembersContainer.append('<p>Please select a condominium to load its members.</p>');
+                    return;
+                }
+
+                // Chamada AJAX para Occurrences
+                $.ajax({
+                    url: `GetOccurencesFromCondo/${id}`,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (occurrences) {
+                        if (occurrences.length > 0) {
+                            $.each(occurrences, function (i, occurrence) {
+                                var checkboxHtml = `
+                                    <div class="form-check">
+                                        <input type="checkbox"
+                                               name="SelectedOccurrencesIds"
+                                               value="${occurrence.value}"
+                                               id="occurrence_${occurrence.value}"
+                                               class="form-check-input" />
+                                        <label class="form-check-label" for="occurrence_${occurrence.value}">
+                                            ${occurrence.text}
+                                        </label>
+                                    </div>`;
+                                occurrencesContainer.append(checkboxHtml);
+                            });
+                        } else {
+                            occurrencesContainer.append('<p>No occurrences for this condominium.</p>');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching occurrences: " + error);
+                        occurrencesContainer.append('<p>Error loading occurrences. Please try again.</p>');
+                    }
+                });
+
+                // Chamada AJAX para CondoMembers
+                $.ajax({
+                    url: `GetCondoMembersFromCondo/${id}`,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (condomembers) {
+                        if (condomembers.length > 0) {
+                            $.each(condomembers, function (i, condomember) {
+                                var checkboxHtml = `
+                                    <div class="form-check">
+                                        <input type="checkbox"
+                                               name="SelectedCondoMembersIds"
+                                               value="${condomember.value}"
+                                               id="condomember_${condomember.value}"
+                                               class="form-check-input" />
+                                        <label class="form-check-label" for="condomember_${condomember.value}">
+                                            ${condomember.text}
+                                        </label>
+                                    </div>`;
+                                condomembersContainer.append(checkboxHtml);
+                            });
+                        } else {
+                            condomembersContainer.append('<p>Condominium has no members yet.</p>');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching condomembers: " + error);
+                        condomembersContainer.append('<p>Error loading members. Please try again.</p>');
+                    }
+                });
+            });
+
+            // Adiciona um evento `onload` para carregar as listas se já houver um valor selecionado
+            var initialCondoId = $('#condominiumSelect').val();
+            if (initialCondoId) {
+                $('#condominiumSelect').trigger('change');
+            }
+        });
+    </script>
 
 }

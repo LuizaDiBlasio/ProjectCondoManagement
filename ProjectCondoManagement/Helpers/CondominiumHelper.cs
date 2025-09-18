@@ -33,7 +33,7 @@ namespace ProjectCondoManagement.Helpers
                 };
             }
 
-            condominium.Company = _converterHelper.ToCompanyDto(company);
+            condominium.Company = _converterHelper.ToCompanyDto(company, false);
 
             if (condominium.Company == null)
             {

@@ -15,11 +15,6 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group">
-                <input type="hidden" asp-for="CompanyId" value="@ViewBag.CompanyId" />
-            </div>
-
-
-            <div class="form-group">
                 <label asp-for="FullName" class="control-label"></label>
                 <input asp-for="FullName" class="form-control" />
                 <span asp-validation-for="FullName" class="text-danger"></span>
@@ -39,12 +34,7 @@
 
             <div class="form-group">
                 <label asp-for="BirthDate" class="control-label"></label>
-                <ejs-datepicker id="BirthDate"
-                                name="BirthDate"
-                                format="dd/MM/yyyy"
-                                placeholder="Select birth date"
-                                value="@DateTime.Now">
-                </ejs-datepicker>
+                <input type="text" id="birthDateInput" asp-for="BirthDate" class="form-control" placeholder="Select a date" />
                 <span asp-validation-for="BirthDate" class="text-danger"></span>
             </div>
 
@@ -71,4 +61,16 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializa o DatePicker para BirthDate
+            var birthDatePicker = new ej.calendars.DatePicker({
+                format: 'MM/dd/yyyy',
+                placeholder: 'Select a date',
+                max: new Date()
+            });
+            birthDatePicker.appendTo('#birthDateInput');
+        });
+    </script>
 }

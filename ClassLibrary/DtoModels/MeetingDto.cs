@@ -14,10 +14,16 @@ namespace ClassLibrary.DtoModels
 
         public int CondominiumId { get; set; }
 
+
+        [Display(Name="Subject")]
         public string Title { get; set; }
 
+
+        [Display(Name = "Description")]
         public string Description { get; set; }
 
+
+        [Display(Name = "Date and time")]
         public DateTime DateAndTime { get; set; }
 
         //public DocumentDto? Report { get; set; }
@@ -30,6 +36,8 @@ namespace ClassLibrary.DtoModels
 
         public List<OccurrenceDto> OccurencesDto { get; set; }
 
+
+        [Display(Name = "Meeting type")]
         public bool IsExtraMeeting { get; set; }  // (regular/extra)
 
         public string MeetingLink { get; set; }

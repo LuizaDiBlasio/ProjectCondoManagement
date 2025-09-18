@@ -12,8 +12,8 @@ using ProjectCondoManagement.Data.Entites.CondosDb;
 namespace ProjectCondoManagement.Migrations.CondosDb
 {
     [DbContext(typeof(DataContextCondos))]
-    [Migration("20250905164838_MeetingVotingDetach")]
-    partial class MeetingVotingDetach
+    [Migration("20250910180643_InitCreateCondos")]
+    partial class InitCreateCondos
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -85,9 +85,15 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FinancialAccountId")
+                        .HasColumnType("int");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -191,12 +197,12 @@ namespace ProjectCondoManagement.Migrations.CondosDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsExtraMeeting")
+                        .HasColumnType("bit");
+
                     b.Property<string>("MeetingLink")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("MeetingType")
-                        .HasColumnType("bit");
 
                     b.Property<int?>("ReportId")
                         .HasColumnType("int");

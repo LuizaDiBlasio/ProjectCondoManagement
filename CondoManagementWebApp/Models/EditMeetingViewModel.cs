@@ -8,9 +8,11 @@ namespace CondoManagementWebApp.Models
         public int Id { get; set; }
 
         [Required]
+        [Display(Name = "Condominium")]
         public int? CondominiumId { get; set; }
 
         [Required]
+        [Display (Name ="Date and time")]
         public DateTime? DateAndTime { get; set; }
 
         //public DocumentDto? Report { get; set; }
@@ -27,6 +29,7 @@ namespace CondoManagementWebApp.Models
         public List<SelectListItem>? CondoMembersToSelect { get; set; }
 
         [Required]
+        [Display(Name = "Selected condo members")]
         public List<int> SelectedCondoMembersIds { get; set; }
 
 
@@ -39,8 +42,9 @@ namespace CondoManagementWebApp.Models
 
         public List<SelectListItem>? OccurrencesToSelect { get; set; }
 
-        [Required]
-        public List<int> SelectedOccurrencesIds { get; set; }
+     
+        [Display(Name = "Selected occurrences")]
+        public List<int>? SelectedOccurrencesIds { get; set; } = new List<int>();
 
         public bool MeetingType { get; set; } = false; // (regular = false/ extra = true)
     }
