@@ -50,7 +50,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (user == null)
             {
-                return Ok(new Response<object>() { IsSuccess = false, Message = "Member not found." });
+                return Ok(new List<CondoMemberDto>());
             }
 
 
@@ -68,7 +68,7 @@ namespace ProjectCondoManagement.Controllers
                                                                     
             if (!condoMembers.Any())
             {
-                return Ok(new Response<object>() { IsSuccess = false, Message = "Member not found." });
+                return Ok(new List<CondoMemberDto>());
             }
 
             await _condoMemberRepository.LinkImages(condoMembers); // Link images to condo members
@@ -138,8 +138,14 @@ namespace ProjectCondoManagement.Controllers
             }
 
 
-            var condoMember = await _condoMemberRepository.GetAll(_context).Include(c => c.Units).ThenInclude(u => u.Condominium)
-                .FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
+            var condoMember = await _condoMemberRepository.GetAll(_context)
+            .Include(c => c.Units)
+                .ThenInclude(u => u.Condominium)
+                    .ThenInclude(condo => condo.Occurrences)
+            .Include(c => c.Units)
+                .ThenInclude(u => u.Condominium)
+                    .ThenInclude(condo => condo.Meetings)
+            .FirstOrDefaultAsync(c => c.Email == email);
 
 
             if (condoMember == null)
@@ -496,6 +502,33 @@ namespace ProjectCondoManagement.Controllers
             var membersDto = members.Select(m => _converterHelper.ToCondoMemberDto(m)).ToList();
 
             return membersDto;
+        }
+
+
+        // GET: api/CondoMembers/Exists?email=someone@email.com
+        [HttpGet("Exists")]
+        public async Task<ActionResult<bool>> ExistsByEmail([FromQuery] string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return BadRequest("Email is required.");
+            }
+
+            try
+            {
+                // Verifica se existe no repositório de CondoMembers
+                var existsCondoMember = await _condoMemberRepository.ExistByEmailAsync(email);
+
+                // Verifica também se já existe como usuário (opcional)
+                var existsUser = await _userHelper.ExistsAsync(email);
+
+                return Ok(existsCondoMember || existsUser);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"An error occurred: {ex.Message}");
+            }
         }
 
     }

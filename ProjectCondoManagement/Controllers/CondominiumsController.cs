@@ -7,6 +7,7 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Helpers;
+using System.Linq;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -66,7 +67,7 @@ namespace ProjectCondoManagement.Controllers
             var userCompanyIds = user.Companies.Select(c => c.Id).ToList();
 
             var condominiums = await _condominiumRepository.GetAll(_context)
-                                                           .Where(c => userCompanyIds.Contains(c.CompanyId.Value))
+                                                           .Where(c => c.CompanyId.HasValue && userCompanyIds.Contains(c.CompanyId.Value))
                                                            .ToListAsync();
             if (condominiums == null)
             {
@@ -308,27 +309,58 @@ namespace ProjectCondoManagement.Controllers
 
             var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
 
-            var condominiums = await _condominiumRepository.GetAll(_context).Where(c => c.ManagerUserId == user.Id).ToListAsync();
-            if (condominiums == null)
+            var condominiums = await _condominiumRepository.GetAll(_context)
+                .Include(c => c.Occurrences).Include(c => c.Meetings).Include(c => c.Units)
+                .Where(c => c.ManagerUserId == user.Id)
+                .ToListAsync();
+
+            if (condominiums == null || !condominiums.Any())
             {
                 return new List<CondominiumDto>();
             }
 
+            // 1) obter todos os FinancialAccountId dos condomínios (somente os com valor)
+            var condominiumFinancialAccountIds = condominiums
+                .Select(c => c.FinancialAccountId)
+                .Where(id => id.HasValue)
+                .Select(id => id.Value)
+                .ToList();
 
+            // 2) buscar todos os pagamentos que tenham PayerFinancialAccountId ou BenificiarAccountID em condominiumFinancialAccountIds
+            var allPayments = await _paymentRepository.GetAll(_dataContextFinances)
+                 .Where(p =>
+                     condominiumFinancialAccountIds.Contains(p.PayerFinancialAccountId) ||
+                     (p.BeneficiaryAccountId.HasValue && condominiumFinancialAccountIds.Contains(p.BeneficiaryAccountId.Value))
+                 )
+                 .Include(p => p.Transaction)
+                 .Include(p => p.Expenses)
+                 .ToListAsync();
+            // 3) converter pagamentos para DTOs (reutilizando seu converter)
+            var allPaymentsDto = allPayments
+                .Select(p => _converterHelper.ToPaymentDto(p, false))
+                .ToList();
 
-            var condominiumsDtos = condominiums.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList();
-
-            if (condominiumsDtos == null)
-            {
-                return new List<CondominiumDto>();
-            }
+            // 4) converter condomínios para DTOs e ligar Manager / FinancialAccount (como você já fazia)
+            var condominiumsDtos = condominiums
+                .Select(c => _converterHelper.ToCondominiumDto(c, true))
+                .ToList();
 
             await _condominiumRepository.LinkManager(condominiumsDtos);
             await _condominiumRepository.LinkFinancialAccount(condominiumsDtos);
 
+            // 5) popular os pagamentos em cada CondominiumDto
+            foreach (var condoDto in condominiumsDtos)
+            {
+                // aqui assumimos que condoDto.FinancialAccountId foi preenchido por LinkFinancialAccount
+                // e que existe uma propriedade List<PaymentDto> CondoPayments no CondominiumDto
+                condoDto.Payments = allPaymentsDto
+                  .Where(p => p.PayerFinancialAccountId == condoDto.FinancialAccountId
+                           || (p.BeneficiaryAccountId.HasValue && p.BeneficiaryAccountId.Value == condoDto.FinancialAccountId))
+                  .ToList();
+            }
+
             return condominiumsDtos;
         }
-
 
 
 

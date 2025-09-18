@@ -20,7 +20,7 @@ namespace ClassLibrary.DtoModels
 
         public string SelectedRole { get; set; }
 
-        public List<CompanyDto> Companies { get; set; }    
+        public List<CompanyDto>? Companies { get; set; }    
 
         public string? ImageUrl { get; set; }
     }

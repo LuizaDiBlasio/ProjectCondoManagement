@@ -2,6 +2,8 @@
 using ClassLibrary.DtoModels;
 using Microsoft.AspNetCore.Identity;
 using ProjectCondoManagement.Data.Entites.UsersDb;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ProjectCondoManagement.Helpers
 {
@@ -58,12 +60,14 @@ namespace ProjectCondoManagement.Helpers
 
         Task<IEnumerable<User>> GetUsersByRoleAsync(string role);
 
-        public Task<List<User>> GetUsersByFullName(string cleanedFullName);
+        Task<List<User>> GetUsersByFullName(string cleanedFullName);
+        Task<List<User>> GetUsersWithCompanyAsync();
 
-        public Task<List<User>> GetUsersWithCompanyAsync();
+        Task<bool> ExistsAsync(string email);
 
         Task<List<User>> GetUsersWithCompanyByRoleAsync(string role);
 
         Task<User> GetUserByIdWithCompaniesAsync(string id);
+        Task<User> GetUserByFinancialAccountIdAsync(int financialAccountId);
     }
 }

@@ -14,5 +14,6 @@ namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
         Task<bool> AssociateFinancialAccountAsync(string? email, int? financialAccountId);
 
         Task<List<CondoMember>> GetCondoMembersByEmailsAsync(List<string> emails);
+        Task<bool> ExistByEmailAsync(string email);
     }
 }

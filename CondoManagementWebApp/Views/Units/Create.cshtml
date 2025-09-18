@@ -24,6 +24,7 @@
             {
                 <input type="hidden" name="CondominiumId" value="@Model.CondoId" />
                 <input type="hidden" name="CondoName" value="@Model.CondoName" />
+ 
             }
             else
             {
@@ -51,7 +52,16 @@
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-success" />
-                <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+
+
+                @if (Model.CondoId != null && Model.CondoName != null)
+                {
+                    <a asp-action="Index" asp-route-id="@Model.CondoId" asp-route-condoName="@Model.CondoName" class="btn btn-outline-primary">Back to List</a>
+                }
+                else if (Model.MemberId != null)
+                {
+                    <a asp-action="MemberUnits" asp-route-id="@Model.MemberId" class="btn btn-outline-primary">Back to List</a>
+                }
             </div>
         </form>
     </div>

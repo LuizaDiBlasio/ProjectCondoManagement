@@ -15,6 +15,7 @@ using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Users;
 using ProjectCondoManagement.Helpers;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ProjectCondoManagement.Controllers
 {
@@ -279,8 +280,8 @@ namespace ProjectCondoManagement.Controllers
         {
             var user = await _userHelper.GetUserByEmailWithCompaniesAsync(this.User.Identity.Name);
 
-
-            var companiesDto = user.Companies?.Select(c => _converterHelper.ToCompanyDto(c, false));
+         
+            var companiesDto = user.Companies?.Select(c => _converterHelper.ToCompanyDto(c, false)).ToList();
 
             if (includeCondominiums && companiesDto != null)
             {
@@ -294,6 +295,19 @@ namespace ProjectCondoManagement.Controllers
             }
 
             return Ok(companiesDto);
+        }
+
+
+        [HttpPost("GetCompanyCondominiums")]
+
+        public async Task<IActionResult> GetCompanyCondominiums([FromBody] CompanyDto companyDto)
+        {
+            var companyCondominiums = await _condominiumRepository.GetCompanyCondominiums(companyDto.SelectedCondominiumIds);
+
+            var companyCondominiumsDtos = companyCondominiums?.Select(c => _converterHelper.ToCondominiumDto(c, false)).ToList() ?? new List<CondominiumDto>();
+
+
+            return Ok(companyCondominiumsDtos); 
         }
     }
 }

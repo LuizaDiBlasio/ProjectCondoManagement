@@ -200,8 +200,23 @@
                                      // <-- ADICIONAR OS ROLES E ENCAMINHAMENTOS AQUI 
 
                                     if (data.role === "SysAdmin") {
-                                        window.location.href = '@Url.Action("SysAdminDashBoard", "Account")';
-                                    } else {
+                                        window.location.href = '@Url.Action("SysAdminDashboard", "Account")';
+                                    } 
+                                    
+                                    else if(data.role === "CondoManager"){
+                                        window.location.href = '@Url.Action("CondoManagerDashboard", "Account")';
+                                    }
+
+                                       else if(data.role === "CompanyAdmin"){
+                                        window.location.href = '@Url.Action("CompanyAdminDashboard", "Account")';
+                                    }
+
+
+                                    else if(data.role === "CondoMember"){
+                                        window.location.href = '@Url.Action("Dashboard", "CondoMember")';
+                                    }                                   
+
+                                    else {
                                         window.location.href = '@Url.Action("Index", "Home")';
                                     }
                             } else {

@@ -9,11 +9,11 @@ using ProjectCondoManagement.Data.Entites.UsersDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.UsersDb
+namespace ProjectCondoManagement.Migrations.DataContextUsersMigrations
 {
     [DbContext(typeof(DataContextUsers))]
-    [Migration("20250914084734_InitCreate")]
-    partial class InitCreate
+    [Migration("20250918141052_InitCreateUsers")]
+    partial class InitCreateUsers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -186,6 +186,9 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CompanyAdminId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CondominiumIds")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")

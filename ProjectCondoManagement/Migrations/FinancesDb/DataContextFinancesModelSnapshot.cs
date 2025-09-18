@@ -8,7 +8,7 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.FinancesDb
+namespace ProjectCondoManagement.Migrations
 {
     [DbContext(typeof(DataContextFinances))]
     partial class DataContextFinancesModelSnapshot : ModelSnapshot
@@ -228,6 +228,9 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
 
                     b.Property<int?>("PaymentId")
                         .HasColumnType("int");
+
+                    b.Property<string>("RecipientName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

@@ -32,7 +32,7 @@ namespace CondoManagementWebApp.Models
         [Display(Name = "Recipient's Account")]
         public int? BeneficiaryAccountId { get; set; }
 
-        public List<SelectListItem>? CondosToSelect { get; set; }
+        public SelectList? CondosToSelect { get; set; }
 
         [Required]
         [Display (Name ="Payment Condominium")]

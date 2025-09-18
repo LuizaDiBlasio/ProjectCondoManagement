@@ -28,6 +28,9 @@ namespace ClassLibrary.DtoModels
         [NotMapped]
         public FinancialAccountDto? FinancialAccountDto { get; set; }
 
+        [NotMapped]
+        public List<PaymentDto>? Payments { get; set; }
+
         public int? FinancialAccountId { get; set; }     
 
         public UserDto? ManagerUser { get; set; }

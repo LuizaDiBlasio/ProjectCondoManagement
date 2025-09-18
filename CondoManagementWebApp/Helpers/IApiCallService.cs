@@ -14,5 +14,6 @@ namespace CondoManagementWebApp.Helpers
         Task<TResponse> GetByQueryAsync<TResponse>(string requestUri, string query);
 
         Task<HttpResponseMessage> DeleteAsync(string requestUri);
+
     }
 }

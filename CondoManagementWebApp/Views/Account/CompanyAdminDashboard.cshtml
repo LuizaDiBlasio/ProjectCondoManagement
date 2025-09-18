@@ -1,0 +1,225 @@
+﻿@model CondoManagementWebApp.Models.CompanyAdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Company Admin Dashboard";
+}
+
+<div class="container mt-4 text-dark">
+
+    <!-- Admin profile -->
+    <div class="d-flex align-items-center mb-4">
+        <img src="@Model.CompanyAdmin?.ImageFullPath"
+             alt="Admin photo"
+             class="rounded-circle me-3 border"
+             style="width: 80px; height: 80px; object-fit: cover;" />
+        <div>
+            <h2 class="mb-0 text-dark">@Model.CompanyAdmin?.FullName</h2>
+            <small class="text-secondary">@Model.CompanyAdmin?.Email</small><br />
+            <small class="text-secondary">Phone: @Model.CompanyAdmin?.PhoneNumber</small>
+        </div>
+    </div>
+
+    <div class="accordion" id="adminDashboardAccordion">
+
+        <!-- Financial Account -->
+        <div class="accordion-item mb-2 rounded shadow-sm">
+            <h2 class="accordion-header" id="headingFinancial">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFinancial" aria-expanded="true" aria-controls="collapseFinancial">
+                    Financial Account
+                </button>
+            </h2>
+            <div id="collapseFinancial" class="accordion-collapse collapse show" aria-labelledby="headingFinancial" data-bs-parent="#adminDashboardAccordion">
+                <div class="accordion-body">
+                    @if (Model.FinancialAccount != null)
+                    {
+                        <p><strong>Owner:</strong> @Model.FinancialAccount.OwnerName</p>
+                        <p><strong>Bank:</strong> @Model.FinancialAccount.BankName</p>
+                        <p><strong>Account Number:</strong> @Model.FinancialAccount.AssociatedBankAccount</p>
+                        <p><strong>Card Number:</strong> @Model.FinancialAccount.CardNumber</p>
+                        <p><strong>Balance:</strong> @Model.FinancialAccount.Balance.ToString("C")</p>
+                        <p><strong>Status:</strong> @(Model.FinancialAccount.IsActive ? "Active" : "Inactive")</p>
+                    }
+                    else
+                    {
+                        <p class="text-secondary">No financial account linked.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Condominiums -->
+        <div class="accordion-item mb-2 rounded shadow-sm">
+            <h2 class="accordion-header" id="headingCondos">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCondos" aria-expanded="false" aria-controls="collapseCondos">
+                    Condominiums
+                </button>
+            </h2>
+            <div id="collapseCondos" class="accordion-collapse collapse" aria-labelledby="headingCondos" data-bs-parent="#adminDashboardAccordion">
+                <div class="accordion-body p-0">
+                    <div class="card bg-white border border-light shadow-sm rounded text-dark">
+                        <div class="card-body">
+                            @if (Model.Condominiums != null && Model.Condominiums.Any())
+                            {
+                                <ul class="list-group">
+                                    @foreach (var condo in Model.Condominiums)
+                                    {
+                                        var unresolvedOccurrences = condo.Occurrences?
+                                        .Where(o => !o.IsResolved)
+                                        .Count() ?? 0;
+
+                                        var futureMeetings = condo.Meetings?
+                                        .Where(m => m.DateAndTime > DateTime.Now)
+                                        .Count() ?? 0;
+
+                                        <li class="list-group-item text-dark">
+                                            <strong>@condo.CondoName</strong><br />
+                                            <span class="text-secondary">@condo.Address</span><br />
+                                           Manager: @(condo.ManagerUser?.FullName ?? "No manager assigned")<br />
+                                           Units: @(condo.Units?.Count() ?? 0) |
+                                           Unresolved Occurrences: @unresolvedOccurrences |
+                                           Upcoming Meetings: @futureMeetings
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="text-secondary">No condominiums found.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Condo Managers -->
+        <div class="accordion-item mb-2 rounded shadow-sm">
+            <h2 class="accordion-header" id="headingManagers">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseManagers" aria-expanded="false" aria-controls="collapseManagers">
+                    Condo Managers
+                </button>
+            </h2>
+            <div id="collapseManagers" class="accordion-collapse collapse" aria-labelledby="headingManagers" data-bs-parent="#adminDashboardAccordion">
+                <div class="accordion-body p-0">
+                    <div class="card bg-white border border-light shadow-sm rounded text-dark">
+                        <div class="card-body">
+                            @if (Model.CondoManagers != null && Model.CondoManagers.Any())
+                            {
+                                <ul class="list-group">
+                                    @foreach (var manager in Model.CondoManagers)
+                                    {
+                                        <li class="list-group-item text-dark d-flex align-items-center">
+                                            <img src="@manager.ImageFullPath"
+                                                 class="rounded-circle me-3 border"
+                                                 style="width: 40px; height: 40px; object-fit: cover;" />
+                                            <div>
+                                                <strong>@manager.FullName</strong><br />
+                                                <small class="text-secondary">@manager.Email</small><br />
+                                                <small class="text-secondary">Phone: @manager.PhoneNumber</small>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="text-secondary">No condo managers registered.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments -->
+        <div class="accordion-item mb-2 rounded shadow-sm">
+            <h2 class="accordion-header" id="headingPayments">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePayments" aria-expanded="false" aria-controls="collapsePayments">
+                    Pending Payments 
+                </button>
+            </h2>
+            <div id="collapsePayments" class="accordion-collapse collapse" aria-labelledby="headingPayments" data-bs-parent="#adminDashboardAccordion">
+                <div class="accordion-body p-0">
+                    <div class="card bg-white border border-light shadow-sm rounded text-dark">
+                        <div class="card-body">
+                            @if (Model.Payments != null && Model.Payments.Any(p => !p.IsPaid))
+                            {
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Due Date</th>
+                                            <th>Amount</th>
+                                            <th>Recipient</th>
+                                            <th>Payer</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var p in Model.Payments
+                                                                            .Where(p => !p.IsPaid)
+                                                                            .OrderBy(p => p.DueDate)
+                                                                            .Take(5))
+                                        {
+                                            <tr>
+                                                <td>@p.DueDate.ToString("MM/dd/yyyy")</td>
+                                                <td class="text-success">@p.Amount?.ToString("C")</td>
+                                                <td>@p.Recipient</td>
+                                                <td>@p.Payer</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                            else
+                            {
+                                <p class="text-secondary">No pending payments registered.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="accordion-item mb-2 rounded shadow-sm">
+            <h2 class="accordion-header" id="headingMessages">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMessages" aria-expanded="false" aria-controls="collapseMessages">
+                    Recent Messages
+                </button>
+            </h2>
+            <div id="collapseMessages" class="accordion-collapse collapse" aria-labelledby="headingMessages" data-bs-parent="#adminDashboardAccordion">
+                <div class="accordion-body p-0">
+                    <div class="card bg-white border border-light shadow-sm rounded text-dark">
+                        <div class="card-body">
+                            @if (Model.Messages != null && Model.Messages.Any())
+                            {
+                                <div class="list-group">
+                                    @foreach (var msg in Model.Messages
+                                                                    .OrderByDescending(m => m.PostingDate)
+                                                                    .Take(5))
+                                    {
+                                        <a href="#" class="list-group-item list-group-item-action text-dark">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">@msg.MessageTitle</h6>
+                                                <small class="text-secondary">@msg.PostingDate?.ToString("MM/dd/yyyy")</small>
+                                            </div>
+                                            <p class="mb-1">@msg.MessageContent</p>
+                                            <small class="text-muted">
+                                                <strong>From:</strong> @msg.SenderEmail <br />
+                                                <strong>To:</strong> @msg.ReceiverEmail
+                                            </small>
+                                        </a>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-secondary">No messages received.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

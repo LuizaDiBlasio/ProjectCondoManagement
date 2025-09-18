@@ -310,7 +310,14 @@ namespace ProjectCondoManagement.Controllers
         [Microsoft.AspNetCore.Mvc.HttpPost("AssociateUser")]
         public async Task<IActionResult> AssociateUser([FromBody] RegisterUserDto registerDtoModel)
         {
-            var user = await _userHelper.CreateUser(registerDtoModel);
+            var user = await _userHelper.GetUserByEmailAsync(registerDtoModel.Email); //buscar user  
+
+            if (user != null)
+            {
+                return StatusCode(409, new Response<object> { Message = "User already exists, try registering wih new credentials", IsSuccess = false });
+            }
+
+            user = await _userHelper.CreateUser(registerDtoModel);
             if (user == null)
             {
                 return StatusCode(500, new { Message = "Internal server error: User not registered" });
@@ -558,7 +565,7 @@ namespace ProjectCondoManagement.Controllers
         [HttpGet("GetUserByEmail2")]
         public async Task<IActionResult> GetUserByEmail2([FromQuery] string email)
         {
-            var user = await _userHelper.GetUserByEmailAsync(email);
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
 
             if (user == null)
             {

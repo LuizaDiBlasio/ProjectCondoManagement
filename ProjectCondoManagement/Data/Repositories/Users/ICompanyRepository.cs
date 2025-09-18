@@ -18,5 +18,6 @@ namespace ProjectCondoManagement.Data.Repositories.Users
         Task<List<SelectListItem>> GetCompanyAdminsSelectListToEdit(int id);
 
         Task<Company?> GetCompanyWithCondosAndUsers(int id);
+        Task<Company> GetCompanyByFinancialAccountIdAsync(int id);
     }
 }

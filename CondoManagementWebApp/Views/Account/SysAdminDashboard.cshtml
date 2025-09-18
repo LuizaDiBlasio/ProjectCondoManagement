@@ -47,9 +47,10 @@
         </h2>
         <div id="collapseCondoMembers" class="accordion-collapse collapse" aria-labelledby="headingCondoMembers" data-bs-parent="#accordionCondoMembers">
             <div class="accordion-body">
-                <table class="table">
+                
                     @if (Model.CondoMembers != null && Model.CondoMembers.Any())
                     {
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th></th>
@@ -84,12 +85,13 @@
                                 </tr>
                             }
                         </tbody>
+                         </table>
                     }
                     else
                     {
-                        <tr><td colspan="2" class="text-center text-muted">No condo members found.</td></tr>
+                      <p colspan="5" class="text-center text-muted">No condo members found.</p>
                     }
-                </table>
+               
             </div>
         </div>
     </div>
@@ -106,9 +108,10 @@
         </h2>
         <div id="collapseCompanyAdmins" class="accordion-collapse collapse" aria-labelledby="headingCompanyAdmins" data-bs-parent="#accordionCompanyAdmins">
             <div class="accordion-body">
-                <table class="table">
+                
                     @if (Model.CompanyAdmins != null && Model.CompanyAdmins.Any())
                     {
+                        <table class="table">
                         <thead>
                             <tr>
                                 <th></th>
@@ -139,29 +142,23 @@
                                             <span class="badge bg-danger" style="font-size: 1.1em;">Inactive</span>
                                         }
                                     </td>
+                                    <td>
+                                        <a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@admin.Email">Edit Details</a>
 
-                                    @if (!admin.CompaniesDto.Any())
-                                    {
-                                        <td style="color: red; font-weight: bold;">No Company Assigned</td>
-                                    }
-                                    else
-                                    {
-                                        <td>@admin.CompaniesDto.First().Name</td>
-                                    }
-
-                                    <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@admin.Email">Edit Details</a></td>
-                                    <td><a class="btn btn-outline-secondary" asp-controller="Account" asp-action="AssignCompany" asp-route-email="@admin.Email">Manage Company</a></td>
+                                        <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="AssignCompany" asp-route-email="@admin.Email">Change Company</a>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
+                    </table>
                     }
                     else
                     {
-                        <tbody>
-                            <tr><td colspan="2" class="text-center text-muted">No company admins found.</td></tr>
-                        </tbody>
+                        
+                        <p class="text-center text-muted">No company admins found.</p>
+                        
                     }
-                </table>
+                
             </div>
         </div>
     </div>
@@ -177,9 +174,10 @@
         </h2>
         <div id="collapseCondoManagers" class="accordion-collapse collapse" aria-labelledby="headingCondoManagers" data-bs-parent="#accordionCondoManagers">
             <div class="accordion-body">
-                <table class="table">
+                
                     @if (Model.CondoManagers != null && Model.CondoManagers.Any())
                     {
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th></th>
@@ -218,20 +216,23 @@
                                     {
                                         <td>@manager.CompaniesDto.First().Name</td>
                                     }
-                                    <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@manager.Email">Edit Details</a></td>
-                                    <td><a class="btn btn-outline-secondary" asp-controller="Account" asp-action="AssignCompany" asp-route-email="@manager.Email">Manage Company</a></td>
+                                    <td>
+                                        <a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@manager.Email">Edit Details</a>
+                                        <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="AssignCompany" asp-route-email="@manager.Email">Change Company</a>
+                                    </td>
 
                                 </tr>
                             }
                         </tbody>
+                        </table>
                     }
                     else
                     {
-                        <tbody>
-                            <tr><td colspan="2" class="text-center text-muted">No condo managers found.</td></tr>
-                        </tbody>
+ 
+                       <p class="text-center text-muted">No condo managers found.</p>
+      
                     }
-                </table>
+                
             </div>
         </div>
     </div>
@@ -274,7 +275,7 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    @* Se o modelo indicar homônimos, exibir o modal *@
+
     <script type="text/javascript">
         $(document).ready(function () {
         @if (Model.HasHomonyms)
