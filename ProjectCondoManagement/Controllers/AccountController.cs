@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MimeKit;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
@@ -14,7 +12,6 @@ using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Users;
 using ProjectCondoManagement.Helpers;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 
 namespace ProjectCondoManagement.Controllers
@@ -42,7 +39,7 @@ namespace ProjectCondoManagement.Controllers
 
         public AccountController(IUserHelper userHelper, HttpClient httpClient, IConfiguration configuration, IConverterHelper converterHelper,
                                IMailHelper mailHelper, DataContextCondos dataContextCondos, DataContextFinances dataContextFinances, IJwtTokenService jwtTokenService,
-                               ICondoMemberRepository condoMemberRepository , ISmsHelper smsHelper, IFinancialAccountRepository financialAccountRepository, IWebHostEnvironment env,
+                               ICondoMemberRepository condoMemberRepository, ISmsHelper smsHelper, IFinancialAccountRepository financialAccountRepository, IWebHostEnvironment env,
                                DataContextUsers dataContextUsers, ICompanyRepository companyRepository, UserManager<User> userManager)
         {
             _userHelper = userHelper;
@@ -146,19 +143,19 @@ namespace ProjectCondoManagement.Controllers
             else
             {
                 //TODO tirar isso   // Gera token JWT direto
-                    var roles = await _userHelper.GetRolesAsync(user);
-                    var userRole = roles.FirstOrDefault() ?? "User";
-                    var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
+                var roles = await _userHelper.GetRolesAsync(user);
+                var userRole = roles.FirstOrDefault() ?? "User";
+                var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
 
-                    return Ok(new Response<object>
-                    {
-                        Token = tokenJwt,
-                        Expiration = DateTime.UtcNow.AddDays(15),
-                        Requires2FA = false,
-                        Role = userRole,
-                        IsSuccess = true,
-                        Message = "2FA skipped in development"
-                    });
+                return Ok(new Response<object>
+                {
+                    Token = tokenJwt,
+                    Expiration = DateTime.UtcNow.AddDays(15),
+                    Requires2FA = false,
+                    Role = userRole,
+                    IsSuccess = true,
+                    Message = "2FA skipped in development"
+                });
 
                 //TODO descomentar
                 //return StatusCode(500, new { Message = "Wrong credentials, please try again" });
@@ -167,7 +164,7 @@ namespace ProjectCondoManagement.Controllers
 
 
 
-       
+
 
 
         /// <summary>
@@ -261,9 +258,8 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-        [HttpPost]
-        [AllowAnonymous] 
-        [Route("LoginMobile")] 
+        [HttpPost("LoginMobile")]
+        [AllowAnonymous]
         public async Task<IActionResult> LoginMobile([FromBody] LoginMobileDto model)
         {
             // Validação do modelo de entrada
@@ -296,7 +292,7 @@ namespace ProjectCondoManagement.Controllers
                 isSuccess = true,
                 message = "Login successful.",
                 token,
-                role 
+                role
             });
         }
 
@@ -321,7 +317,7 @@ namespace ProjectCondoManagement.Controllers
             }
 
             await _condoMemberRepository.AssociateFinancialAccountAsync(user.Email, user.FinancialAccountId);
-            
+
 
             string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user); //gerar o token
 
@@ -331,13 +327,13 @@ namespace ProjectCondoManagement.Controllers
             Response<object> response = _mailHelper.SendEmail(registerDtoModel.Email, "Email confirmation", $"<h1>Email Confirmation</h1>" +
            $"To allow the user,<br><br><a href = \"{tokenLink}\">Click here to confirm your email and reset password</a>"); //Contruir email e enviá-lo com o link
 
-            
+
 
             if (response.IsSuccess) //se conseguiu enviar o email
             {
 
 
-                return StatusCode(200, new Response<object> { Message = "User registered, a confirmation email has been sent", IsSuccess = true});
+                return StatusCode(200, new Response<object> { Message = "User registered, a confirmation email has been sent", IsSuccess = true });
             }
 
             //se não conseguiu enviar email:
@@ -369,15 +365,15 @@ namespace ProjectCondoManagement.Controllers
                 var newUser = await _userHelper.CreateUser(registerDtoModel);
 
                 if (newUser == null)//se retorna null, CreateUser foi mal sucedido 
-                {                   
+                {
                     return StatusCode(500, new { Message = "Internal server error: User not registered" });
                 }
 
 
                 //atualizar company admin Ids das companies
-                if(await _userHelper.IsUserInRoleAsync(newUser, "CompanyAdmin"))
+                if (await _userHelper.IsUserInRoleAsync(newUser, "CompanyAdmin"))
                 {
-                    foreach(var company in newUser.Companies)
+                    foreach (var company in newUser.Companies)
                     {
                         company.CompanyAdminId = newUser.Id;
 
@@ -418,7 +414,7 @@ namespace ProjectCondoManagement.Controllers
 
                 //se não conseguiu enviar email:
                 return StatusCode(500, new Response<object> { Message = "User couldn't be logged", IsSuccess = false });
-            }   
+            }
         }
 
 
@@ -482,7 +478,7 @@ namespace ProjectCondoManagement.Controllers
             else
             {
                 return StatusCode(400, new Response<object> { Message = "An unexpected error occurred while resetting password, please try again", IsSuccess = false });
-            }   
+            }
         }
 
 
@@ -507,7 +503,7 @@ namespace ProjectCondoManagement.Controllers
 
                 if (result.Succeeded)
                 {
-                    return StatusCode(200, new Response<object>() { IsSuccess = true, Message = "Your password has been changed."});
+                    return StatusCode(200, new Response<object>() { IsSuccess = true, Message = "Your password has been changed." });
                 }
                 else
                 {
@@ -625,7 +621,7 @@ namespace ProjectCondoManagement.Controllers
         }
 
 
-       
+
 
 
         /// <summary>
@@ -668,11 +664,11 @@ namespace ProjectCondoManagement.Controllers
 
             if (editedUser == null)
             {
-                return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to update, user not found in the system"});
+                return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to update, user not found in the system" });
             }
 
             //desfazer relações com companies
-            if(editedUser.IsActive == false)
+            if (editedUser.IsActive == false)
             {
                 editedUser.Companies.Clear();
             }
@@ -685,7 +681,7 @@ namespace ProjectCondoManagement.Controllers
 
                 if (condomember == null)
                 {
-                    return NotFound(new Response<object>  { IsSuccess = false, Message = "Unable to update, user not found in the system" });
+                    return NotFound(new Response<object> { IsSuccess = false, Message = "Unable to update, user not found in the system" });
                 }
 
                 await _condoMemberRepository.UpdateAsync(condomember, _dataContextCondos);
@@ -693,7 +689,7 @@ namespace ProjectCondoManagement.Controllers
                 return Ok(new Response<object> { IsSuccess = true });
             }
 
-            return Ok(new Response<object> { IsSuccess = true});
+            return Ok(new Response<object> { IsSuccess = true });
         }
 
 
@@ -702,7 +698,7 @@ namespace ProjectCondoManagement.Controllers
         public async Task<IActionResult> AssingCompanyToMember([FromBody] UserDto userDto)
         {
             var user = await _userHelper.GetUserByEmailWithCompaniesAsync(userDto.Email);
-            
+
             if (user == null)
             {
                 NotFound();
@@ -712,7 +708,7 @@ namespace ProjectCondoManagement.Controllers
 
             var userCompanies = new List<Company>();
 
-            foreach(var companyId in userCompaniesIds)
+            foreach (var companyId in userCompaniesIds)
             {
                 var company = _dataContextUsers.Companies.FirstOrDefault(c => c.Id == companyId);
                 userCompanies.Add(company);
@@ -763,10 +759,10 @@ namespace ProjectCondoManagement.Controllers
                             user.Companies.Clear();
                             user.Companies.Add(company);
 
-                          
+
                             company.CompanyAdminId = user.Id;
 
-                            await _userHelper.UpdateUserAsync(user); 
+                            await _userHelper.UpdateUserAsync(user);
                             await _companyRepository.UpdateAsync(company, _dataContextUsers);
                         }
                         else
@@ -797,7 +793,7 @@ namespace ProjectCondoManagement.Controllers
             {
                 return Ok(new Response<object> { IsSuccess = false, Message = "Unable to assing user due to server error" });
             }
-     
+
         }
 
 
@@ -821,7 +817,7 @@ namespace ProjectCondoManagement.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("GetUsersWithCompany")]
-        public async Task<IActionResult> GetUsersWithCompanyAsync([FromQuery] string role )
+        public async Task<IActionResult> GetUsersWithCompanyAsync([FromQuery] string role)
         {
 
             var users = await _userHelper.GetUsersWithCompanyAsync();
@@ -836,10 +832,10 @@ namespace ProjectCondoManagement.Controllers
                 }
             }
 
-            
+
             var usersDto = filteredUsers.Select(u => _converterHelper.ToUserDto(u, true)).ToList();
 
-           
+
             return Ok(usersDto);
         }
 
@@ -873,7 +869,7 @@ namespace ProjectCondoManagement.Controllers
         }
 
         [HttpGet("GetUserRole")]
-        public async Task<ActionResult<string>> GetUserRole([FromQuery]string email)
+        public async Task<ActionResult<string>> GetUserRole([FromQuery] string email)
         {
             var user = await _userHelper.GetUserByEmailAsync(email);
 

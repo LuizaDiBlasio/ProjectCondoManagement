@@ -128,8 +128,23 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
 
+//configuração do CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
+
 // Configuração do pipeline de requisições 
 var app = builder.Build();
+
+// Ativar o CORS
+app.UseCors("AllowAllOrigins");
 
 // Configurar o pipeline HTTP.
 if (app.Environment.IsDevelopment())

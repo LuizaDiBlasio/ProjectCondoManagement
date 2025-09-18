@@ -24,18 +24,16 @@
 
         <StackLayout Grid.Row="1" Spacing="15" Margin="0,30,0,0">
             <Entry Placeholder="Enter your email"
-                   Text="{Binding Email}"
-                   Keyboard="Email"
-                   BackgroundColor="Transparent"
-                   TextColor="White"
-                   PlaceholderColor="#A9A9A9" />
+           Text="{Binding Email}"
+           Keyboard="Email"
+           BackgroundColor="Transparent"
+           TextColor="Black"           PlaceholderColor="Black"    />
 
             <Entry Placeholder="Enter your Password"
-                   Text="{Binding Password}"
-                   IsPassword="True"
-                   BackgroundColor="Transparent"
-                   TextColor="White"
-                   PlaceholderColor="#A9A9A9" />
+           Text="{Binding Password}"
+           IsPassword="True"
+           BackgroundColor="Transparent"
+           TextColor="Black"           PlaceholderColor="Black"    />
         </StackLayout>
 
         <Button Text="Login"
