@@ -287,12 +287,12 @@ namespace ProjectCondoManagement.Controllers
             var token = _jwtTokenService.GenerateToken(user, role);
 
             // Retornar a resposta de sucesso com o token
-            return Ok(new
+            return Ok(new LoginResponseDto ()
             {
-                isSuccess = true,
-                message = "Login successful.",
-                token,
-                role
+                IsSuccess = true,
+                Message = "Login successful.",
+                Token = token,
+                UserRole = role
             });
         }
 

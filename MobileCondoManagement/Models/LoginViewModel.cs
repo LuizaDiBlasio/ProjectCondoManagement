@@ -1,12 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MobileCondoManagement.Services;
+using MobileCondoManagement.Services.Interfaces;
 
 namespace MobileCondoManagement.Models
 {
     public partial class LoginViewModel : ObservableObject
     {
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
 
         [ObservableProperty]
         private string email;
@@ -23,7 +24,7 @@ namespace MobileCondoManagement.Models
         [NotifyPropertyChangedFor(nameof(HasError))]
         private string errorMessage;
 
-        public LoginViewModel(ApiService apiService)
+        public LoginViewModel(IApiService apiService)
         {
             _apiService = apiService;
         }
@@ -45,8 +46,22 @@ namespace MobileCondoManagement.Models
                     // Lógica de armazenamento do token
                     await SecureStorage.Default.SetAsync("auth_token", loginResult.Token);
 
-                    //  página principal
-                    await Shell.Current.GoToAsync("//MainPage");
+                    //Reencaminhamento
+                    switch (loginResult.UserRole)
+                    {
+                        case "SysAdmin":
+                            await Shell.Current.GoToAsync("//SysAdminDashboardPage");
+                            break;
+                        case "CompanyAdmin":
+                            await Shell.Current.GoToAsync("//CompanyAdminDashboardPage");
+                            break;
+                        case "CondoMember":
+                            await Shell.Current.GoToAsync("//CondoMemberDashboardPage");
+                            break;
+                        case "CondoManager":
+                            await Shell.Current.GoToAsync("//CondoManagerDashboardPage");
+                            break;
+                    }
                 }
                 else
                 {
@@ -67,7 +82,7 @@ namespace MobileCondoManagement.Models
         private async Task ForgotPasswordAsync()
         {
             // Lógica de navegação para a página de redefinição de senha
-            await Shell.Current.GoToAsync("//ForgotPasswordPage");
+            await Shell.Current.GoToAsync("ForgotPasswordPage");
         }
     }
 }

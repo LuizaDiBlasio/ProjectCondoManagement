@@ -57,6 +57,11 @@ namespace CondoManagementWebApp.Controllers
                 return RedirectToAction("Index", "Home"); //mandar para a view Index que possui o controller Home
             }
 
+            foreach (var cookie in Request.Cookies.Keys)
+            {
+                Response.Cookies.Delete(cookie);
+            }
+
             return View(); //se login não funcionar, permanece na View 
         }
 
