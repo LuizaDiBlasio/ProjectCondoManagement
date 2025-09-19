@@ -58,7 +58,6 @@
                                 <th>Email</th>
                                 <th>Status</th>
                                 <th></th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -80,8 +79,10 @@
                                             <span class="badge bg-danger" style="font-size: 1.1em;">Inactive</span>
                                         }
                                     </td>
-                                    <td><a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@member.Email">Edit Details</a></td>
-                                    <td><a class="btn btn-outline-secondary" asp-controller="Account" asp-action="AssignCompany" asp-route-email="@member.Email">Manage Companies</a></td>
+                                    <td>
+                                        <a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@member.Email">Edit Details</a>
+                                        <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="AssignCompany" asp-route-email="@member.Email">Manage Companies</a>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -120,7 +121,7 @@
                                 <th>Status</th>
                                 <th>Company</th>
                                 <th></th>
-                                <th></th>
+                 
                             </tr>
                         </thead>
                         <tbody>
@@ -142,6 +143,14 @@
                                             <span class="badge bg-danger" style="font-size: 1.1em;">Inactive</span>
                                         }
                                     </td>
+                                    @if (!admin.CompaniesDto.Any())
+                                    {
+                                        <td style="color: red; font-weight: bold;">No Company Assigned</td>
+                                    }
+                                    else
+                                    {
+                                        <td>@admin.CompaniesDto.First().Name</td>
+                                    }
                                     <td>
                                         <a class="btn btn-outline-primary" asp-controller="Account" asp-action="EditUserDetails" asp-route-email="@admin.Email">Edit Details</a>
 
@@ -186,7 +195,7 @@
                                 <th>Status</th>
                                 <th>Company</th>
                                 <th></th>
-                                <th></th>
+  
                             </tr>
                         </thead>
                         <tbody>
