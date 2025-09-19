@@ -36,7 +36,7 @@ namespace CondoManagementWebApp.Helpers
         {
             AddAuthorizationHeader();
             var response = await _httpClient.GetAsync(requestUri);
-            //response.EnsureSuccessStatusCode(); // Lança exceção se o status não for 2xx
+            response.EnsureSuccessStatusCode(); // Lança exceção se o status não for 2xx
 
             if (!response.IsSuccessStatusCode)
             {
