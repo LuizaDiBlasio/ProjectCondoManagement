@@ -11,7 +11,7 @@ namespace MobileCondoManagement.Services
         public ApiService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("http://10.0.2.2:5081/");
+            _httpClient.BaseAddress = new Uri("http://10.0.2.2:7001/");
         }
 
         public async Task<LoginResponseDto> RequestLoginAsync(string email, string password)
@@ -34,5 +34,27 @@ namespace MobileCondoManagement.Services
                 return errorResponse ?? new LoginResponseDto { IsSuccess = false, Message = "Login failed. Check your credentials." };
             }
         }
+
+
+        public async Task<T?> GetAsync<T>(string url)
+        {
+            var response = await _httpClient.GetAsync(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<T>(json);
+            }
+
+            return default;
+        }
+
+
+
+
+
+
+
+
     }
 }

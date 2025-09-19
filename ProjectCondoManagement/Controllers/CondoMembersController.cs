@@ -1,5 +1,6 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
+using ClassLibrary.DtoModelsMobile;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,8 +8,12 @@ using Microsoft.Build.Framework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
+using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Users;
 using ProjectCondoManagement.Helpers;
 using System.Linq;
 
@@ -26,9 +31,15 @@ namespace ProjectCondoManagement.Controllers
         private readonly IUnitRepository _unitRepository;
         private readonly ICondominiumRepository _condominiumRepository;
         private readonly DataContextCondos _dataContextCondos;
+        private readonly IFinancialAccountRepository _financialAccountRepository;
+        private readonly DataContextFinances _dataContextFinances;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly IMessageRepository _messageRepository;
+        private readonly DataContextUsers _dataContextUsers;
 
         public CondoMembersController(DataContextCondos context, ICondoMemberRepository condoMemberRepository, IConverterHelper converterHelper, IUserHelper userHelper,IUnitRepository unitRepository,
-                                        ICondominiumRepository condominiumRepository, DataContextCondos dataContextCondos)
+                                        ICondominiumRepository condominiumRepository, DataContextCondos dataContextCondos, IFinancialAccountRepository financialAccountRepository,
+                                        DataContextFinances dataContextFinances, IPaymentRepository paymentRepository, IMessageRepository messageRepository,DataContextUsers dataContextUsers)
         {
             _context = context;
             _condoMemberRepository = condoMemberRepository;
@@ -37,6 +48,11 @@ namespace ProjectCondoManagement.Controllers
             _unitRepository = unitRepository;
             _condominiumRepository = condominiumRepository;
             _dataContextCondos = dataContextCondos;
+            _financialAccountRepository = financialAccountRepository;
+            _dataContextFinances = dataContextFinances;
+            _paymentRepository = paymentRepository;
+            _messageRepository = messageRepository;
+            _dataContextUsers = dataContextUsers;
         }
 
         // GET: api/CondoMembers
@@ -530,6 +546,94 @@ namespace ProjectCondoManagement.Controllers
                     $"An error occurred: {ex.Message}");
             }
         }
+
+
+
+
+
+
+
+
+
+        [HttpGet("CondoMemberDashboard/{email}")]
+        public async Task<ActionResult<CondoMemberDashboardDto>> GetCondoMemberDashboard(string email)
+        {
+            var model = new CondoMemberDashboardDto();
+
+            var condoMember = _condoMemberRepository.GetAll(_context)
+                .Include(c => c.Units)
+                    .ThenInclude(u => u.Condominium)
+                        .ThenInclude(condo => condo.Occurrences)
+                .Include(c => c.Units)
+                    .ThenInclude(u => u.Condominium)
+                        .ThenInclude(condo => condo.Meetings)
+                .FirstOrDefault(c => c.Email == email);
+
+
+            var user = await _userHelper.GetUserByEmailWithCompaniesAsync(email);
+
+
+            var condoMemberDto = _converterHelper.ToCondoMemberDto(condoMember);
+
+            model.CondoMember = condoMemberDto;
+
+            model.Units = condoMemberDto?.Units?.ToList() ?? new List<UnitDto>();
+
+            var distinctCondos = model.Units
+                .Where(u => u.CondominiumDto != null)
+                .Select(u => u.CondominiumDto)
+                .DistinctBy(c => c.Id)
+                .ToList();
+
+            model.Occurrences = distinctCondos
+                .Where(c => c.Occurrences != null)
+                .SelectMany(c => c.Occurrences.Where(o => !o.IsResolved))
+                .ToList();
+
+            var financialAccount = condoMemberDto.FinancialAccountId != null
+                ? await _financialAccountRepository.GetByIdAsync(
+                    condoMemberDto.FinancialAccountId,
+                    _dataContextFinances
+                  )
+                : null;
+
+
+            var financialAccountDto = financialAccount != null
+                ? _converterHelper.ToFinancialAccountDto(financialAccount, false)
+                : null;
+
+
+            model.FinancialAccount = financialAccountDto;
+
+
+            var unfilteredPayments = _paymentRepository.GetAll(_dataContextFinances)
+             .Where(p => p.BeneficiaryAccountId == financialAccountDto.Id
+                      || p.PayerFinancialAccountId == financialAccountDto.Id)
+             .ToList();
+
+
+            var unfilteredPaymentsDtos = unfilteredPayments
+                .Select(p => _converterHelper.ToPaymentDto(p, false))
+                .ToList();
+
+            model.Payments = unfilteredPaymentsDtos.Where(p => !p.IsPaid).ToList();
+
+            model.Meetings = distinctCondos.SelectMany(c => c.Meetings ?? new List<MeetingDto>()).ToList();
+
+            var messages = await _messageRepository.GetReceivedMessagesAsync(email, _dataContextUsers);
+
+            var messagesDto = messages.Select(m => _converterHelper.ToMessageDto(m, new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>())).ToList();
+
+            model.Messages = messagesDto;
+
+            return Ok(model);
+        }
+
+
+
+
+
+
 
     }
 }

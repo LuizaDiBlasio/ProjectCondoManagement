@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Class="MobileCondoManagement.Views.CondoManagerDashboardPage"
+    Title="Dashboard"
+    BackgroundColor="White">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="15" Spacing="20">
+
+            <!-- Perfil do Membro -->
+            <HorizontalStackLayout Spacing="15">
+                <Border
+                    Stroke="Gray"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 40"
+                    WidthRequest="80"
+                    HeightRequest="80"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start">
+                    <Image 
+                        Source="{Binding condoMember.ImageFullPath}"
+                        Aspect="AspectFill"/>
+                </Border>
+
+                <VerticalStackLayout>
+                    <Label Text="{Binding condoMember.FullName}" 
+                           FontSize="20" 
+                           FontAttributes="Bold"/>
+                    <Label Text="{Binding condoMember.Email}" 
+                           FontSize="14" 
+                           TextColor="Gray"/>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+
+            <!-- Units -->
+            <toolkit:Expander>
+                <toolkit:Expander.Header>
+                    <Label Text="My Units" FontAttributes="Bold" FontSize="18"/>
+                </toolkit:Expander.Header>
+                <CollectionView ItemsSource="{Binding Units}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame BorderColor="#ddd" Padding="10" Margin="5" CornerRadius="10">
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding CondominiumDto.CondoName}" FontAttributes="Bold"/>
+                                    <Label Text="Door: {Binding Door}, Floor: {Binding Floor}"/>
+                                    <Label Text="Bedrooms: {Binding Bedrooms}" TextColor="Blue"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </toolkit:Expander>
+
+            <!-- Messages -->
+            <toolkit:Expander>
+                <toolkit:Expander.Header>
+                    <Label Text="Recent Messages" FontAttributes="Bold" FontSize="18"/>
+                </toolkit:Expander.Header>
+                <CollectionView ItemsSource="{Binding Messages}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame BorderColor="#ddd" Padding="10" Margin="5" CornerRadius="10">
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding MessageTitle}" FontAttributes="Bold"/>
+                                    <Label Text="{Binding MessageContent}" LineBreakMode="WordWrap"/>
+                                    <Label Text="{Binding PostingDate, StringFormat='Date: {0:dd/MM/yyyy}'}" FontSize="12" TextColor="Gray"/>
+                                    <Label Text="From: {Binding SenderEmail}" FontSize="12" TextColor="Gray"/>
+                                    <Label Text="To: {Binding ReceiverEmail}" FontSize="12" TextColor="Gray"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </toolkit:Expander>
+
+            <!-- Meetings -->
+            <toolkit:Expander>
+                <toolkit:Expander.Header>
+                    <Label Text="Upcoming Meetings" FontAttributes="Bold" FontSize="18"/>
+                </toolkit:Expander.Header>
+                <CollectionView ItemsSource="{Binding Meetings}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame BorderColor="#ddd" Padding="10" Margin="5" CornerRadius="10">
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding Title}" FontAttributes="Bold" TextColor="DarkBlue"/>
+                                    <Label Text="{Binding DateAndTime, StringFormat='Date: {0:dd/MM/yyyy HH:mm}'}"/>
+                                    <Label Text="{Binding Description}" FontAttributes="Italic"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </toolkit:Expander>
+
+            <!-- Financial Account -->
+            <toolkit:Expander>
+                <toolkit:Expander.Header>
+                    <Label Text="Financial Account" FontAttributes="Bold" FontSize="18"/>
+                </toolkit:Expander.Header>
+                <StackLayout Padding="10">
+                    <Label Text="{Binding financialAccount.OwnerName}" />
+                    <Label Text="{Binding financialAccount.BankName}" />
+                    <Label Text="{Binding financialAccount.AssociatedBankAccount}" />
+                    <Label Text="{Binding financialAccount.CardNumber}" />
+                    <Label Text="{Binding financialAccount.Balance, StringFormat='Balance: {0:C}'}"/>
+                    <Label Text="{Binding financialAccount.IsActive, StringFormat='Status: {0}'}"/>
+                </StackLayout>
+            </toolkit:Expander>
+
+            <!-- Payments -->
+            <toolkit:Expander>
+                <toolkit:Expander.Header>
+                    <Label Text="Pending Payments" FontAttributes="Bold" FontSize="18"/>
+                </toolkit:Expander.Header>
+                <CollectionView ItemsSource="{Binding Payments}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame BorderColor="#ddd" Padding="10" Margin="5" CornerRadius="10">
+                                <Grid ColumnDefinitions="*,*,*">
+                                    <Label Text="{Binding DueDate, StringFormat='{0:dd/MM/yyyy}'}"/>
+                                    <Label Text="{Binding Amount, StringFormat='Amount: {0:C}'}" Grid.Column="1" TextColor="Green"/>
+                                    <Label Text="{Binding Recipient}" Grid.Column="2"/>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </toolkit:Expander>
+
+            <!-- Occurrences -->
+            <toolkit:Expander>
+                <toolkit:Expander.Header>
+                    <Label Text="My Occurrences" FontAttributes="Bold" FontSize="18"/>
+                </toolkit:Expander.Header>
+                <CollectionView ItemsSource="{Binding Occurrences}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame BorderColor="Red" Padding="10" Margin="5" CornerRadius="10">
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding Subject}" FontAttributes="Bold" TextColor="Red"/>
+                                    <Label Text="{Binding Details}" LineBreakMode="WordWrap"/>
+                                    <Label Text="{Binding DateAndTime, StringFormat='{0:dd/MM/yyyy HH:mm}'}" FontSize="12" TextColor="Gray"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </toolkit:Expander>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
