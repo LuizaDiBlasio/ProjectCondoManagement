@@ -2,9 +2,9 @@ using MobileCondoManagement.Models;
 
 namespace MobileCondoManagement.Views
 {
-    public partial class CondoManagerDashboardPage : ContentPage
+    public partial class CondoMemberDashboardPage : ContentPage
     {
-        public CondoManagerDashboardPage(CondoMemberDashboardViewModel viewModel)
+        public CondoMemberDashboardPage(CondoMemberDashboardViewModel viewModel)
         {
             InitializeComponent();
             BindingContext = viewModel;

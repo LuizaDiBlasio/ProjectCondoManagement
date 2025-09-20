@@ -71,7 +71,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Update="Views\CondoManagerDashboardPage.xaml">
+	  <Compile Update="Views\CondoMemberDashboardPage.xaml.cs">
+	    <DependentUpon>CondoMemberDashboardPage.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Views\CondoMemberDashboardPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\ForgotPasswordPage.xaml">

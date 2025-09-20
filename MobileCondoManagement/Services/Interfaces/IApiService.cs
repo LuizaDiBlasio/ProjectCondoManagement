@@ -8,6 +8,8 @@ namespace MobileCondoManagement.Services.Interfaces
         Task<LoginResponseDto> RequestLoginAsync(string email, string password);
 
         Task<Response<object>> RequestForgotPasswordAsync(string email);
+
+        Task<T> GetAsync<T>(string requestUri);
     }
 }
 

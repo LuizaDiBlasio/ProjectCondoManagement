@@ -19,7 +19,6 @@ namespace MobileCondoManagement.Services
         public ApiService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("http://10.0.2.2:7001/");
         }
 
 

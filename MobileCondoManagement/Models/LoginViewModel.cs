@@ -56,7 +56,7 @@ namespace MobileCondoManagement.Models
                             await Shell.Current.GoToAsync("//CompanyAdminDashboardPage");
                             break;
                         case "CondoMember":
-                            await Shell.Current.GoToAsync("//CondoMemberDashboardPage");
+                            await Shell.Current.GoToAsync($"//CondoMemberDashboardPage?email={Uri.EscapeDataString(Email)}");
                             break;
                         case "CondoManager":
                             await Shell.Current.GoToAsync("//CondoManagerDashboardPage");

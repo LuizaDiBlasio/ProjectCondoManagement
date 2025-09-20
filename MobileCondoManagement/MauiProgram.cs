@@ -38,7 +38,7 @@ namespace MobileCondoManagement
             // Views e Models
             builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<LoginPage>();
-            builder.Services.AddTransient<CondoManagerDashboardPage>();
+            builder.Services.AddTransient<CondoMemberDashboardPage>();
             builder.Services.AddTransient<CondoMemberDashboardViewModel>();
 
             builder.Services.AddTransient<ForgotPasswordViewModel>();

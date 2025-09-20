@@ -7,12 +7,13 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
+using MobileCondoManagement.Services.Interfaces;
 
 namespace MobileCondoManagement.Models
 {
     public partial class CondoMemberDashboardViewModel : ObservableObject, IQueryAttributable
     {
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
 
         [ObservableProperty]
         private CondoMemberDto? condoMember;
@@ -34,7 +35,7 @@ namespace MobileCondoManagement.Models
         public ObservableCollection<PaymentDto> Payments { get; } = new();
         public ObservableCollection<OccurrenceDto> Occurrences { get; } = new();
 
-        public CondoMemberDashboardViewModel(ApiService apiService)
+        public CondoMemberDashboardViewModel(IApiService apiService)
         {
             _apiService = apiService;
         }
@@ -102,5 +103,8 @@ namespace MobileCondoManagement.Models
                 IsBusy = false;
             }
         }
+
+
+
     }
 }

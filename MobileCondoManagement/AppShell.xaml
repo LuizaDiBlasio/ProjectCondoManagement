@@ -8,9 +8,17 @@
     Shell.FlyoutBehavior="Disabled"
     Shell.NavBarIsVisible="False">
 
+    <!-- Login Page-->
     <ShellContent
         Title="Login"
         ContentTemplate="{DataTemplate views:LoginPage}"
         Route="LoginPage" />
+
+
+    <!-- Condo Member Dashboard-->
+    <ShellContent
+        Title="Dashboard"
+        ContentTemplate="{DataTemplate views:CondoMemberDashboardPage}"
+        Route="CondoMemberDashboardPage" />
 
 </Shell>
