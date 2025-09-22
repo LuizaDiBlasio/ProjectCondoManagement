@@ -21,4 +21,18 @@
         ContentTemplate="{DataTemplate views:CondoMemberDashboardPage}"
         Route="CondoMemberDashboardPage" />
 
+
+    <!-- Condo Manager Dashboard-->
+    <ShellContent
+        Title="Condo Manager Dashboard"
+        Route="CondoManagerDashboardPage"
+        ContentTemplate="{DataTemplate views:CondoManagerDashboardPage}" />
+
+
+    <!-- Company Admin Dashboard -->
+    <ShellContent
+        Title="Company Admin Dashboard"
+        Route="CompanyAdminDashboardPage"
+        ContentTemplate="{DataTemplate views:CompanyAdminDashboardPage}" />
+
 </Shell>

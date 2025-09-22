@@ -94,7 +94,7 @@ namespace MobileCondoManagement.Services
 
         public async Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest data)
         {
-            AddAuthorizationHeader();
+           await  AddAuthorizationHeader();
             var jsonContent = new StringContent(
                 System.Text.Json.JsonSerializer.Serialize(data),
                 Encoding.UTF8,

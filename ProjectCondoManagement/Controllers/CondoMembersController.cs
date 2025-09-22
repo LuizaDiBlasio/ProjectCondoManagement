@@ -21,7 +21,7 @@ namespace ProjectCondoManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CondoMembersController : ControllerBase
     {
         private readonly DataContextCondos _context;

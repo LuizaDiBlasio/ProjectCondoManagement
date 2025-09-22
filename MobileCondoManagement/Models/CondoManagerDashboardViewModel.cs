@@ -2,24 +2,17 @@
 using ClassLibrary.DtoModelsMobile;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MobileCondoManagement.Services;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using System.Linq;
-using System.Collections.Generic;
 using MobileCondoManagement.Services.Interfaces;
+using System.Collections.ObjectModel;
 
 namespace MobileCondoManagement.Models
 {
-    public partial class CondoMemberDashboardViewModel : ObservableObject, IQueryAttributable
+    public partial class CondoManagerDashboardViewModel : ObservableObject, IQueryAttributable
     {
         private readonly IApiService _apiService;
 
         [ObservableProperty]
-        private CondoMemberDto? condoMember;
-
-        [ObservableProperty]
-        private FinancialAccountDto? financialAccount;
+        private UserDto? condoManager;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsNotBusy))]
@@ -29,18 +22,20 @@ namespace MobileCondoManagement.Models
         [ObservableProperty]
         private string errorMessage;
 
-        public ObservableCollection<UnitDto> Units { get; } = new();
-        public ObservableCollection<MessageDto> Messages { get; } = new();
+        // Coleções específicas do manager
         public ObservableCollection<MeetingDto> Meetings { get; } = new();
         public ObservableCollection<PaymentDto> Payments { get; } = new();
+        public ObservableCollection<MessageDto> Messages { get; } = new();
         public ObservableCollection<OccurrenceDto> Occurrences { get; } = new();
+        public ObservableCollection<CondominiumDto> Condominiums { get; } = new();
 
-        public CondoMemberDashboardViewModel(IApiService apiService)
+
+        public CondoManagerDashboardViewModel(IApiService apiService)
         {
             _apiService = apiService;
         }
 
-        // Recebe query params (Shell) — invoca o load (fire-and-forget)
+
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.TryGetValue("email", out var emailObj) && emailObj is string email)
@@ -52,41 +47,37 @@ namespace MobileCondoManagement.Models
         [RelayCommand]
         public async Task LoadDashboardAsync(string email)
         {
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                return;
-            }
-               
+            if (string.IsNullOrWhiteSpace(email)) return;
 
             try
             {
                 IsBusy = true;
                 ErrorMessage = string.Empty;
 
-                var dashboard = await _apiService.GetAsync<CondoMemberDashboardDto>($"api/CondoMembers/CondoMemberDashboard/{email}");
+                var dashboard = await _apiService.GetAsync<CondoManagerDashboardDto>(
+                    $"api/Account/CondoManagerDashboard/{email}");
 
-                if (dashboard == null)
+                 if (dashboard == null)
                 {
                     ErrorMessage = "Error retrieving info";
                     return;
                 }
 
-                CondoMember = dashboard.CondoMember;
-                FinancialAccount = dashboard.FinancialAccount;
+                CondoManager = dashboard.CondoManager;
 
-                Units.Clear();
-                foreach (var u in dashboard.Units ?? Enumerable.Empty<UnitDto>())
+                Meetings.Clear();
+                foreach (var mt in dashboard.Meetings ?? Enumerable.Empty<MeetingDto>()) 
                 {
-                    Units.Add(u);
+                   Meetings.Add(mt);
                 }
                     
 
                 Payments.Clear();
                 foreach (var p in dashboard.Payments ?? Enumerable.Empty<PaymentDto>())
                 {
-                    Payments.Add(p);
-
+                   Payments.Add(p);
                 }
+                    
 
                 Messages.Clear();
                 foreach (var m in dashboard.Messages ?? Enumerable.Empty<MessageDto>())
@@ -95,19 +86,18 @@ namespace MobileCondoManagement.Models
                 }
                     
 
-                Meetings.Clear();
-                foreach (var mt in dashboard.Meetings ?? Enumerable.Empty<MeetingDto>())
-                {
-                    Meetings.Add(mt);
-                }
-                    
-
                 Occurrences.Clear();
-                foreach (var occ in dashboard.Occurrences ?? Enumerable.Empty<OccurrenceDto>())
+                foreach (var o in dashboard.Occurrences ?? Enumerable.Empty<OccurrenceDto>())
                 {
-                    Occurrences.Add(occ);
+                    Occurrences.Add(o);
                 }
-                    
+
+                Condominiums.Clear();
+                foreach (var c in dashboard.Condominiums ?? Enumerable.Empty<CondominiumDto>())
+                {
+                    Condominiums.Add(c);
+                }
+
             }
             catch (Exception ex)
             {
@@ -118,7 +108,6 @@ namespace MobileCondoManagement.Models
                 IsBusy = false;
             }
         }
-
 
         [RelayCommand]
         private async Task LogoutAsync()

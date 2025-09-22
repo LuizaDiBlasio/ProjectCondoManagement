@@ -1,0 +1,219 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="MobileCondoManagement.Views.CompanyAdminDashboardPage"
+             Title="Company Admin Dashboard"
+             BackgroundColor="#f4f6fa">
+
+    <ContentPage.Resources>
+        <Color x:Key="PrimaryBlue">#1976d2</Color>
+        <Color x:Key="LightBlue">#e3f2fd</Color>
+        <Color x:Key="CardBg">#FFFFFF</Color>
+        <Thickness x:Key="CardMargin">0,6</Thickness>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="15" Spacing="18">
+
+            <!-- PERFIL (Manager) -->
+            <Frame CornerRadius="12" Padding="12" BackgroundColor="{StaticResource CardBg}" HasShadow="True" Margin="0,4">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+
+                    <!-- Perfil -->
+                    <HorizontalStackLayout Grid.Column="0" Spacing="12" VerticalOptions="Center">
+                        <Border Stroke="{StaticResource PrimaryBlue}" StrokeThickness="2" StrokeShape="RoundRectangle 40"
+         WidthRequest="72" HeightRequest="72" VerticalOptions="Center" HorizontalOptions="Start">
+                            <Image Aspect="AspectFill" WidthRequest="72" HeightRequest="72">
+                                <Image.Source>
+                                    <UriImageSource Uri="{Binding CompanyAdmin.ImageFullPath}" />
+                                </Image.Source>
+                            </Image>
+                        </Border>
+                        <VerticalStackLayout VerticalOptions="CenterAndExpand">
+                            <Label Text="{Binding CompanyAdmin.FullName}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource PrimaryBlue}"/>
+                            <Label Text="{Binding CompanyAdmin.Email}" FontSize="13" TextColor="Gray"/>
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+
+                    <!-- Logout -->
+                    <Button 
+                     Grid.Column="1"
+                     Text="Logout"
+                     Command="{Binding LogoutCommand}"
+                     BackgroundColor="Red"
+                     TextColor="White"
+                     CornerRadius="8"
+                     VerticalOptions="Center"
+                     HorizontalOptions="End" />
+                </Grid>
+            </Frame>
+
+            <!-- FINANCIAL ACCOUNT -->
+            <Frame CornerRadius="12" Padding="0" BackgroundColor="{StaticResource CardBg}" HasShadow="True">
+                <toolkit:Expander>
+                    <toolkit:Expander.Header>
+                        <Grid BackgroundColor="{StaticResource PrimaryBlue}" Padding="12">
+                            <Label Text="Financial Account" FontSize="16" FontAttributes="Bold" TextColor="White"/>
+                        </Grid>
+                    </toolkit:Expander.Header>
+                    <toolkit:Expander.Content>
+                        <VerticalStackLayout Padding="12" Spacing="8">
+                            <Frame BackgroundColor="{StaticResource LightBlue}" CornerRadius="10" Padding="10" Margin="{StaticResource CardMargin}">
+                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="4">
+                                    <Label Text="Owner:" FontAttributes="Bold"/>
+                                    <Label Text="{Binding FinancialAccount.OwnerName}" Grid.Column="1"/>
+
+                                    <Label Text="Bank:" FontAttributes="Bold" Grid.Row="1"/>
+                                    <Label Text="{Binding FinancialAccount.BankName}" Grid.Column="1" Grid.Row="1"/>
+
+                                    <Label Text="Account Number:" FontAttributes="Bold" Grid.Row="2"/>
+                                    <Label Text="{Binding FinancialAccount.AssociatedBankAccount}" Grid.Column="1" Grid.Row="2"/>
+
+                                    <Label Text="Card Number:" FontAttributes="Bold" Grid.Row="3"/>
+                                    <Label Text="{Binding FinancialAccount.CardNumber}" Grid.Column="1" Grid.Row="3"/>
+
+                                    <Label Text="Balance:" FontAttributes="Bold" Grid.Row="4"/>
+                                    <Label Text="{Binding FinancialAccount.Balance, StringFormat='{0:C}'}" Grid.Column="1" Grid.Row="4" TextColor="Green"/>
+                                    
+                                </Grid>
+                            </Frame>
+                        </VerticalStackLayout>
+                    </toolkit:Expander.Content>
+                </toolkit:Expander>
+            </Frame>
+
+            <!-- CONDOMINIUMS -->
+            <Frame CornerRadius="12" Padding="0" BackgroundColor="{StaticResource CardBg}" HasShadow="True">
+                <toolkit:Expander>
+                    <toolkit:Expander.Header>
+                        <Grid BackgroundColor="{StaticResource PrimaryBlue}" Padding="12">
+                            <Label Text="Condominiums" FontSize="16" FontAttributes="Bold" TextColor="White"/>
+                        </Grid>
+                    </toolkit:Expander.Header>
+                    <toolkit:Expander.Content>
+                        <CollectionView ItemsSource="{Binding Condominiums}" SelectionMode="None">
+                            <CollectionView.EmptyView>
+                                <Label Text="No condominiums found." TextColor="Gray" FontAttributes="Italic" HorizontalOptions="Center"/>
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Frame BackgroundColor="{StaticResource LightBlue}" CornerRadius="10" Padding="10" Margin="{StaticResource CardMargin}">
+                                        <VerticalStackLayout>
+                                            <Label Text="{Binding CondoName}" FontAttributes="Bold"/>
+                                            <Label Text="{Binding Address}" FontSize="13" TextColor="Gray"/>
+                                            <Label Text="{Binding ManagerUser.FullName, StringFormat='Manager: {0}'}" FontSize="13" TextColor="Gray"/>
+                                            <Label Text="{Binding Units.Count, StringFormat='Units: {0}'}" FontSize="13" TextColor="Gray"/>
+                                            <Label Text="{Binding Occurrences.Count, StringFormat='Unresolved Occurrences: {0}'}" FontSize="13" TextColor="Gray"/>
+                                            <Label Text="{Binding Meetings.Count, StringFormat='Upcoming Meetings: {0}'}" FontSize="13" TextColor="Gray"/>
+                                        </VerticalStackLayout>
+                                    </Frame>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </toolkit:Expander.Content>
+                </toolkit:Expander>
+            </Frame>
+
+            <!-- CONDO MANAGERS -->
+            <Frame CornerRadius="12" Padding="0" BackgroundColor="{StaticResource CardBg}" HasShadow="True">
+                <toolkit:Expander>
+                    <toolkit:Expander.Header>
+                        <Grid BackgroundColor="{StaticResource PrimaryBlue}" Padding="12">
+                            <Label Text="Condo Managers" FontSize="16" FontAttributes="Bold" TextColor="White"/>
+                        </Grid>
+                    </toolkit:Expander.Header>
+                    <toolkit:Expander.Content>
+                        <CollectionView ItemsSource="{Binding CondoManagers}" SelectionMode="None">
+                            <CollectionView.EmptyView>
+                                <Label Text="No condo managers found." TextColor="Gray" FontAttributes="Italic" HorizontalOptions="Center"/>
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Frame BackgroundColor="{StaticResource LightBlue}" CornerRadius="10" Padding="10" Margin="{StaticResource CardMargin}">
+                                        <HorizontalStackLayout Spacing="12">
+                                            <Border Stroke="{StaticResource PrimaryBlue}" StrokeThickness="1" StrokeShape="RoundRectangle 20"
+                                                    WidthRequest="40" HeightRequest="40">
+                                                <Image Source="{Binding ImageFullPath}" Aspect="AspectFill" WidthRequest="40" HeightRequest="40"/>
+                                            </Border>
+                                            <VerticalStackLayout>
+                                                <Label Text="{Binding FullName}" FontAttributes="Bold"/>
+                                                <Label Text="{Binding Email}" FontSize="13" TextColor="Gray"/>
+                                                <Label Text="{Binding PhoneNumber}" FontSize="13" TextColor="Gray"/>
+                                            </VerticalStackLayout>
+                                        </HorizontalStackLayout>
+                                    </Frame>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </toolkit:Expander.Content>
+                </toolkit:Expander>
+            </Frame>
+
+            <!-- PAYMENTS -->
+            <Frame CornerRadius="12" Padding="0" BackgroundColor="{StaticResource CardBg}" HasShadow="True">
+                <toolkit:Expander>
+                    <toolkit:Expander.Header>
+                        <Grid BackgroundColor="{StaticResource PrimaryBlue}" Padding="12">
+                            <Label Text="Pending Payments" FontSize="16" FontAttributes="Bold" TextColor="White"/>
+                        </Grid>
+                    </toolkit:Expander.Header>
+                    <toolkit:Expander.Content>
+                        <CollectionView ItemsSource="{Binding Payments}" SelectionMode="None">
+                            <CollectionView.EmptyView>
+                                <Label Text="No pending payments." TextColor="Gray" FontAttributes="Italic" HorizontalOptions="Center"/>
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Frame BackgroundColor="{StaticResource LightBlue}" CornerRadius="10" Padding="10" Margin="{StaticResource CardMargin}">
+                                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="4">
+                                            <Label Text="Due Date:" FontAttributes="Bold"/>
+                                            <Label Text="{Binding DueDate, StringFormat='{0:dd/MM/yyyy}'}" Grid.Column="1"/>
+                                            <Label Text="Amount:" FontAttributes="Bold" Grid.Row="1"/>
+                                            <Label Text="{Binding Amount, StringFormat='{0:C}'}" Grid.Column="1" Grid.Row="1" TextColor="Green"/>
+                                            <Label Text="Recipient:" FontAttributes="Bold" Grid.Row="2"/>
+                                            <Label Text="{Binding Recipient}" Grid.Column="1" Grid.Row="2"/>
+                                            <Label Text="Payer:" FontAttributes="Bold" Grid.Row="3"/>
+                                            <Label Text="{Binding Payer}" Grid.Column="1" Grid.Row="3"/>
+                                        </Grid>
+                                    </Frame>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </toolkit:Expander.Content>
+                </toolkit:Expander>
+            </Frame>
+
+            <!-- MESSAGES -->
+            <Frame CornerRadius="12" Padding="0" BackgroundColor="{StaticResource CardBg}" HasShadow="True">
+                <toolkit:Expander>
+                    <toolkit:Expander.Header>
+                        <Grid BackgroundColor="{StaticResource PrimaryBlue}" Padding="12">
+                            <Label Text="Recent Messages" FontSize="16" FontAttributes="Bold" TextColor="White"/>
+                        </Grid>
+                    </toolkit:Expander.Header>
+                    <toolkit:Expander.Content>
+                        <CollectionView ItemsSource="{Binding Messages}" SelectionMode="None">
+                            <CollectionView.EmptyView>
+                                <Label Text="No recent messages." TextColor="Gray" FontAttributes="Italic" HorizontalOptions="Center"/>
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Frame BackgroundColor="{StaticResource LightBlue}" CornerRadius="10" Padding="10" Margin="{StaticResource CardMargin}">
+                                        <VerticalStackLayout>
+                                            <Label Text="{Binding MessageTitle}" FontAttributes="Bold"/>
+                                            <Label Text="{Binding PostingDate, StringFormat='{0:dd/MM/yyyy}'}" FontSize="12" TextColor="Gray"/>
+                                            <Label Text="{Binding MessageContent}" FontSize="13"/>
+                                            <Label Text="{Binding SenderEmail, StringFormat='From: {0}'}" FontSize="12" TextColor="Gray"/>
+                                            <Label Text="{Binding ReceiverEmail, StringFormat='To: {0}'}" FontSize="12" TextColor="Gray"/>
+                                        </VerticalStackLayout>
+                                    </Frame>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </toolkit:Expander.Content>
+                </toolkit:Expander>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
