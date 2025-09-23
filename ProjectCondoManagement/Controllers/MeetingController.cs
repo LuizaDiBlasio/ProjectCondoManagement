@@ -1,5 +1,7 @@
 ﻿using ClassLibrary;
 using ClassLibrary.DtoModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
@@ -10,7 +12,7 @@ namespace ProjectCondoManagement.Controllers
 {
     [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
     [ApiController]
-    //[Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MeetingController : Controller
     {
         private readonly IMeetingRepository _meetingRepository;
@@ -175,6 +177,7 @@ namespace ProjectCondoManagement.Controllers
 
 
         // POST: MeetingController/Create
+        [Authorize(Roles ="CondoManager")]
         [HttpPost("CreateMeeting")]
         public async Task<ActionResult> Create([FromBody] MeetingDto meetingDto)
         {
@@ -203,6 +206,7 @@ namespace ProjectCondoManagement.Controllers
             }
         }
 
+        [Authorize(Roles = "CondoManager")]
         [HttpPost("EditMeeting")]
         public async Task<ActionResult> EditMeeting([FromBody] MeetingDto meetingDto)
         {
@@ -296,6 +300,7 @@ namespace ProjectCondoManagement.Controllers
         }
 
         // DELETE: MeetingController/Delete/5
+        [Authorize(Roles = "CondoManager")]
         [HttpDelete("DeleteMeeting/{id}")]
         public async Task<ActionResult> DeleteMeeting(int id)
         {

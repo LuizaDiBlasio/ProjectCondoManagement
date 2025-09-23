@@ -57,7 +57,7 @@ namespace CondoManagementWebApp.Controllers
                 return RedirectToAction("Index", "Home"); //mandar para a view Index que possui o controller Home
             }
 
-            foreach (var cookie in Request.Cookies.Keys)
+            foreach (var cookie in Request.Cookies.Keys) // deletar cookies anteriores
             {
                 Response.Cookies.Delete(cookie);
             }
@@ -274,9 +274,9 @@ namespace CondoManagementWebApp.Controllers
 
                 return Json(new { Message = "Unable to send link, please contact admin." });
             }
-            catch (Exception ex)
+            catch (Exception )
             {
-                return BadRequest(ex.Message);
+                return View("Error500");
             }
 
         }
@@ -521,11 +521,11 @@ namespace CondoManagementWebApp.Controllers
                     return View(model2);
                 }
 
-                return new NotFoundViewResult("NotAuthorized");
+                return new NotFoundViewResult("Error404");
             }
             catch
             {
-                return new NotFoundViewResult("NotAuthorized");
+                return new NotFoundViewResult("Error404");
             }
 
         }
@@ -580,7 +580,7 @@ namespace CondoManagementWebApp.Controllers
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token)) //verificar parâmetros
             {
-                return new NotFoundViewResult("NotAuthorized");
+                return new NotFoundViewResult("Error404");
             }
 
             var model = new ResetPasswordViewModel()
@@ -604,7 +604,7 @@ namespace CondoManagementWebApp.Controllers
         {
             if (string.IsNullOrEmpty(model.UserId) || string.IsNullOrEmpty(model.Token)) //verificar parâmetros (se o token for null, quer dizer que processo falhou e não autoriza)
             {
-                return new NotFoundViewResult("NotAuthorized");
+                return new NotFoundViewResult("Error404");
             }
 
             var resetPasswordDto = _converterHelper.ToResetPasswordDto(model); //esse já contém password
@@ -622,7 +622,7 @@ namespace CondoManagementWebApp.Controllers
                 {
                     _flashMessage.Confirmation("Password sucessfully reset, you can login now");
 
-                    return RedirectToAction(nameof(Login));
+                    return View("RecoverPassword", new RecoverPasswordViewModel());
                 }
 
                 _flashMessage.Danger($"Unable to reset password, please contact admin");
@@ -1053,7 +1053,7 @@ namespace CondoManagementWebApp.Controllers
 
             if (email == null)
             {
-                return NotFound();
+                return UserNotFound();
             }
 
             try
@@ -1061,7 +1061,7 @@ namespace CondoManagementWebApp.Controllers
                 var user = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", email);
                 if (user == null)
                 {
-                    return NotFound();
+                    return UserNotFound();
                 }
 
                 var model = await LoadAssingCompanyViewModel(user);
@@ -1086,7 +1086,7 @@ namespace CondoManagementWebApp.Controllers
 
             if (email == null)
             {
-                return NotFound();
+                return UserNotFound();
             }
             
             try

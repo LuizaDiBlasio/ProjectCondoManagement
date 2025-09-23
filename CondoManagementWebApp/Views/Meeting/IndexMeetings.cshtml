@@ -70,8 +70,19 @@ else
 													</td>
 												}
 												<td>
-													<a href="@meeting.MeetingLink" target="_blank" class="btn btn-outline-info" title="Join Meeting">
-														<i class="fas fa-video"></i>
+													@if (!string.IsNullOrEmpty(meeting.MeetingLink))
+													{
+														var now = DateTime.Now;
+														var start = meeting.DateAndTime.AddHours(-3);
+														var end = meeting.DateAndTime.AddHours(3);
+
+														if (now >= start && now <= end)
+														{
+															<a href="@meeting.MeetingLink" target="_blank" class="btn btn-sm btn-outline-primary">
+																<i class="bi bi-link-45deg"></i> Join Meeting
+															</a>
+														}
+													}
 												</td>
 												<td>
 													@if (User.IsInRole("CondoManager"))

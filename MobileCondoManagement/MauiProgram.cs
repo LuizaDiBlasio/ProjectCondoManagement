@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging;
 using MobileCondoManagement.Models;
 using MobileCondoManagement.Services;
 using MobileCondoManagement.Services.Interfaces;
-using MobileCondoManagement.ViewModels;
 using MobileCondoManagement.Views;
+using CommunityToolkit.Maui;
 
 namespace MobileCondoManagement
 {
@@ -47,8 +47,9 @@ namespace MobileCondoManagement
 
 
             builder.Services.AddTransient<ForgotPasswordViewModel>();
-            builder.Services.AddTransient<ForgotPasswordPage>(); // Ensure ForgotPasswordPage exists in the MobileCondoManagement.Views namespace
-
+            builder.Services.AddTransient<ForgotPasswordPage>();
+            builder.Services.AddTransient<SysAdminDashboardViewModel>();
+            builder.Services.AddTransient<SysAdminDashboardPage>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif

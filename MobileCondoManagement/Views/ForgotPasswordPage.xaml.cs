@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using MobileCondoManagement.Models;
 
 
 namespace MobileCondoManagement.Views
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
+    
     public partial class ForgotPasswordPage : ContentPage
     {
-        public ForgotPasswordPage()
+        public ForgotPasswordPage(ForgotPasswordViewModel viewModel)
         {
             InitializeComponent();
+
+            this.BindingContext = viewModel;
         }
     }
 }

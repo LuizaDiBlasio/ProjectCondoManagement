@@ -1,4 +1,5 @@
 ﻿using ClassLibrary;
+using ClassLibrary.DtoModels;
 using ClassLibrary.DtoModelsMobile;
 
 namespace MobileCondoManagement.Services.Interfaces
@@ -10,6 +11,12 @@ namespace MobileCondoManagement.Services.Interfaces
         Task<Response<object>> RequestForgotPasswordAsync(string email);
 
         Task<T> GetAsync<T>(string requestUri);
+
+        Task<Response<object>> ResetPasswordAsync(ResetPasswordDto resetData);
+
+        Task<T> GetAsync<T>(string requestUri);
+
+        Task<TResponse> GetByQueryAsync<TResponse>(string requestUri, string query);
     }
 }
 

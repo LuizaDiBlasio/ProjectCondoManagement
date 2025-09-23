@@ -35,4 +35,12 @@
         Route="CompanyAdminDashboardPage"
         ContentTemplate="{DataTemplate views:CompanyAdminDashboardPage}" />
 
+    <!--SysAdmin Dashboard-->
+    <ShellContent
+        Title="Dashboard"
+        ContentTemplate="{DataTemplate views:SysAdminDashboardPage}"
+        Route="CondoMemberDashboardPage" />
+
+
 </Shell>
+

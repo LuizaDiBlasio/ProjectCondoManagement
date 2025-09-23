@@ -51,13 +51,13 @@ namespace CondoManagementWebApp.Controllers
 
             if (id == null)
             {
-                return NotFound();
+                return View("Error404");
             }
 
 
             if (email == null)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             ViewBag.Email = email;
@@ -69,8 +69,8 @@ namespace CondoManagementWebApp.Controllers
                 var financialAccountDto = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{id.Value}");
                 if (financialAccountDto == null)
                 {
-                    return NotFound();
-                }
+                        return View("Error404");
+                 }
 
                 return View(financialAccountDto);
             }
@@ -79,7 +79,7 @@ namespace CondoManagementWebApp.Controllers
                 _flashMessage.Danger($"Error fetching account");
             }
 
-            return NotFound();
+            return View("Error404");
         }
 
 
@@ -89,17 +89,17 @@ namespace CondoManagementWebApp.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             if (email == null)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             if (returnUrl == null)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             if (returnId != null)
@@ -115,7 +115,7 @@ namespace CondoManagementWebApp.Controllers
                 var financialAccountDto = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{id.Value}");
                 if (financialAccountDto == null)
                 {
-                    return NotFound();
+                    return View("Error404");
                 }
 
                 return View(financialAccountDto);
@@ -136,12 +136,12 @@ namespace CondoManagementWebApp.Controllers
         {
             if (id != financialAccountDto.Id)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             if (email == null)
             {
-                return NotFound();
+                return View("Error404");
             }
          
 
@@ -195,12 +195,12 @@ namespace CondoManagementWebApp.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             if (email == null)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             

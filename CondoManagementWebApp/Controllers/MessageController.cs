@@ -47,7 +47,7 @@ namespace CondoManagementWebApp.Controllers
             }
             catch
             {
-                return View("Error");
+                return View("Error500");
             }
             
         }
@@ -74,7 +74,7 @@ namespace CondoManagementWebApp.Controllers
             }
             catch
             {
-                return View("Error");
+                return View("Error500");
             }
 
         }
@@ -263,7 +263,7 @@ namespace CondoManagementWebApp.Controllers
             }
             catch
             {
-                return View("Error");
+                return View("Error500");
             }
             
         }
