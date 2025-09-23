@@ -1,76 +1,74 @@
 ﻿@model ClassLibrary.DtoModels.UnitDto
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Unit Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Details</h1>
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Unit Details</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">Units</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Details</a></li>
+                </ol>
+            </div>
+        </div>
 
-<div>
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Unit Info</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.CondominiumDto)</label>
+                                <p>@Html.DisplayFor(model => model.CondominiumDto.CondoName)</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.Floor)</label>
+                                <p>@Html.DisplayFor(model => model.Floor)</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.Bedrooms)</label>
+                                <p>@Html.DisplayFor(model => model.Bedrooms)</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label font-weight-bold">@Html.DisplayNameFor(model => model.Door)</label>
+                                <p>@Html.DisplayFor(model => model.Door)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.CondominiumDto)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.CondominiumDto.CondoName)
-        </dd>
-
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Floor)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Floor)
-        </dd>
-
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Bedrooms)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Bedrooms)
-        </dd>
-
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Door)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Door)
-        </dd>
-
-        @if (Model.CondoMemberDtos != null && Model.CondoMemberDtos.Any())
-        {
-            <dt class="col-sm-2">
-                Members
-            </dt>
-            <dd class="col-sm-10">
-                <ul class="list-unstyled">
-                    @foreach (var member in Model.CondoMemberDtos)
-                    {
-                        <li>@member.FullName (@member.Email)</li>
-                    }
-                </ul>
-            </dd>
-        }
-    </dl>
-</div>
-<div>
-    @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null && ViewBag.ReturnUrl != null)
-    {
-        <a asp-action="@ViewBag.ReturnUrl" asp-route-condoId="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName" class="btn btn-outline-primary">Back to List</a>
-    }
-
-    else if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
-    {
-        <a asp-action="Index" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName" class="btn btn-outline-primary">Back to List</a>
-    }
-    else if (ViewBag.MemberId != null)
-    {
-        <a asp-action="MemberUnits" asp-route-id="@ViewBag.MemberId" class="btn btn-outline-primary">Back to List</a>
-    }
-
-    else
-    {
-        <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
-    }
+        <div class="d-flex justify-content-start mt-3">
+            @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null && ViewBag.ReturnUrl != null)
+            {
+                <a asp-action="@ViewBag.ReturnUrl" asp-route-condoId="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName" class="btn btn-outline-secondary">Back to List</a>
+            }
+            else if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
+            {
+                <a asp-action="Index" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName" class="btn btn-outline-secondary">Back to List</a>
+            }
+            else if (ViewBag.MemberId != null)
+            {
+                <a asp-action="MemberUnits" asp-route-id="@ViewBag.MemberId" class="btn btn-outline-secondary">Back to List</a>
+            }
+            else
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+            }
+        </div>
+    </div>
 </div>

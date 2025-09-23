@@ -87,7 +87,7 @@ namespace CondoManagementWebApp.Controllers
                     return BadRequest(new { isSuccess = false, message = "Invalid input, please fill in the form correctly." });
                 }
             }
-            else // Requesição não AJAX (se você quiser manter o comportamento de form tradicional)
+            else // Requesição não AJAX 
             {
                 if (!ModelState.IsValid)
                 {
@@ -116,7 +116,7 @@ namespace CondoManagementWebApp.Controllers
                         //limpar os cookies da sessão anterior
                         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-                        // Para requisições AJAX, retorne um JSON que o JavaScript possa entender
+                        // Para requisições AJAX, retornar um JSON que o JavaScript possa entender
                         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                         {
                             return Ok(new { isSuccess = true, requires2FA = true, username = model.Username });
@@ -126,7 +126,7 @@ namespace CondoManagementWebApp.Controllers
 
                         return View("Login", responseModel);
                     }
-                    else // Login bem-sucedido (sem 2FA) //TODO remover esse else antes de publicar
+                    else // Login bem-sucedido (sem 2FA) - para testes
                     {
                         //limpar os cookies da sessão anterior
                         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -145,6 +145,7 @@ namespace CondoManagementWebApp.Controllers
                         // login no  WebApp, criando um cookie de autenticação
                         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
+                        // Para requisições AJAX, retornar um JSON que o JavaScript possa entender
                         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                         {
                             return Ok(new { isSuccess = true, requires2FA = false });
@@ -208,11 +209,13 @@ namespace CondoManagementWebApp.Controllers
                     var content = await response.Content.ReadAsStringAsync();
                     var tokenResponse = JsonSerializer.Deserialize<ClassLibrary.Response<object>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                    // **1. Recebe o tokenResponse COMPLETO da API**
+                    // **1. Recebe o tokenResponse da api**
                     if (tokenResponse.IsSuccess)
                     {
                         var handler = new JwtSecurityTokenHandler();
                         var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
+
+                        //armazena token na sessão
 
                         HttpContext.Session.SetString("JwtToken", tokenResponse.Token);
 
@@ -220,7 +223,7 @@ namespace CondoManagementWebApp.Controllers
                         var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
                         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
-                        // **2. RETORNA o objeto COMPLETO, incluindo o Role, para o frontend**
+                        // retorna token para o frontend**
                         return Ok(new { isSuccess = true, role = tokenResponse.Role });
                     }
                 }

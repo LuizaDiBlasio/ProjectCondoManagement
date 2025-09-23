@@ -1,67 +1,96 @@
 ﻿@model ClassLibrary.DtoModels.UnitDto
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Unit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Edit Unit</h1>
-
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="CondominiumId" />
-
-            @if (ViewBag.MemberId != null)
-            {
-                <input type="hidden" name="memberId" value="@ViewBag.MemberId" />
-            }
-
-            @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
-            {
-                <input type="hidden" name="condoId" value="@ViewBag.CondominiumId" />
-                <input type="hidden" name="condoName" value="@ViewBag.CondoName" />
-
-            } 
-
-
-            <div class="form-group">
-                <label asp-for="Floor" class="control-label"></label>
-                <input asp-for="Floor" class="form-control" />
-                <span asp-validation-for="Floor" class="text-danger"></span>
+<div class="content-body">
+    <div class="container-fluid">
+        @* Título e Breadcrumbs *@
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Update Unit</h4>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Bedrooms" class="control-label"></label>
-                <input asp-for="Bedrooms" class="form-control" />
-                <span asp-validation-for="Bedrooms" class="text-danger"></span>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">Units</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Edit</a></li>
+                </ol>
             </div>
-            <div class="form-group">
-                <label asp-for="Door" class="control-label"></label>
-                <input asp-for="Door" class="form-control" />
-                <span asp-validation-for="Door" class="text-danger"></span>
+        </div>
+
+        @* Formulário de Edição dentro de um Card *@
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Unit Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
+                        <form asp-action="Edit">
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="CondominiumId" />
+
+                            @if (ViewBag.MemberId != null)
+                            {
+                                <input type="hidden" name="memberId" value="@ViewBag.MemberId" />
+                            }
+
+                            @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
+                            {
+                                <input type="hidden" name="condoId" value="@ViewBag.CondominiumId" />
+                                <input type="hidden" name="condoName" value="@ViewBag.CondoName" />
+                            }
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label font-weight-bold" asp-for="Floor"></label>
+                                    <input asp-for="Floor" class="form-control" />
+                                    <span asp-validation-for="Floor" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label font-weight-bold" asp-for="Bedrooms"></label>
+                                    <input asp-for="Bedrooms" class="form-control" />
+                                    <span asp-validation-for="Bedrooms" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label class="form-label font-weight-bold" asp-for="Door"></label>
+                                <input asp-for="Door" class="form-control" />
+                                <span asp-validation-for="Door" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mt-4 d-flex justify-content-between align-items-center">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                                @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
+                                {
+                                    <a asp-action="Index" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName" class="btn btn-outline-secondary">Back to List</a>
+                                }
+                                else if (ViewBag.MemberId != null)
+                                {
+                                    <a asp-action="MemberUnits" asp-route-id="@ViewBag.MemberId" class="btn btn-outline-secondary">Back to List</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                                }
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-    
-               <input type="submit" value="Save" class="btn btn-success" />
-
-                
-
-                @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
-                {
-                    <a asp-action="Index" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName" class="btn btn-outline-primary">Back to List</a>
-                }
-                else if (ViewBag.MemberId != null)
-                {
-                    <a asp-action="MemberUnits" asp-route-id="@ViewBag.MemberId" class="btn btn-outline-primary">Back to List</a>
-                }
-
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-
-
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

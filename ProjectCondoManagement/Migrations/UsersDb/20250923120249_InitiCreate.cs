@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.DataContextUsersMigrations
+namespace ProjectCondoManagement.Migrations.UsersDb
 {
     /// <inheritdoc />
-    public partial class InitCreateUsers : Migration
+    public partial class InitiCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

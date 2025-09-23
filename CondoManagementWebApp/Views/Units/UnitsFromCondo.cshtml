@@ -2,45 +2,92 @@
 
 @{
     ViewData["Title"] = "UnitsFromCondo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>My Units From @ViewBag.CondoName</h2>
+<div class="content-body">
+    <div class="container-fluid">
+        @* Título e Breadcrumbs *@
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>My Units From @ViewBag.CondoName</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Condominium" asp-action="MyCondos">My Condos</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Units</a></li>
+                </ol>
+            </div>
+        </div>
 
-<br />
-<a asp-controller="Condominium" asp-action="MyCondos" class="btn btn-outline-primary">Back to My Condos</a>
-<br />
+        @* Conteúdo da Tabela dentro de um Card *@
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">List of My Units</h4>
+                    </div>
+                    <div class="card-body">
+                        @if (Model == null || !Model.Any())
+                        {
+                            <p>No units found.</p>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Floor)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Bedrooms)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Door)
+                                            </th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Floor)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Bedrooms)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Door)
+                                                </td>
+                                                <td>
+                                                    <a class="btn btn-info" asp-action="Details" asp-route-returnUrl="UnitsFromCondo" asp-route-id="@item.Id" asp-route-condoId="@item.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Details</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Floor)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Bedrooms)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Door)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Floor)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Bedrooms)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Door)
-            </td>
-            <td>
-                    <a class="btn btn-outline-primary" asp-action="Details" asp-route-returnUrl="UnitsFromCondo" asp-route-id="@item.Id" asp-route-condoId="@item.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Details</a>
-            </td>
-        </tr>
+        <div class="d-flex justify-content-start mt-3">
+            <a asp-controller="Condominium" asp-action="MyCondos" class="btn btn-outline-secondary">Back to My Condos</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
-    </tbody>
-</table>

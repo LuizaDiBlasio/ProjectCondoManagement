@@ -27,4 +27,10 @@
     <ProjectReference Include="..\ClassLibrary\ClassLibrary.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\CondosDb\" />
+    <Folder Include="Migrations\FinancesDb\" />
+    <Folder Include="Migrations\UsersDb\" />
+  </ItemGroup>
+
 </Project>

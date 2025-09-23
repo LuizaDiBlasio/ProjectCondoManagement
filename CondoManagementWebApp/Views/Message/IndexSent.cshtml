@@ -1,55 +1,71 @@
-﻿
-
-@model IEnumerable<ClassLibrary.DtoModels.MessageDto>
+﻿@model IEnumerable<ClassLibrary.DtoModels.MessageDto>
 
 @{
     ViewData["Title"] = "Sent Messages";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<div class="content-body">
+    <div class="container-fluid">
+        @* Título e Botões *@
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Sent Messages</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <a asp-controller="Message" asp-action="CreateMessage" class="btn btn-primary me-2">New Message</a>
+                <a asp-controller="Message" asp-action="IndexReceived" class="btn btn-secondary">Inbox</a>
+            </div>
+        </div>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Sent Messages</h1>
-    <div>
-        <a asp-controller="Message" asp-action="CreateMessage" class="btn btn-primary">New</a>
-        <a asp-controller="Message" asp-action="IndexReceived" class="btn btn-secondary">Inbox</a>
+        @* Conteúdo da Tabela dentro de um Card *@
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-body">
+                        @if (Model != null && Model.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Date</th>
+                                            <th>Sent to</th>
+                                            <th>Ticket Status</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td>@Html.DisplayFor(modelItem => item.MessageTitle)</td>
+                                                <td>@item.PostingDate?.ToString("MM/dd/yyyy HH:mm")</td>
+                                                <td>@Html.DisplayFor(modelItem => item.ReceiverEmail)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Status.Name)</td>
+                                                <td>
+                                                    <a href="#" class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@item.Id">Delete</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p>No sent messages.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-@if (Model != null && Model.Any())
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Date</th>
-                <th>Sent to</th>
-                <th>Ticket Status</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @* Itera sobre as mensagens enviadas *@
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@Html.DisplayFor(modelItem => item.MessageTitle)</td>
-                    <td>@item.PostingDate?.ToString("MM/dd/yyyy HH:mm")</td>
-                    <td>@Html.DisplayFor(modelItem => item.ReceiverEmail)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Status.Name)</td>
-                    <td>
-                        <a href="#" class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@item.Id">Delete</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <p>No sent messages</p>
-}
-
-<!-- Modal de Confirmação de Exclusão -->
 <div id="deleteDialog" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -72,7 +88,7 @@ else
 @section Scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-           
+
             // Adiciona o ID da mensagem para a modal de deleção
             var idToDelete = 0;
             $('a.delete-btn').click(function (e) {

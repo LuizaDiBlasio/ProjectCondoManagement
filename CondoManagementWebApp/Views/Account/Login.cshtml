@@ -43,10 +43,7 @@
                                     <label class="form-label" asp-for="Password">Password</label>
                                     <div class="position-relative">
                                         <input type="password" asp-for="Password" class="form-control" placeholder="Enter password" id="dz-password">
-                                        <span asp-validation-for="Password" class="text-danger"></span> <span class="show-pass eye">
-                                            <i class="fa fa-eye-slash"></i>
-                                            <i class="fa fa-eye"></i>
-                                        </span>
+                                        <span asp-validation-for="Password" class="text-danger"></span> 
                                     </div>
                                 </div>
 
@@ -111,6 +108,8 @@
                 var currentUsername = '';
 
                 // --- Lógica do Login e 2FA ---
+
+                // -- onter credenciais 
                 $('#loginForm').on('submit', function(event) {
                     event.preventDefault();
 
@@ -125,17 +124,20 @@
                     $('#username').removeClass('is-invalid');
                     $('#dz-password').removeClass('is-invalid');
 
-                    $.ajax({
+                    //--chamada ajax primeira etapa de login (check de credenciais)
+                    $.ajax({ 
                         url: '@Url.Action("RequestLogin", "Account")',
                         type: 'POST',
                         data: {
                             Username: username,
                             Password: password
                         },
+
+                        // -- se passou no check de credenciais, mostrar modal
                         success: function(data) {
                             $('#loginButton').prop('disabled', false).text('Sign In');
                             if (data.isSuccess) {
-                                if (data.requires2FA === true) {
+                                if (data.requires2FA === true) { 
                                     $('#twoFAModal').modal('show');
                                 } else {
                                     window.location.href = '@Url.Action("Index", "Home")';
@@ -144,7 +146,7 @@
                                 var errorMsg = data.message || 'Login failed, please check your credentials.';
                                 $('#loginErrorSummary').text(errorMsg).show();
                             }
-                        },
+                        }, //senão, mostra mensagens hide erro
                         error: function(xhr) {
                             $('#loginButton').prop('disabled', false).text('Sign In');
                             var errorMsg = 'Login failed, please check your credentials.';
@@ -161,6 +163,7 @@
                     });
                 });
 
+                //Modal do 2fa
             @if (Model != null && Model.Requires2FA == true)
             {
                 <text>
@@ -184,7 +187,9 @@
                     $('#verifyButtonSpinner').removeClass('d-none');
                     $('#verifyTokenButton').prop('disabled', true);
 
-                    $.ajax({
+
+                    //chamada ajax AudioParam verificar código do 2fa
+                    $.ajax({ 
                         url: '@Url.Action("Verify2FA", "Account")',
                         type: 'POST',
                         contentType: 'application/json',
@@ -192,6 +197,7 @@
                             Username: currentUsername,
                             Token: token
                         }),
+                        //caso codigo válido
                         success: function(data) {
                             console.log("Resposta do Verify2FA:", data)
                             if (data.isSuccess) {
@@ -219,6 +225,8 @@
                                     else {
                                         window.location.href = '@Url.Action("Index", "Home")';
                                     }
+
+                            //tratamento de erros
                             } else {
                                 resetVerifyButton();
                                 errorContainer.text(data.message || 'Invalid code.').show();
@@ -235,6 +243,7 @@
                     });
                 });
 
+                //fechar modal
                 $('#twoFAToken').on('input', function() {
                     $('#twoFATokenError').hide();
                 });

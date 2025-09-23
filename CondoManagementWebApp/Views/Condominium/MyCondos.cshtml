@@ -1,54 +1,73 @@
 ﻿@model CondoManagementWebApp.Models.MyCondosViewModel
 
 @{
-    ViewData["Title"] = "MyCondos";
+	ViewData["Title"] = "MyCondos";
 }
 
-<h1>My Condos</h1>
+<div class="content-body">
+	<div class="container-fluid">
+		@* Título *@
+		<div class="row page-titles mx-0">
+			<div class="col-sm-6 p-md-0">
+				<div class="welcome-text">
+					<h4>My Condos</h4>
+				</div>
+			</div>
+		</div>
 
-<div class="accordion" id="condoAccordion">
-    @if (Model?.MyCondos != null && Model.MyCondos.Any())
-    {
-        var index = 0;
-        foreach (var item in Model.MyCondos)
-        {
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="heading-@index">
-                    <button class="accordion-button @(index > 0 ? "collapsed" : "")"
-                            type="button" data-bs-toggle="collapse"
-                            data-bs-target="#collapse-@index"
-                            aria-expanded="@(index == 0 ? "true" : "false")"
-                            aria-controls="collapse-@index">
-                        @item.CondoName
-                    </button>
-                </h2>
-                <div id="collapse-@index"
-                     class="accordion-collapse collapse @(index == 0 ? "show" : "")"
-                     aria-labelledby="heading-@index"
-                     data-bs-parent="#condoAccordion">
-                    <div class="accordion-body p-0">
+		@* Conteúdo da Tabela dentro de um Card *@
+		<div class="row">
+			<div class="col-xl-12 col-xxl-12">
+				<div class="card">
+					<div class="card-body">
+						<div class="accordion" id="condoAccordion">
+							@if (Model?.MyCondos != null && Model.MyCondos.Any())
+							{
+								var index = 0;
+								foreach (var item in Model.MyCondos)
+								{
+									<div class="accordion-item">
+										<h2 class="accordion-header" id="heading-@index">
+											<button class="accordion-button @(index > 0 ? "collapsed" : "")"
+																			  type="button" data-bs-toggle="collapse"
+																			  data-bs-target="#collapse-@index"
+																			  aria-expanded="@(index == 0 ? "true" : "false")"
+																			  aria-controls="collapse-@index">
+												@item.CondoName
+											</button>
+										</h2>
+										<div id="collapse-@index"
+																	class="accordion-collapse collapse @(index == 0 ? "show" : "")"
+																	aria-labelledby="heading-@index"
+																	data-bs-parent="#condoAccordion">
+											<div class="accordion-body p-4">
+												<p class="text-gray-600"><strong>Address:</strong> @item.Address</p>
+												<p>
+													<a class="btn btn-info me-2" asp-action="Details" asp-route-id="@item.Id" asp-route-returnUrl="MyCondos">Details</a>
+													<a class="btn btn-outline-primary me-2" asp-controller="CondoMember" asp-action="MembersFromCondo" asp-route-condoId="@item.Id" asp-route-condoName="@item.CondoName">Members</a>
+													<a class="btn btn-primary" asp-controller="Units" asp-action="UnitsFromCondo" asp-route-condoId="@item.Id" asp-route-condoName="@item.CondoName">My Units</a>
+												</p>
+											</div>
+										</div>
+									</div>
+									index++;
+								}
+							}
+							else
+							{
+								<p class="text-center text-muted">No condominiums found.</p>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
-                        
-                        <div class="card bg-white border border-light shadow-sm">
-                            <div class="card-body">
-                                <p><strong>Address:</strong> @item.Address</p>
-
-                                <p>
-                                    <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id" asp-route-returnUrl="MyCondos">Details</a>
-                                    <a class="btn btn-outline-primary" asp-controller="CondoMember" asp-action="MembersFromCondo" asp-route-condoId="@item.Id" asp-route-condoName="@item.CondoName">Members</a>
-                                    <a class="btn btn-outline-primary" asp-controller="Units" asp-action="UnitsFromCondo" asp-route-condoId="@item.Id" asp-route-condoName="@item.CondoName">My Units</a>
-                                </p>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-            index++;
-        }
-    }
-    else
-    {
-        <p>No condominiums found.</p>
-    }
 </div>
+
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+}

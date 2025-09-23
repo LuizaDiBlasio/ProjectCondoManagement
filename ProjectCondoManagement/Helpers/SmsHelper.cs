@@ -31,7 +31,7 @@ namespace ProjectCondoManagement.Helpers
                     to: new PhoneNumber(phoneNumber),
                     from: new PhoneNumber(twilioPhoneNumber),
                     body: message,
-                    riskCheck: MessageResource.RiskCheckEnum.Disable
+                    riskCheck: MessageResource.RiskCheckEnum.Disable //para poder testar sem block
                 );
 
                 //verificar status da mensagem
