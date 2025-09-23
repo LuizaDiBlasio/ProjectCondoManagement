@@ -14,8 +14,6 @@ namespace MobileCondoManagement.Services.Interfaces
 
         Task<Response<object>> ResetPasswordAsync(ResetPasswordDto resetData);
 
-        Task<T> GetAsync<T>(string requestUri);
-
         Task<TResponse> GetByQueryAsync<TResponse>(string requestUri, string query);
     }
 }
