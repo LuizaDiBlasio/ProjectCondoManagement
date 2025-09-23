@@ -1,60 +1,87 @@
 ﻿@model CondoManagementWebApp.Models.UnitDtoViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Unit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
+<div class="fix-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-md-12">
+                <div class="card mb-0 h-auto">
+                    <div class="card-body">
 
-<h4>UnitDto</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
+                        <h4 class="text-center mb-4">Create Unit</h4>
 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <hr class="mt-4 mb-5" style="border-top: 1px solid #e0e0e0; opacity: 0.8;" />
 
-            @if(Model.MemberId != null)
-            {
-                <input type="hidden" name="MemberId" value="@Model.MemberId" />
-            }
-            
+                        <div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
 
-            @if (Model.CondoId != null && Model.CondoName != null)
-            {
-                <input type="hidden" name="CondominiumId" value="@Model.CondoId" />
-                <input type="hidden" name="CondoName" value="@Model.CondoName" />
-            }
-            else
-            {
-                <div class="form-group">
-                    <label asp-for="CondominiumId" class="control-label"></label>
-                    <select asp-for="CondominiumId" asp-items="@Model.Condos" class="form-control"></select>
-                    <span asp-validation-for="CondominiumId" class="text-danger"></span>
+                        <form asp-action="Create">
+                            @if (Model.MemberId != null)
+                            {
+                                <input type="hidden" name="MemberId" value="@Model.MemberId" />
+                            }
+
+                            @if (Model.CondoId != null && Model.CondoName != null)
+                            {
+                                <input type="hidden" name="CondominiumId" value="@Model.CondoId" />
+                                <input type="hidden" name="CondoName" value="@Model.CondoName" />
+                            }
+                            else
+                            {
+                                <div class="form-group mb-4">
+                                    <label class="form-label" asp-for="CondominiumId"></label>
+                                    <select asp-for="CondominiumId" asp-items="@Model.Condos" class="form-control"></select>
+                                    <span asp-validation-for="CondominiumId" class="text-danger"></span>
+                                </div>
+                            }
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-4">
+                                        <label class="form-label" asp-for="Floor"></label>
+                                        <input asp-for="Floor" class="form-control" />
+                                        <span asp-validation-for="Floor" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-4">
+                                        <label class="form-label" asp-for="Bedrooms"></label>
+                                        <input asp-for="Bedrooms" class="form-control" />
+                                        <span asp-validation-for="Bedrooms" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label class="form-label" asp-for="Door"></label>
+                                <input asp-for="Door" class="form-control" />
+                                <span asp-validation-for="Door" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mt-3 d-flex justify-content-between align-items-center">
+                                @if (Model.CondoId != null && Model.CondoName != null)
+                                {
+                                    <a asp-action="Index" class="btn btn-outline-secondary" asp-route-id="@Model.CondoId" asp-route-condoName="@Model.CondoName">Back to List</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                                }
+                                <button type="submit" class="btn btn-primary">Create</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            }
-           
-            <div class="form-group">
-                <label asp-for="Floor" class="control-label"></label>
-                <input asp-for="Floor" class="form-control" />
-                <span asp-validation-for="Floor" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Bedrooms" class="control-label"></label>
-                <input asp-for="Bedrooms" class="form-control" />
-                <span asp-validation-for="Bedrooms" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Door" class="control-label"></label>
-                <input asp-for="Door" class="form-control" />
-                <span asp-validation-for="Door" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-success" />
-                <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

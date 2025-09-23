@@ -1,93 +1,94 @@
 ﻿@model CondoManagementWebApp.Models.AssignMemberViewModel
 @{
     ViewData["Title"] = "Assign Member";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1 class="mb-4">Manage Members</h1>
-<hr />
+<div class="fix-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="card mb-0 h-auto">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <h4 class="text-center mb-4">Manage Members</h4>
+                        </div>
+                        <hr class="mt-4 mb-5" style="border-top: 1px solid #e0e0e0; opacity: 0.8;" />
 
-<div class="row">
-    <div class="col-md-8">
-        <form asp-action="AssignMember" method="post">
+                        <form asp-action="AssignMember" method="post">
+                            <input type="hidden" asp-for="UnitId" />
+                            <input type="hidden" name="condoId" value="@ViewBag.CondominiumId" />
+                            <input type="hidden" name="condoName" value="@ViewBag.CondoName" />
+                            <div class="mb-3">
+                                <h5>Assign Members</h5>
+                                @if (Model.Members != null && Model.Members.Any())
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Name</th>
+                                                    <th>Email</th>
+                                                    <th>Phone</th>
+                                                    <th style="width: 50px;"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var member in Model.Members)
+                                                {
+                                                    <tr>
+                                                        <td><img src="@member.ImageFullPath" alt="Member Image" class="img-fluid rounded border shadow" style="max-height: 100px;" /></td>
+                                                        <td>
+                                                            <label for="member_@member.Id">@member.FullName</label>
+                                                        </td>
+                                                        <td>@member.Email</td>
+                                                        <td>@(member.PhoneNumber ?? "N/A")</td>
+                                                        <td>
+                                                            <input type="checkbox"
+                                                                   name="MemberIds"
+                                                                   value="@member.Id"
+                                                                   id="member_@member.Id"
+                                                            @(Model.Unit?.CondoMemberDtos != null && Model.Unit.CondoMemberDtos.Any(c => c.Id == member.Id) ? "checked" : "") />
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
 
-            <input type="hidden" asp-for="UnitId" />
-            <input type="hidden" name="condoId" value="@ViewBag.CondominiumId" />
-            <input type="hidden" name="condoName" value="@ViewBag.CondoName" />
-
-
-
-
-            <br />
-
-            <div class="mb-3">
-                <h5>Assign Members</h5>
-                @if (Model.Members != null && Model.Members.Any())
-                {
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                
-                                <th></th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th style="width: 50px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var member in Model.Members)
-                            {
-
-                                <tr>
-                                    <td><img src="@member.ImageFullPath" alt="Member Image" class="img-fluid rounded border shadow" style="max-height: 100px;" /></td>
-                                    <td>
-                                        <label for="member_@member.Id">@member.FullName</label>
-                                    </td>
-                                    <td>@member.Email</td>
-                                    <td>@(member.PhoneNumber ?? "N/A")</td>
-                                    <td>
-                                        <input type="checkbox"
-                                               name="MemberIds"
-                                               value="@member.Id"
-                                               id="member_@member.Id"
-                                               @(Model.Unit?.CondoMemberDtos != null && Model.Unit.CondoMemberDtos.Any(c => c.Id == member.Id) ? "checked" : "") />
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-
-                    
-            <div class="mt-4">
-                <button type="submit" class="btn btn-success">Update Members</button>
-                @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
-                {
-                    <a asp-action="Index" class="btn btn-outline-danger" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Cancel</a>
-                }
-                else
-                {
-                    <a asp-action="Index" class="btn btn-outline-danger">Cancel</a>
-                }
-                
-            </div>
-                }
-                else
-                {
-                    <div class="alert alert-warning">
-                        No members available. Please create members accounts first.
+                                    <div class="mt-4 d-flex justify-content-between align-items-center">
+                                        <button type="submit" class="btn btn-primary">Update Members</button>
+                                        @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
+                                        {
+                                            <a asp-action="Index" class="btn btn-outline-secondary" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Cancel</a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-warning">
+                                        No members available. Please create members accounts first.
+                                    </div>
+                                    @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
+                                    {
+                                        <a asp-action="Index" class="btn btn-outline-secondary" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Cancel</a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                                    }
+                                }
+                            </div>
+                        </form>
                     </div>
-                      @if (ViewBag.CondominiumId != null && ViewBag.CondoName != null)
-                {
-                    <a asp-action="Index" class="btn btn-outline-danger" asp-route-id="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Cancel</a>
-                }
-                else
-                {
-                    <a asp-action="Index" class="btn btn-outline-danger">Cancel</a>
-                }
-                }
+                </div>
             </div>
-
-        </form>
+        </div>
     </div>
 </div>
 
