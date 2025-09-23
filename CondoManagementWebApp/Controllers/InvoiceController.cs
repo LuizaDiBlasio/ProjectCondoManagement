@@ -52,8 +52,11 @@ namespace CondoManagementWebApp.Controllers
                 }
 
 
-                //buscar account do condo 
-                var condoFinancialAccount = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{paymentDto.CondominiumId}");
+                //buscar account do condo
+                
+                var condo = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{paymentDto.CondominiumId}");
+
+                var condoFinancialAccount = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{condo.FinancialAccountId}");
 
                 model.CondominiumFinancialAccountId = condoFinancialAccount.Id;
 

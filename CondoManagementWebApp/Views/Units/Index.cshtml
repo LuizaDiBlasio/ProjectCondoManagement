@@ -22,7 +22,7 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0)">Units</a></li>
                 </ol>
             </div>
@@ -84,9 +84,9 @@
                                                     {
                                                         <a class="btn btn-outline-secondary me-2" asp-action="AssignMember" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Manage Members</a>
                                                         <a class="btn btn-outline-primary me-2" asp-action="Edit" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Edit</a>
-                                                        <a class="btn btn-danger" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@item.Id">Delete</a>
+                                                        <a class="btn btn-outline-danger" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#deleteDialog" data-id="@item.Id">Delete</a>
                                                     }
-                                                    <a class="btn btn-info ms-2" asp-action="Details" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Details</a>
+                                                    <a class="btn btn-outline-info ms-2" asp-action="Details" asp-route-id="@item.Id" asp-route-condoId="@ViewBag.CondominiumId" asp-route-condoName="@ViewBag.CondoName">Details</a>
                                                 </td>
                                             </tr>
                                         }

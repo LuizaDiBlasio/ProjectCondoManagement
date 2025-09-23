@@ -99,28 +99,8 @@ namespace ProjectCondoManagement.Controllers
             var result = await _userHelper.LoginAsync(loginDtoModel); //fazer login 
 
 
-
-            if (result.RequiresTwoFactor) //se login for bem sucedido
+            if (result.RequiresTwoFactor) //se login for bem sucedido e precisar de 2fa 
             {
-                //TODO tirar _____________________________________________________________
-                if (_env.IsDevelopment())
-                {
-                    // Gera token JWT direto
-                    var roles = await _userHelper.GetRolesAsync(user);
-                    var userRole = roles.FirstOrDefault() ?? "User";
-                    var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
-
-                    return Ok(new Response<object>
-                    {
-                        Token = tokenJwt,
-                        Expiration = DateTime.UtcNow.AddDays(15),
-                        Requires2FA = false,
-                        Role = userRole,
-                        IsSuccess = true,
-                        Message = "2FA skipped in development"
-                    });
-                }
-                //_______________________________________________________________________
 
                 var token = await _userHelper.GenerateTwoFactorTokenAsync(user, "Phone");
                 try
@@ -153,24 +133,29 @@ namespace ProjectCondoManagement.Controllers
             }
             else
             {
-                //TODO tirar isso   // Gera token JWT direto
-                var roles = await _userHelper.GetRolesAsync(user);
-                var userRole = roles.FirstOrDefault() ?? "User";
-                var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
-
-                return Ok(new Response<object>
+                // Para testes em desenvolvimento___________________________________________
+                if (_env.IsDevelopment())
                 {
-                    Token = tokenJwt,
-                    Expiration = DateTime.UtcNow.AddDays(15),
-                    Requires2FA = false,
-                    Role = userRole,
-                    IsSuccess = true,
-                    Message = "2FA skipped in development"
-                });
+                    // Gera token JWT direto
+                    var roles = await _userHelper.GetRolesAsync(user);
+                    var userRole = roles.FirstOrDefault() ?? "User";
+                    var tokenJwt = _jwtTokenService.GenerateToken(user, userRole);
 
-                //TODO descomentar
-                //return StatusCode(500, new { Message = "Wrong credentials, please try again" });
+                    return Ok(new Response<object>
+                    {
+                        Token = tokenJwt,
+                        Expiration = DateTime.UtcNow.AddDays(15),
+                        Requires2FA = false,
+                        Role = userRole,
+                        IsSuccess = true,
+                        Message = "2FA skipped in development"
+                    });
+                }
+                //_______________________________________________________________________
             }
+
+            return StatusCode(500, new { Message = "Wrong credentials, please try again" });
+       
         }
 
 

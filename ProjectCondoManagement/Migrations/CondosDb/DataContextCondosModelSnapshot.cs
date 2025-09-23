@@ -8,7 +8,7 @@ using ProjectCondoManagement.Data.Entites.CondosDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.DataContextCondosMigrations
+namespace ProjectCondoManagement.Migrations.CondosDb
 {
     [DbContext(typeof(DataContextCondos))]
     partial class DataContextCondosModelSnapshot : ModelSnapshot

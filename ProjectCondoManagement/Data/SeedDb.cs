@@ -70,6 +70,9 @@ namespace ProjectCondoManagement.Data
                         EmailConfirmed = true
                     };
 
+                    //ativar 2fa
+                    var activation2FA = await _userHelper.EnableTwoFactorAuthenticationAsync(userLuiza, true);
+
                     var result = await _userHelper.AddUserAsync(userLuiza, "123456");
                     if (result != IdentityResult.Success)
                     {

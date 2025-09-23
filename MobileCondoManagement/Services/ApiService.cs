@@ -68,28 +68,7 @@ namespace MobileCondoManagement.Services
             }
         }
 
-        public async Task<Response<object>> ResetPasswordAsync(ResetPasswordDto resetData)
-        {
-            var jsonContent = new StringContent(
-                                JsonConvert.SerializeObject(resetData),
-                                System.Text.Encoding.UTF8,
-                                 "application/json");
-
-            var response = await _httpClient.PostAsync("api/Account/ResetPassword", jsonContent);
-
-            var json = await response.Content.ReadAsStringAsync();
-
-            var result = JsonConvert.DeserializeObject<dynamic>(json);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return new Response<object> { IsSuccess = true, Message = (string)result.Message };
-            }
-            else
-            {
-                return new Response<object> { IsSuccess = false, Message = (string)result.Message };
-            }
-        }
+      
 
         #region ApiGenericCalls
 

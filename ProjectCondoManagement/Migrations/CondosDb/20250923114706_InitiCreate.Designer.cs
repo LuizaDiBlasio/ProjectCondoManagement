@@ -9,11 +9,11 @@ using ProjectCondoManagement.Data.Entites.CondosDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.DataContextCondosMigrations
+namespace ProjectCondoManagement.Migrations.CondosDb
 {
     [DbContext(typeof(DataContextCondos))]
-    [Migration("20250918141040_InitCreateCondos")]
-    partial class InitCreateCondos
+    [Migration("20250923114706_InitiCreate")]
+    partial class InitiCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

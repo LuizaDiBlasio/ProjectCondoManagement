@@ -108,17 +108,9 @@ namespace ProjectCondoManagement.Helpers
                     break;
             }
 
-
-
-            ////TODO Tirar o if e essa atribuição de bool quando publicar, manter só o método de ativação
-            //user.Uses2FA = true;
-
-            //if (user.Uses2FA == true)
-            //{
-            //    var activation2FA = await EnableTwoFactorAuthenticationAsync(user, true);
-            //}
-
-
+            //ativar 2Fa
+             var activation2FA = await EnableTwoFactorAuthenticationAsync(user, true);
+          
             return user;
         }
 
