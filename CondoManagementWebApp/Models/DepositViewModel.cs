@@ -9,7 +9,7 @@ namespace CondoManagementWebApp.Models
         [Display(Name ="Amount")]
         public decimal DepositValue { get; set; }
 
-        public int SelectedPaymentMethodId { get; set; } // 1: Bank Transfer, 2: Credit Card, 3: Associated Bank Account
+        public int SelectedPaymentMethodId { get; set; } // 1: Mb Way, 2: Credit Card, 3: Associated Bank Account
 
         [Display(Name = "Credit Card Number")]
         public string? CreditCardNumber { get; set; } // For Credit Card

@@ -31,11 +31,12 @@ namespace ProjectCondoManagement.Controllers
         private readonly IFinancialAccountRepository _financialAccountRepository;
         private readonly DataContextFinances _contextFinances;
         private readonly IUserHelper _userHelper;
-        private readonly ICondominiumRepository _condominiumRepository; 
+        private readonly ICondominiumRepository _condominiumRepository;
+        private readonly IFinancialAccountHelper _financialAccountHelper;
 
         public CompanyController(ICompanyRepository companyRepository, DataContextUsers contextUsers, IConverterHelper converterHelper, 
             DataContextCondos contextCondos, IFinancialAccountRepository financialAccountRepository, DataContextFinances dataContextFinances,
-            IUserHelper userHelper, ICondominiumRepository condominiumRepository)
+            IUserHelper userHelper, ICondominiumRepository condominiumRepository, IFinancialAccountHelper financialAccountHelper)
         {
             _companyRepository = companyRepository;
             _contextUsers = contextUsers;
@@ -45,6 +46,7 @@ namespace ProjectCondoManagement.Controllers
             _contextFinances = dataContextFinances;
             _userHelper = userHelper;
             _condominiumRepository = condominiumRepository;
+            _financialAccountHelper = financialAccountHelper;
         }
 
         /// <summary>
@@ -180,6 +182,10 @@ namespace ProjectCondoManagement.Controllers
                 company.Address = companyDto.Address;   
 
                 await _companyRepository.UpdateAsync(company, _contextUsers);
+
+                await _financialAccountHelper.UpdateFinancialAccountNameAsync(company.FinancialAccountId, company.Name);
+
+
 
                 return Ok(new Response<object> { IsSuccess = true, Message = "Company details updated successfully!" });
             }

@@ -16,6 +16,8 @@
             <th>Date</th>
             <th>Amount</th>
             <th>Recipient</th>
+            <th>Payer</th>
+
         </tr>
     </thead>
     <tbody>
@@ -35,7 +37,9 @@
                 <td class="fw-bold @amountClass">
                     @(item.Amount.HasValue? item.Amount.Value.ToString("C") : "—")
                 </td>
-                <td>@(item.RecipientName ?? "—")</td>
+                <td>@(item.RecipientName ?? "—--")</td>
+                <td>@(item.PayerName ?? "—--")</td>
+
             </tr>
         }
     </tbody>

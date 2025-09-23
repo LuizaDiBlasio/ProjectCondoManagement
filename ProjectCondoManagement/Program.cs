@@ -111,6 +111,9 @@ builder.Services.AddScoped<IMeetingRepository, MeetingRepository>();
 
 builder.Services.AddScoped<IOccurenceRepository, OccurrenceRepository>();
 
+builder.Services.AddScoped<IFinancialAccountHelper,FinancialAccountHelper>();
+
+
 
 builder.Services.AddHttpClient();
 

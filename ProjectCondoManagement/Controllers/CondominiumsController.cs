@@ -28,6 +28,7 @@ namespace ProjectCondoManagement.Controllers
         private readonly DataContextFinances _dataContextFinances;
         private readonly ICondoMemberRepository _condoMemberRepository;
         private readonly IInvoiceRepository _invoiceRepository;
+        private readonly IFinancialAccountHelper _financialAccountHelper;
 
         public CondominiumsController(DataContextCondos context,
                                       ICondominiumRepository condominiumRepository,
@@ -38,7 +39,7 @@ namespace ProjectCondoManagement.Controllers
                                       IPaymentRepository paymentRepository,
                                       DataContextFinances dataContextFinances,
                                       ICondoMemberRepository condoMemberRepository,
-                                      IInvoiceRepository invoiceRepository)
+                                      IInvoiceRepository invoiceRepository, IFinancialAccountHelper financialAccountHelper)
         {
             _context = context;
             _condominiumRepository = condominiumRepository;
@@ -50,6 +51,7 @@ namespace ProjectCondoManagement.Controllers
             _dataContextFinances = dataContextFinances;
             _condoMemberRepository = condoMemberRepository;
             _invoiceRepository = invoiceRepository;
+            _financialAccountHelper = financialAccountHelper;
         }
 
         // GET: api/Condominiums
@@ -142,9 +144,18 @@ namespace ProjectCondoManagement.Controllers
 
             var condominium = _converterHelper.ToCondominium(condominiumDto, false);
 
+          
+            
+
+
             try
             {
                 await _condominiumRepository.UpdateAsync(condominium, _context);
+
+                if (condominium.FinancialAccountId != null)
+                {
+                    await _financialAccountHelper.UpdateFinancialAccountNameAsync(condominium.FinancialAccountId.Value, condominium.CondoName);
+                }
 
                 return Ok(new Response<object> { IsSuccess = true, Message = "Condominium updated successfully." });
             }

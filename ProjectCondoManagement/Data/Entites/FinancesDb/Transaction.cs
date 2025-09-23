@@ -13,6 +13,8 @@ namespace ProjectCondoManagement.Data.Entites.FinancesDb
 
         public FinancialAccount? AccountPayer { get; set; }
 
+        public string PayerName { get; set; }
+
         public int? BeneficiaryAccountId { get; set; }// FK para TransactionsAsBeneficiary
 
         public FinancialAccount? AccountBeneficiary { get; set; }

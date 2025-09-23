@@ -27,6 +27,7 @@ namespace ClassLibrary.DtoModels
 
         public string? RecipientName { get; set; }
 
+        public string? PayerName { get; set; }
 
         public int? PaymentId { get; set; }
 

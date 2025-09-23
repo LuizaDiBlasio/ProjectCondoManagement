@@ -36,10 +36,12 @@ namespace ProjectCondoManagement.Controllers
         private readonly IPaymentRepository _paymentRepository;
         private readonly IMessageRepository _messageRepository;
         private readonly DataContextUsers _dataContextUsers;
+        private readonly IFinancialAccountHelper _financialAccountHelper;
 
         public CondoMembersController(DataContextCondos context, ICondoMemberRepository condoMemberRepository, IConverterHelper converterHelper, IUserHelper userHelper,IUnitRepository unitRepository,
                                         ICondominiumRepository condominiumRepository, DataContextCondos dataContextCondos, IFinancialAccountRepository financialAccountRepository,
-                                        DataContextFinances dataContextFinances, IPaymentRepository paymentRepository, IMessageRepository messageRepository,DataContextUsers dataContextUsers)
+                                        DataContextFinances dataContextFinances, IPaymentRepository paymentRepository, IMessageRepository messageRepository,DataContextUsers dataContextUsers,
+                                        IFinancialAccountHelper financialAccountHelper)
         {
             _context = context;
             _condoMemberRepository = condoMemberRepository;
@@ -53,6 +55,7 @@ namespace ProjectCondoManagement.Controllers
             _paymentRepository = paymentRepository;
             _messageRepository = messageRepository;
             _dataContextUsers = dataContextUsers;
+            _financialAccountHelper = financialAccountHelper;
         }
 
         // GET: api/CondoMembers
@@ -105,7 +108,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (user == null)
             {
-                return Ok(new Response<object>() { IsSuccess = false, Message = "You do not have access to this condo member." });
+                return Ok(new Response<object>() { IsSuccess = false, Message = "" });
             }
 
             var condoMember = await _condoMemberRepository.GetByIdWithIncludeAsync(id, _context);
@@ -127,6 +130,12 @@ namespace ProjectCondoManagement.Controllers
 
             var condoMembers = new List<CondoMember> { condoMember };// Create a list with the single condo member for linking images
             await _condoMemberRepository.LinkImages(condoMembers); // Link images to the single condo member
+
+            condoMember.Units = condoMember.Units
+            .Where(u => u.Condominium != null
+                     && u.Condominium.CompanyId.HasValue
+                     && userCompanyIds.Contains(u.Condominium.CompanyId.Value)).ToList();
+
 
             var condoMemberDto = _converterHelper.ToCondoMemberDto(condoMember);
 
@@ -236,6 +245,7 @@ namespace ProjectCondoManagement.Controllers
             }
 
             await _condoMemberRepository.LinkImages(condoMembers); // Link images to condo members
+   
 
             var condoMembersDtos = condoMembers.Select(c => _converterHelper.ToCondoMemberDto(c)).ToList();
 
@@ -286,6 +296,7 @@ namespace ProjectCondoManagement.Controllers
 
             var condoMember = _converterHelper.ToCondoMember(condoMemberDto);
 
+            await _financialAccountHelper.UpdateFinancialAccountNameAsync(condoMember.FinancialAccountId, condoMember.FullName);
 
             try
             {

@@ -271,28 +271,39 @@ namespace CondoManagementWebApp.Controllers
                 return View(model);
             }
 
+            var payername = string.Empty;
+
             //validação hard code dos campos das opções de pagamento
             if (model.SelectedPaymentMethodId == 2) // Cartão de Crédito
             {
+                payername = "Credit Card - " + model.CreditCardNumber;
                 if (string.IsNullOrEmpty(model.CreditCardNumber) || string.IsNullOrEmpty(model.Cvv))
                 {
                     ModelState.AddModelError("CreditCardNumber", "Credit card number and CVV are required.");
+                    
+
                     return View(model);                    
                 }
             }
             else if (model.SelectedPaymentMethodId == 1) // MbWay
             {
+                payername = "MbWay - " + model.PhoneNumber;
+
                 if (string.IsNullOrEmpty(model.PhoneNumber))
                 {
                     ModelState.AddModelError("PhoneNumber", "Phone number is required.");
+                    
                     return View(model);
                 }
             }
             else if (model.SelectedPaymentMethodId == 3)//AssociatedBankAccount
             {
+                payername = "Bank Account - " + financialAccountDto.AssociatedBankAccount;
                 if (financialAccountDto.IsActive == false)
                 {
                     ModelState.AddModelError("AssociatedBankAccount", "No Account associated");
+                    
+
                     return View(model);
                 }
 
@@ -308,6 +319,7 @@ namespace CondoManagementWebApp.Controllers
                 TransactionDto
                 {
                     RecipientName = financialAccountDto.OwnerName,
+                    PayerName = payername,
                     DateAndTime = DateTime.Now,
                     BeneficiaryAccountId = financialAccountDto.Id,
                     ExternalRecipientBankAccount = $"{financialAccountDto.OwnerName}'s Wallet",
@@ -427,8 +439,30 @@ namespace CondoManagementWebApp.Controllers
                 return View(model);
             }
 
-            model.SelectedPaymentMethodId = 3;
             model.CreditCardNumber = financialAccountDto.CardNumber;
+
+            // 1: Mb Way, 2: Credit Card, 3: Associated Bank Account
+
+            var recipient = string.Empty;
+
+            if (model.SelectedPaymentMethodId == 1)
+            {
+                recipient = $"MbWay - {model.PhoneNumber}";
+            }
+            else if (model.SelectedPaymentMethodId == 2)
+            {
+                recipient = $"Credit Card - {model.CreditCardNumber}";
+            }
+            else if (model.SelectedPaymentMethodId == 3)
+            {
+                recipient = $"Bank Account - {financialAccountDto.AssociatedBankAccount}";
+            }
+            else
+            {
+                ModelState.AddModelError("SelectedPaymentMethodId", "Select a valid payment method.");
+                return View(model);
+            }
+
 
             try
             {
@@ -436,7 +470,8 @@ namespace CondoManagementWebApp.Controllers
                 {
                     DateAndTime = DateTime.Now,
                     PayerAccountId = financialAccountDto.Id,
-                    RecipientName = financialAccountDto.OwnerName,
+                    RecipientName = recipient,
+                    PayerName = financialAccountDto.OwnerName,
                     Amount = model.DepositValue
                 };
 

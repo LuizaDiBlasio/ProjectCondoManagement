@@ -53,41 +53,6 @@ namespace ProjectCondoManagement.Controllers
                 return NotFound();
             }
 
-
-
-            if (this.User.IsInRole("CondoMember"))
-            {
-                var member = await _userHelper.GetUserByFinancialAccountIdAsync(id);
-
-                if(member != null && financialAccount.OwnerName != member.FullName)
-                {
-                    financialAccount.OwnerName = member.FullName ;
-                }
-            }
-
-            if (this.User.IsInRole("CompanyAdmin"))
-            {
-                var company = await _companyRepository.GetCompanyByFinancialAccountIdAsync(id);
-
-                if (financialAccount.OwnerName != company.Name)
-                {
-                    financialAccount.OwnerName = company.Name;
-                }
-            }
-
-            if (this.User.IsInRole("CondoManager"))
-            {
-                var condo = await _condominiumRepository.GetCondominiumByFinancialAccountIdAsync(id);
-
-                if (financialAccount.OwnerName != condo.CondoName)
-                {
-                    financialAccount.OwnerName = condo.CondoName;
-                }
-            }
-
-
-
-
             var financialAccountDto = _converterHelper.ToFinancialAccountDto(financialAccount, false);
             if (financialAccountDto == null)
             {

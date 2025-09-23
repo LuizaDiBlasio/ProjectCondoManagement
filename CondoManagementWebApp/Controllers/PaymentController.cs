@@ -108,10 +108,13 @@ namespace CondoManagementWebApp.Controllers
                 return View(new PaymentDto());  
             }
 
-            model.PaymentDto = paymentDto;  
+            model.PaymentDto = paymentDto;
 
-            var condoFinancialAccount = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{paymentDto.CondominiumId}");   
-            
+            var condo = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{paymentDto.CondominiumId}");    
+
+            var condoFinancialAccount = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{condo.FinancialAccountId}");
+
+
             model.CondominiumFinancialAccountId = condoFinancialAccount.Id;
 
             return View(model);
@@ -668,6 +671,7 @@ namespace CondoManagementWebApp.Controllers
                         PaymentId = paymentDto.Id,
                         DateAndTime = DateTime.Now,
                         RecipientName = paymentDto.Recipient,
+                        PayerName = paymentDto.Payer,
                         PayerAccountId = paymentDto.PayerFinancialAccountId,
                         BeneficiaryAccountId = paymentDto.BeneficiaryAccountId,
                         ExternalRecipientBankAccount = paymentDto.ExternalRecipientBankAccount,
