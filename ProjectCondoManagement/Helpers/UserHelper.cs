@@ -487,5 +487,33 @@ namespace ProjectCondoManagement.Helpers
         }
 
 
+        public async Task<bool> ExistsAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return false;
+            }
+
+
+            var user = await _userManager.FindByEmailAsync(email);
+            {
+                if (user != null)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            
+        }
+
+
+        public async Task<User> GetUserByFinancialAccountIdAsync(int financialAccountId)
+        {
+            return await _dataContextUsers.Users
+                .FirstOrDefaultAsync(u => u.FinancialAccountId == financialAccountId);
+        }
+
+
     }
 }

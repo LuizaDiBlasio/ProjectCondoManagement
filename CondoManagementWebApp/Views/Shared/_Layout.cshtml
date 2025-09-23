@@ -6,7 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - CondoManagementWebApp</title>
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+      <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+      <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+  
     <link rel="stylesheet" href="~/vendor/jqvmap/css/jqvmap.min.css" />
     <link rel="stylesheet" href="~/vendor/owl-carousel/owl.carousel.css" />
     <link rel="stylesheet" href="~/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" />
@@ -15,7 +18,7 @@
     <link href="https://cdn.syncfusion.com/ej2/30.2.4/bootstrap5.css" rel="stylesheet"   />
     <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon.png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-*" crossorigin="anonymous" referrerpolicy="no-referrer" /> 
-
+  
 </head>
 <body>
 
@@ -93,6 +96,15 @@
             <div class="deznav">
                 <div class="deznav-scroll">
                     <ul class="metismenu" id="menu">
+
+
+                        <li>
+                            <a class="ai-icon" asp-controller="Account" asp-action="CondoManagerDashboard">
+                                <i class="flaticon-dashboard-1"></i>
+                                <span class="nav-text">Personal Space</span>
+                            </a>
+
+                        </li>
        
 
                         <li>
@@ -150,6 +162,17 @@
                     <div class="deznav-scroll">
                         <ul class="metismenu" id="menu">
 
+
+                         <li>
+                            <a class="ai-icon" asp-controller="Account" asp-action="CompanyAdminDashboard">
+                                <i class="flaticon-dashboard-1"></i>
+                                <span class="nav-text">Personal Space</span>
+                            </a>
+
+                        </li>
+
+
+
                            <li>
                                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                                     <i class="flaticon-dashboard-1"></i>
@@ -197,7 +220,7 @@
                     <div class="deznav-scroll">
                         <ul class="metismenu" id="menu">
 
-                         <li>
+                        <li>
                             <a class="ai-icon" asp-controller="CondoMember" asp-action="Dashboard">
                                 <i class="flaticon-dashboard-1"></i>
                                 <span class="nav-text">Personal Space</span>
@@ -350,6 +373,34 @@
             <script src="~/js/site.js" asp-append-version="true"></script>
 
 
+            <!-- DataTables JS -->
+            <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+            <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+
+
+                  <script>
+            $(document).ready(function () {
+                $('.table').DataTable({
+                    paging: false,     
+                    info: false,       
+                    lengthChange: false,
+                    searching: true,   
+                    ordering: true,  
+                    language: {
+                        url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/en-US.json"
+                    }
+                });
+            });
+        </script>
+
+
+   
+
+
+
+
+
             <script>
                 function carouselReview() {
                 jQuery('.testimonial-one').owlCarousel({
@@ -385,6 +436,7 @@
 
                 
             <ejs-scripts></ejs-scripts>
+
 
 </body>
 </html>

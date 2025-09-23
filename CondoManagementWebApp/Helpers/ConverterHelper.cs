@@ -202,6 +202,7 @@ namespace CondoManagementWebApp.Helpers
                 {
                     DueDate = model.DueDate.Value,
                     PayerFinancialAccountId = model.PayerFinancialAccountId.Value,
+                    BeneficiaryAccountId = model.BeneficiaryAccountId,
                     CondominiumId = model.CondominiumId.Value,
                     Recipient = model.Recipient,
                     Amount = model.ExpenseAmount,

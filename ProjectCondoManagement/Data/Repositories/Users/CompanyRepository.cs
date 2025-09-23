@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
+using ProjectCondoManagement.Data.Entites.FinancesDb;
 using ProjectCondoManagement.Data.Entites.UsersDb;
 using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Helpers;
@@ -137,6 +138,11 @@ namespace ProjectCondoManagement.Data.Repositories.Users
             }
         }
 
+        public async Task<Company> GetCompanyByFinancialAccountIdAsync(int id)
+        {
 
+            return await _dataContextUsers.Companies.FirstOrDefaultAsync(c => c.FinancialAccountId == id);
+
+        }
     }
 }

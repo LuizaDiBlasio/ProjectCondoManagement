@@ -35,7 +35,7 @@
                 <td class="fw-bold @amountClass">
                     @(item.Amount.HasValue? item.Amount.Value.ToString("C") : "—")
                 </td>
-                <td>@(item.ExternalRecipientBankAccount ?? "—")</td>
+                <td>@(item.RecipientName ?? "—")</td>
             </tr>
         }
     </tbody>

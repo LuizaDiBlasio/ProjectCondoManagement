@@ -19,7 +19,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
         private readonly DataContextFinances _dataContextFinances;
         private readonly IFinancialAccountRepository _financialAccountRepository;
 
-        public CondominiumRepository(IUserHelper userHelper, IConverterHelper converterHelper, DataContextCondos dataContextCondos, DataContextFinances dataContextFinances,IFinancialAccountRepository financialAccountRepository) 
+        public CondominiumRepository(IUserHelper userHelper, IConverterHelper converterHelper, DataContextCondos dataContextCondos, DataContextFinances dataContextFinances, IFinancialAccountRepository financialAccountRepository)
         {
             _userHelper = userHelper;
             _converterHelper = converterHelper;
@@ -44,13 +44,13 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             return companyCondominiums;
         }
 
-  
+
 
         public async Task<Response<object>> LinkManager(List<CondominiumDto> condominiums)
         {
             try
             {
-                IEnumerable<User> managers = await  _userHelper.GetUsersByRoleAsync("CondoManager");
+                IEnumerable<User> managers = await _userHelper.GetUsersByRoleAsync("CondoManager");
                 if (managers == null || !managers.Any())
                 {
                     return new Response<object>
@@ -135,12 +135,49 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
         }
 
 
+
+        public async Task UpdateCondominiumsCompanyId(Company company)
+        {
+            var newCondoIds = company.CondominiumIds ?? new List<int>();
+
+            //buscar condos da company
+            var currentCompanyCondos =
+                 GetAll(_dataContextCondos)
+                .Where(c => c.CompanyId == company.Id)
+                .ToList();
+
+            //caso tenha que remover
+            var condosToRemove = currentCompanyCondos
+                    .Where(c => !newCondoIds.Contains(c.Id))
+                    .ToList();
+
+            // fazer update da remoção
+            foreach (var condo in condosToRemove)
+            {
+                condo.CompanyId = null;
+                await UpdateAsync(condo, _dataContextCondos);
+            }
+
+            //condos adicionados
+            var condosToAdd =
+                    GetAll(_dataContextCondos)
+                    .Where(c => newCondoIds.Contains(c.Id) && c.CompanyId != company.Id)
+                    .ToList();
+
+            // Update adição
+            foreach (var condo in condosToAdd)
+            {
+                condo.CompanyId = company.Id;
+                await UpdateAsync(condo, _dataContextCondos);
+            }
+        }
+
         public async Task<List<CondoMember>> GetCondoCondomembers(int condoId)
         {
-                return _dataContextCondos.Units
-                        .Where(u => u.CondominiumId == condoId)
-                        .SelectMany(u => u.CondoMembers!) 
-                        .ToList();
+            return _dataContextCondos.Units
+                    .Where(u => u.CondominiumId == condoId)
+                    .SelectMany(u => u.CondoMembers!)
+                    .ToList();
 
         }
 
@@ -192,22 +229,25 @@ namespace ProjectCondoManagement.Data.Repositories.Condos
             }
         }
 
-       
-        public Task<IEnumerable<CondominiumDto>?> GetCondominiumsByCompanyIdAsync(int id)
+        public async Task<List<CondominiumDto>> GetCondominiumsByCompanyIdAsync(int id)
         {
-            var condos = _dataContextCondos.Condominiums
-                            .Where(c => c.CompanyId == id).Include(c => c.Units).Include(c => c.Occurrences).Include(c => c.Meetings);
+            var condos = await _dataContextCondos.Condominiums
+                .Where(c => c.CompanyId == id)
+                .Include(c => c.Units)
+                .Include(c => c.Occurrences)
+                .Include(c => c.Meetings)
+                .ToListAsync();
 
-            var condosDto = condos.Select(c => _converterHelper.ToCondominiumDto(c, false));
+            var condosDto = condos
+                .Select(c => _converterHelper.ToCondominiumDto(c, true))
+                .ToList();
 
-            return condosDto.Any() ? Task.FromResult<IEnumerable<CondominiumDto>?>(condosDto) : Task.FromResult<IEnumerable<CondominiumDto>?>(null);
-
+            return condosDto;
         }
 
         public Task<Condominium> GetCondominiumByFinancialAccountIdAsync(int id)
         {
             return _dataContextCondos.Condominiums.FirstOrDefaultAsync(c => c.FinancialAccountId == id);
         }
-
     }
 }

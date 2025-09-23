@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectCondoManagement.Data.Entites.CondosDb;
 using ProjectCondoManagement.Data.Entites.FinancesDb;
+using ProjectCondoManagement.Data.Repositories.Condos.Interfaces;
 using ProjectCondoManagement.Data.Repositories.Finances.Interfaces;
+using ProjectCondoManagement.Data.Repositories.Users;
 using ProjectCondoManagement.Helpers;
 
 using System.Threading.Tasks;
@@ -22,12 +24,19 @@ namespace ProjectCondoManagement.Controllers
         private readonly IFinancialAccountRepository _financialAccountRepository;
         private readonly IConverterHelper _converterHelper;
         private readonly DataContextFinances _context;
+        private readonly IUserHelper _userHelper;
+        private readonly ICompanyRepository _companyRepository;
+        private readonly ICondominiumRepository _condominiumRepository;
 
-        public FinancialAccountsController(IFinancialAccountRepository financialAccountRepository, IConverterHelper converterHelper, DataContextFinances context)
+        public FinancialAccountsController(IFinancialAccountRepository financialAccountRepository, IConverterHelper converterHelper,
+            DataContextFinances context, IUserHelper userHelper, ICompanyRepository companyRepository, ICondominiumRepository condominiumRepository)
         {
             _financialAccountRepository = financialAccountRepository;
             _converterHelper = converterHelper;
             _context = context;
+            _userHelper = userHelper;
+            _companyRepository = companyRepository;
+            _condominiumRepository = condominiumRepository;
         }
 
         //public IFinancialAccountRepository FinancialAccount { get; }
@@ -43,6 +52,41 @@ namespace ProjectCondoManagement.Controllers
             {
                 return NotFound();
             }
+
+
+
+            if (this.User.IsInRole("CondoMember"))
+            {
+                var member = await _userHelper.GetUserByFinancialAccountIdAsync(id);
+
+                if(member != null && financialAccount.OwnerName != member.FullName)
+                {
+                    financialAccount.OwnerName = member.FullName ;
+                }
+            }
+
+            if (this.User.IsInRole("CompanyAdmin"))
+            {
+                var company = await _companyRepository.GetCompanyByFinancialAccountIdAsync(id);
+
+                if (financialAccount.OwnerName != company.Name)
+                {
+                    financialAccount.OwnerName = company.Name;
+                }
+            }
+
+            if (this.User.IsInRole("CondoManager"))
+            {
+                var condo = await _condominiumRepository.GetCondominiumByFinancialAccountIdAsync(id);
+
+                if (financialAccount.OwnerName != condo.CondoName)
+                {
+                    financialAccount.OwnerName = condo.CondoName;
+                }
+            }
+
+
+
 
             var financialAccountDto = _converterHelper.ToFinancialAccountDto(financialAccount, false);
             if (financialAccountDto == null)

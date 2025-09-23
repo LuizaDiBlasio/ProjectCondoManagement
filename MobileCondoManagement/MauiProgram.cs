@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using CommunityToolkit.Maui;
+using Microsoft.Extensions.Logging;
 using MobileCondoManagement.Models;
 using MobileCondoManagement.Services;
 using MobileCondoManagement.Services.Interfaces;
@@ -12,7 +13,7 @@ namespace MobileCondoManagement
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
-            builder
+            MauiAppBuilder mauiAppBuilder = builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
@@ -37,6 +38,14 @@ namespace MobileCondoManagement
             // Views e Models
             builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<CondoMemberDashboardPage>();
+            builder.Services.AddTransient<CondoMemberDashboardViewModel>();
+            builder.Services.AddTransient<CondoManagerDashboardPage>();
+            builder.Services.AddTransient<CondoManagerDashboardViewModel>();
+            builder.Services.AddTransient<CompanyAdminDashboardPage>();
+            builder.Services.AddTransient<CompanyAdminDashboardViewModel>();
+
+
             builder.Services.AddTransient<ForgotPasswordViewModel>();
             builder.Services.AddTransient<ForgotPasswordPage>();
             builder.Services.AddTransient<SysAdminDashboardViewModel>();

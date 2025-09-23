@@ -4,6 +4,7 @@ using CondoManagementWebApp.Helpers;
 using CondoManagementWebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Vereyon.Web;
 
@@ -74,10 +75,29 @@ namespace CondoManagementWebApp.Controllers
 
             model.UnitDtos = condoMember?.Units?.ToList() ?? new List<UnitDto>();
 
+            var distinctCondos = model.UnitDtos
+            .Where(u => u.CondominiumDto != null)
+            .Select(u => u.CondominiumDto)
+            .DistinctBy(c => c.Id)   
+            .ToList();
+
+            model.OccurrenceDtos = distinctCondos
+                .Where(c => c.Occurrences != null)                
+                .SelectMany(c => c.Occurrences.Where(o => o.IsResolved == false))
+                .ToList();
+
+
             model.FinancialAccountDto = await _apiCallService.GetAsync<FinancialAccountDto>($"api/FinancialAccounts/{user.FinancialAccountId}");
+
+            var unfilteredPayments = await _apiCallService.GetAsync<List<PaymentDto>>($"api/Payment/GetPaymentsByFinancialAccount?financialAccountId={model.FinancialAccountDto.Id}") ?? new List<PaymentDto>();
+
+            model.PaymentsDtos = unfilteredPayments.Where(p => p.IsPaid == false).ToList();
+
+            model.MeetingsDtos = distinctCondos.SelectMany(c => c.Meetings ?? new List<MeetingDto>()).ToList();
 
             model.MessageDtos = await _apiCallService.GetAsync<List<MessageDto>>($"api/Message/Received/{email}") ?? new List<MessageDto>();
 
+          
 
             return View(model);
 
@@ -122,6 +142,10 @@ namespace CondoManagementWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(CondoMemberDto condoMemberDto)
         {
+
+            var email = User.Identity?.Name;
+            var user = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email}");
+
             if (!ModelState.IsValid)
             {
                 return View(condoMemberDto);
@@ -130,20 +154,27 @@ namespace CondoManagementWebApp.Controllers
             if (condoMemberDto.BirthDate > DateTime.Today)
             {
                 ModelState.AddModelError("BirthDate", "Birth date cannot be in the future.");
-                var email1 = User.Identity?.Name;
-                var user1 = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email1}");
+
 
                 return View(condoMemberDto);
             }
+            
 
             try
             {
+
+                bool checkEmailExists = await _apiCallService.GetAsync<bool>($"api/CondoMembers/Exists?email={condoMemberDto.Email}");
+                if (checkEmailExists)
+                {
+                    ModelState.AddModelError("Email", "Email already in use!");
+
+                    return View(condoMemberDto);
+                }
+
                 var result = await _apiCallService.PostAsync<CondoMemberDto, Response<object>>("api/CondoMembers", condoMemberDto);
                 if (!result.IsSuccess)
                 {
                     _flashMessage.Danger(result.Message);
-                    var email3 = User.Identity?.Name;
-                    var user3 = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email3}");
 
                     return View(condoMemberDto);
                 }
@@ -154,6 +185,13 @@ namespace CondoManagementWebApp.Controllers
 
                     registerUserDto.SelectedRole = "CondoMember";
 
+                    if(registerUserDto.Companies == null)
+                    {
+                        registerUserDto.Companies = new List<CompanyDto>();
+                    }
+
+                    registerUserDto.Companies.Add(user.CompaniesDto.FirstOrDefault());                    
+
                     var result2 = await _apiCallService.PostAsync<RegisterUserDto, Response<object>>("api/Account/AssociateUser", registerUserDto);
                     
 
@@ -162,25 +200,22 @@ namespace CondoManagementWebApp.Controllers
             }
             catch (Exception)
             {
-                var createdMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{condoMemberDto.Email}");
-                if (createdMember == null)
+                var createdMemberExists = await _apiCallService.GetAsync<bool>($"api/CondoMembers/Exists?email={condoMemberDto.Email}");
+                if (!createdMemberExists)
                 {
                     return NotFound("Condo member not found after creation.");
                 }
+                var createdMember = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/ByEmail/{condoMemberDto.Email}");
 
                 await _apiCallService.DeleteAsync($"api/CondoMembers/{createdMember.Id}");
 
                 _flashMessage.Danger($"An error occurred while creating the condo member.");
-                var email2 = User.Identity?.Name;
-                var user2 = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email2}");
 
                 return View(condoMemberDto);
             }
 
 
             _flashMessage.Danger($"An error occurred while creating the condo member.");
-            var email = User.Identity?.Name;
-            var user = await _apiCallService.GetAsync<UserDto>($"api/Account/GetUserByEmail2?email={email}");
 
             return View(condoMemberDto);
 
@@ -304,5 +339,13 @@ namespace CondoManagementWebApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+
+
+
+
+     
+
+
     }
 }

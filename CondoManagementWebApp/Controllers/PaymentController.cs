@@ -117,54 +117,18 @@ namespace CondoManagementWebApp.Controllers
             return View(model);
         }
 
+
         [HttpGet("CreateOneTimePayment")]
-        // GET: PaymentController/CreateOneTimePayment
         public async Task<ActionResult> CreateOneTimePayment()
         {
-            var model = new CreateOneTimePaymentViewModel();
+            var model = await BuildCreatePaymentViewModel();
 
-            var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
-            if (condoManagerCondos != null && !condoManagerCondos.Any())
-            {
+            if (model.CondosToSelect == null || !model.CondosToSelect.Any())
                 _flashMessage.Danger("You are not managing any condominiums currently");
-                return View("CreateOneTimePayment", new CreateOneTimePaymentViewModel());
-            }
-
-            model.CondoMembers = new SelectList(new List<CondoMemberDto>(), "Id", "FullName");
-
-            var condosToSelectList = _converterHelper.ToCondosSelectList(condoManagerCondos);
-            if (condosToSelectList.Any())
-            {
-                model.CondosToSelect = condosToSelectList;  
-            }
-
-            var expenseTypeList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
-
-            if (expenseTypeList.Any())
-            {
-                model.ExpenseTypesList = expenseTypeList;
-            }
-
-            //descobrir o role do user
-
-            string userRole = string.Empty;
-
-            if (User.IsInRole("CondoManager"))
-            {
-                userRole = "CondoManager";
-            }
-
-            if (User.IsInRole("CondoMember"))
-            {
-                userRole = "CondoMember";
-            }
-
-            model.BeneficiaryTypeList = _paymentHelper.GetBeneficiaryTypesList(userRole);
-
-
 
             return View(model);
         }
+
 
 
         [HttpGet]
@@ -203,6 +167,7 @@ namespace CondoManagementWebApp.Controllers
             
         }
 
+
         // POST: PaymentController/RequestCreateOneTimePaymentCondo
         [HttpPost("RequestCreateOneTimePayment")]
         public async Task<ActionResult> RequestCreateOneTimePayment(CreateOneTimePaymentViewModel model)
@@ -210,7 +175,12 @@ namespace CondoManagementWebApp.Controllers
             if (!ModelState.IsValid)
             {
                 _flashMessage.Danger("Unable to issue one time payment");
-                return View("CreateOneTimePayment", model); 
+                model.CondominiumId = null;
+                model.SelectedCondoMemberId = null;
+
+                ModelState.Remove("CondominiumId");
+                ModelState.Remove("SelectedCondoMemberId");
+                return View("CreateOneTimePayment", await BuildCreatePaymentViewModel(model));
             }
 
             if (model.SelectedBeneficiaryId == 3)
@@ -218,13 +188,17 @@ namespace CondoManagementWebApp.Controllers
                 if (string.IsNullOrWhiteSpace(model.Recipient) || string.IsNullOrWhiteSpace(model.ExternalRecipientBankAccount))
                 {
                     _flashMessage.Danger("Please enter recipient name and bank account.");
-                    return View("CreateOneTimePayment", model);
+                    model.CondominiumId = null;
+                    model.SelectedCondoMemberId = null;
+
+                    ModelState.Remove("CondominiumId");
+                    ModelState.Remove("SelectedCondoMemberId");
+                    return View("CreateOneTimePayment", await BuildCreatePaymentViewModel(model));
                 }
             }
+
             try
             {
-
-
                 // Se for empresa, preenche automaticamente
                 if (model.SelectedBeneficiaryId == 2)
                 {
@@ -236,29 +210,36 @@ namespace CondoManagementWebApp.Controllers
                     {
                         model.Recipient = company.Name;
                     }
-
                 }
-                
 
-
-                    //PREENCHER MODEL (propriedades fora da view)
-                    var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
+          
+                var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
                 if (condoManagerCondos != null && !condoManagerCondos.Any())
                 {
                     _flashMessage.Danger("You are not managing any condominiums currently");
-                    return View("CreateOneTimePayment", new CreateOneTimePaymentViewModel());
+                    model.CondominiumId = null;
+                    model.SelectedCondoMemberId = null;
+
+                    ModelState.Remove("CondominiumId");
+                    ModelState.Remove("SelectedCondoMemberId");
+                    return View("CreateOneTimePayment", await BuildCreatePaymentViewModel());
                 }
 
                 var expenseTypeList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
 
                 var expenseType = expenseTypeList.FirstOrDefault(e => e.Value == model.ExpenseTypeValue.ToString());
-                if(expenseType == null)
+                if (expenseType == null)
                 {
                     _flashMessage.Danger("Unable to select this type of expense");
-                    return View("CreateOneTimePayment", new CreateOneTimePaymentViewModel());
+                    model.CondominiumId = null;
+                    model.SelectedCondoMemberId = null;
+
+                    ModelState.Remove("CondominiumId");
+                    ModelState.Remove("SelectedCondoMemberId");
+                    return View("CreateOneTimePayment", await BuildCreatePaymentViewModel(model));
                 }
 
-                //criar expense 
+                // Criar expense 
                 var expenseDto = new ExpenseDto()
                 {
                     Amount = model.ExpenseAmount,
@@ -266,7 +247,6 @@ namespace CondoManagementWebApp.Controllers
                     ExpenseTypeDto = new EnumDto() { Value = model.ExpenseTypeValue.Value, Name = expenseType.Text },
                     CondominiumId = model.CondominiumId.Value,
                 };
-
 
                 int? payerFinancialAccountId = null;
                 string? payerName = null;
@@ -276,51 +256,52 @@ namespace CondoManagementWebApp.Controllers
                     var condo = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{model.CondominiumId}");
                     payerFinancialAccountId = condo?.FinancialAccountId;
                     payerName = condo?.CondoName;
-
-
-
                 }
                 else if (model.SelectedPayerType == "Member" && model.SelectedCondoMemberId.HasValue)
                 {
-
                     var member = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{model.SelectedCondoMemberId.Value}");
                     payerFinancialAccountId = member?.FinancialAccountId;
                     payerName = member?.FullName;
 
+                    var condo = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{model.CondominiumId}");
+
+                    model.BeneficiaryAccountId = condo.FinancialAccountId;
+                    model.Recipient = condo.CondoName;
                 }
 
                 if (!payerFinancialAccountId.HasValue)
                 {
                     _flashMessage.Danger("Unable to resolve financial account.");
-                    return View("CreateOneTimePayment", model);
+                    model.CondominiumId = null;
+                    model.SelectedCondoMemberId = null;
+
+                    ModelState.Remove("CondominiumId");
+                    ModelState.Remove("SelectedCondoMemberId");
+                    return View("CreateOneTimePayment", await BuildCreatePaymentViewModel(model));
                 }
 
-
                 model.PayerFinancialAccountId = payerFinancialAccountId;
-              
 
-                //CONVERTER PARA PAYMENT DTO
+                // CONVERTER PARA PAYMENT DTO
                 var paymentDto = _converterHelper.FromOneTimeToPaymentDto(model);
 
-                //atribur propriedades fora do view model
-
+                // atribuir propriedades fora do view model
                 paymentDto.IssueDate = DateTime.Now;
                 paymentDto.Amount = model.ExpenseAmount;
                 paymentDto.Payer = payerName;
                 paymentDto.ExpenseType = expenseType.Text;
-
                 paymentDto.OneTimeExpenseDto = expenseDto;
+
                 if (model.SelectedBeneficiaryId == 2)
                 {
                     paymentDto.BeneficiaryAccountId = model.BeneficiaryAccountId.Value;
-
                 }
                 else
                 {
-                  paymentDto.ExternalRecipientBankAccount = model.ExternalRecipientBankAccount;
+                    paymentDto.ExternalRecipientBankAccount = model.ExternalRecipientBankAccount;
                 }
 
-                    paymentDto.SelectedBeneficiaryId = model.SelectedBeneficiaryId;
+                paymentDto.SelectedBeneficiaryId = model.SelectedBeneficiaryId;
 
                 var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/CreateOneTimePayment", paymentDto);
 
@@ -336,17 +317,186 @@ namespace CondoManagementWebApp.Controllers
                     {
                         return RedirectToAction(nameof(IndexAllCondoMembersPayments));
                     }
-
                 }
 
                 _flashMessage.Danger("Unable to issue payment");
-                return View("CreateOneTimePayment", model);
+                model.CondominiumId = null;
+                model.SelectedCondoMemberId = null;
+
+                ModelState.Remove("CondominiumId");
+                ModelState.Remove("SelectedCondoMemberId");
+
+                return View("CreateOneTimePayment", await BuildCreatePaymentViewModel(model));
             }
             catch
             {
                 return View("Error500");
             }
         }
+
+        private async Task<CreateOneTimePaymentViewModel> BuildCreatePaymentViewModel(CreateOneTimePaymentViewModel model = null)
+        {
+            model ??= new CreateOneTimePaymentViewModel();
+
+            model.CondosToSelect = await _paymentHelper.GetCondosToSelectListAsync();
+            model.ExpenseTypesList = await _paymentHelper.GetExpenseTypesAsync();
+            model.BeneficiaryTypeList = _paymentHelper.GetBeneficiaryTypesList(
+                User.IsInRole("CondoManager") ? "CondoManager" :
+                User.IsInRole("CondoMember") ? "CondoMember" : "");
+
+            return model;
+        }
+
+
+        //// POST: PaymentController/RequestCreateOneTimePaymentCondo
+        //[HttpPost("RequestCreateOneTimePayment")]
+        //public async Task<ActionResult> RequestCreateOneTimePayment(CreateOneTimePaymentViewModel model)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        _flashMessage.Danger("Unable to issue one time payment");
+        //        return View("CreateOneTimePayment", model); 
+        //    }
+
+        //    if (model.SelectedBeneficiaryId == 3)
+        //    {
+        //        if (string.IsNullOrWhiteSpace(model.Recipient) || string.IsNullOrWhiteSpace(model.ExternalRecipientBankAccount))
+        //        {
+        //            _flashMessage.Danger("Please enter recipient name and bank account.");
+        //            return View("CreateOneTimePayment", model);
+        //        }
+        //    }
+        //    try
+        //    {
+
+
+        //        // Se for empresa, preenche automaticamente
+        //        if (model.SelectedBeneficiaryId == 2)
+        //        {
+        //            var company = await _apiCallService.GetAsync<CompanyDto>("api/Company/GetCompanyByUser");
+
+        //            model.BeneficiaryAccountId = company.FinancialAccountId;
+
+        //            if (string.IsNullOrWhiteSpace(model.Recipient))
+        //            {
+        //                model.Recipient = company.Name;
+        //            }
+
+        //        }
+
+
+        //            //PREENCHER MODEL (propriedades fora da view)
+        //            var condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
+        //        if (condoManagerCondos != null && !condoManagerCondos.Any())
+        //        {
+        //            _flashMessage.Danger("You are not managing any condominiums currently");
+        //            return View("CreateOneTimePayment", new CreateOneTimePaymentViewModel());
+        //        }
+
+        //        var expenseTypeList = await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
+
+        //        var expenseType = expenseTypeList.FirstOrDefault(e => e.Value == model.ExpenseTypeValue.ToString());
+        //        if(expenseType == null)
+        //        {
+        //            _flashMessage.Danger("Unable to select this type of expense");
+        //            return View("CreateOneTimePayment", new CreateOneTimePaymentViewModel());
+        //        }
+
+        //        //criar expense 
+        //        var expenseDto = new ExpenseDto()
+        //        {
+        //            Amount = model.ExpenseAmount,
+        //            Detail = model.ExpenseDetail,
+        //            ExpenseTypeDto = new EnumDto() { Value = model.ExpenseTypeValue.Value, Name = expenseType.Text },
+        //            CondominiumId = model.CondominiumId.Value,
+        //        };
+
+
+        //        int? payerFinancialAccountId = null;
+        //        string? payerName = null;
+
+        //        if (model.SelectedPayerType == "Condominium")
+        //        {
+        //            var condo = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{model.CondominiumId}");
+        //            payerFinancialAccountId = condo?.FinancialAccountId;
+        //            payerName = condo?.CondoName;
+
+
+
+        //        }
+        //        else if (model.SelectedPayerType == "Member" && model.SelectedCondoMemberId.HasValue)
+        //        {
+
+
+        //            var member = await _apiCallService.GetAsync<CondoMemberDto>($"api/CondoMembers/{model.SelectedCondoMemberId.Value}");
+        //            payerFinancialAccountId = member?.FinancialAccountId;
+        //            payerName = member?.FullName;
+
+        //            var condo = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{model.CondominiumId}");
+
+        //            model.BeneficiaryAccountId = condo.FinancialAccountId;
+        //            model.Recipient = condo.CondoName;
+
+        //        }
+
+        //        if (!payerFinancialAccountId.HasValue)
+        //        {
+        //            _flashMessage.Danger("Unable to resolve financial account.");
+        //            return View("CreateOneTimePayment", model);
+        //        }
+
+
+        //        model.PayerFinancialAccountId = payerFinancialAccountId;
+
+
+        //        //CONVERTER PARA PAYMENT DTO
+        //        var paymentDto = _converterHelper.FromOneTimeToPaymentDto(model);
+
+        //        //atribur propriedades fora do view model
+
+        //        paymentDto.IssueDate = DateTime.Now;
+        //        paymentDto.Amount = model.ExpenseAmount;
+        //        paymentDto.Payer = payerName;
+        //        paymentDto.ExpenseType = expenseType.Text;
+
+        //        paymentDto.OneTimeExpenseDto = expenseDto;
+        //        if (model.SelectedBeneficiaryId == 2)
+        //        {
+        //            paymentDto.BeneficiaryAccountId = model.BeneficiaryAccountId.Value;
+
+        //        }
+        //        else
+        //        {
+        //          paymentDto.ExternalRecipientBankAccount = model.ExternalRecipientBankAccount;
+        //        }
+
+        //            paymentDto.SelectedBeneficiaryId = model.SelectedBeneficiaryId;
+
+        //        var apiCall = await _apiCallService.PostAsync<PaymentDto, Response<object>>("api/Payment/CreateOneTimePayment", paymentDto);
+
+        //        if (apiCall.IsSuccess && condoManagerCondos != null)
+        //        {
+        //            var isCondoPayment = condoManagerCondos.Any(c => c.FinancialAccountId == paymentDto.PayerFinancialAccountId);
+
+        //            if (isCondoPayment)
+        //            {
+        //                return RedirectToAction(nameof(IndexCondominiumPayments));
+        //            }
+        //            else
+        //            {
+        //                return RedirectToAction(nameof(IndexAllCondoMembersPayments));
+        //            }
+
+        //        }
+
+        //        _flashMessage.Danger("Unable to issue payment");
+        //        return View("CreateOneTimePayment", model);
+        //    }
+        //    catch
+        //    {
+        //        return View("Error");
+        //    }
+        //}
 
 
         // GET: PaymentController/Edit/5
@@ -418,7 +568,7 @@ namespace CondoManagementWebApp.Controllers
                     model.PayerFinancialAccountId = condo.FinancialAccountId;
                 }
 
-                    if (model.PayerFinancialAccountId == 0)
+                if (model.PayerFinancialAccountId == 0)
                 {
                     ModelState.AddModelError("OmahWalletNumber", "Omah wallet number is required");
                 }
@@ -517,6 +667,7 @@ namespace CondoManagementWebApp.Controllers
                     {
                         PaymentId = paymentDto.Id,
                         DateAndTime = DateTime.Now,
+                        RecipientName = paymentDto.Recipient,
                         PayerAccountId = paymentDto.PayerFinancialAccountId,
                         BeneficiaryAccountId = paymentDto.BeneficiaryAccountId,
                         ExternalRecipientBankAccount = paymentDto.ExternalRecipientBankAccount,
@@ -600,21 +751,25 @@ namespace CondoManagementWebApp.Controllers
         [HttpPost("RequestDelete")]
         public async Task<ActionResult> RequestDelete(int id)
         {
-            CondominiumDto condoManagerCondo = null;
+            List<CondominiumDto> condoManagerCondos = null;
 
             PaymentDto paymentDto = null;
 
             try
             {
-                condoManagerCondo = await _apiCallService.GetByQueryAsync<CondominiumDto>("api/Condominiums/GetCondoManagerCondominiumDto", this.User.Identity.Name);
+                condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
+
+              
 
                 paymentDto = await _apiCallService.GetAsync<PaymentDto>($"api/Payment/GetPaymentDetails/{id}");
+
+                var isCondoPayment = condoManagerCondos.Any(c => c.FinancialAccountId == paymentDto.PayerFinancialAccountId);
 
                 var apiCall = await _apiCallService.DeleteAsync($"api/Payment/Delete/{id}");
 
                 if(apiCall.IsSuccessStatusCode)
                 {
-                    if (condoManagerCondo.FinancialAccountId == paymentDto.PayerFinancialAccountId)
+                    if (isCondoPayment)
                     {
                         return RedirectToAction(nameof(IndexCondominiumPayments));
                     }
@@ -625,7 +780,7 @@ namespace CondoManagementWebApp.Controllers
                 }
                 else
                 {
-                    if (condoManagerCondo.FinancialAccountId == paymentDto.PayerFinancialAccountId)
+                    if (isCondoPayment)
                     {
                         _flashMessage.Danger("Unable to process cancellation due to server error");
                         return RedirectToAction(nameof(IndexCondominiumPayments));
@@ -641,11 +796,16 @@ namespace CondoManagementWebApp.Controllers
             }
             catch(System.Net.Http.HttpRequestException ex)
             {
-                if(condoManagerCondo != null && paymentDto != null)
+
+
+                if(condoManagerCondos != null && paymentDto != null)
                 {
                     if (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
                     {
-                        if (condoManagerCondo.FinancialAccountId == paymentDto.PayerFinancialAccountId)
+                        condoManagerCondos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
+                        var isCondoPayment = condoManagerCondos.Any(c => c.FinancialAccountId == paymentDto.PayerFinancialAccountId);
+
+                        if (isCondoPayment)
                         {
                             _flashMessage.Danger("Payment is already paid, unable to process cancellation");
                             return RedirectToAction(nameof(IndexCondominiumPayments));
@@ -662,8 +822,6 @@ namespace CondoManagementWebApp.Controllers
             }
         }
 
-
-        
 
     }
 }

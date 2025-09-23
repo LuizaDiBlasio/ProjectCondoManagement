@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.UsersDb
+namespace ProjectCondoManagement.Migrations.DataContextUsersMigrations
 {
     /// <inheritdoc />
-    public partial class InitCreate : Migration
+    public partial class InitCreateUsers : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -69,7 +69,8 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TaxIdDocument = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TaxIdDocument = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CondominiumIds = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {

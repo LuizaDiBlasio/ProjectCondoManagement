@@ -8,7 +8,7 @@ using ProjectCondoManagement.Data.Entites.CondosDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.CondosDb
+namespace ProjectCondoManagement.Migrations.DataContextCondosMigrations
 {
     [DbContext(typeof(DataContextCondos))]
     partial class DataContextCondosModelSnapshot : ModelSnapshot
@@ -81,9 +81,6 @@ namespace ProjectCondoManagement.Migrations.CondosDb
 
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()

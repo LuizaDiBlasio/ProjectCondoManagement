@@ -43,7 +43,7 @@ namespace ProjectCondoManagement.Helpers
         Message ToMessage(MessageDto messageDto, bool isNew);
 
         PaymentDto ToPaymentDto(Payment payment, bool isNew);
-        UnitDto ToUnitDto(Unit unit, bool includeCondoMembers = true);
+        UnitDto ToUnitDto(Unit unit, bool includeCondoMembers = true, bool includeCondominium = true);
 
         InvoiceDto ToInvoiceDto(Invoice invoice, bool isNew);
 
@@ -61,9 +61,9 @@ namespace ProjectCondoManagement.Helpers
 
         FinancialAccount ToFinancialAccount(FinancialAccountDto financialAccountDto, bool isNew);
 
-        OccurrenceDto ToOccurrenceDto(Occurrence occurrence, bool isNew);
+        OccurrenceDto ToOccurrenceDto(Occurrence occurrence, bool isNew, bool includeUnits = true);
 
-        MeetingDto ToMeetingDto(Meeting meeting);
+        MeetingDto ToMeetingDto(Meeting meeting, bool IncludeOccurence = true);
 
         Meeting ToMeeting(MeetingDto meetingDto, bool isNew);
 

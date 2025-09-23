@@ -39,7 +39,7 @@ namespace ProjectCondoManagement.Data
         {
             
 
-            await _contextCondos.Database.MigrateAsync(); // Faz migrações pendentes. Caso não exista BD, cria uma BD aos moldes do _context 
+            await _contextCondos.Database.MigrateAsync(); 
 
             await _contextUsers.Database.MigrateAsync();
 

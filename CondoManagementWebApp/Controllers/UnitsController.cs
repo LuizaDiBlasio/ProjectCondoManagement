@@ -183,33 +183,9 @@ namespace CondoManagementWebApp.Controllers
         // GET: UnitsController/Create
         public async  Task<IActionResult> Create(int? memberId, int? condoId, string? condoName)
         {
+            var model = await BuildUnitViewModelAsync(memberId, condoId, condoName);
 
-            var model = new UnitDtoViewModel();
-
-            if (condoId != null && condoName != null)
-            {
-                model.CondoId = condoId;
-                model.CondoName = condoName;
-            }
-
-            else
-            {
-                var condos = await _apiCallService.GetAsync<IEnumerable<CondominiumDto>>("api/Condominiums");
-
-                model.Condos = condos.Select(c => new SelectListItem
-                {
-                    Value = c.Id.ToString(), 
-                    Text = c.CondoName              
-                }).ToList();
-            }
-
-            if (memberId != null)
-            {
-                model.MemberId = memberId.Value;
-            }
-
-
-                return View(model);
+            return View(model);
         }
 
         //POST: UnitsController/Create  //TODO 
@@ -220,12 +196,14 @@ namespace CondoManagementWebApp.Controllers
 
             if (!ModelState.IsValid)
             {
+                model = await BuildUnitViewModelAsync(model.MemberId, model.CondominiumId, model.CondoName);
                 return View(model);
             }
 
             if (await IsDuplicateUnitAsync(model.CondominiumId, model.Floor, model.Door))
             {
                 _flashMessage.Danger("A unit with the same floor and door already exists in this condominium.");
+                model = await BuildUnitViewModelAsync(model.MemberId, model.CondominiumId, model.CondoName);
                 return View(model);
             }
 
@@ -270,13 +248,13 @@ namespace CondoManagementWebApp.Controllers
 
 
                 _flashMessage.Danger(result.Message);
-                model.CondoId = model.CondominiumId; // Ensure CondoId is set for the view model
+                model = await BuildUnitViewModelAsync(model.MemberId, model.CondominiumId, model.CondoName);
                 return View(model);
             }
             catch (Exception ex)
             {
                 _flashMessage.Danger($"Erro posting unit{ex.InnerException}");
-                model.CondoId = model.CondominiumId;
+                model = await BuildUnitViewModelAsync(model.MemberId, model.CondominiumId, model.CondoName);
                 return View(model);
             }
 
@@ -659,6 +637,38 @@ namespace CondoManagementWebApp.Controllers
         }
 
 
+        private async Task<UnitDtoViewModel> BuildUnitViewModelAsync(int? memberId, int? condoId, string? condoName)
+        {
+            var model = new UnitDtoViewModel();
+
+   
+            if (condoId != null && !string.IsNullOrEmpty(condoName))
+            {
+                model.CondoId = condoId.Value;
+                model.CondoName = condoName;
+            }
+            else
+            {
+
+                var condos = await _apiCallService.GetAsync<IEnumerable<CondominiumDto>>("api/Condominiums");
+
+                if (condos != null && condos.Any())
+                {
+                    model.Condos = condos.Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = c.CondoName
+                    }).ToList();
+                }
+            }
+
+            if (memberId != null)
+            {
+                model.MemberId = memberId.Value;
+            }
+
+            return model;
+        }
 
 
         private async Task<bool> IsDuplicateUnitAsync(int condoId, string floor, string door)

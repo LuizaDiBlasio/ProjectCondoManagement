@@ -20,8 +20,7 @@ namespace ProjectCondoManagement.Data.Repositories.Condos.Interfaces
         Task<Response<object>> LinkFinancialAccountWithTransactions(List<CondominiumDto> condominiums);
 
         Task<Response<object>> LinkFinancialAccount(List<CondominiumDto> condominiums);
-
-        Task<IEnumerable<CondominiumDto>?> GetCondominiumsByCompanyIdAsync(int id);
+        Task<List<CondominiumDto>?> GetCondominiumsByCompanyIdAsync(int id);
 
         Task<Condominium> GetCondominiumByFinancialAccountIdAsync(int id);
     }

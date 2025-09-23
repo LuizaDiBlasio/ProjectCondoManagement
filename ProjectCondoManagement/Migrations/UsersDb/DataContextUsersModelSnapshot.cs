@@ -8,7 +8,7 @@ using ProjectCondoManagement.Data.Entites.UsersDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.UsersDb
+namespace ProjectCondoManagement.Migrations.DataContextUsersMigrations
 {
     [DbContext(typeof(DataContextUsers))]
     partial class DataContextUsersModelSnapshot : ModelSnapshot
@@ -183,6 +183,9 @@ namespace ProjectCondoManagement.Migrations.UsersDb
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CompanyAdminId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CondominiumIds")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")

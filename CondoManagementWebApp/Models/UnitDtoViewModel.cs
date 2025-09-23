@@ -10,7 +10,7 @@ namespace CondoManagementWebApp.Models
 
         public string? CondoName { get; set; }
 
-        public int? MemberId { get; set; }
+        public int? MemberId { get; set; }        
 
         public IEnumerable<SelectListItem>? Condos { get; set; }
     }

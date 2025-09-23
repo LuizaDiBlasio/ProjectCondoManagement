@@ -1,10 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using ClassLibrary.DtoModels;
+using CondoManagementWebApp.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+using System.Security.Claims;
+using Vereyon.Web;
 
 namespace CondoManagementWebApp.Helpers
 {
     public class PaymentHelper : IPaymentHelper 
     {
+        private readonly IApiCallService _apiCallService;
+        private readonly IConverterHelper _converterHelper;
+
+        public PaymentHelper(IApiCallService apiCallService, IConverterHelper converterHelper)
+        {
+            _apiCallService = apiCallService;
+            _converterHelper = converterHelper;
+        }
+
+
         public List<SelectListItem> GetPaymentMethodsList()
         {
             var selectList = new List<SelectListItem>
@@ -67,6 +81,27 @@ namespace CondoManagementWebApp.Helpers
 
             return string.Empty;
         }
+
+
+
+        public async Task<SelectList> GetCondosToSelectListAsync()
+        {
+            var condos = await _apiCallService.GetAsync<List<CondominiumDto>>("api/Condominiums/ByManager");
+
+            var condoSelectListItems = _converterHelper.ToCondosSelectList(condos);
+
+            var condoSelectList = new SelectList(condoSelectListItems, "Value", "Text");
+
+            return condoSelectList;
+        }
+
+        public async Task<List<SelectListItem>> GetExpenseTypesAsync()
+        {
+            return await _apiCallService.GetAsync<List<SelectListItem>>("api/Expense/GetExpenseTypeList");
+        }
+
+
+     
 
     }
 }

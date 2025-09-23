@@ -9,10 +9,10 @@ using ProjectCondoManagement.Data.Entites.FinancesDb;
 
 #nullable disable
 
-namespace ProjectCondoManagement.Migrations.FinancesDb
+namespace ProjectCondoManagement.Migrations
 {
     [DbContext(typeof(DataContextFinances))]
-    [Migration("20250910175932_InitCreateFinances")]
+    [Migration("20250918141028_InitCreateFinances")]
     partial class InitCreateFinances
     {
         /// <inheritdoc />
@@ -231,6 +231,9 @@ namespace ProjectCondoManagement.Migrations.FinancesDb
 
                     b.Property<int?>("PaymentId")
                         .HasColumnType("int");
+
+                    b.Property<string>("RecipientName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

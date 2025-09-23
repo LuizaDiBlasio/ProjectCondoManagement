@@ -8,12 +8,34 @@
     Shell.FlyoutBehavior="Disabled"
     Shell.NavBarIsVisible="False">
 
+    <!-- Login Page-->
     <ShellContent
         Title="Login"
         ContentTemplate="{DataTemplate views:LoginPage}"
         Route="LoginPage" />
 
 
+    <!-- Condo Member Dashboard-->
+    <ShellContent
+        Title="Dashboard"
+        ContentTemplate="{DataTemplate views:CondoMemberDashboardPage}"
+        Route="CondoMemberDashboardPage" />
+
+
+    <!-- Condo Manager Dashboard-->
+    <ShellContent
+        Title="Condo Manager Dashboard"
+        Route="CondoManagerDashboardPage"
+        ContentTemplate="{DataTemplate views:CondoManagerDashboardPage}" />
+
+
+    <!-- Company Admin Dashboard -->
+    <ShellContent
+        Title="Company Admin Dashboard"
+        Route="CompanyAdminDashboardPage"
+        ContentTemplate="{DataTemplate views:CompanyAdminDashboardPage}" />
+
+    <!--SysAdmin Dashboard-->
     <ShellContent
         Title="Dashboard"
         ContentTemplate="{DataTemplate views:SysAdminDashboardPage}"
