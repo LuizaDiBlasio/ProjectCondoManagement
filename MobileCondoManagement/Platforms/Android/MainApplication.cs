@@ -12,5 +12,8 @@ namespace MobileCondoManagement
         }
 
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+
+
     }
 }
+

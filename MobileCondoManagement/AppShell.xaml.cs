@@ -9,6 +9,8 @@ namespace MobileCondoManagement
             InitializeComponent();
 
             Routing.RegisterRoute("ForgotPasswordPage", typeof(ForgotPasswordPage));
+            Routing.RegisterRoute("SysAdminDashboardPage", typeof(SysAdminDashboardPage));
+            Routing.RegisterRoute("LoginPage", typeof(LoginPage));
         }
     }
 }

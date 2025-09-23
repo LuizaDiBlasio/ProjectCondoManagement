@@ -1,4 +1,8 @@
-﻿namespace MobileCondoManagement
+﻿
+using MobileCondoManagement;
+using System.Web;
+
+namespace MobileCondoManagement
 {
     public partial class App : Application
     {
@@ -8,5 +12,7 @@
 
             MainPage = new AppShell();
         }
+
+        
     }
 }

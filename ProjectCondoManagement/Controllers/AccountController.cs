@@ -236,7 +236,7 @@ namespace ProjectCondoManagement.Controllers
 
             if (user == null)
             {
-                return StatusCode(404, new Response<object> { Message = "User not found", IsSuccess = false });
+                return StatusCode(404, new { Message = "User not found", IsSuccess = false });
             }
 
             string myToken = await _userHelper.GeneratePasswordResetTokenAsync(user); //gerar o token

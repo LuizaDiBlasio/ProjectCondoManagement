@@ -1,4 +1,5 @@
 ﻿using ClassLibrary;
+using ClassLibrary.DtoModels;
 using ClassLibrary.DtoModelsMobile;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -45,14 +46,39 @@ namespace MobileCondoManagement.Services
 
         public async Task<Response<object>> RequestForgotPasswordAsync(string email)
         {
-            var forgotPasswordData = new { Email = email};
-            var jsonContent = new StringContent(JsonConvert.SerializeObject(forgotPasswordData), System.Text.Encoding.UTF8, "application/json");
+            var jsonContent = new StringContent(
+                                JsonConvert.SerializeObject(email),
+                                System.Text.Encoding.UTF8,
+                                 "application/json");
 
             var response = await _httpClient.PostAsync("api/Account/GenerateForgotPasswordTokenAndEmail", jsonContent);
 
             var json = await response.Content.ReadAsStringAsync();
 
             // Deserializa a resposta em um objeto dinâmico para pegar a propriedade 'Message' 
+            var result = JsonConvert.DeserializeObject<Response<object>>(json);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return new Response<object> { IsSuccess = true, Message = result.Message };
+            }
+            else
+            {
+                return new Response<object> { IsSuccess = false, Message = result.Message };
+            }
+        }
+
+        public async Task<Response<object>> ResetPasswordAsync(ResetPasswordDto resetData)
+        {
+            var jsonContent = new StringContent(
+                                JsonConvert.SerializeObject(resetData),
+                                System.Text.Encoding.UTF8,
+                                 "application/json");
+
+            var response = await _httpClient.PostAsync("api/Account/ResetPassword", jsonContent);
+
+            var json = await response.Content.ReadAsStringAsync();
+
             var result = JsonConvert.DeserializeObject<dynamic>(json);
 
             if (response.IsSuccessStatusCode)
@@ -78,7 +104,7 @@ namespace MobileCondoManagement.Services
 
         public async Task<T> GetAsync<T>(string requestUri)
         {
-            AddAuthorizationHeader();
+           await AddAuthorizationHeader();
             var response = await _httpClient.GetAsync(requestUri);
             response.EnsureSuccessStatusCode(); // Lança exceção se o status não for 2xx
 
@@ -94,7 +120,7 @@ namespace MobileCondoManagement.Services
 
         public async Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest data)
         {
-            AddAuthorizationHeader();
+           await  AddAuthorizationHeader();
             var jsonContent = new StringContent(
                 System.Text.Json.JsonSerializer.Serialize(data),
                 Encoding.UTF8,
@@ -111,6 +137,23 @@ namespace MobileCondoManagement.Services
 
             response.EnsureSuccessStatusCode();
 
+
+            return await response.Content.ReadFromJsonAsync<TResponse>();
+        }
+
+        public async Task<TResponse> GetByQueryAsync<TResponse>(string requestUri, string query)
+        {
+            await AddAuthorizationHeader();
+
+            // Serializa o objeto
+            var jsonContent = new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(query),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await _httpClient.PostAsync(requestUri, jsonContent);
+            response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadFromJsonAsync<TResponse>();
         }

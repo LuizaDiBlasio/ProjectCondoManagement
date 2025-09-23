@@ -2,8 +2,8 @@
 using MobileCondoManagement.Models;
 using MobileCondoManagement.Services;
 using MobileCondoManagement.Services.Interfaces;
-using MobileCondoManagement.ViewModels;
 using MobileCondoManagement.Views;
+using CommunityToolkit.Maui;
 
 namespace MobileCondoManagement
 {
@@ -14,6 +14,7 @@ namespace MobileCondoManagement
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -37,8 +38,9 @@ namespace MobileCondoManagement
             builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<ForgotPasswordViewModel>();
-            builder.Services.AddTransient<ForgotPasswordPage>(); // Ensure ForgotPasswordPage exists in the MobileCondoManagement.Views namespace
-
+            builder.Services.AddTransient<ForgotPasswordPage>();
+            builder.Services.AddTransient<SysAdminDashboardViewModel>();
+            builder.Services.AddTransient<SysAdminDashboardPage>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif

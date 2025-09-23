@@ -39,7 +39,7 @@ namespace CondoManagementWebApp.Controllers
             }
             catch (Exception)
             {
-                return View("Error");
+                return View("Error500");
             }
         }
 

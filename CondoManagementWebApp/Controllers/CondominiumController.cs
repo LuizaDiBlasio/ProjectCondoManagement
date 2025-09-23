@@ -97,7 +97,7 @@ namespace CondoManagementWebApp.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return View("Error404");
             }
             if(returnUrl != null)
             {
@@ -109,7 +109,7 @@ namespace CondoManagementWebApp.Controllers
                 var condominium = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{id.Value}");
                 if (condominium == null)
                 {
-                    return NotFound();
+                    return View("Error404");
                 }
 
                 return View(condominium);
@@ -166,7 +166,7 @@ namespace CondoManagementWebApp.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             try
@@ -174,7 +174,7 @@ namespace CondoManagementWebApp.Controllers
                 var condominium = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{id.Value}");
                 if (condominium == null)
                 {
-                    return NotFound();
+                    return View("Error404");
                 }
 
                 return View(condominium);
@@ -196,7 +196,7 @@ namespace CondoManagementWebApp.Controllers
         {
             if (id != condominiumDto.Id)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             if (!ModelState.IsValid)
@@ -230,7 +230,7 @@ namespace CondoManagementWebApp.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             try
@@ -254,7 +254,7 @@ namespace CondoManagementWebApp.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             try
@@ -263,7 +263,7 @@ namespace CondoManagementWebApp.Controllers
                 var condominium = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{id.Value}");
                 if (condominium == null)
                 {
-                    return NotFound();
+                    return View("Error404");
                 }
 
                 var units = await _apiCallService.GetAsync<List<UnitDto>>($"api/Units/condo/{condominium.Id}");
@@ -299,7 +299,7 @@ namespace CondoManagementWebApp.Controllers
 
             if (id == null)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             try
@@ -307,7 +307,7 @@ namespace CondoManagementWebApp.Controllers
                 var condominium = await _apiCallService.GetAsync<CondominiumDto>($"api/Condominiums/{id.Value}");
                 if (condominium == null)
                 {
-                    return NotFound();
+                    return View("Error404");
                 }
 
                 var managers = await  _apiCallService.GetAsync<IEnumerable<UserDto>>("api/Account/GetManagers");
@@ -357,7 +357,7 @@ namespace CondoManagementWebApp.Controllers
         {
             if (id != model.Id)
             {
-                return NotFound();
+                return View("Error404");
             }
 
             if (!ModelState.IsValid)

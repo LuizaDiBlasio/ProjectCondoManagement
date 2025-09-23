@@ -13,4 +13,12 @@
         ContentTemplate="{DataTemplate views:LoginPage}"
         Route="LoginPage" />
 
+
+    <ShellContent
+        Title="Dashboard"
+        ContentTemplate="{DataTemplate views:SysAdminDashboardPage}"
+        Route="CondoMemberDashboardPage" />
+
+
 </Shell>
+

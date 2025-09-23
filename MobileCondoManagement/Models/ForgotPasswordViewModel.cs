@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MobileCondoManagement.Services.Interfaces;
 using System.Threading.Tasks;
 
-namespace MobileCondoManagement.ViewModels
+namespace MobileCondoManagement.Models
 {
     public partial class ForgotPasswordViewModel : ObservableObject
     {
@@ -21,7 +21,14 @@ namespace MobileCondoManagement.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsNotBusy))] 
         private bool isBusy;
-        public bool IsNotBusy => !IsBusy; 
+        public bool IsNotBusy => !IsBusy;
+
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowSignInButton))]
+        private bool showSendButton = true;
+
+        public bool ShowSignInButton => !ShowSendButton;
 
         public ForgotPasswordViewModel(IApiService apiService)
         {
@@ -32,8 +39,10 @@ namespace MobileCondoManagement.ViewModels
         private async Task SendResetLinkAsync()
         {
             IsBusy = true;
-            Message = string.Empty;
+            Message = string.Empty; // Change this line
             IsSuccess = false;
+
+            OnPropertyChanged(nameof(Message));
 
             try
             {
@@ -43,14 +52,13 @@ namespace MobileCondoManagement.ViewModels
                     return;
                 }
 
-                // A sua API espera uma string no corpo da requisição.
-                // O método RequestForgotPasswordAsync precisa ser adaptado para isso.
                 var result = await _apiService.RequestForgotPasswordAsync(Email);
 
                 if (result.IsSuccess)
                 {
                     IsSuccess = true;
                     Message = result.Message;
+                    ShowSendButton = false;
                 }
                 else
                 {
@@ -62,5 +70,12 @@ namespace MobileCondoManagement.ViewModels
                 IsBusy = false;
             }
         }
+
+        [RelayCommand]
+        private async Task GoToLoginAsync()
+        {
+            await Shell.Current.GoToAsync("//LoginPage");
+        }
     }
 }
+

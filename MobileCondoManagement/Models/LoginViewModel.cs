@@ -46,11 +46,14 @@ namespace MobileCondoManagement.Models
                     // Lógica de armazenamento do token
                     await SecureStorage.Default.SetAsync("auth_token", loginResult.Token);
 
+                    // Salvar o e-mail do usuário
+                    await SecureStorage.Default.SetAsync("user_email", Email);
+
                     //Reencaminhamento
                     switch (loginResult.UserRole)
                     {
                         case "SysAdmin":
-                            await Shell.Current.GoToAsync("//SysAdminDashboardPage");
+                            await Shell.Current.GoToAsync("SysAdminDashboardPage");
                             break;
                         case "CompanyAdmin":
                             await Shell.Current.GoToAsync("//CompanyAdminDashboardPage");

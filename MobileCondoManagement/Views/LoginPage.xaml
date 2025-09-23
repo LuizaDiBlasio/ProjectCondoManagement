@@ -1,72 +1,84 @@
 ﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:viewmodels="clr-namespace:MobileCondoManagement.Models"
+             xmlns:vm="clr-namespace:MobileCondoManagement.Models"
              x:Class="MobileCondoManagement.Views.LoginPage"
-             x:DataType="viewmodels:LoginViewModel"
+             Shell.NavBarIsVisible="False"
              Title="Login">
 
-    <Grid >
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <ContentPage.Resources>
+        <Color x:Key="PrimaryBlue">#1976d2</Color>
+        <Color x:Key="CardBg">#FFFFFF</Color>
+        <Color x:Key="ButtonBlue">#3742fa</Color>
+    </ContentPage.Resources>
 
-        <Label Text="Welcome, log into your account"
-               FontSize="24"
-               FontAttributes="Bold"
-               TextColor="White"
-               HorizontalOptions="Center"
-               Grid.Row="0" />
+    <Grid BackgroundColor="#f4f6fa" RowDefinitions="Auto,*">
+        <VerticalStackLayout Grid.Row="0" VerticalOptions="Center" HorizontalOptions="Center" Padding="0,50,0,0">
+            <Image Source="logo_full.png" Aspect="AspectFit" HeightRequest="50" HorizontalOptions="Center" />
+         
+        </VerticalStackLayout>
 
-        <StackLayout Grid.Row="1" Spacing="15" Margin="0,30,0,0">
-            <Entry Placeholder="Enter your email"
-           Text="{Binding Email}"
-           Keyboard="Email"
-           BackgroundColor="Transparent"
-           TextColor="Black"           PlaceholderColor="Black"    />
+        <ScrollView Grid.Row="1" VerticalOptions="FillAndExpand">
+            <VerticalStackLayout Padding="30, 20">
+                <Frame CornerRadius="12" 
+                       Padding="20" 
+                       BackgroundColor="{StaticResource CardBg}" 
+                       HasShadow="True"
+                       VerticalOptions="CenterAndExpand">
 
-            <Entry Placeholder="Enter your Password"
-           Text="{Binding Password}"
-           IsPassword="True"
-           BackgroundColor="Transparent"
-           TextColor="Black"           PlaceholderColor="Black"    />
-        </StackLayout>
+                    <VerticalStackLayout Spacing="25">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Username" FontSize="14" FontAttributes="Bold" />
+                            <Entry Text="{Binding Email}" 
+                                   Placeholder="Enter username (Email)" 
+                                   Keyboard="Email"
+                                   Style="{StaticResource EntryStyle}" />
+                        </VerticalStackLayout>
 
-        <Button Text="Login"
-                Command="{Binding LoginCommand}"
-                IsEnabled="{Binding IsNotBusy}"
-                BackgroundColor="#EE9F00"
-                TextColor="#041735"
-                CornerRadius="10"
-                Grid.Row="2"
-                Margin="0,20,0,0"/>
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Password" FontSize="14" FontAttributes="Bold" />
+                            <Entry Text="{Binding Password}" 
+                                   Placeholder="Enter password" 
+                                   IsPassword="True"
+                                   Style="{StaticResource EntryStyle}" />
+                        </VerticalStackLayout>
 
-        <ActivityIndicator IsRunning="{Binding IsBusy}"
-                           IsVisible="{Binding IsBusy}"
-                           Color="#EE9F00"
-                           HorizontalOptions="Center"
-                           VerticalOptions="Center"
-                           Grid.Row="3"/>
+                        <Grid>
+                            <Button Grid.Column="1"
+                                    Text="Forgot Password?"
+                                    FontSize="14"
+                                    TextColor="{StaticResource ButtonBlue}"
+                                    HorizontalOptions="End"
+                                    Command="{Binding ForgotPasswordCommand}"
+                                    BackgroundColor="Transparent"
+                                    Padding="0"
+                                    Margin="0" />
+                        </Grid>
 
-        <Label Text="Forgot password?"
-               TextColor="#EE9F00"
-               HorizontalOptions="Center"
-               Grid.Row="4"
-               VerticalOptions="Start"
-               Margin="0,10,0,0">
-            <Label.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding ForgotPasswordCommand}" />
-            </Label.GestureRecognizers>
-        </Label>
+                        <Button Text="Sign In" 
+                                Command="{Binding LoginCommand}"
+                                IsEnabled="{Binding IsNotBusy}"
+                                BackgroundColor="{StaticResource ButtonBlue}"
+                                TextColor="White"
+                                CornerRadius="8"
+                                HeightRequest="50"
+                                Margin="0,10,0,0">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsBusy}" Value="True">
+                                    <Setter Property="Text" Value="Signing In..." />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
 
-        <Label Text="{Binding ErrorMessage}"
-               TextColor="Red"
-               HorizontalOptions="Center"
-               Grid.Row="5"
-               IsVisible="{Binding HasError}" />
+                        <Label Text="{Binding ErrorMessage}"
+                               IsVisible="{Binding HasError}"
+                               TextColor="Red"
+                               HorizontalOptions="Center"
+                               FontAttributes="Italic"
+                               FontSize="14"
+                               Margin="0,10,0,0" />
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+        </ScrollView>
     </Grid>
 </ContentPage>
