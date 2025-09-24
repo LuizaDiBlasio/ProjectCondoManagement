@@ -1,7 +1,6 @@
 ﻿@model CondoManagementWebApp.Models.AssignCompanyViewModel
 @{
     ViewData["Title"] = "Assign Company";
-    Layout = "~/Views/Shared/_Layout.cshtml"; // Garante que o layout é o mesmo
 }
 
 <div class="fix-wrapper">
@@ -21,6 +20,7 @@
                             <input type="hidden" asp-for="Id" />
                             <input type="hidden" asp-for="FinancialAccountId" />
                             <input type="hidden" asp-for="UserRole" />
+                            <input type="hidden" asp-for="Email" />
                             <input type="hidden" name="email" value="@Context.Request.Query["email"]" />
 
                             <div class="row">

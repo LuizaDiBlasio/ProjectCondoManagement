@@ -109,7 +109,7 @@
 
                         <li>
                             <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                                <i class="flaticon-dashboard-1"></i>
+                                <i class="fa-solid fa-city"></i>
                                 <span class="nav-text">Condos</span>
                             </a>
                             <ul aria-expanded="false">
@@ -128,7 +128,7 @@
                                 <li><a asp-controller="Payment" asp-action="IndexCondominiumPayments">Payments</a></li>
                                 <li><a asp-controller="Expense" asp-action="IndexExpenses">Expenses</a></li>
                                 <li><a asp-controller="Invoice" asp-action="IndexCondominiumInvoices">Invoices</a></li>
-                                <li><a asp-controller="FinancialAccounts" asp-action="CondoAccounts" asp-route-email="@User.FindFirst(ClaimTypes.Name)?.Value">Condominiums Accounts</a></li>
+                                <li><a asp-controller="FinancialAccounts" asp-action="CondoAccounts" asp-route-email="@User.FindFirst(ClaimTypes.Name)?.Value">Condominiums Wallets</a></li>
                             </ul>
                         </li>
                         <li>
@@ -174,7 +174,7 @@
 
                            <li>
                                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                                    <i class="flaticon-dashboard-1"></i>
+                                <i class="fa-solid fa-city"></i>
                                    <span class="nav-text">Condos</span>
                                </a>
                                <ul aria-expanded="false">
@@ -189,7 +189,7 @@
                                     <span class="nav-text">Finances</span>
                                 </a>
                                 <ul aria-expanded="false">
-                                    <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Financial Account</a></li>
+                                    <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Omah Wallet</a></li>
                                 </ul>
                             </li>
                         <li>
@@ -229,7 +229,7 @@
 
                              <li>
                             <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                                <i class="flaticon-381-user-7"></i>
+                                <i class="fa-solid fa-city"></i>
                                 <span class="nav-text">Condos</span>
                             </a>
                             <ul aria-expanded="false">
@@ -251,7 +251,7 @@
                                 <ul aria-expanded="false">
                                     <li><a asp-controller="Payment" asp-action="IndexCondoMemberPayments">Payments</a></li>
                                     <li><a asp-controller="Invoice" asp-action="IndexCondoMemberInvoices">Invoices</a></li>
-                                     <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Financial Account</a></li>
+                                     <li><a asp-controller="FinancialAccounts" asp-action="Details" asp-route-email="@User.Identity?.Name">Omah Wallet</a></li>
                                 </ul>
                             </li>
                         <li>

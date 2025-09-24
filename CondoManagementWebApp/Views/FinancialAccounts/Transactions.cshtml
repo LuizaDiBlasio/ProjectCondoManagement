@@ -2,45 +2,62 @@
 
 @{
     ViewData["Title"] = "Transactions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1 class="mb-4">Transactions</h1>
+<div class="row page-titles mx-0 d-flex align-items-center">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text">
+            <h4 class="text-2xl font-semibold text-gray-800">Transactions</h4>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 d-flex justify-content-end">
+        <a asp-action="Details" asp-route-email="@ViewBag.Email" asp-route-id="@ViewBag.AccountId" class="btn btn-outline-primary">
+            Back to Wallet
+        </a>
+    </div>
+</div>
 
-<a asp-action="Details" asp-route-email="@ViewBag.Email" asp-route-id="@ViewBag.AccountId" class="btn btn-outline-primary mb-3">
-    Back to Account
-</a>
-
-<table class="table table-hover table-bordered shadow-sm">
-    <thead class="table-dark">
-        <tr>
-            <th>Date</th>
-            <th>Amount</th>
-            <th>Recipient</th>
-            <th>Payer</th>
-
-        </tr>
-    </thead>
-    <tbody>
-
-
-        @{
-            int accountId = Convert.ToInt32(ViewBag.AccountId);
-        }
-
-        @foreach (var item in Model)
-        {
-            var isMyAccount = item.BeneficiaryAccountId == accountId;
-            var amountClass = isMyAccount ? "text-success" : "text-danger";
-
+@if (!Model.Any())
+{
+    <p>No transactions available for this account yet.</p>
+}
+else
+{
+    <table class="table table-hover table-bordered shadow-sm">
+        <thead >
             <tr>
-                <td>@item.DateAndTime.ToString("dd/MM/yyyy HH:mm")</td>
-                <td class="fw-bold @amountClass">
-                    @(item.Amount.HasValue? item.Amount.Value.ToString("C") : "—")
-                </td>
-                <td>@(item.RecipientName ?? "—--")</td>
-                <td>@(item.PayerName ?? "—--")</td>
-
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Recipient</th>
+                <th>Payer</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @{
+                int accountId = Convert.ToInt32(ViewBag.AccountId);
+            }
+
+            @foreach (var item in Model)
+            {
+                var isMyAccount = item.BeneficiaryAccountId == accountId;
+                var amountClass = isMyAccount ? "text-success" : "text-danger";
+
+                <tr>
+                    <td>@item.DateAndTime.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td class="fw-bold @amountClass">
+                        @(item.Amount.HasValue ? item.Amount.Value.ToString("C") : "—")
+                    </td>
+                    <td>@(item.RecipientName ?? "—--")</td>
+                    <td>@(item.PayerName ?? "—--")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

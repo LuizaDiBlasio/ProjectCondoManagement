@@ -1,49 +1,80 @@
 ﻿@model ClassLibrary.DtoModels.FinancialAccountDto
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Financial Account";
+    Layout = "~/Views/Shared/_Layout.cshtml"; 
 }
 
-<h1>Financial Account</h1>
-
-
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="IsActive" />
-            <input type="hidden" asp-for="OwnerName" />
-            <input type="hidden" asp-for="Balance" />
-            <input type="hidden" name="email" value="@ViewBag.Email" />
-
-            
-          
-           
-            <div class="form-group">
-                <label asp-for="CardNumber" class="control-label"></label>
-                <input asp-for="CardNumber" class="form-control" />
-                <span asp-validation-for="CardNumber" class="text-danger"></span>
+<div class="content-body">
+    <div class="container-fluid">
+        @* Título e Breadcrumbs *@
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Activate Omah Wallet</h4>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="AssociatedBankAccount" class="control-label"></label>
-                <input asp-for="AssociatedBankAccount" class="form-control" />
-                <span asp-validation-for="AssociatedBankAccount" class="text-danger"></span>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Financial Account</a></li>
+                </ol>
             </div>
-            <div class="form-group">
-                <label asp-for="BankName" class="control-label"></label>
-                <input asp-for="BankName" class="form-control" />
-                <span asp-validation-for="BankName" class="text-danger"></span>
-            </div>
+        </div>
 
+        @* Formulário de Edição dentro de um Card *@
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Account Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
+                        <form asp-action="Edit" method="post">
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="IsActive" />
+                            <input type="hidden" asp-for="OwnerName" />
+                            <input type="hidden" asp-for="Balance" />
+                            <input type="hidden" name="email" value="@ViewBag.Email" />
 
-            <div class="form-group">
-                <input type="submit" value="Activate Account" class="btn btn-primary" />
-                <a asp-action="@ViewBag.ReturnUrl" asp-route-id="@ViewBag.ReturnId" asp-route-email="@ViewBag.Email">Back to List</a>
+                            @* Campos em duas colunas *@
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label font-weight-bold" asp-for="CardNumber"></label>
+                                    <input asp-for="CardNumber" class="form-control" />
+                                    <span asp-validation-for="CardNumber" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label font-weight-bold" asp-for="AssociatedBankAccount"></label>
+                                    <input asp-for="AssociatedBankAccount" class="form-control" />
+                                    <span asp-validation-for="AssociatedBankAccount" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label font-weight-bold" asp-for="BankName"></label>
+                                    <input asp-for="BankName" class="form-control" />
+                                    <span asp-validation-for="BankName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-4 text-center">
+                                <button type="submit" class="btn btn-primary">Activate Account</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-        </form>
+        </div>
+
+        @* Botão de voltar, fora do card *@
+        <div class="d-flex justify-content-start mt-3">
+            <a asp-action="@ViewBag.ReturnUrl" asp-route-id="@ViewBag.ReturnId" asp-route-email="@ViewBag.Email" class="btn btn-outline-secondary">Back to List</a>
+        </div>
     </div>
 </div>
 
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
