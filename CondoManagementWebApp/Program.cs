@@ -11,7 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddFlashMessage();
 
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<IApiCallService, ApiCallService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]);
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    
+    ServerCertificateCustomValidationCallback =
+        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+});
 
 builder.Services.AddHttpContextAccessor();
 

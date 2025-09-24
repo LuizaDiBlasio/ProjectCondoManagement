@@ -25,7 +25,7 @@ namespace MobileCondoManagement
             // Serviços
             builder.Services.AddHttpClient<IApiService, ApiService>(client =>
             {
-                client.BaseAddress = new Uri("https://10.0.2.2:7001/");
+                client.BaseAddress = new Uri("http://www.OmahCondosApi.somee.com/");
             })
               .ConfigurePrimaryHttpMessageHandler(() =>
               {

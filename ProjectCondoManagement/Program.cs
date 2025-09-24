@@ -17,6 +17,8 @@ using ProjectCondoManagement.Data.Repositories.Users;
 var builder = WebApplication.CreateBuilder(args);
 
 
+
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -126,6 +128,8 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
+
+
 // Configurações do Swagger/OpenAPI para testar a API (opcional, mas útil)
 builder.Services.AddEndpointsApiExplorer();
 
@@ -161,6 +165,7 @@ else
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
 
 
 // Configure the HTTP request pipeline.

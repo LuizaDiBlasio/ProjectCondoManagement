@@ -133,9 +133,7 @@ namespace ProjectCondoManagement.Controllers
             }
             else
             {
-                // Para testes em desenvolvimento___________________________________________
-                if (_env.IsDevelopment())
-                {
+                // Para testes em desenvolvimento___________________________________________            
                     // Gera token JWT direto
                     var roles = await _userHelper.GetRolesAsync(user);
                     var userRole = roles.FirstOrDefault() ?? "User";
@@ -150,11 +148,10 @@ namespace ProjectCondoManagement.Controllers
                         IsSuccess = true,
                         Message = "2FA skipped in development"
                     });
-                }
                 //_______________________________________________________________________
             }
 
-            return StatusCode(500, new { Message = "Wrong credentials, please try again" });
+            //return StatusCode(500, new { Message = "Wrong credentials, please try again" });
        
         }
 
