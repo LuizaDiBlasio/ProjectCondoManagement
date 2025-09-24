@@ -2,40 +2,57 @@
 
 @{
     ViewData["Title"] = "Withdrawal";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Withdrawal</h1>
+<div class="fix-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-md-12">
+                <div class="card mb-0 h-auto">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <a href="@Url.Action("Index", "Home")"><img class="logo-auth" src="~/images/logo-full.png" alt="Logo"></a>
+                        </div>
+                        <h4 class="text-center mb-4">Make a Withdrawal</h4>
 
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Withdrawal" asp-route-id="@Model.OwnerId" asp-route-email="@ViewBag.Email">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <hr class="mt-4 mb-5" style="border-top: 1px solid #e0e0e0; opacity: 0.8;" />
 
+                        <div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
 
-            <input type="hidden" asp-for="OwnerId" />
-            <input type="hidden" asp-for="SelectedPaymentMethodId" value="3" />
+                        <form asp-action="Withdrawal" asp-route-id="@Model.OwnerId" asp-route-email="@ViewBag.Email" method="post">
+                            <input type="hidden" asp-for="OwnerId" />
+                            <input type="hidden" asp-for="SelectedPaymentMethodId" value="3" />
 
-   
-            <div class="form-group">
-                <label asp-for="DepositValue" class="control-label">Withdrawal Amount</label>
-                <input asp-for="DepositValue" class="form-control" />
-                <span asp-validation-for="DepositValue" class="text-danger"></span>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group mb-4">
+                                        <label class="form-label" asp-for="DepositValue">Withdrawal Amount</label>
+                                        <input asp-for="DepositValue" class="form-control" />
+                                        <span asp-validation-for="DepositValue" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="alert alert-info mt-3">
+                                        Withdrawals are only available through your <strong>Associated Bank Account</strong>.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-3 d-flex justify-content-between align-items-center">
+                                <a asp-action="Details" asp-route-id="@Model.OwnerId" asp-route-email="@ViewBag.Email" class="btn btn-outline-secondary">
+                                    Back to List
+                                </a>
+                                <button type="submit" class="btn btn-primary">Withdrawal</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-
-        
-            <div class="alert alert-info mt-3">
-                Withdrawals are only available through your <strong>Associated Bank Account</strong>.
-            </div>
-
-      
-            <div class="form-group mt-3">
-                <input type="submit" value="Withdrawal" class="btn btn-primary" />
-                <a asp-action="Details" asp-route-id="@Model.OwnerId" asp-route-email="@ViewBag.Email" class="btn btn-secondary">
-                    Back to List
-                </a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 

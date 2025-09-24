@@ -700,30 +700,6 @@ namespace ProjectCondoManagement.Controllers
         [HttpPost("AssignCompanyToMember")]
         public async Task<IActionResult> AssingCompanyToMember([FromBody] UserDto userDto)
         {
-            //var user = await _userHelper.GetUserByEmailWithCompaniesAsync(userDto.Email);
-
-            //if (user == null)
-            //{
-            //    NotFound();
-            //}
-
-            //var userCompaniesIds = userDto.CompaniesDto.Select(c => c.Id).ToList();
-
-            //var userCompanies = new List<Company>();
-
-            //foreach (var companyId in userCompaniesIds)
-            //{
-            //    var company = _dataContextUsers.Companies.FirstOrDefault(c => c.Id == companyId);
-            //    userCompanies.Add(company);
-            //}
-
-            //user.Companies.Clear();
-
-            //user.Companies = userCompanies;
-
-            //await _userHelper.UpdateUserAsync(user);
-
-            //return Ok(new Response<object> { IsSuccess = true });
             var user = await _userHelper.GetUserByEmailWithCompaniesAsync(userDto.Email);
 
             if (user == null)

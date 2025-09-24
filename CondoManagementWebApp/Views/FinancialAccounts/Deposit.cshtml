@@ -2,80 +2,100 @@
 
 @{
     ViewData["Title"] = "Deposit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Deposit</h1>
+<div class="fix-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-md-12">
+                <div class="card mb-0 h-auto">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <a href="@Url.Action("Index", "Home")"><img class="logo-auth" src="~/images/logo-full.png" alt="Logo"></a>
+                        </div>
+                        <h4 class="text-center mb-4">Make a Deposit</h4>
 
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Deposit" asp-route-id="@Model.OwnerId" asp-route-email="@ViewBag.Email">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <hr class="mt-4 mb-5" style="border-top: 1px solid #e0e0e0; opacity: 0.8;" />
 
+                        <div asp-validation-summary="ModelOnly" class="text-danger text-center"></div>
 
-            <input type="hidden" asp-for="OwnerId" />
+                        <form asp-action="Deposit" asp-route-id="@Model.OwnerId" asp-route-email="@ViewBag.Email" method="post">
+                            <input type="hidden" asp-for="OwnerId" />
 
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group mb-4">
+                                        <label class="form-label" asp-for="DepositValue"></label>
+                                        <input asp-for="DepositValue" class="form-control" />
+                                        <span asp-validation-for="DepositValue" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
 
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group mb-4">
+                                        <label class="form-label">Payment Method</label><br />
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" asp-for="SelectedPaymentMethodId" value="1" id="pmMbWay" />
+                                            <label class="form-check-label" for="pmMbWay">MB Way</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" asp-for="SelectedPaymentMethodId" value="2" id="pmCreditCard" />
+                                            <label class="form-check-label" for="pmCreditCard">Credit Card</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" asp-for="SelectedPaymentMethodId" value="3" id="pmBank" />
+                                            <label class="form-check-label" for="pmBank">Associated Bank Account</label>
+                                        </div>
+                                        <span asp-validation-for="SelectedPaymentMethodId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
 
-            <div class="form-group">
-                <label asp-for="DepositValue" class="control-label"></label>
-                <input asp-for="DepositValue" class="form-control" />
-                <span asp-validation-for="DepositValue" class="text-danger"></span>
+                            <div class="row">
+                                <div id="mbWayFields" style="display:none;">
+                                    <div class="col-md-12">
+                                        <div class="form-group mb-4">
+                                            <label class="form-label" asp-for="PhoneNumber"></label>
+                                            <input asp-for="PhoneNumber" class="form-control" />
+                                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="creditCardFields" style="display:none;">
+                                    <div class="col-md-12">
+                                        <div class="form-group mb-4">
+                                            <label class="form-label" asp-for="CreditCardNumber"></label>
+                                            <input asp-for="CreditCardNumber" class="form-control" />
+                                            <span asp-validation-for="CreditCardNumber" class="text-danger"></span>
+                                        </div>
+                                        <div class="form-group mb-4">
+                                            <label class="form-label" asp-for="Cvv"></label>
+                                            <input asp-for="Cvv" class="form-control" />
+                                            <span asp-validation-for="Cvv" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-3 d-flex justify-content-between align-items-center">
+                                <a asp-action="Details" asp-route-id="@Model.OwnerId" asp-route-email="@ViewBag.Email" class="btn btn-outline-secondary">Back to List</a>
+                                <button type="submit" class="btn btn-primary">Deposit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-
- 
-            <div class="form-group">
-                <label>Payment Method</label><br />
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" asp-for="SelectedPaymentMethodId" value="1" id="pmMbWay" />
-                    <label class="form-check-label" for="pmMbWay">MB Way</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" asp-for="SelectedPaymentMethodId" value="2" id="pmCreditCard" />
-                    <label class="form-check-label" for="pmCreditCard">Credit Card</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" asp-for="SelectedPaymentMethodId" value="3" id="pmBank" />
-                    <label class="form-check-label" for="pmBank">Associated Bank Account</label>
-                </div>
-                <span asp-validation-for="SelectedPaymentMethodId" class="text-danger"></span>
-            </div>
-
-
-            <div id="mbWayFields" style="display:none;">
-                <div class="form-group">
-                    <label asp-for="PhoneNumber" class="control-label"></label>
-                    <input asp-for="PhoneNumber" class="form-control" />
-                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div id="creditCardFields" style="display:none;">
-                <div class="form-group">
-                    <label asp-for="CreditCardNumber" class="control-label"></label>
-                    <input asp-for="CreditCardNumber" class="form-control" />
-                    <span asp-validation-for="CreditCardNumber" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Cvv" class="control-label"></label>
-                    <input asp-for="Cvv" class="form-control" />
-                    <span asp-validation-for="Cvv" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="form-group mt-3">
-                <input type="submit" value="Deposit" class="btn btn-primary" />
-                <a asp-action="Details" asp-route-id="@Model.OwnerId" asp-route-email="@ViewBag.Email" class="btn btn-secondary">Back to List</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
     <script>
-
         function togglePaymentFields() {
             let selected = document.querySelector('input[name="SelectedPaymentMethodId"]:checked')?.value;
             document.getElementById("mbWayFields").style.display = (selected === "1") ? "block" : "none";
@@ -85,7 +105,6 @@
         document.querySelectorAll('input[name="SelectedPaymentMethodId"]').forEach(radio => {
             radio.addEventListener('change', togglePaymentFields);
         });
-
 
         togglePaymentFields();
     </script>
