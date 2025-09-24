@@ -1042,7 +1042,7 @@ namespace CondoManagementWebApp.Controllers
         /// <returns>The "User Not Found" view.</returns>
         public IActionResult UserNotFound()
         {
-            return View();
+            return View("Error404");
         }
 
 
@@ -1084,17 +1084,17 @@ namespace CondoManagementWebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AssignCompany(string? email, AssignCompanyViewModel model)
+        public async Task<IActionResult> AssignCompany(AssignCompanyViewModel model)
         {
 
-            if (email == null)
+            if (model.Email == null)
             {
                 return UserNotFound();
             }
             
             try
             {
-                var userDto = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", email);
+                var userDto = await _apiCallService.GetByQueryAsync<UserDto>("api/Account/GetUserByEmail", model.Email);
                 if (userDto == null)
                 {
                     _flashMessage.Danger("Unable to change companies, user not found");
@@ -1129,7 +1129,7 @@ namespace CondoManagementWebApp.Controllers
                                     return View(returnModel);
                                 }
 
-                                _flashMessage.Confirmation(apiCall.Message);
+                                _flashMessage.Confirmation("Company assigned sucessfully");
                                 return RedirectToAction(nameof(SysAdminDashboard));
                             }
                             else
@@ -1154,7 +1154,7 @@ namespace CondoManagementWebApp.Controllers
                                     return View(returnModel);
                                 }
 
-                                _flashMessage.Confirmation(apiCall.Message);
+                                _flashMessage.Confirmation("Company assigned sucessfully");
                                 return RedirectToAction(nameof(SysAdminDashboard));
                             }
                         }
@@ -1206,6 +1206,8 @@ namespace CondoManagementWebApp.Controllers
                                     return View(returnModel);
                                 }
                             }
+                            //remover da lista de companies do user
+                            userDto.CompaniesDto.RemoveAll(c => c.Id == id);
                         }
                     }
 
@@ -1235,7 +1237,7 @@ namespace CondoManagementWebApp.Controllers
                         return View(returnModel);
                     }
 
-                    _flashMessage.Confirmation(result.Message);
+                    _flashMessage.Confirmation("Company assigned sucessfully");
                     return RedirectToAction(nameof(SysAdminDashboard));
                 }
 
@@ -1298,6 +1300,7 @@ namespace CondoManagementWebApp.Controllers
             {
                 Id = user.Id,
                 CompaniesDto = user.CompaniesDto,
+                Email = user.Email, 
                 Address = user.Address,
                 FullName = user.FullName,
                 FinancialAccountId = user.FinancialAccountId,

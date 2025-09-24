@@ -700,26 +700,55 @@ namespace ProjectCondoManagement.Controllers
         [HttpPost("AssignCompanyToMember")]
         public async Task<IActionResult> AssingCompanyToMember([FromBody] UserDto userDto)
         {
+            //var user = await _userHelper.GetUserByEmailWithCompaniesAsync(userDto.Email);
+
+            //if (user == null)
+            //{
+            //    NotFound();
+            //}
+
+            //var userCompaniesIds = userDto.CompaniesDto.Select(c => c.Id).ToList();
+
+            //var userCompanies = new List<Company>();
+
+            //foreach (var companyId in userCompaniesIds)
+            //{
+            //    var company = _dataContextUsers.Companies.FirstOrDefault(c => c.Id == companyId);
+            //    userCompanies.Add(company);
+            //}
+
+            //user.Companies.Clear();
+
+            //user.Companies = userCompanies;
+
+            //await _userHelper.UpdateUserAsync(user);
+
+            //return Ok(new Response<object> { IsSuccess = true });
             var user = await _userHelper.GetUserByEmailWithCompaniesAsync(userDto.Email);
 
             if (user == null)
             {
-                NotFound();
+                return NotFound();
             }
 
-            var userCompaniesIds = userDto.CompaniesDto.Select(c => c.Id).ToList();
+            // Identifica as empresas que o usuário quer ter
+            var selectedCompanyIds = userDto.CompaniesDto.Select(c => c.Id).ToList();
 
-            var userCompanies = new List<Company>();
+            // Remove as empresas que não estão mais selecionadas
+            user.Companies.RemoveAll(c => !selectedCompanyIds.Contains(c.Id));
 
-            foreach (var companyId in userCompaniesIds)
+            // Adiciona as novas empresas que não estavam na lista original
+            var existingCompanyIds = user.Companies.Select(c => c.Id).ToList();
+            var newCompanyIds = selectedCompanyIds.Except(existingCompanyIds).ToList();
+
+            foreach (var companyId in newCompanyIds)
             {
-                var company = _dataContextUsers.Companies.FirstOrDefault(c => c.Id == companyId);
-                userCompanies.Add(company);
+                var company = await _dataContextUsers.Companies.FindAsync(companyId);
+                if (company != null)
+                {
+                    user.Companies.Add(company);
+                }
             }
-
-            user.Companies.Clear();
-
-            user.Companies = userCompanies;
 
             await _userHelper.UpdateUserAsync(user);
 
